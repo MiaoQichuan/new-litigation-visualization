@@ -93,5 +93,9 @@
     "uncertainties": [
       "各期间起止日期依原图文字逐字保留;轴按比例后端点已落在对应日期竖线"
     ]
+  },
+  "checkpoint": {
+    "emphasis_source": "user",
+    "confirmed": true
   }
 }

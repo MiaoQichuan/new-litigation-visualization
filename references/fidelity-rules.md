@@ -65,4 +65,7 @@ raw facts (dates + events) with no diagram, you may generate the timeline from
 them — same schema, same rules — but you are now authoring, so be extra careful
 to use only the user's stated facts and not to imply order/emphasis they didn't
 give.
-$\n---\n\n> **把法律画出来 · Make the Law Visible** ｜ 新诉讼可视化 New Litigation Visualization ｜ 缪奇川 出品 ｜ v1.0.0
+
+---
+
+> **把法律画出来 · Make the Law Visible** ｜ 新诉讼可视化 New Litigation Visualization ｜ 缪奇川 出品 ｜ v1.0.2

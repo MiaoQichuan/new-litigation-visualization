@@ -29,4 +29,4 @@ machine (best-available wins). The **SVG** master carries the full stack, so it
 shows 方正小标宋 wherever that font is installed. No obscure/unverifiable fonts are
 placed in the default chain.
 
-> **把法律画出来 · Make the Law Visible** ｜ 新诉讼可视化 New Litigation Visualization ｜ 缪奇川 出品 ｜ v1.0.0
+> **把法律画出来 · Make the Law Visible** ｜ 新诉讼可视化 New Litigation Visualization ｜ 缪奇川 出品 ｜ v1.0.2

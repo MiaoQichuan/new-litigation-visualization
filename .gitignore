@@ -18,6 +18,13 @@ final.pdf
 *.tmp.svg
 *.tmp.png
 
+# 可编辑交付件(渲染产物,不入库)
+final.pptx
+final.vsdx
+final.drawio
+final.drawio.svg
+*-draft.*
+
 # ---- 系统 / 编辑器 ----
 .DS_Store
 Thumbs.db

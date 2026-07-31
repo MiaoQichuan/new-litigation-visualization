@@ -107,4 +107,51 @@ positioning. The point timelines (`numbered_point_timeline`, `dated_point_timeli
 the gantt (`proportional_gantt`) and the hierarchical `relation_tree` need **no**
 graphviz — the tree computes its own tidy layout. `render.py` only invokes graphviz
 for `graphviz_flow` and `graphviz_relation` maps.
-$\n---\n\n> **把法律画出来 · Make the Law Visible** ｜ 新诉讼可视化 New Litigation Visualization ｜ 缪奇川 出品 ｜ v1.0.0
+
+---
+
+> **把法律画出来 · Make the Law Visible** ｜ 新诉讼可视化 New Litigation Visualization ｜ 缪奇川 出品 ｜ v1.0.2
+
+
+## Editable hand-offs (v1.0.2)
+
+A figure is delivered with the master `.svg`, a `.png`, and three editable
+formats, all transcribed from the master so none of them can drift from it:
+
+| file | opens in | note |
+|---|---|---|
+| `.drawio` / `.drawio.svg` | draw.io / diagrams.net | themed to match the mode |
+| `.pptx` | PowerPoint, WPS, Keynote | native shapes; a module is ONE object, its caption inside it; straight runs are native connectors, bent routes are traced point-for-point |
+| `.vsdx` | **ProcessOn**, Visio, WPS, Edraw | inches, origin bottom-left; a caption that mixes font sizes is split per size so no importer can flatten it |
+
+**Why `.vsdx` for ProcessOn.** ProcessOn imports xmind · mmap · txt · km · mm ·
+md · opml · pos · vsdx · csv. Eight of those carry an outline, not a drawing —
+a litigation figure pushed through one loses its dates, its routing and its arrow
+direction, which is worse than exporting nothing. `pos` is ProcessOn's own format
+and would round-trip best, but it is undocumented and private: it cannot be
+verified from here, and it would break silently when they change it. `vsdx` is a
+published standard, opens in four tools rather than one, and LibreOffice can read
+it back — so the output is rendered and measured, not hoped over.
+
+Self-checks that look at RENDERED output rather than at the files we wrote:
+`scripts/verify_pptx.py fig.svg fig.pptx|fig.vsdx` (text position and size) and
+`scripts/audit_edges.py fig.svg fig.png` (edge weight symmetry).
+
+
+## The checkpoint is generated, not composed
+
+`scripts/checkpoint.py map.json [--suggest=n]` prints the three questions. They
+are generated for the same reason the geometry is computed: their consequences
+are already enforced deterministically (`strip_unearned_emphasis`, the `-draft`
+naming), so a question a hurried model might drop, shorten or garble would be the
+one soft link in an otherwise hard chain.
+
+Three wording rules the guards hold:
+
+1. **A mode is described by its look and its use — never by whose style it is.**
+   The mode names are the author's; the reader is another lawyer choosing a look
+   for their own case file.
+2. **The layout is shown with its reason and its real siblings**, as a reading to
+   correct rather than a free menu. The data decides the form.
+3. **Every question states what happens if it is not answered**, because the
+   common case is that it will not be.

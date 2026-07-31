@@ -96,6 +96,60 @@ def lint_svg(svg, w=None, h=None):
         if 'auto-start-reverse' in mm.group(0) or 'orient="auto"' not in mm.group(0):
             warns.append("marker orient is not \"auto\" (deprecated/absent orient rotates arrows wrong)")
 
+    # 5b. TEXT SPILLING OUT OF ITS OWN BOX, and TEXT COLLIDING WITH TEXT.
+    #     Check 2b already catches a line that runs off the CANVAS; these are the
+    #     two failures that stay inside the canvas and still make a figure
+    #     unusable — a caption wider than the card it sits in, and two labels
+    #     printed on top of each other. Both are invisible to every other check
+    #     here, and both are exactly what a reader notices first.
+    boxes = []
+    for m in re.finditer(r"<rect\b[^>]*/>", svg):
+        t = m.group(0)
+        g = lambda a: re.search(r'\b' + a + r'="(-?[\d.]+)"', t)
+        if all(g(a) for a in ("x", "y", "width", "height")):
+            x, y, bw, bh = (float(g(a).group(1)) for a in ("x", "y", "width", "height"))
+            boxes.append((x, y, bw, bh))
+    texts = []
+    for m in re.finditer(r'<text\b([^>]*)>(.*?)</text>', svg, re.S):
+        a, body = m.group(1), re.sub(r"<[^>]+>", "", m.group(2))
+        body = body.strip()
+        if not body:
+            continue
+        g = lambda k: re.search(k + r'="(-?[\d.]+)"', a)
+        if not (g("x") and g("y")):
+            continue
+        tx, ty = float(g("x").group(1)), float(g("y").group(1))
+        fs = float(g("font-size").group(1)) if g("font-size") else 13.0
+        tr = float(g("letter-spacing").group(1)) if g("letter-spacing") else 0.0
+        wpx = sum(fs if ord(c) > 0x2E7F else fs * 0.55 for c in body) + tr * max(0, len(body) - 1)
+        anch = re.search(r'text-anchor="(\w+)"', a)
+        anch = anch.group(1) if anch else "start"
+        x0 = tx - (wpx / 2 if anch == "middle" else (wpx if anch == "end" else 0))
+        texts.append((x0, ty - fs * 0.86, wpx, fs * 1.02, body))
+
+    for x0, y0, wpx, hpx, body in texts:
+        # the smallest box that contains the text's anchor point is its container
+        host = None
+        for bx, by, bw, bh in boxes:
+            if bx <= x0 + wpx / 2 <= bx + bw and by <= y0 + hpx / 2 <= by + bh:
+                if host is None or bw * bh < host[2] * host[3]:
+                    host = (bx, by, bw, bh)
+        if host and wpx > host[2] + 1.0:
+            warns.append(f"text overflows its box: {body[:20]!r} needs "
+                            f"{wpx:.0f}px inside a {host[2]:.0f}px module")
+
+    for i in range(len(texts)):
+        ax, ay, aw, ah, at = texts[i]
+        for j in range(i + 1, len(texts)):
+            bx, by, bw2, bh2, bt = texts[j]
+            ox = min(ax + aw, bx + bw2) - max(ax, bx)
+            oy = min(ay + ah, by + bh2) - max(ay, by)
+            # a real collision, not two lines of one caption brushing past each other
+            if ox > 2.0 and oy > min(ah, bh2) * 0.5:
+                warns.append(f"text overlaps text: {at[:16]!r} and {bt[:16]!r} "
+                                f"share {ox:.0f}x{oy:.0f}px")
+                break
+
     # 6. well-formed XML (a malformed SVG rasterizes to nothing)
     try:
         import xml.etree.ElementTree as ET
@@ -129,5 +183,16 @@ def main(path):
     return 0
 
 
+
+def _quiet_broken_pipe():
+    """`… | head` closes the pipe early; without this the script ends on a
+    traceback, which looks like a crash to anyone reading the terminal."""
+    import signal
+    try:
+        signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+    except (AttributeError, ValueError):
+        pass
+
 if __name__ == "__main__":
+    _quiet_broken_pipe()
     sys.exit(main(sys.argv[1]))

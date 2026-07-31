@@ -2,7 +2,7 @@
 name: mqc-litigation-visual-redraw
 metadata:
   author: 缪奇川
-  version: 1.0.0
+  version: 1.0.2
   last_updated: 2026-07-09
 description: >-
   Redraw a litigation diagram into a restrained, court-ready presentation
@@ -104,38 +104,71 @@ from the model being clever about pixels.
    Preserve original numbering if present; you may add numbering for readability
    and must record that in `provenance`.
 
-3. **CHECKPOINT — one round of questions before rendering (not optional).** Ask the
-   user, together in one turn:
-   - **Structure** — show the extracted spine (the events/nodes/edges you read) and
-     the `uncertainties`; confirm anything that could change the legal meaning (date
-     vs. source order, unreadable labels, and — for a hand-drawn/messy source —
-     whether your read of the structure is right).
-   - **Emphasis (the red accent)** — ask which single element (one party / event /
-     edge), if any, should carry the deep-red emphasis. **If the user skips or
-     declines, use NO red anywhere** (`emphasis:false` on everything). Never choose
-     it for them.
-   - **Visual mode / scenario** — ask which of the three modes fits, framed by where
-     the figure will be used:
-     · **奇川流** (default) — casework / personal brand · colour;
-     · **白描** — court filing / print / exhibit · black-and-white line-art (`--baimiao`);
-     · **歸葬流** — online post / lecture / sharing · Klein-blue Swiss (`--guizang`).
-     If the scenario is already unambiguous from the request, state your pick and
-     proceed. In 歸葬流 / 白描 the red accent is re-expressed (blue block / black), so
-     the emphasis question still applies.
-   **Default when the user does not choose (skips a question, says "just render it",
-   or does not reply): 奇川流, and NO red anywhere.** Never invent an emphasis to
-   fill the gap — red appears only when the user names what it marks. Matters most
-   on hand-drawn/dense sources and weaker models. See `references/extraction-guide.md`.
+3. **CHECKPOINT — one round of questions before rendering (not optional).**
+
+   **Do not compose the questions yourself. Generate them:**
+
+   ```bash
+   python3 scripts/checkpoint.py map.json --suggest=<n>   # n = the mark you propose
+   ```
+
+   Show that output to the user verbatim and wait. It asks the same three things
+   every time:
+
+   - **① structure** — the layout, **why** that layout (the data decides it, not
+     taste), what was read, what is uncertain, and the sibling forms this data
+     could genuinely be swapped to. The layout is presented as a reading to
+     correct, never as a free menu: offering a date-proportional axis for events
+     with no parseable dates is offering something that cannot be delivered.
+   - **② style** — each mode by what it LOOKS like and what it is FOR. Never by
+     whose style it is: these names are the author's, but the reader is another
+     lawyer choosing a look for their own file.
+   - **③ emphasis** — your proposed mark, plus 0 for none. Short candidate lists
+     are numbered; a long one is not printed, because a sixteen-item list is a
+     wall rather than a menu — the user knows their own case and can name the
+     element. This is generated rather than written out here for the
+   same reason the geometry is computed rather than placed: a question that a
+   hurried model might drop, shorten or garble is not a reliable question, and the
+   consequences of these three answers are already enforced deterministically.
+
+   Then **record the answers** in the map and render:
+
+   ```jsonc
+   "checkpoint": {
+     "confirmed": true,            // the user confirmed the structure
+     "emphasis_source": "user"     // "user" | "model" | "none"
+   }
+   ```
+
+   - **`"user"`** — they named the element. Up to two marks.
+   - **`"model"`** — they skipped, said "you pick", or did not reply. Mark the
+     ONE element you judge the case turns on. `render.py` keeps exactly one and
+     clears any others, and **you must say in the delivery which one you marked
+     and why**, so the user can move or remove it. It is your legal reading, not
+     theirs — never let it pass silently as if it were.
+   - **`"none"`** — they asked for no red. The figure is pure greyscale.
+   - **Absent / anything else** — the map cannot say where the red came from, so
+     the renderer draws none. `provenance.emphasis_note` authorises nothing: it is
+     written by the same model whose choice it describes.
+
+   **Defaults when the user does not choose: 奇川风, and `emphasis_source: "model"`**
+   — a figure with no focal point at all is not the safer answer, it is just a
+   weaker one. Until `confirmed` is `true`, every file is written as `*-draft.*`.
 
 4. **Render deterministically**, in the mode chosen at the checkpoint. From `scripts/`.
+   Every run writes the master `.svg`, a `.png`, and three editable hand-offs —
+   `.drawio`, `.pptx` (PowerPoint / WPS) and `.vsdx` (ProcessOn / Visio / WPS /
+   Edraw). All five are transcribed from the same master, so none can drift from
+   the delivered figure. This is deliberate: which tool the lawyer edits in is not
+   ours to guess. Narrow it only if asked, with `--formats=svg,png`.
    On an unfamiliar machine (a fresh clone), run `python3 scripts/doctor.py` first —
    it reports missing tooling (graphviz, rasteriser, fonts) instead of failing obscurely:
    ```bash
-   python render.py <semantic-map.json> final              # 奇川流 (colour, default)
-   python render.py <semantic-map.json> final --baimiao    # 白描 (court / print)
-   python render.py <semantic-map.json> final --guizang    # 歸葬流 (online / lecture)
+   python render.py <semantic-map.json> final              # 奇川风 (recommended, colour)
+   python render.py <semantic-map.json> final --guizang    # 歸藏风 (online / lecture)
+   python render.py <semantic-map.json> final --baimiao    # 白描 (pure black and white)
    ```
-   (Or set `"visual_mode":"白描"` / `"歸葬流"` in the JSON instead of a flag.) This
+   (Or set `"visual_mode":"歸藏风"` / `"白描"` in the JSON instead of a flag.) This
    picks the layout, writes `final.svg` (primary, editable) and `final.png`
    (preview/filing), and prints an audit summary. All three modes share ONE geometry
    — only the surface differs. Never edit coordinates by hand; if something is wrong,
@@ -274,4 +307,4 @@ with `fc-list | grep -i "CJK SC"`. See `references/rendering-and-workflow.md`.
 
 ---
 
-> **把法律画出来 · Make the Law Visible** ｜ 新诉讼可视化 New Litigation Visualization ｜ 缪奇川 出品 ｜ v1.0.0
+> **把法律画出来 · Make the Law Visible** ｜ 新诉讼可视化 New Litigation Visualization ｜ 缪奇川 出品 ｜ v1.0.2

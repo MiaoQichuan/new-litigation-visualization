@@ -37,12 +37,12 @@ unreadable/uncertain goes in `provenance.uncertainties` and is raised at the
    declined ledger in §9. Adopt schema/lint/CLI/rasterizer discipline; refuse
    model-places-coordinates, multi-colour, legends, and infographic shells.
 3. **Deterministic quality floor** — the pipeline (frozen tokens + scripts-do-geometry
-   + validate + audit + lint + 53 regression guards) means a correct JSON always
+   + validate + audit + lint + 134 regression guards, 147 assertions) means a correct JSON always
    renders to standard, regardless of model strength.
 
 ---
 
-## 1. Layouts — six, in three families
+## 1. Layouts — seven, in three families
 
 | family | layout | when | renderer | graphviz? |
 |---|---|---|---|---|
@@ -52,6 +52,7 @@ unreadable/uncertain goes in `provenance.uncertainties` and is raised at the
 | flowchart | `graphviz_flow` | steps / decisions / branches / merges | render_flow | **yes** |
 | relationship · network | `graphviz_relation` | free-form labeled relationships | render_relation | **yes** |
 | relationship · tree | `relation_tree` | top-down hierarchy (主体关系图, 股权/控制) | render_tree | no |
+| relationship · table | `comparison_table` | A vs B read across, dimension by dimension (两裁判要旨 / 两方案) | render_compare | no |
 
 ---
 
@@ -98,23 +99,36 @@ Title stack (degrades only through well-known Song faces, **never 仿宋/FangSon
 
 - Connector: neutral gray, width 2 (emphasis red, width 3).
 - Arrowhead: clean isosceles triangle `M 0 0 L 12 6 L 0 12 Z`, **fixed 10px**
-  (`markerUnits=userSpaceOnUse`), refX 11; the red width-3 edge uses a 14px head.
-  Connectors stop ~4px before the head node.
+  (`markerUnits=userSpaceOnUse`); the red width-3 edge uses a 14px head. Head
+  SIZE stays fixed per class — it never scales continuously with stroke width.
+- **The head/line JUNCTION is a ratio, not a number** (`common.arrow_geom`).
+  The line ends where the triangle is `arrow.cover` (= 2.0) times the stroke
+  width: wide enough to bury the square cap (so the tip stays SHARP) and deep
+  enough inside the head (so there is no SEAM). `refX` is derived from that, so
+  a heavier line or a bigger head moves the junction automatically. A single
+  pinned `refX` is what produced the flat-head defect in v1.0.1.
+- **Head-room is derived too** (`common.head_trim`): a connector stops
+  `cover x width + arrow.tip_clear` short of the head node, so the arrow TIP —
+  not the line's end — keeps a constant ~3.5px gap at every line weight.
 - **All right-angle turns get a tiny r≈2.5 rounded corner** (near right-angle) —
   everywhere, every renderer. No large radii.
 - **Edge/branch labels never get a background box** — plain text beside/above the
   line (weight 600; emphasis = red bold).
-- Cards / step nodes rx=12; terminals = pill; **decision = rounded hexagon** (angled
+- Cards / step nodes rx=12 (**白描 squares these to r≈2.5** — see visual-style.md;
+  bars at rx=0 and terminal pills are exempt); terminals = pill;
+  **decision = rounded hexagon** (angled
   ends, corners r≈2.5 — never a diamond, which is a poor container for CJK text);
-  **gantt period bars = right angle
-  (rx=0)**.
+  **gantt period bars AND the timeline axis bar = right angle (rx=0)** — a
+  running period and a time ruler are bars, not cards; the numbered axis line
+  likewise takes square ends, not round caps.
 
 ## 6. Timeline standards
 
 - **numbered** — equidistant; numbered circle markers (1-2-3); dates optional on
   the card. Spacing carries no argument.
 - **dated** — **date-proportional** (honest: equal real time = equal distance).
-  Axis is a slightly-thick light-gray bar `#E5E7EB`; thin ticks `#C6CBD2` split it;
+  Axis is a slightly-thick light-gray bar `#E5E7EB` with **right-angle ends
+  (`rx=0`) — a time ruler is a bar, never a pill**; thin ticks `#C6CBD2` split it;
   a small **year (or year.month for short spans, auto)** label sits per unit;
   **no dots** (connector meets the bar edge); precise date in the card. Every event
   needs a real `date` or it errors. For undated/clustered events use the numbered
@@ -148,7 +162,13 @@ still the only meaning. Optional per-branch `label` (持股比例…, no box) an
 ## 9. Rendering, validation & regression
 
 SVG is the primary editable deliverable; PNG is derived (rasterizer auto-detected;
-soffice→PDF→pdftoppm fallback). Pipeline gates, in order:
+soffice→PDF→pdftoppm fallback, pinned to an EXACT integer scale — see §5). Three
+further editable formats are transcribed FROM the master SVG, so each is the
+delivered figure rather than a second layout: **`.drawio`** (draw.io),
+**`.pptx`** (PowerPoint / WPS — lawyers who edit diagrams in slides) and
+**`.vsdx`** (Visio — and the only one of the ten formats ProcessOn imports that
+carries placed shapes; its other nine are outline/mind-map formats that would
+flatten dates, routes and arrow direction into a tree). Pipeline gates, in order:
 
 1. **`schema_version`** — every map declares `"schema_version": 1` (const; pins the
    IR contract so a file that validates today keeps rendering identically). An
@@ -163,8 +183,8 @@ soffice→PDF→pdftoppm fallback). Pipeline gates, in order:
    run (a broken audit is a delivery defect).
 4. **lint** (`lint.py`) — final-SVG artifact check, **read-only, changes no visuals**:
    non-finite numbers, off-canvas boxes/anchors, arrows drawn as a single diagonal,
-   **rejected blue/slate colours** — the "no blue" standard **scoped to 奇川流**, the
-   colour master (歸葬流 legitimately uses Klein blue `#002FA7`; its own guard enforces
+   **rejected blue/slate colours** — the "no blue" standard **scoped to 奇川风**, the
+   colour master (歸藏风 legitimately uses Klein blue `#002FA7`; its own guard enforces
    that palette instead) — via a blacklist that does
    NOT false-flag our mildly-cool neutral grays, marker `orient` sanity, well-formed
    XML, and `url(#id)` reference integrity. Runs on every render; `--strict` makes a
@@ -197,30 +217,58 @@ matches the path and `markerUnits=userSpaceOnUse` scales rather than crops — s
 "markerWidth ≥ viewBox" warning from diagram-builder does not apply and was not
 retro-fitted.)
 
+## 9b. Tuning constants and the post-processing net
+
+Numbers that were arrived at by LOOKING at output — graphviz separation, the
+歸藏风 title ratio and 天头, the decision-node lift, the side-label bias — live in
+`assets/style-tokens.json` under `tuning`, named and explained. Gathering them is
+only worth anything if the code reads them, so a guard nudges one and asserts the
+figure moves.
+
+The two mode transforms (`to_monochrome`, `to_guizang`) still rewrite generated
+SVG with regexes. Making the modes native to the renderers would be cleaner, but
+only ~8 of ~64 operations are recolouring; the rest are structural (hexagon→
+diamond, band, dot layer, title), so it is a cross-renderer rewrite with no
+user-visible gain and real regression risk. What HAS been removed is the part
+that is dangerous rather than merely ugly: **a regex that stops matching used to
+fail silently**, leaving a wrong figure nobody would catch without looking at
+pixels. Every step that must fire goes through `_sub()`, misses are reported by
+name, and a guard asserts there are none for any layout.
+
+Two traps that mechanism itself walked into, recorded so the next person does not
+repeat them:
+- a step that is layout-specific (module groups do not exist in a timeline) must
+  declare that, or the report cries wolf and gets ignored;
+- that declaration must NOT be derived from the pattern's own marker string. The
+  first version tested `'<g data-role="node"' in svg` for both, so renaming the
+  marker made the step stop being "required" exactly when it stopped working —
+  a guard that goes quiet at the moment it is needed. The LAYOUT decides.
+
 ## 10. Rejected — do not revisit
 
 slate/blue palette · notched/hollow/blocky arrows · boxed edge labels · infographic
-shell (subtitles/English/legend/insight lines under the title) · arrowheads that
-scale with stroke width · **仿宋 (FangSong) as a title face** · equidistant spacing
+shell (subtitles/English/legend/insight lines under the title) · arrowhead SIZE
+that scales continuously with stroke width (the head/line *junction* is a ratio —
+see §5 — but the head stays 10px / 14px by class) · **仿宋 (FangSong) as a title face** · equidistant spacing
 with a real time ruler on the axis (a time ruler REQUIRES a proportional axis).
 
 ---
 
 ## Versioning
 
-Stays **1.0.0 until first open-source release** (the CHANGELOG records iterations
-within 1.0.0). Author/footer: 缪奇川律师 · mqc-legal-skills.
+Now **v1.0.2**. The CHANGELOG records what each release changed.
+Author/footer: 缪奇川律师 · mqc-legal-skills.
 
-> **把法律画出来 · Make the Law Visible** ｜ 新诉讼可视化 New Litigation Visualization ｜ 缪奇川 出品 ｜ v1.0.0
+> **把法律画出来 · Make the Law Visible** ｜ 新诉讼可视化 New Litigation Visualization ｜ 缪奇川 出品 ｜ v1.0.2
 
 ## Mode & emphasis defaults (frozen)
 
-- **Default mode is 奇川流** (colour master). 白描 and 歸葬流 engage only when the
+- **Default mode is 奇川风** (colour master). 白描 and 歸藏风 engage only when the
   user picks them (checkpoint answer, `visual_mode` in the JSON, or a CLI flag).
 - **Red is opt-in only.** The deep-red accent marks whatever the USER names at the
   checkpoint. **If the user skips the question, says "just render it", or does not
   reply, the figure carries NO red at all** — the model must never pick an emphasis
-  on its own to fill the gap. In 歸葬流 / 白描 the same user choice is re-expressed
+  on its own to fill the gap. In 歸藏风 / 白描 the same user choice is re-expressed
   (solid blue block / black), and the same opt-in rule applies.
 - The delivery summary always states the mode used and either the chosen emphasis
   or "emphasis: none".

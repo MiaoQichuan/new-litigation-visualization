@@ -61,5 +61,9 @@
     "uncertainties": [
       "节点7原图无日期，保留为空"
     ]
+  },
+  "checkpoint": {
+    "emphasis_source": "user",
+    "confirmed": true
   }
 }

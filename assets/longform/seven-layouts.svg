@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="2520" viewBox="0 0 1240 2520" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">
+<defs><marker id="ag" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M 0 0 L 12 6 L 0 12 Z" fill="#4B5563"/></marker><marker id="ar" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto"><path d="M 0 0 L 12 6 L 0 12 Z" fill="#991B1B"/></marker></defs>
+<rect width="1240" height="2520" fill="#FFFFFF"/>
+<text x="72.0" y="217.0" font-size="151" font-weight="400" fill="#1F2933" text-anchor="start" font-family="'Anton','Impact','Haettenschweiler','Arial Narrow',sans-serif" letter-spacing="2">TYPES</text>
+<text x="444.0" y="108.0" font-size="27" font-weight="500" fill="#6B7280" text-anchor="start" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif" letter-spacing="4">新诉讼可视化 · 番外篇（一）</text>
+<text x="1168.0" y="108.0" font-size="22" font-weight="400" fill="#6B7280" text-anchor="end" font-family="'Noto Sans Mono CJK SC','DejaVu Sans Mono',monospace" letter-spacing="1.2">mqc-litigation-visual-redraw</text>
+<text x="444.0" y="210.0" font-size="60" font-weight="700" fill="#1F2933" text-anchor="start" font-family="'Noto Serif CJK SC','思源宋体','Source Han Serif SC',serif" letter-spacing="4">三类七种图形</text>
+<path d="M 72,272.0 L 1168,272.0" stroke="#E5E7EB" stroke-width="2" fill="none"/>
+<text x="72.0" y="328.0" font-size="34" font-weight="500" fill="#1F2933" text-anchor="start" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">时间、流程、关系。诉讼里要画的东西，基本都落在这三类里。</text>
+<text x="72.0" y="374.0" font-size="26" font-weight="400" fill="#6B7280" text-anchor="start" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">七种布局共用同一套几何，选对类型，图就成了一半。</text>
+<text x="72.0" y="492.0" font-size="38" font-weight="700" fill="#1F2933" text-anchor="start" font-family="'Noto Serif CJK SC','思源宋体','Source Han Serif SC',serif">时间轴</text>
+<text x="214.0" y="492.0" font-size="22" font-weight="400" fill="#9CA3AF" text-anchor="start" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif" letter-spacing="3">TIMELINE</text>
+<text x="1168.0" y="492.0" font-size="24" font-weight="400" fill="#6B7280" text-anchor="end" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">三种</text>
+<path d="M 72,518.0 L 1168,518.0" stroke="#E5E7EB" stroke-width="2" fill="none"/>
+<rect x="72.0" y="576.0" width="352.0" height="388.0" rx="12" fill="#FFFFFF" stroke="#D6DAE0" stroke-width="1.6"/>
+<path d="M 98.0,692.0 L 398.0,692.0" fill="none" stroke="#C3C9D2" stroke-width="2"/>
+<rect x="89.5" y="616.0" width="92.0" height="50.0" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1.4"/>
+<path d="M 135.5,666.0 L 135.5,684.0" fill="none" stroke="#C3C9D2" stroke-width="1.6"/>
+<circle cx="135.5" cy="692.0" r="8" fill="#FFFFFF" stroke="#4B5563" stroke-width="2"/>
+<text x="135.5" y="697.0" font-size="13" font-weight="700" fill="#4B5563" text-anchor="middle" font-family="'Noto Sans Mono CJK SC','DejaVu Sans Mono',monospace">1</text>
+<rect x="164.5" y="718.0" width="92.0" height="50.0" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1.4"/>
+<path d="M 210.5,718.0 L 210.5,700.0" fill="none" stroke="#C3C9D2" stroke-width="1.6"/>
+<circle cx="210.5" cy="692.0" r="8" fill="#FFFFFF" stroke="#4B5563" stroke-width="2"/>
+<text x="210.5" y="697.0" font-size="13" font-weight="700" fill="#4B5563" text-anchor="middle" font-family="'Noto Sans Mono CJK SC','DejaVu Sans Mono',monospace">2</text>
+<rect x="239.5" y="616.0" width="92.0" height="50.0" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1.4"/>
+<path d="M 285.5,666.0 L 285.5,684.0" fill="none" stroke="#C3C9D2" stroke-width="1.6"/>
+<circle cx="285.5" cy="692.0" r="8" fill="#FFFFFF" stroke="#4B5563" stroke-width="2"/>
+<text x="285.5" y="697.0" font-size="13" font-weight="700" fill="#4B5563" text-anchor="middle" font-family="'Noto Sans Mono CJK SC','DejaVu Sans Mono',monospace">3</text>
+<rect x="314.5" y="718.0" width="92.0" height="50.0" rx="12" fill="#991B1B"/>
+<path d="M 360.5,718.0 L 360.5,700.0" fill="none" stroke="#C3C9D2" stroke-width="1.6"/>
+<circle cx="360.5" cy="692.0" r="8" fill="#FFFFFF" stroke="#4B5563" stroke-width="2"/>
+<text x="360.5" y="697.0" font-size="13" font-weight="700" fill="#4B5563" text-anchor="middle" font-family="'Noto Sans Mono CJK SC','DejaVu Sans Mono',monospace">4</text>
+<text x="248.0" y="838.0" font-size="30" font-weight="700" fill="#1F2933" text-anchor="middle" font-family="'Noto Serif CJK SC','思源宋体','Source Han Serif SC',serif">编号型</text>
+<text x="248.0" y="870.0" font-size="19" font-weight="400" fill="#9CA3AF" text-anchor="middle" font-family="'Noto Sans Mono CJK SC','DejaVu Sans Mono',monospace">numbered_point_timeline</text>
+<text x="248.0" y="906.0" font-size="22" font-weight="400" fill="#6B7280" text-anchor="middle" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">事实经过，编号等距</text>
+<text x="248.0" y="934.0" font-size="22" font-weight="400" fill="#6B7280" text-anchor="middle" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">没有精确日期时的默认选择</text>
+<rect x="444.0" y="576.0" width="352.0" height="388.0" rx="12" fill="#FFFFFF" stroke="#D6DAE0" stroke-width="1.6"/>
+<rect x="470.0" y="730.0" width="300.0" height="34.0" rx="6" fill="#D1D5DB"/>
+<text x="500.0" y="753.0" font-size="14" font-weight="600" fill="#FFFFFF" text-anchor="middle" font-family="'Noto Sans Mono CJK SC','DejaVu Sans Mono',monospace">20XX</text>
+<text x="596.0" y="753.0" font-size="14" font-weight="600" fill="#FFFFFF" text-anchor="middle" font-family="'Noto Sans Mono CJK SC','DejaVu Sans Mono',monospace">20XX</text>
+<text x="692.0" y="753.0" font-size="14" font-weight="600" fill="#FFFFFF" text-anchor="middle" font-family="'Noto Sans Mono CJK SC','DejaVu Sans Mono',monospace">20XX</text>
+<rect x="468.0" y="662.0" width="76.0" height="46.0" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1.4"/>
+<path d="M 506.0,708 L 506.0,730" fill="none" stroke="#C3C9D2" stroke-width="1.6"/>
+<rect x="570.0" y="632.0" width="76.0" height="46.0" rx="12" fill="#991B1B"/>
+<path d="M 608.0,678 L 608.0,730" fill="none" stroke="#C3C9D2" stroke-width="1.6"/>
+<rect x="687.0" y="662.0" width="76.0" height="46.0" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1.4"/>
+<path d="M 725.0,708 L 725.0,730" fill="none" stroke="#C3C9D2" stroke-width="1.6"/>
+<text x="620.0" y="838.0" font-size="30" font-weight="700" fill="#1F2933" text-anchor="middle" font-family="'Noto Serif CJK SC','思源宋体','Source Han Serif SC',serif">日期型</text>
+<text x="620.0" y="870.0" font-size="19" font-weight="400" fill="#9CA3AF" text-anchor="middle" font-family="'Noto Sans Mono CJK SC','DejaVu Sans Mono',monospace">dated_point_timeline</text>
+<text x="620.0" y="906.0" font-size="22" font-weight="400" fill="#6B7280" text-anchor="middle" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">按真实日期成比例</text>
+<text x="620.0" y="934.0" font-size="22" font-weight="400" fill="#6B7280" text-anchor="middle" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">间隔本身有法律意义时用</text>
+<rect x="816.0" y="576.0" width="352.0" height="388.0" rx="12" fill="#FFFFFF" stroke="#D6DAE0" stroke-width="1.6"/>
+<rect x="851.8" y="616.0" width="99.3" height="22.0" rx="0" fill="#D1D5DB"/>
+<rect x="898.6" y="650.0" width="87.6" height="22.0" rx="0" fill="#D1D5DB"/>
+<rect x="962.8" y="684.0" width="64.2" height="22.0" rx="0" fill="#D1D5DB"/>
+<rect x="933.6" y="718.0" width="163.5" height="22.0" rx="0" fill="#991B1B"/>
+<path d="M 1097.12,608 L 1097.12,762" fill="none" stroke="#991B1B" stroke-width="1.6" stroke-dasharray="6 4"/>
+<path d="M 846.0,766 L 1138.0,766" fill="none" stroke="#4B5563" stroke-width="2"/>
+<text x="992.0" y="838.0" font-size="30" font-weight="700" fill="#1F2933" text-anchor="middle" font-family="'Noto Serif CJK SC','思源宋体','Source Han Serif SC',serif">期间型</text>
+<text x="992.0" y="870.0" font-size="19" font-weight="400" fill="#9CA3AF" text-anchor="middle" font-family="'Noto Sans Mono CJK SC','DejaVu Sans Mono',monospace">proportional_gantt</text>
+<text x="992.0" y="906.0" font-size="22" font-weight="400" fill="#6B7280" text-anchor="middle" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">时效 · 保证期间 · 履行期</text>
+<text x="992.0" y="934.0" font-size="22" font-weight="400" fill="#6B7280" text-anchor="middle" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">条长与重叠就是主张</text>
+<text x="72.0" y="1074.0" font-size="38" font-weight="700" fill="#1F2933" text-anchor="start" font-family="'Noto Serif CJK SC','思源宋体','Source Han Serif SC',serif">流程图</text>
+<text x="214.0" y="1074.0" font-size="22" font-weight="400" fill="#9CA3AF" text-anchor="start" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif" letter-spacing="3">FLOW</text>
+<text x="1168.0" y="1074.0" font-size="24" font-weight="400" fill="#6B7280" text-anchor="end" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">一种</text>
+<path d="M 72,1100.0 L 1168,1100.0" stroke="#E5E7EB" stroke-width="2" fill="none"/>
+<rect x="72.0" y="1158.0" width="1096.0" height="400.0" rx="12" fill="#FFFFFF" stroke="#D6DAE0" stroke-width="1.6"/>
+<rect x="814.0" y="1186.0" width="168.0" height="40.0" rx="20" fill="#374151"/>
+<path d="M 898.0,1226 L 898.0,1242" fill="none" stroke="#4B5563" stroke-width="1.8"/>
+<rect x="802.0" y="1246.0" width="192.0" height="42.0" rx="12" fill="#E9ECEF" stroke="#D6DAE0" stroke-width="1.4"/>
+<path d="M 898.0,1288 L 898.0,1304" fill="none" stroke="#4B5563" stroke-width="1.8"/>
+<path d="M 794.0,1328 L 816.0,1304 L 980.0,1304 L 1002.0,1328 L 980.0,1352 L 816.0,1352 Z" fill="#FFFFFF" stroke="#9CA3AF" stroke-width="1.4"/>
+<path d="M 898.0,1352 L 898.0,1368" fill="none" stroke="#4B5563" stroke-width="1.8"/>
+<path d="M 898.0,1372 L 895.5,1372 L 772.5,1372 Q 770.0,1372 770.0,1374.5 L 770.0,1388" fill="none" stroke="#4B5563" stroke-width="1.8"/>
+<rect x="686.0" y="1392.0" width="168.0" height="42.0" rx="12" fill="#E9ECEF" stroke="#D6DAE0" stroke-width="1.4"/>
+<path d="M 898.0,1372 L 900.5,1372 L 1023.5,1372 Q 1026.0,1372 1026.0,1374.5 L 1026.0,1388" fill="none" stroke="#4B5563" stroke-width="1.8"/>
+<rect x="942.0" y="1392.0" width="168.0" height="42.0" rx="12" fill="#E9ECEF" stroke="#D6DAE0" stroke-width="1.4"/>
+<rect x="802.0" y="1458.0" width="192.0" height="42.0" rx="12" fill="#991B1B"/>
+<text x="128.0" y="1266.0" font-size="34" font-weight="700" fill="#1F2933" text-anchor="start" font-family="'Noto Serif CJK SC','思源宋体','Source Han Serif SC',serif">流程图</text>
+<text x="128.0" y="1304.0" font-size="20" font-weight="400" fill="#9CA3AF" text-anchor="start" font-family="'Noto Sans Mono CJK SC','DejaVu Sans Mono',monospace">graphviz_flow</text>
+<text x="128.0" y="1354.0" font-size="23" font-weight="400" fill="#6B7280" text-anchor="start" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">案件程序、请求权路径、攻防路径。</text>
+<text x="128.0" y="1388.0" font-size="23" font-weight="400" fill="#6B7280" text-anchor="start" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">圆角步骤，六边形判断，胶囊起止。</text>
+<text x="128.0" y="1422.0" font-size="23" font-weight="400" fill="#6B7280" text-anchor="start" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">上下与左右两种方向都能排。</text>
+<text x="72.0" y="1668.0" font-size="38" font-weight="700" fill="#1F2933" text-anchor="start" font-family="'Noto Serif CJK SC','思源宋体','Source Han Serif SC',serif">关系图</text>
+<text x="214.0" y="1668.0" font-size="22" font-weight="400" fill="#9CA3AF" text-anchor="start" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif" letter-spacing="3">RELATION</text>
+<text x="1168.0" y="1668.0" font-size="24" font-weight="400" fill="#6B7280" text-anchor="end" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">三种</text>
+<path d="M 72,1694.0 L 1168,1694.0" stroke="#E5E7EB" stroke-width="2" fill="none"/>
+<rect x="72.0" y="1752.0" width="352.0" height="388.0" rx="12" fill="#FFFFFF" stroke="#D6DAE0" stroke-width="1.6"/>
+<rect x="78.0" y="1860.0" width="92.0" height="48.0" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1.4"/>
+<rect x="202.0" y="1860.0" width="92.0" height="48.0" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1.4"/>
+<rect x="326.0" y="1860.0" width="92.0" height="48.0" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1.4"/>
+<path d="M 170.0,1884.0 L 198.0,1884.0" fill="none" stroke="#4B5563" stroke-width="1.8" marker-end="url(#ag)"/>
+<path d="M 294.0,1884.0 L 322.0,1884.0" fill="none" stroke="#4B5563" stroke-width="1.8" marker-end="url(#ag)"/>
+<path d="M 124.0,1860.0 L 124.0,1796.5 Q 124.0,1794 126.5,1794 L 369.5,1794 Q 372.0,1794 372.0,1796.5 L 372.0,1856.0" fill="none" stroke="#991B1B" stroke-width="2.2" marker-end="url(#ar)"/>
+<text x="248.0" y="2014.0" font-size="30" font-weight="700" fill="#1F2933" text-anchor="middle" font-family="'Noto Serif CJK SC','思源宋体','Source Han Serif SC',serif">网络</text>
+<text x="248.0" y="2046.0" font-size="19" font-weight="400" fill="#9CA3AF" text-anchor="middle" font-family="'Noto Sans Mono CJK SC','DejaVu Sans Mono',monospace">graphviz_relation</text>
+<text x="248.0" y="2082.0" font-size="22" font-weight="400" fill="#6B7280" text-anchor="middle" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">当事人 · 担保 · 股权 · 资金</text>
+<text x="248.0" y="2110.0" font-size="22" font-weight="400" fill="#6B7280" text-anchor="middle" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">自由布局，关系线带标签</text>
+<rect x="444.0" y="1752.0" width="352.0" height="388.0" rx="12" fill="#FFFFFF" stroke="#D6DAE0" stroke-width="1.6"/>
+<rect x="554.0" y="1786.0" width="132.0" height="40.0" rx="12" fill="#E9ECEF" stroke="#D6DAE0" stroke-width="1.4"/>
+<path d="M 620.0,1826 L 620.0,1844" fill="none" stroke="#4B5563" stroke-width="1.8"/>
+<path d="M 620.0,1844 L 532.5,1844 Q 530.0,1844 530.0,1846.5 L 530.0,1864" fill="none" stroke="#4B5563" stroke-width="1.8"/>
+<rect x="474.0" y="1868.0" width="112.0" height="38.0" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1.4"/>
+<path d="M 620.0,1844 L 707.5,1844 Q 710.0,1844 710.0,1846.5 L 710.0,1864" fill="none" stroke="#4B5563" stroke-width="1.8"/>
+<rect x="654.0" y="1868.0" width="112.0" height="38.0" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1.4"/>
+<path d="M 530.0,1906 L 530.0,1917.5 Q 530.0,1920 527.5,1920 L 487.5,1920 Q 485.0,1920 485.0,1922.5 L 485.0,1940" fill="none" stroke="#4B5563" stroke-width="1.8"/>
+<rect x="449.0" y="1944.0" width="72.0" height="34.0" rx="12" fill="#FFFFFF" stroke="#D6DAE0" stroke-width="1.4"/>
+<path d="M 530.0,1906 L 530.0,1917.5 Q 530.0,1920 532.5,1920 L 572.5,1920 Q 575.0,1920 575.0,1922.5 L 575.0,1940" fill="none" stroke="#4B5563" stroke-width="1.8"/>
+<rect x="539.0" y="1944.0" width="72.0" height="34.0" rx="12" fill="#FFFFFF" stroke="#D6DAE0" stroke-width="1.4"/>
+<path d="M 710.0,1906 L 710.0,1917.5 Q 710.0,1920 707.5,1920 L 667.5,1920 Q 665.0,1920 665.0,1922.5 L 665.0,1940" fill="none" stroke="#4B5563" stroke-width="1.8"/>
+<rect x="629.0" y="1944.0" width="72.0" height="34.0" rx="12" fill="#FFFFFF" stroke="#D6DAE0" stroke-width="1.4"/>
+<path d="M 710.0,1906 L 710.0,1917.5 Q 710.0,1920 712.5,1920 L 752.5,1920 Q 755.0,1920 755.0,1922.5 L 755.0,1940" fill="none" stroke="#4B5563" stroke-width="1.8"/>
+<rect x="719.0" y="1944.0" width="72.0" height="34.0" rx="12" fill="#991B1B"/>
+<text x="620.0" y="2014.0" font-size="30" font-weight="700" fill="#1F2933" text-anchor="middle" font-family="'Noto Serif CJK SC','思源宋体','Source Han Serif SC',serif">层级树</text>
+<text x="620.0" y="2046.0" font-size="19" font-weight="400" fill="#9CA3AF" text-anchor="middle" font-family="'Noto Sans Mono CJK SC','DejaVu Sans Mono',monospace">relation_tree</text>
+<text x="620.0" y="2082.0" font-size="22" font-weight="400" fill="#6B7280" text-anchor="middle" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">实际控制人到子公司</text>
+<text x="620.0" y="2110.0" font-size="22" font-weight="400" fill="#6B7280" text-anchor="middle" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">对称树，等高等宽</text>
+<rect x="816.0" y="1752.0" width="352.0" height="388.0" rx="12" fill="#FFFFFF" stroke="#D6DAE0" stroke-width="1.6"/>
+<rect x="935.6" y="1786.0" width="98.7" height="38.0" rx="8" fill="#E9ECEF" stroke="#D6DAE0" stroke-width="1.4"/>
+<rect x="1043.3" y="1786.0" width="98.7" height="38.0" rx="8" fill="#E9ECEF" stroke="#D6DAE0" stroke-width="1.4"/>
+<text x="985.0" y="1812.0" font-size="20" font-weight="700" fill="#1F2933" text-anchor="middle" font-family="'Noto Sans Mono CJK SC','DejaVu Sans Mono',monospace">A</text>
+<text x="1092.6" y="1812.0" font-size="20" font-weight="700" fill="#1F2933" text-anchor="middle" font-family="'Noto Sans Mono CJK SC','DejaVu Sans Mono',monospace">B</text>
+<rect x="842.0" y="1836.0" width="84.6" height="36.0" rx="8" fill="#F3F4F6"/>
+<rect x="935.6" y="1836.0" width="98.7" height="36.0" rx="8" fill="#FFFFFF" stroke="#D6DAE0" stroke-width="1.2"/>
+<rect x="1043.3" y="1836.0" width="98.7" height="36.0" rx="8" fill="#FFFFFF" stroke="#D6DAE0" stroke-width="1.2"/>
+<rect x="842.0" y="1882.0" width="84.6" height="36.0" rx="8" fill="#F3F4F6"/>
+<rect x="935.6" y="1882.0" width="98.7" height="36.0" rx="8" fill="#FFFFFF" stroke="#D6DAE0" stroke-width="1.2"/>
+<rect x="1043.3" y="1882.0" width="98.7" height="36.0" rx="8" fill="#991B1B"/>
+<rect x="842.0" y="1928.0" width="84.6" height="36.0" rx="8" fill="#F3F4F6"/>
+<rect x="935.6" y="1928.0" width="98.7" height="36.0" rx="8" fill="#FFFFFF" stroke="#D6DAE0" stroke-width="1.2"/>
+<rect x="1043.3" y="1928.0" width="98.7" height="36.0" rx="8" fill="#FFFFFF" stroke="#D6DAE0" stroke-width="1.2"/>
+<text x="992.0" y="2014.0" font-size="30" font-weight="700" fill="#1F2933" text-anchor="middle" font-family="'Noto Serif CJK SC','思源宋体','Source Han Serif SC',serif">对比表</text>
+<text x="992.0" y="2046.0" font-size="19" font-weight="400" fill="#9CA3AF" text-anchor="middle" font-family="'Noto Sans Mono CJK SC','DejaVu Sans Mono',monospace">comparison_table</text>
+<text x="992.0" y="2082.0" font-size="22" font-weight="400" fill="#6B7280" text-anchor="middle" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">A 对 B 逐维度横向对读</text>
+<text x="992.0" y="2110.0" font-size="22" font-weight="400" fill="#6B7280" text-anchor="middle" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">两份要旨，或两套方案</text>
+<path d="M 72,2236.0 L 1168,2236.0" stroke="#E5E7EB" stroke-width="2" fill="none"/>
+<text x="72.0" y="2298.0" font-size="30" font-weight="700" fill="#1F2933" text-anchor="start" font-family="'Noto Serif CJK SC','思源宋体','Source Han Serif SC',serif">七种，只是现在。</text>
+<text x="72.0" y="2340.0" font-size="24" font-weight="400" fill="#6B7280" text-anchor="start" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">以后新增的类型都会长进这个 Skill 里，更新一次就有，不必另装。</text>
+<path d="M 72,2394.0 L 1168,2394.0" stroke="#E5E7EB" stroke-width="2" fill="none"/>
+<text x="72.0" y="2440.0" font-size="24" font-weight="400" fill="#9CA3AF" text-anchor="start" font-family="'Noto Sans Mono CJK SC','DejaVu Sans Mono',monospace">mqc-litigation-visual-redraw · v1.0.2</text>
+<text x="1168.0" y="2440.0" font-size="24" font-weight="400" fill="#9CA3AF" text-anchor="end" font-family="'Noto Sans CJK SC','思源黑体','PingFang SC',sans-serif">缪奇川 律师　|　2026.07</text>
+</svg>

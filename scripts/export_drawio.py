@@ -461,13 +461,17 @@ def build_model(m):
     else:
         raise RuntimeError(f'draw.io export does not support layout "{layout}".')
 
-    ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     model = (f'<mxGraphModel dx="{W:.0f}" dy="{H:.0f}" grid="1" gridSize="10" '
              f'guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" '
              f'pageScale="1" pageWidth="{max(850,int(W)):d}" '
              f'pageHeight="{max(1100,int(H)):d}" math="0" shadow="0">'
              f'<root>{"".join(cells)}</root></mxGraphModel>')
-    mxfile = (f'<mxfile host="mqc-litigation-visual-redraw" modified="{ts}" '
+    # No `modified` attribute. It is optional in mxfile, and a wall-clock stamp
+    # made the same map produce a different FILE on every run — which quietly
+    # broke the safety net this project leans on hardest, byte-comparing a
+    # rebuild against a known-good one. The filesystem already records when a
+    # file was written; determinism is worth more here than restating it.
+    mxfile = (f'<mxfile host="mqc-litigation-visual-redraw" '
               f'agent="mqc-litigation-visual-redraw" version="21.6.5" type="device">'
               f'<diagram id="litigation" name="{esc(m.get("title_text","图"))}">'
               f'{model}</diagram></mxfile>')
@@ -501,7 +505,7 @@ def theme_drawio(xml, mode, hub_id=None):
     """Re-colour the editable drawio model to match a visual mode.
 
     The SVG themes are post-processors, and so is this: the exporter keeps emitting
-    the 奇川流 palette, and here we rewrite the `fillColor=/strokeColor=/fontColor=`
+    the 奇川风 palette, and here we rewrite the `fillColor=/strokeColor=/fontColor=`
     values so the editable file a user opens in draw.io matches the figure they were
     given. Geometry, ids, and structure are untouched — only colours change.
     """
@@ -512,8 +516,13 @@ def theme_drawio(xml, mode, hub_id=None):
         xml = re.sub(r'fillColor=#(?!FFFFFF)[0-9A-Fa-f]{6}', 'fillColor=#FFFFFF', xml)
         xml = re.sub(r'strokeColor=#[0-9A-Fa-f]{6}', f'strokeColor={INK}', xml)
         xml = re.sub(r'fontColor=#[0-9A-Fa-f]{6}', f'fontColor={INK}', xml)
+        # …and square the modules off, exactly as the SVG does. A white box with a
+        # thin black rule reads as a filing form; a generous radius on it reads
+        # soft and app-like. `arcSize=50` marks a terminal STADIUM — a semantic
+        # cue for start/end, not decoration — so that one keeps its shape.
+        xml = re.sub(r'rounded=1;(?!arcSize=50)', 'rounded=0;', xml)
         return xml
-    # 歸葬流 — Klein blue + grey + white
+    # 歸藏风 — Klein blue + grey + white
     IKB, DINK, SUB, LINE, BORDER = "#002FA7", "#333333", "#737373", "#BDBDBD", "#D4D4D2"
 
     def _lum(c):

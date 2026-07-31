@@ -15,7 +15,8 @@ Usage: python render_tree.py <semantic-map.json> <out.svg>
 """
 import sys, math
 from collections import defaultdict, deque
-from common import C, FONT, FS, TITLE_FONT, esc, wrap, text_w, load_map, arrow_marker
+from common import (C, FONT, FS, TITLE_FONT, TOKENS, esc, wrap, text_w, load_map,
+                    arrow_marker, head_trim)
 
 FS_T = FS["node_title"]           # 17
 FS_NOTE = FS["subtitle"]          # 13
@@ -25,6 +26,8 @@ PADX, PADY = 20, 14
 _THEME = None
 MINW = 132
 MAXW = 230
+SW_N = 1.6                         # bracket connectors are lighter than flow/relation lines
+SW_E = TOKENS["stroke"]["emphasis"]
 FORK = 26                          # bus distance below a parent
 NOTE_GAP = 26
 MARGIN = 70
@@ -209,7 +212,7 @@ def render(m):
     H = max(g["bottom"] for g in geo.values()) + note_room + MARGIN
 
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W:.0f}" height="{H:.0f}" viewBox="0 0 {W:.0f} {H:.0f}" font-family="{FONT}">',
-           '<defs>' + arrow_marker('ag', C["line"]) + arrow_marker('ar', C["red"], size=14, refX=11) + '</defs>',
+           '<defs>' + arrow_marker('ag', C["line"], width=SW_N) + arrow_marker('ar', C["red"], size=14, width=SW_E) + '</defs>',
            f'<rect width="{W:.0f}" height="{H:.0f}" fill="{C["bg"]}"/>',
            f'<text x="{W/2:.0f}" y="46" font-size="{FS["doc_title"]}" font-weight="700" font-family="{TITLE_FONT}" '
            f'fill="{C["ink"]}" stroke="{C["ink"]}" stroke-width="0.3" text-anchor="middle">{esc(m["title_text"])}</text>']
@@ -233,8 +236,10 @@ def render(m):
             ck = geo[k]
             emph = emph_edge.get((p, k))
             col = C["red"] if emph else C["line"]
-            sw = 3 if emph else 1.6
-            gap = 4 if arrows else 0
+            sw = SW_E if emph else SW_N
+            # derived head-room per edge: the red 3px edge carries a bigger head
+            # than the 1.6px hairline, so it needs to stop further back
+            gap = head_trim(14 if emph else None, sw) if arrows else 0
             pts = [(g["cx"], g["bottom"]), (g["cx"], busy), (ck["cx"], busy), (ck["cx"], ck["top"] - gap)]
             mk = (' marker-end="url(#ar)"' if emph else ' marker-end="url(#ag)"') if arrows else ""
             out.append(f'<path d="{rounded(pts)}" fill="none" stroke="{col}" stroke-width="{sw}"{mk}/>')
@@ -257,7 +262,7 @@ def render(m):
         else:
             st = level_fill(lvl[nid], maxlevel)
         out.append(f'<g data-role="node" data-id="{nid}">')
-        border = f' stroke="{st["border"]}" stroke-width="1.2"' if st["border"] else ""
+        border = f' stroke="{st["border"]}" stroke-width="1"' if st["border"] else ""
         out.append(f'<rect x="{g["left"]:.1f}" y="{g["top"]:.1f}" width="{g["w"]:.1f}" height="{g["h"]:.1f}" '
                    f'rx="12" fill="{st["fill"]}"{border}/>')
         lines = lines_by[nid]

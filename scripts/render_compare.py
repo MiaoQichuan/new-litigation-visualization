@@ -102,7 +102,7 @@ def render(m):
             fill = "#FBEBEB" if emph else C["card_fill"]
             stroke = C["red"] if emph else C["card_stroke"]
             S.append(f'<rect x="{x_col[k]:.1f}" y="{y:.1f}" width="{COL_W}" height="{h}" rx="{RX}" '
-                     f'fill="{fill}" stroke="{stroke}" stroke-width="1.2"/>')
+                     f'fill="{fill}" stroke="{stroke}" stroke-width="1"/>')
             ls = cell_lines[c]
             cy = y + h/2 - (len(ls)-1)*LH/2 + FS_CELL*0.35
             for ln in ls:

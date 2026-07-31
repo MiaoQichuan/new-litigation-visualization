@@ -12,7 +12,9 @@ renderer draws every connector itself from the node coordinates. This keeps the
 same philosophy as the timelines: the engine handles collision-free placement,
 we own all styling.
 
-`build_dot` sets `rankdir` (TB by default), `nodesep=0.85`, `ranksep=0.70`
+`build_dot` sets `rankdir` (TB by default) and takes `nodesep` / `ranksep` from
+`style-tokens.json` → `tuning` (currently 0.85 / **1.1** — the ranksep was widened
+from 0.70 so an edge label has room to sit beside its line rather than on it)
 (vertical gap must stay generous — too small and the connector's turn crowds the
 arrowhead), and gives each node a fixed `width`/`height` computed from its
 wrapped text.
@@ -100,4 +102,4 @@ These are locked by `flow-std` regression guards — do not loosen them:
 
 ---
 
-> **把法律画出来 · Make the Law Visible** ｜ 新诉讼可视化 New Litigation Visualization ｜ 缪奇川 出品 ｜ v1.0.0
+> **把法律画出来 · Make the Law Visible** ｜ 新诉讼可视化 New Litigation Visualization ｜ 缪奇川 出品 ｜ v1.0.2

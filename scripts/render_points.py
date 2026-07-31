@@ -55,7 +55,7 @@ def render(m):
     S.append(f'<text data-role="title" x="{cx_all}" y="{pad+52}" font-size="{FS_TITLE}" '
              f'font-weight="700" font-family="{TITLE_FONT}" fill="{C["ink"]}" stroke="{C["ink"]}" stroke-width="0.3" text-anchor="middle">{esc(m["title_text"])}</text>')
     S.append(f'<line data-role="axis" x1="{MARGIN_X}" y1="{axis_y}" x2="{width-MARGIN_X}" '
-             f'y2="{axis_y}" stroke="{C["line_soft"]}" stroke-width="2.5" stroke-linecap="round"/>')
+             f'y2="{axis_y}" stroke="{C["line_soft"]}" stroke-width="2.5"/>')   # square ends: the axis is a bar, not a pill
 
     def draw_card(ev, cx, top):
         emph = ev.get("emphasis")
@@ -69,7 +69,7 @@ def render(m):
             S.append(f'<rect x="{cx-CARD_W/2}" y="{top}" width="{CARD_W}" height="{h}" rx="{RX}" fill="{fill}"/>')
         else:     # clean white card, thin gray border, small radius
             S.append(f'<rect x="{cx-CARD_W/2}" y="{top}" width="{CARD_W}" height="{h}" rx="{RX}" '
-                     f'fill="{fill}" stroke="{C["card_stroke"]}" stroke-width="1.2"/>')
+                     f'fill="{fill}" stroke="{C["card_stroke"]}" stroke-width="1"/>')
         ty = top + (26 if _THEME == "guizang" else PAD_Y) + FS_DATE
         if ev.get("date_text"):
             S.append(f'<text x="{cx}" y="{ty}" font-size="{FS_DATE}" font-weight="600" '

@@ -11,7 +11,8 @@ Usage: python render_flow.py <semantic-map.json> <out.svg>
 """
 import sys, math, subprocess
 from collections import defaultdict
-from common import C, FONT, FS, TITLE_FONT, TOKENS, esc, wrap, text_w, load_map, arrow_marker
+from common import (C, FONT, FS, TITLE_FONT, TOKENS, esc, wrap, text_w, load_map,
+                    arrow_marker, head_trim)
 
 FC = TOKENS["flow_colors"]
 FS_TITLE_DOC = FS["doc_title"]
@@ -23,6 +24,7 @@ FORK = 26
 HEX_INS = TOKENS["radius"]["decision_hex_inset"]   # angled end width of the decision hexagon
 HEX_R = TOKENS["radius"]["corner"]                 # r≈2.5 rounding on hexagon vertices
 TARGET_MIN = 0.66          # pad sides if skinnier than ~A4 portrait
+EW = TOKENS["stroke"]["connector"]                 # one connector weight in a flow
 
 def tw(s, fs): return text_w(s, fs)
 
@@ -39,13 +41,15 @@ _THEME = None            # set by the dispatcher; "guizang" -> squarer, roomier 
 
 def box_size(n):
     lt, ld, cw_, ch_ = node_layout(n)
-    px, py = (26, 30) if _THEME == "guizang" else (PADX, PADY)   # 歸葬流: roomier, squarer
+    _T = TOKENS["tuning"]
+    px, py = ((_T["guizang_pad_x"], _T["guizang_pad_y"])
+              if _THEME == "guizang" else (PADX, PADY))   # 歸藏风: roomier, squarer
     w, h = cw_ + 2*px, ch_ + 2*py
     if n.get("kind","step") == "decision":
         # hexagon / diamond: taller box so the shape reads as a real decision and,
-        # in 歸葬流, becomes a proper (non-flat) diamond whose vertices are exactly
+        # in 歸藏风, becomes a proper (non-flat) diamond whose vertices are exactly
         # where connectors land.
-        w, h = cw_ + 2*px + 2*HEX_INS, ch_ + 2*py + 46
+        w, h = cw_ + 2*px + 2*HEX_INS, ch_ + 2*py + _T["guizang_decision_lift"]
     if n.get("kind","step") == "terminal":
         w, h = w + 24, ch_ + 2*py + 6
     return w, h
@@ -58,7 +62,7 @@ def _aliases(m):
 def build_dot(m):
     al = _aliases(m)
     L = ['digraph G {', f'  rankdir={m.get("direction","TB")}; splines=ortho;',
-         '  nodesep=0.85; ranksep=1.1;', '  node [shape=box, fixedsize=true];']
+         f'  nodesep={TOKENS["tuning"]["flow_nodesep"]}; ranksep={TOKENS["tuning"]["flow_ranksep"]};', '  node [shape=box, fixedsize=true];']
     # one uniform width for every STEP box: columns line up (fewer connector
     # bends) and the diagram stops mixing many box sizes.
     step_cw = [node_layout(n)[2] for n in m["nodes"] if n.get("kind", "step") == "step"]
@@ -158,7 +162,7 @@ def render(m):
     by_id = {n["id"]: n for n in m["nodes"]}
 
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W:.0f}" height="{H_total:.0f}" viewBox="0 0 {W:.0f} {H_total:.0f}" font-family="{FONT}">',
-           '<defs>' + arrow_marker('ar', FC["line"]) + '</defs>',
+           '<defs>' + arrow_marker('ar', FC["line"], width=EW) + '</defs>',
            f'<rect width="{W:.0f}" height="{H_total:.0f}" fill="{C["bg"]}"/>',
            f'<text x="{W/2:.0f}" y="44" font-size="{FS_TITLE_DOC}" font-weight="700" font-family="{TITLE_FONT}" '
            f'fill="{C["ink"]}" stroke="{C["ink"]}" stroke-width="0.3" text-anchor="middle">{esc(m["title_text"])}</text>']
@@ -174,7 +178,10 @@ def render(m):
 
     horizontal = m.get("direction", "TB") == "LR"
     out.append('<g data-role="edges">')
-    GAP = 4  # leave a small gap before the head so the arrowhead never touches it
+    # Head-room is DERIVED, not guessed: the line stops far enough back that the
+    # arrow TIP keeps its breathing room while the head stays sharp (see
+    # common.arrow_geom). Grows automatically if the line weight ever changes.
+    GAP = head_trim(width=EW)
     for e in m["edges"]:
         a, b = geo[e["from"]], geo[e["to"]]
         lanchor = "middle"
@@ -223,7 +230,7 @@ def render(m):
                 jog = min(16, max(6, (ey - sy) * 0.28))
                 pts = [(sx, sy), (sx, ey - jog), (ex, ey - jog), (ex, ey)]
                 lx, ly = (sx + ex) / 2, ey - jog - 8
-        out.append(f'<path d="{rounded(pts)}" fill="none" stroke="{FC["line"]}" stroke-width="2" marker-end="url(#ar)"/>')
+        out.append(f'<path d="{rounded(pts)}" fill="none" stroke="{FC["line"]}" stroke-width="{EW}" marker-end="url(#ar)"/>')
         if e.get("label"):   # text beside/above the line — NO box, so the connector stays intact
             out.append(f'<text x="{lx:.1f}" y="{ly:.1f}" font-size="{FS_CAP}" font-weight="600" '
                        f'fill="{C["ink2"]}" text-anchor="{lanchor}">{esc(e["label"])}</text>')
@@ -251,11 +258,15 @@ def render(m):
             ins = min(HEX_INS, bw/2 - 4)
             hexpts = [(cx-bw/2, cy), (cx-bw/2+ins, cy-bh/2), (cx+bw/2-ins, cy-bh/2),
                       (cx+bw/2, cy), (cx+bw/2-ins, cy+bh/2), (cx-bw/2+ins, cy+bh/2)]
+            # The decision node is the one shape that exists ONLY as an outline —
+            # white fill, grey rule — so its border is functional, not decorative,
+            # and carries a heavier weight than the other modules. Kept an INTEGER
+            # so its two horizontal edges rasterise at equal weight (see §5).
             out.append(f'<path d="{rounded_poly(hexpts, HEX_R)}" fill="{fill}" '
-                       f'stroke="{stroke}" stroke-width="1.4"/>')
+                       f'stroke="{stroke}" stroke-width="2"/>')
         elif kind == "terminal":
             out.append(f'<rect x="{cx-bw/2:.1f}" y="{cy-bh/2:.1f}" width="{bw:.1f}" height="{bh:.1f}" '
-                       f'rx="{bh/2:.1f}" fill="{fill}" stroke="{stroke}" stroke-width="1.2"/>')
+                       f'rx="{bh/2:.1f}" fill="{fill}" stroke="{stroke}" stroke-width="1"/>')
         else:
             out.append(f'<rect x="{cx-bw/2:.1f}" y="{cy-bh/2:.1f}" width="{bw:.1f}" height="{bh:.1f}" '
                        f'rx="12" fill="{fill}"/>')

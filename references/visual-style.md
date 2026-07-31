@@ -69,11 +69,19 @@ Song has no bold face (e.g. LibreOffice on Linux).
 - Main connector: `line` neutral gray (`#4B5563` / flow `#6B7280`), `stroke-width=2`. Emphasis: `red`, width 3.
 - Arrowhead: a clean **isosceles triangle** `path="M 0 0 L 12 6 L 0 12 Z"`, a
   **fixed 10px** (`markerUnits="userSpaceOnUse"`, so it does NOT scale up with
-  stroke-width and never overpowers the line), `refX=11`, `orient=auto`. Built by
-  `common.arrow_marker(id, colour)`. No notched/hollow/blocky arrows.
+  stroke-width and never overpowers the line), `orient=auto`. Built by
+  `common.arrow_marker(id, colour, width=<the line's stroke width>)`. No
+  notched/hollow/blocky arrows.
+- **`refX` is computed, never pinned.** The line must end where the triangle is
+  `cover` (2.0) times the stroke width — any shallower and the square cap pokes
+  out and flattens the tip; any deeper and the head drifts off the node. Because
+  the three renderers use three different weights (flow 2, relation 2/3, tree
+  1.6/3), one hard-coded `refX` cannot be right for all of them, and in v1.0.1
+  it was right for none. Locked by the `arrow · …` guard.
 - The **emphasis (red, width-3) edge uses a larger 14px arrowhead** so the thick line does not flatten the tip; normal 2px lines keep the 10px arrow.
-- **Connectors stop ~4px before the head node** so the arrow tip sits in a small
-  gap and never overlaps the node/module.
+- **Connectors stop `common.head_trim()` short of the head node** so the arrow
+  TIP sits in a small ~3.5px gap and never overlaps the node/module. The trim
+  grows with the head, so that visible gap is the same at every line weight.
 - Dashed lines (point-event markers, any dashed run): rhythm `stroke-dasharray="6 4"`.
 - Orthogonal bends get a *very small* rounded corner (`r≈2.5`) — near right-angle.
 
@@ -85,6 +93,7 @@ Song has no bold face (e.g. LibreOffice on Linux).
 | edge label | plain text, no box |
 | terminal (pill) | height / 2 |
 | **period bar (gantt)** | **0 — right angle** (a running period is a bar, not a card) |
+| **timeline axis bar / band** | **0 — right angle** in all three modes; the numbered timeline's axis line takes square ends (no round cap). A time ruler is a bar, not a pill. |
 
 ## Edge / branch labels — no masking box
 
@@ -109,8 +118,10 @@ bold. Node fills stay solid blocks; only the connector must never be masked.
   decoration. See `references/flowchart-spec.md`. This exception is flowchart-
   only; timeline markers stay circles.)
 - **Event boxes / cards: small rounded corners** (`rx≈8`).
-- **Period bars: right angles, never rounded.** A running period is a bar, not a
-  card. Rounding a period bar is wrong.
+- **Period bars AND the timeline axis bar/band: right angles, never rounded.** A
+  running period and a time ruler are bars, not cards. This holds in 奇川风,
+  歸藏风 and 白描 alike — the band is drawn square at the source, so no mode has
+  to undo a radius.
 - Arrowheads (directional periods) are **sharp triangles, no curves**, sized to
   sit flush with the bar thickness.
 
@@ -164,20 +175,35 @@ like typeset copy, not a raw character dump:
 - Real `<text>` elements — never convert text to paths.
 - Groups carry `data-role` / `data-id` so the SVG can be edited downstream.
 - No raster of the dirty source embedded as a backdrop; no whole-image base64.
-$\n---\n\n> **把法律画出来 · Make the Law Visible** ｜ 新诉讼可视化 New Litigation Visualization ｜ 缪奇川 出品 ｜ v1.0.0
+
+---
+
+> **把法律画出来 · Make the Law Visible** ｜ 新诉讼可视化 New Litigation Visualization ｜ 缪奇川 出品 ｜ v1.0.2
 
 ## 白描 mode (court / print) — frozen standard
 
 `白描` (bái-miáo, "ink-outline drawing") is the sober, print-first variant for
-court bundles. It is **not a different renderer**: it takes the exact 奇川流
-output and applies one deterministic colour transform (`to_monochrome` in
-`render.py`), so **geometry, layout, spacing, routing and labels are byte-for-byte
-identical** — only colour changes. The transform:
+court bundles. It is **not a different renderer**: it takes the 奇川风 output and
+applies one deterministic transform (`to_monochrome` in `render.py`), so
+**every position, size, route and label is byte-for-byte identical** — nothing
+moves and nothing resizes. The transform:
 
 - every colour → **black ink** (`#111111`); the deep red is gone;
 - every **solid colour block → an outline module** (white fill + black border) —
   cards, decision hexagons, gantt bars, depth-shaded tree boxes all become frames;
-- **markers/point-dots stay solid black**; connectors and arrowheads are black.
+- **markers/point-dots stay solid black**; connectors and arrowheads are black;
+- **modules are squared off to a near right angle** (`rx` → r≈2.5, the same
+  radius every bend uses). Once a module is a white box with a thin black rule it
+  reads as a filing form, and a generous 12px radius on it reads soft and
+  app-like rather than sober. Two shapes are deliberately exempt:
+  - **anything already at `rx=0`** — the timeline time-band and the gantt period
+    bars are BARS, and a bar with corners is a card. 白描 must never give them one;
+  - **terminal pills (`rx = height/2`)** — the stadium is what distinguishes a
+    start/end node from an ordinary step, so flattening it would erase a semantic
+    distinction rather than soften a decorative one.
+  The `.drawio` export follows the same rule (`rounded=1` → `rounded=0`, with
+  `arcSize=50` stadiums preserved). Locked by the `白描 · …` guard, which also
+  re-asserts the byte-identical layout.
 
 Emphasis still reads without colour, because it already carries a **thicker stroke
 and bolder weight** (now black instead of red). Invoke with `--baimiao` (aliases
@@ -185,17 +211,17 @@ and bolder weight** (now black instead of red). Invoke with `--baimiao` (aliases
 map. Locked by the `白描 · monochrome mode …` guard (colours reduced to black/white
 AND geometry identical to the colour master).
 
-## 歸葬流 mode (Guizang Swiss / IKB) — frozen standard
+## 歸藏风 mode (Guizang Swiss / IKB) — frozen standard
 
-`歸葬流` is the **online / lecture / social-sharing** variant, adapted from blogger
-歸葬's "Swiss International" PPT aesthetic. Like 白描 it reuses 奇川流's **engineering
-path** (layout + routing geometry) — but 奇川流's *visual* choices do **not** bind it;
-歸葬流 is a genuine artistic treatment with its own surface, applied by `to_guizang`
+`歸藏风` is the **online / lecture / social-sharing** variant, adapted from blogger
+歸藏's "Swiss International" PPT aesthetic. Like 白描 it reuses 奇川风's **engineering
+path** (layout + routing geometry) — but 奇川风's *visual* choices do **not** bind it;
+歸藏风 is a genuine artistic treatment with its own surface, applied by `to_guizang`
 in `render.py` (plus a theme-aware, roomier box padding in the renderers, keyed off
 `_THEME`). Invoke with `--guizang` (aliases `--swiss` / `--ikb`) or set
-`"visual_mode": "歸葬流"`.
+`"visual_mode": "歸藏风"`.
 
-Frozen rules (locked by the `歸葬流 · …` guard):
+Frozen rules (locked by the `歸藏风 · …` guard):
 
 - **Palette — Klein blue + grey + white, nothing else.** Accent `#002FA7` (IKB),
   paper `#FAFAF8`, dark-grey ink `#333333`, secondary grey `#737373`, hairline
@@ -211,15 +237,22 @@ Frozen rules (locked by the `歸葬流 · …` guard):
   **Numbers and English use IBM Plex Mono** — the engineered Latin texture. No serif.
 - **Connectors + arrowheads are soft grey** — blue is reserved for blocks, never
   lines.
-- **A faint IKB dot-matrix background** (26 px grid) supplies the Swiss "artistic"
-  layer without competing with content.
-- **Roomier, squarer modules**: 歸葬流 renders with larger box padding than 奇川流
+- **A faint LIGHT-GREY dot-matrix background** (`#D4D4D2`, 26 px grid) supplies
+  the Swiss "artistic" layer without competing with content. The grid is
+  deliberately NOT the accent colour: the Klein blue is this style's single
+  high-saturation anchor and belongs on solid blocks and a handful of emphasised
+  marks. Spending it on the backdrop spends the anchor, and the texture starts
+  competing with the content — the opposite of the intent.
+- **Latin and numeral runs carry TRACKING** (letter-spacing ≈ 0.06 em). The wide
+  Latin is half of what makes the style read as engineered rather than merely
+  sans. CJK is never tracked — tracking Chinese only loosens it.
+- **Roomier, squarer modules**: 歸藏风 renders with larger box padding than 奇川风
   (theme-aware), so blocks read as substantial Swiss modules rather than thin cards.
 
-奇川流 (colour master) and 白描 (mono) are **byte-for-byte unaffected** — the theme
-only engages when 歸葬流 is requested.
+奇川风 (colour master) and 白描 (mono) are **byte-for-byte unaffected** — the theme
+only engages when 歸藏风 is requested.
 
-### 歸葬流 — per-figure detail (finalised)
+### 歸藏风 — per-figure detail (finalised)
 
 - **Blue is emphasis only** (one accent, never flooded), always with white text:
   flowchart decision *diamond* + terminals; relation **hub** node (tagged
@@ -236,7 +269,7 @@ only engages when 歸葬流 is requested.
   falls back to a system monospace.
 - **Squarer modules**: every renderer takes a larger vertical padding under
   `_THEME == "guizang"` (flow / relation / tree / timeline cards / comparison),
-  so blocks read as substantial Swiss modules. 奇川流 padding is untouched.
+  so blocks read as substantial Swiss modules. 奇川风 padding is untouched.
 - Palette whitelist (guard-enforced): `#FAFAF8 #333333 #737373 #BDBDBD #D4D4D2
   #E0E0E0 #002FA7 #FFFFFF` — nothing else may appear.
 
@@ -250,15 +283,40 @@ only engages when 歸葬流 is requested.
 
 ### Comparison / showcase ordering (canonical)
 
-Every side-by-side comparison is ordered **奇川流 (left) · 歸葬流 (middle) ·
+Every side-by-side comparison is ordered **奇川风 (left) · 歸藏风 (middle) ·
 白描 (right)** — colour master first, the two derived modes after.
 
-### Editable .drawio follows the mode
+### Every editable hand-off follows the mode
 
 The `.drawio` / `.drawio.svg` export is themed to match the figure the user was
 given (`theme_drawio` in `export_drawio.py`): 白描 exports white fills with black
-strokes and text; 歸葬流 exports the blue/grey/white palette, promoting the **hub
+strokes and text; 歸藏风 exports the blue/grey/white palette, promoting the **hub
 node to a solid blue block with white text** (a relation map has no dark fill to
-map, so the key party carries the accent, exactly as in the SVG). 奇川流 is left
+map, so the key party carries the accent, exactly as in the SVG). 奇川风 is left
 byte-identical. Only colours change — ids, geometry and structure are untouched,
 so the file still opens and edits normally in draw.io.
+
+The `.pptx` and `.vsdx` hand-offs need no equivalent, because they are transcribed
+from the MASTER SVG after the mode transform has already run: whatever the reader
+was given is literally what those files contain, including the 歸藏风 paper and dot
+grid, 白描's squared modules and the emphasis (or its absence). That is the point
+of transcribing rather than re-deriving — there is no second place for a mode to
+be applied, and so no second place for it to be applied differently.
+
+
+## 长图与光栅字体（v1.0.2 补记）
+
+`assets/longform/` 的说明长图是**手工设计**的，不由渲染器产出——改它是版式工作，不要用
+脚本去动版式，只在文案与事实不符时改文字。
+
+它们的 PNG 由本仓库的光栅器生成，因此**依赖字体在场**，而缺字体是 SILENT 的：文字还在，
+只是字形不对。踩过的两次：
+
+- 巨大的展示字 `SKILL` / `TYPES` 用 `Anton → Impact → Haettenschweiler → Arial Narrow`
+  的压缩体栈。四个都缺时退化成普通无衬线，**宽度从 289px 胀到 395px**，一眼就不对，
+  但没有任何检查会报错。
+- 歸藏风的根字体栈以 `Inter` 开头。装上 Inter 之后，七张歸藏风 PNG 的像素有 0.22% 变化——
+  **SVG 逐字节未变**，变的只是光栅。那是修正而非事故：Inter 本来就是这一档的意图字体。
+
+`doctor.py` 现在会逐项报告这几种字体，缺失时说明会退化成什么。判断字体是否真的生效，
+量渲染宽度比看文件名可靠。

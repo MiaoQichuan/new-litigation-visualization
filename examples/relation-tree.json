@@ -72,5 +72,9 @@
     "text_policy": "verbatim",
     "emphasis_note": "AI判断：以『丁建设有限公司（本案被告/被执行主体）』为深红重点，系本案责任主体；每图深红控制在1-2处",
     "uncertainties": []
+  },
+  "checkpoint": {
+    "emphasis_source": "user",
+    "confirmed": true
   }
 }

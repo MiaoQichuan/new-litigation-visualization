@@ -59,5 +59,9 @@
     "date_note": "轴按真实日期成比例；浅灰长条上为年份刻度（间隔真实反映时间流逝）",
     "emphasis_note": "AI建议：以『发出催款函（诉讼时效中断）』为深红重点，系时效是否届满的关键节点，待用户确认",
     "uncertainties": []
+  },
+  "checkpoint": {
+    "emphasis_source": "user",
+    "confirmed": true
   }
 }

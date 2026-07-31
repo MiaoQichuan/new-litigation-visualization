@@ -137,5 +137,9 @@
     "tidy_note": "两条平行纵列（条件A/条件B）各自往下再合流，逐字保留",
     "uncertainties": [],
     "emphasis_note": "AI建议：以【必做】核心敏感信息脱敏为中点深红重点（合流后的关键动作），待用户确认，可取消"
+  },
+  "checkpoint": {
+    "emphasis_source": "user",
+    "confirmed": true
   }
 }

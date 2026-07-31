@@ -109,7 +109,7 @@ def render(m):
 
     # the light-gray axis bar
     S.append(f'<rect data-role="axis" x="{LEFT:.1f}" y="{axis_y-BAR_H/2:.1f}" '
-             f'width="{plot_w:.1f}" height="{BAR_H}" rx="{BAR_H/2}" fill="{BAR_FILL}"/>')
+             f'width="{plot_w:.1f}" height="{BAR_H}" rx="0" fill="{BAR_FILL}"/>')   # a time RULER is a bar, not a pill
 
     # honest ruler: ticks at true unit boundaries; label centred in each unit span
     bounds = []
@@ -127,7 +127,7 @@ def render(m):
         bx = X(bd)
         if i not in (0, len(bounds) - 1):          # interior ticks divide the bar
             S.append(f'<line x1="{bx:.1f}" y1="{axis_y-BAR_H/2:.1f}" x2="{bx:.1f}" '
-                     f'y2="{axis_y+BAR_H/2:.1f}" stroke="{TICK}" stroke-width="1.2"/>')
+                     f'y2="{axis_y+BAR_H/2:.1f}" stroke="{TICK}" stroke-width="1"/>')
     for i in range(len(bounds) - 1):               # label centred in each unit span
         cx = (X(bounds[i][0]) + X(bounds[i+1][0])) / 2
         S.append(f'<text x="{cx:.1f}" y="{axis_y+FS_UNIT*0.35:.1f}" font-size="{FS_UNIT}" '
@@ -145,7 +145,7 @@ def render(m):
             S.append(f'<rect x="{cx-CARD_W/2:.1f}" y="{top:.1f}" width="{CARD_W}" height="{h}" rx="{RX}" fill="{fill}"/>')
         else:
             S.append(f'<rect x="{cx-CARD_W/2:.1f}" y="{top:.1f}" width="{CARD_W}" height="{h}" rx="{RX}" '
-                     f'fill="{fill}" stroke="{C["card_stroke"]}" stroke-width="1.2"/>')
+                     f'fill="{fill}" stroke="{C["card_stroke"]}" stroke-width="1"/>')
         ty = top + (26 if _THEME == "guizang" else PAD_Y) + FS_DATE
         if ev.get("date_text"):
             S.append(f'<text x="{cx:.1f}" y="{ty:.1f}" font-size="{FS_DATE}" font-weight="600" '

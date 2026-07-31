@@ -72,12 +72,21 @@ def _extraction_notes(m):
     notes = []
     if total and red > 2:
         notes.append(f"emphasis discipline: {red} deep-red elements — the rule is ≤2; demote some to gray")
-    if prov.get("emphasis_note"):
+    # The map's own checkpoint record is authoritative over provenance guesswork:
+    # once it says the USER named the emphasis, repeating "AI-chosen" is simply
+    # wrong, and two mechanisms contradicting each other teaches the reader to
+    # trust neither.
+    src = str((m.get("checkpoint") or {}).get("emphasis_source", "")).strip().lower()
+    if src == "model":
+        notes.append("emphasis is AI-CHOSEN — say so on delivery and let the user move it")
+    elif src != "user" and prov.get("emphasis_note"):
         notes.append("emphasis was AI-chosen — confirm it at the checkpoint (emphasis_note recorded)")
     if not prov.get("text_policy"):
         notes.append("provenance.text_policy not recorded — state 'verbatim' (or how text was handled)")
     if prov.get("uncertainties"):
-        notes.append(f"{len(prov['uncertainties'])} uncertainty(ies) logged — resolve at the checkpoint, do not guess")
+        if (m.get("checkpoint") or {}).get("confirmed") is not True:
+            notes.append(f"{len(prov['uncertainties'])} uncertainty(ies) logged — "
+                         f"resolve at the checkpoint, do not guess")
     return notes
 
 
@@ -125,10 +134,12 @@ def report(m):
     # extraction discipline + checkpoint gate
     notes = _extraction_notes(m)
     unc = prov.get("uncertainties", [])
-    checkpoint = bool(unc) or bool(prov.get("emphasis_note")) or count_mismatch
+    confirmed = (m.get("checkpoint") or {}).get("confirmed") is True
+    checkpoint = (not confirmed) and (bool(unc) or bool(prov.get("emphasis_note"))
+                                      or count_mismatch)
     for n in notes:
         lines.append(f"! {n}")
-    if unc:
+    if unc and not confirmed:
         lines.append("uncertainties to confirm with user:")
         for u in unc:
             lines.append(f"  - {u}")
@@ -179,5 +190,16 @@ def _direction_review(m):
     return out
 
 
+
+def _quiet_broken_pipe():
+    """`… | head` closes the pipe early; without this the script ends on a
+    traceback, which looks like a crash to anyone reading the terminal."""
+    import signal
+    try:
+        signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+    except (AttributeError, ValueError):
+        pass
+
 if __name__ == "__main__":
+    _quiet_broken_pipe()
     report(load_map(sys.argv[1]))

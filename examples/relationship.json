@@ -46,5 +46,9 @@
     "note_note": "原图下方三处朝上箭头标签作为各主体的注释处理，非独立关系边",
     "emphasis_note": "AI判断：以甲对丙的『连带清偿责任』为深红重点，系本案担保责任要害",
     "uncertainties": []
+  },
+  "checkpoint": {
+    "emphasis_source": "user",
+    "confirmed": true
   }
 }

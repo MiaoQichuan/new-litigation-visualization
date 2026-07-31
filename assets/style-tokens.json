@@ -37,7 +37,8 @@
   "arrow": {
     "path": "M 0 0 L 12 6 L 0 12 Z",
     "size": 10,
-    "refX": 11
+    "cover": 2.0,
+    "tip_clear": 3.5
   },
   "radius": {
     "card": 12,
@@ -50,5 +51,24 @@
     "connector": 2,
     "emphasis": 3,
     "hairline": 1
+  },
+  "tuning": {
+    "_note": "Values arrived at by looking at the output, not derived from anything. They are correct for the figures in examples/; a very different map may want different ones. Named and gathered here so they can be found, explained and adjusted in ONE place instead of being hunted down inside seven renderers. Changing any of them changes every master figure — diff against the goldens afterwards.",
+    "flow_nodesep": 0.85,
+    "flow_ranksep": 1.1,
+    "flow_nodesep_note": "graphviz separation, in inches. Ranksep is the one that decides whether an edge label has room to sit beside its line.",
+    "guizang_title_ratio": 0.036,
+    "guizang_title_min": 30,
+    "guizang_title_max": 60,
+    "guizang_title_note": "the big centred title scales with canvas WIDTH so a wide figure does not get a title that looks lost; clamped so a narrow or enormous canvas stays sane.",
+    "guizang_top_margin": 60,
+    "guizang_top_margin_note": "天头 — blank reserved ABOVE the title. The canvas grows by this much and the content is translated down.",
+    "guizang_pad_x": 26,
+    "guizang_pad_y": 30,
+    "guizang_pad_note": "roomier inner padding than 奇川风 (16/13), which is what makes the modules read squarer in this mode.",
+    "guizang_decision_lift": 46,
+    "guizang_decision_lift_note": "extra height on a decision node so the diamond's edges meet its bounding box at the mid-points, which is where the connectors land — without it the arrowhead is eaten.",
+    "relation_side_label_bias": 0.9,
+    "relation_side_label_bias_note": "how far a side label sits from the outer end of its segment toward the middle. 1.0 would centre it."
   }
 }

@@ -8,7 +8,8 @@ top/bottom skip-routes ourselves (graphviz edge routes are unreliable).
 Usage: python render_relation.py <semantic-map.json> <out.svg>
 """
 import sys, math, subprocess
-from common import C, FONT, FS, TITLE_FONT, TOKENS, esc, wrap, text_w, load_map, arrow_marker
+from common import (C, FONT, FS, TITLE_FONT, TOKENS, esc, wrap, text_w, load_map,
+                    arrow_marker, head_trim, trim_end)
 
 FC = TOKENS["flow_colors"]
 FS_TITLE_DOC = FS["doc_title"]
@@ -17,6 +18,8 @@ LH_NOTE = 20
 PADX, PADY = 22, 16
 _THEME = None  # "guizang" -> roomier, squarer modules
 NODE_MINW = 150
+SW_N = TOKENS["stroke"]["connector"]      # ordinary relationship line
+SW_E = TOKENS["stroke"]["emphasis"]       # the one emphasised relationship
 ARC_GAP = 56          # how far above the row the top-route runs
 NOTE_GAP = 30         # gap from node bottom to its note
 MARGIN = 72
@@ -60,7 +63,7 @@ def label_anchor(pts, center_y=None):
     mid = (y0 + y1) / 2
     if center_y is not None:
         outer = y0 if abs(y0 - center_y) >= abs(y1 - center_y) else y1
-        along = outer + (mid - outer) * 0.9         # 40% from the outer end toward mid
+        along = outer + (mid - outer) * TOKENS["tuning"]["relation_side_label_bias"]
     else:
         along = mid
     return ("side", x0, along)
@@ -478,7 +481,7 @@ def render(m):
                     "left": cx - w/2, "right": cx + w/2}
 
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W:.0f}" height="{H:.0f}" viewBox="0 0 {W:.0f} {H:.0f}" font-family="{FONT}">',
-           '<defs>' + arrow_marker('ag', C["line"]) + arrow_marker('ar', C["red"], size=14, refX=11) + '</defs>',
+           '<defs>' + arrow_marker('ag', C["line"], width=SW_N) + arrow_marker('ar', C["red"], size=14, width=SW_E) + '</defs>',
            f'<rect width="{W:.0f}" height="{H:.0f}" fill="{C["bg"]}"/>',
            f'<text x="{W/2:.0f}" y="46" font-size="{FS_TITLE_DOC}" font-weight="700" font-family="{TITLE_FONT}" '
            f'fill="{C["ink"]}" stroke="{C["ink"]}" stroke-width="0.3" text-anchor="middle">{esc(m["title_text"])}</text>']
@@ -491,9 +494,12 @@ def render(m):
     for e, pts in zip(m["edges"], routes):
         emph = e.get("emphasis")
         col = C["red"] if emph else C["line"]
-        sw = 3 if emph else 2
+        sw = SW_E if emph else SW_N
         mk = "url(#ar)" if emph else "url(#ag)"
-        d = rounded(pts)
+        # The router aims at the node border; head-room is applied here so the
+        # arrow TIP (not the line end) keeps its gap. Labels still anchor on the
+        # UNtrimmed route, so placement is unchanged.
+        d = rounded(trim_end(pts, head_trim(14 if emph else None, sw)))
         out.append(f'<path d="{d}" fill="none" stroke="{col}" stroke-width="{sw}" marker-end="{mk}"/>')
         if e.get("label"):   # wrapped + segment-aware + collision-placed after nodes
             lcol = C["red"] if emph else C["ink2"]
@@ -510,7 +516,7 @@ def render(m):
         n = by_id[nid]
         out.append(f'<g data-role="node" data-id="{nid}"{" data-emph=\"1\"" if nid == _hub else ""}>')
         out.append(f'<rect x="{g["left"]:.1f}" y="{g["top"]:.1f}" width="{g["w"]:.1f}" height="{g["h"]:.1f}" '
-                   f'rx="12" fill="{FC["step_fill"]}" stroke="{FC["step_stroke"]}" stroke-width="1.4"/>')
+                   f'rx="12" fill="{FC["step_fill"]}" stroke="{FC["step_stroke"]}" stroke-width="1"/>')
         out.append(f'<text x="{g["cx"]:.1f}" y="{g["cy"]+FS_T*0.35:.1f}" font-size="{FS_T}" font-weight="700" '
                    f'fill="{C["ink"]}" text-anchor="middle">{esc(n["title"])}</text>')
         if n.get("note"):

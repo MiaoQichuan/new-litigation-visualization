@@ -26,6 +26,7 @@ from common import text_w  # noqa
 FIX = os.path.join(HERE, "fixtures")
 EXAMPLES = os.path.join(HERE, "..", "examples")
 RESULTS = []
+_DOC_ASSERTIONS = []
 
 # The layout examples are the single source of truth; the test suite loads them
 # straight from examples/ (no duplicated fixtures). Only the edge_* stress cases
@@ -35,6 +36,7 @@ _EX_ALIAS = {
     "ex_gantt.json": "timeline-gantt.json", "ex_flow.json": "flowchart.json",
     "ex_relation.json": "relationship.json", "ex_tree.json": "relation-tree.json",
     "ex_flow_parallel.json": "flow-contract-review.json",
+    "ex_compare.json": "comparison-table.json",
 }
 
 
@@ -264,6 +266,1442 @@ def _():
 def _():
     svg, _, _ = render_flow.render(load("ex_flow.json"))
     assert "M 0 0 L 12 6 L 0 12 Z" in svg, "arrowhead is not the isosceles triangle"
+
+
+@check("arrow · the head stays a SHARP point — head/line junction is proportional")
+def _():
+    """v1.0.1 pinned refX=11 for every arrow, whatever the line weight. At that
+    point the triangle is only ~0.4x the stroke width, so the line's square cap
+    poked out on both sides and the tip rendered FLAT. The junction is now
+    DERIVED from the stroke width (common.arrow_geom), so this guard measures
+    the invariant directly instead of trusting a byte-snapshot of the masters."""
+    import common
+    MIN_COVER = 1.5          # triangle height at the line's end, in stroke widths
+    mk_re = re.compile(r'<marker id="([^"]+)" viewBox="0 0 12 12" refX="([\d.]+)"'
+                       r'[^>]*markerWidth="([\d.]+)"')
+    ed_re = re.compile(r'<path [^>]*stroke-width="([\d.]+)"[^>]*marker-end="url\(#([^)]+)\)"')
+
+    tree_m = load("ex_tree.json"); tree_m["arrows"] = True
+    cases = [("flow", render_flow, load("ex_flow.json")),
+             ("flow-parallel", render_flow, load("ex_flow_parallel.json")),
+             ("relation", render_relation, load("ex_relation.json")),
+             ("relation-dense", render_relation, load("edge_relation_dense.json")),
+             ("tree", render_tree, tree_m)]
+    measured = 0
+    for name, mod, m in cases:
+        svg, _, _ = mod.render(m)
+        mk = {i: (float(rx), float(sz)) for i, rx, sz in mk_re.findall(svg)}
+        assert mk, f"{name}: no arrowhead marker defined"
+        for w, mid in ed_re.findall(svg):
+            w = float(w)
+            assert mid in mk, f"{name}: edge points at undefined marker {mid}"
+            refX, size = mk[mid]
+            cover = (12 - refX) * (size / 12) / w
+            assert cover >= MIN_COVER, (
+                f"{name}/{mid}: triangle is {cover:.2f}x the {w}px line at the "
+                f"line's end — under {MIN_COVER}x the cap pokes out and flattens the tip")
+            # and the line must still be swallowed by the head: no seam
+            assert (12 - refX) * (size / 12) <= size, f"{name}/{mid}: line ends ahead of the head"
+            measured += 1
+    assert measured >= 5, f"only {measured} arrow junctions measured"
+
+    # the rule is a RATIO: a heavier line must push its junction further back
+    thin, _ = common.arrow_geom(10, 1.6)
+    thick, _ = common.arrow_geom(10, 3.0)
+    assert thick < thin, "junction did not move back for a heavier line — still a dead number"
+    # and the line must stop further short of the node when the head is bigger
+    assert common.head_trim(14, 3) > common.head_trim(10, 2), "head-room is not proportional"
+
+
+def _pptx_bytes(mod, m, mode=None):
+    """Render a map to SVG (optionally themed) and transcribe it to a .pptx in
+    a temp file; returns (slide_xml, presentation_xml, svg)."""
+    import export_pptx, render as _render, tempfile, zipfile, os as _os
+    svg, W, H = mod.render(m)
+    if mode == "mono":
+        svg = _render.to_monochrome(svg)
+    elif mode == "guizang":
+        svg = _render.to_guizang(svg)
+    sp = tempfile.mktemp(suffix=".svg"); pp = tempfile.mktemp(suffix=".pptx")
+    open(sp, "w", encoding="utf-8").write(svg)
+    export_pptx.export(sp, pp)
+    with zipfile.ZipFile(pp) as z:
+        names = set(z.namelist())
+        slide = z.read("ppt/slides/slide1.xml").decode("utf-8")
+        pres = z.read("ppt/presentation.xml").decode("utf-8")
+    _os.unlink(sp); _os.unlink(pp)
+    return slide, pres, svg, names
+
+
+_PPTX_CASES = [("flow", render_flow, "ex_flow.json"), ("relation", render_relation, "ex_relation.json"),
+               ("tree", render_tree, "ex_tree.json"), ("points", render_points, "ex_points.json"),
+               ("dated", render_dated, "ex_dated.json"), ("gantt", render_spans, "ex_gantt.json"),
+               ("compare", render_compare, "ex_compare.json")]
+
+
+@check("pptx · every layout exports a well-formed package with the required parts")
+def _():
+    need = {"[Content_Types].xml", "_rels/.rels", "ppt/presentation.xml",
+            "ppt/slides/slide1.xml", "ppt/slideMasters/slideMaster1.xml",
+            "ppt/slideLayouts/slideLayout1.xml", "ppt/theme/theme1.xml"}
+    for name, mod, fx in _PPTX_CASES:
+        slide, pres, svg, names = _pptx_bytes(mod, load(fx))
+        missing = need - names
+        assert not missing, f"{name}: .pptx is missing required parts {sorted(missing)}"
+        _MD.parseString(slide); _MD.parseString(pres)      # PowerPoint refuses malformed XML
+
+
+@check("pptx · text is verbatim — every word of the figure survives into the deck")
+def _():
+    """The verbatim rule applies to EVERY deliverable, not just the SVG."""
+    for name, mod, fx in _PPTX_CASES:
+        slide, _, svg, _ = _pptx_bytes(mod, load(fx))
+        want = [re.sub(r"<[^>]+>", "", t).strip()
+                for t in re.findall(r"<text[^>]*>(.*?)</text>", svg, re.S)]
+        want = [w for w in want if w]
+        body = "".join(re.findall(r"<a:t>(.*?)</a:t>", slide, re.S))
+        for w in want:
+            plain = (w.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">")
+                      .replace("&quot;", '"').replace("&#x27;", "'"))
+            esc = (plain.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+            assert plain in body or esc in body, f"{name}: deck lost text {w!r}"
+
+
+@check("pptx · geometry is transcribed EXACTLY from the master (no second layout engine)")
+def _():
+    import export_pptx
+    EMU = 9525
+    for name, mod, fx in _PPTX_CASES:
+        slide, pres, svg, _ = _pptx_bytes(mod, load(fx))
+        mw = re.search(r'<svg[^>]*width="([\d.]+)"[^>]*height="([\d.]+)"', svg)
+        W, H = float(mw.group(1)), float(mw.group(2))
+        sz = re.search(r'<p:sldSz cx="(\d+)" cy="(\d+)"', pres)
+        assert abs(int(sz.group(1)) / EMU - W) < 0.5 and abs(int(sz.group(2)) / EMU - H) < 0.5, \
+            f"{name}: slide canvas does not match the figure"
+        prims = export_pptx.attach_text(export_pptx.parse_svg(svg), W, H)
+        boxes = [(float(a) / EMU, float(b) / EMU, float(c) / EMU, float(d) / EMU) for a, b, c, d in
+                 re.findall(r'<a:off x="(-?\d+)" y="(-?\d+)"/><a:ext cx="(\d+)" cy="(\d+)"/>', slide)]
+        for s in [p for p in prims if p["k"] in ("rect", "ellipse", "poly")]:
+            near = min(boxes, key=lambda t: abs(t[0] - s["x"]) + abs(t[1] - s["y"])
+                       + abs(t[2] - s["w"]) + abs(t[3] - s["h"]))
+            off = max(abs(near[0] - s["x"]), abs(near[1] - s["y"]),
+                      abs(near[2] - s["w"]), abs(near[3] - s["h"]))
+            assert off < 0.5, f"{name}: shape drifted {off:.2f}px between the SVG and the deck"
+
+
+@check("pptx · the background never swallows the title (it stays its own editable box)")
+def _():
+    """Regression: the full-canvas backdrop contains every label geometrically,
+    so a naive containment test made the title a caption INSIDE the backdrop —
+    clicking the title then selected the whole background instead of the words."""
+    import export_pptx
+    for name, mod, fx in _PPTX_CASES:
+        m = load(fx)
+        svg, W, H = mod.render(m)
+        prims = export_pptx.attach_text(export_pptx.parse_svg(svg), W, H)
+        for p in prims:
+            if p["k"] in ("rect", "ellipse", "poly") and p.get("lines"):
+                assert p["w"] * p["h"] < 0.9 * W * H, \
+                    f"{name}: the canvas backdrop captured {len(p['lines'])} text run(s)"
+        title = m.get("title_text", "")
+        free = [p for p in prims if p["k"] == "text" and not p.get("used")]
+        assert any(title.startswith(f["t"][:6]) or f["t"] in title for f in free), \
+            f"{name}: the title is not an independent text box"
+
+
+@check("pptx · text FITS — the deck is audited as rendered, not just as written")
+def _():
+    """The defect this exists for: the first exporter wrote font sizes in px as
+    if they were points (33% oversized) and let PowerPoint re-wrap text the
+    scripts had already broken. Boxes burst, the title split in two and a dozen
+    year labels stacked into one column — and every other check still passed,
+    because they only asked whether the text was PRESENT."""
+    import export_pptx, tempfile, os as _os
+    for name, mod, fx in _PPTX_CASES:
+        for mode in (None, "guizang", "mono"):
+            svg, W, H = mod.render(load(fx))
+            if mode == "mono":
+                import render as _r; svg = _r.to_monochrome(svg)
+            elif mode == "guizang":
+                import render as _r; svg = _r.to_guizang(svg)
+            sp = tempfile.mktemp(suffix=".svg"); pp = tempfile.mktemp(suffix=".pptx")
+            open(sp, "w", encoding="utf-8").write(svg)
+            export_pptx.export(sp, pp)
+            problems = export_pptx.audit_deck(pp)
+            _os.unlink(sp); _os.unlink(pp)
+            assert not problems, f"{name}/{mode or 'qichuan'}: " + "; ".join(problems[:3])
+
+
+@check("pptx · a label never joins a shape that is not its own centred caption")
+def _():
+    """The time-band contains a dozen year labels at a dozen x positions. Adopting
+    them turned the axis into one shape holding a vertical column of years."""
+    import export_pptx
+    for name, mod, fx in _PPTX_CASES:
+        svg, W, H = mod.render(load(fx))
+        prims = export_pptx.attach_text(export_pptx.parse_svg(svg), W, H)
+        for p in prims:
+            xs = {round(l["x"], 1) for l in p.get("lines", [])}
+            assert len(xs) <= 1, f"{name}: a shape adopted labels at {len(xs)} different x — they stack"
+
+
+@check("pptx · group transforms are honoured (歸藏风 天头 / fit_title push-down)")
+def _():
+    """The renderers wrap content in <g transform="translate(0,dy)"> twice —
+    歸藏风 reserves a 天头 above its big title, and fit_title pushes the drawing
+    down when a long title wraps. A parser that ignores those lifts the WHOLE
+    figure by that offset; the 歸藏风 title then sat above the top of the slide."""
+    import export_pptx
+    svg, W, H = render_flow.render(load("ex_flow.json"))
+    base = export_pptx.parse_svg(svg)
+    shifted = svg.replace("</defs>", '</defs><g transform="translate(0,60)">', 1)
+    shifted = shifted.replace("</svg>", "</g></svg>", 1)
+    moved = export_pptx.parse_svg(shifted)
+    assert len(base) == len(moved), "transform parsing dropped elements"
+    dys = {round(b["y"] - a["y"], 3) for a, b in zip(base, moved) if "y" in a and "y" in b}
+    assert dys == {60.0}, f"translate(0,60) was not applied to every element: {sorted(dys)[:4]}"
+
+
+@check("pptx · every route is reproduced POINT-FOR-POINT (start, bends and end)")
+def _():
+    """The defect this exists for: bent routes were handed to PowerPoint's
+    `bentConnector3`, which has one fixed horizontal→vertical→horizontal shape
+    and is placed from the two ENDPOINTS alone. Routes the router built as
+    vertical→horizontal→vertical came out leaving and entering their nodes from
+    the wrong sides — every bend recomputed, none of them the router's."""
+    import export_pptx
+    EMU = 9525
+    checked = 0
+    for name, mod, fx in _PPTX_CASES:
+        slide, _, svg, _ = _pptx_bytes(mod, load(fx))
+        routes = []
+        for m in re.finditer(r'name="Route \d+".*?<a:off x="(-?\d+)" y="(-?\d+)"/>'
+                             r'<a:ext cx="(\d+)" cy="(\d+)"/>.*?<a:pathLst>(.*?)</a:pathLst>', slide, re.S):
+            x, y, cx, cy = [int(v) / EMU for v in m.groups()[:4]]
+            pts = [(int(a), int(b)) for a, b in re.findall(r'<a:pt x="(-?\d+)" y="(-?\d+)"/>', m.group(5))]
+            routes.append([(x + a / 100000 * cx, y + b / 100000 * cy) for a, b in pts])
+        for m in re.finditer(r'<p:cxnSp>.*?<a:xfrm( flipH="1")?( flipV="1")?>'
+                             r'<a:off x="(-?\d+)" y="(-?\d+)"/><a:ext cx="(\d+)" cy="(\d+)"/>', slide, re.S):
+            fh, fv = bool(m.group(1)), bool(m.group(2))
+            x, y, cx, cy = [int(v) / EMU for v in m.groups()[2:]]
+            routes.append([((x + cx) if fh else x, (y + cy) if fv else y),
+                           (x if fh else (x + cx), y if fv else (y + cy))])
+        for c in [p for p in export_pptx.parse_svg(svg) if p["k"] == "conn"]:
+            want = c["pts"]
+            cand = [r for r in routes if len(r) == len(want)] or routes
+            best = min(cand, key=lambda r: abs(r[0][0] - want[0][0]) + abs(r[0][1] - want[0][1])
+                       + abs(r[-1][0] - want[-1][0]) + abs(r[-1][1] - want[-1][1]))
+            off = max(max(abs(a[0] - b[0]), abs(a[1] - b[1])) for a, b in zip(best, want)) \
+                if len(best) == len(want) else 999
+            assert off < 0.5, f"{name}: a route drifted {off:.1f}px — the deck redrew it"
+            checked += 1
+    assert checked >= 20, f"only {checked} routes compared"
+
+
+@check("timeline · the axis bar/band is a RIGHT-ANGLE bar in every mode, never a pill")
+def _():
+    """A time ruler is a bar, not a card. The dated band used to be drawn as a
+    stadium (rx = height/2) and the numbered axis line with round caps."""
+    import render as _r
+    svg, _, _ = render_dated.render(load("ex_dated.json"))
+    for tag, s2 in (("奇川风", svg), ("白描", _r.to_monochrome(svg)), ("歸藏风", _r.to_guizang(svg))):
+        m = re.search(r'<rect data-role="axis"[^>]*>', s2)
+        assert m, f"{tag}: no axis band found"
+        rx = re.search(r'rx="([\d.]+)"', m.group(0))
+        assert rx and float(rx.group(1)) == 0, f"{tag}: axis band is rounded (rx={rx and rx.group(1)})"
+    psvg, _, _ = render_points.render(load("ex_points.json"))
+    ax = re.search(r'<line data-role="axis"[^>]*>', psvg)
+    assert ax and "linecap=\"round\"" not in ax.group(0), "numbered axis line still has round caps"
+
+
+def _canvas(svg):
+    m = re.search(r'<svg[^>]*width="([\d.]+)"[^>]*height="([\d.]+)"', svg)
+    return (float(m.group(1)), float(m.group(2))) if m else (0, 0)
+
+
+@check("pptx · the RENDERED deck matches the master (converted, measured, compared)")
+def _():
+    """The only check here that looks at a rendered result rather than at the
+    XML we wrote. Every earlier defect — 33%-oversized type, re-wrapped captions,
+    a stacked column of years, a decision node whose question vanished — passed
+    every other guard. Skipped when soffice/pdftotext are absent; doctor.py
+    reports that, and it is not a required dependency of the skill itself."""
+    import export_pptx, verify_pptx, tempfile, os as _os
+    if not verify_pptx.available():
+        return
+    import render as _r
+    for name, mod, fx in (("flow", render_flow, "ex_flow.json"),
+                          ("dated", render_dated, "ex_dated.json"),
+                          ("compare", render_compare, "ex_compare.json")):
+        for mode in (None, "guizang", "mono"):
+            svg, W, H = mod.render(load(fx))
+            if mode == "guizang":
+                svg = _r.to_guizang(svg)          # the pattern-fill backdrop lives here
+            elif mode == "mono":
+                svg = _r.to_monochrome(svg)
+            sp = tempfile.mktemp(suffix=".svg"); pp = tempfile.mktemp(suffix=".pptx")
+            open(sp, "w", encoding="utf-8").write(svg)
+            export_pptx.export(sp, pp, fonts="master")   # the sandbox has these faces
+            problems = verify_pptx.verify(sp, pp)
+            _os.unlink(sp); _os.unlink(pp)
+            assert not problems, (f"{name}/{mode or 'qichuan'}: " + "; ".join(problems[:3])
+                                  + "  (all text missing usually means the deck did not open)")
+
+
+@check("pptx · a module is ONE object — its caption lives in the shape")
+def _():
+    """Splitting a four-line card into four floating text boxes is exact and
+    practically hostile: editing the card then means chasing four objects."""
+    import export_pptx
+    for name, mod, fx in _PPTX_CASES:
+        slide, _, svg, _ = _pptx_bytes(mod, load(fx))
+        prims = export_pptx.attach_text(export_pptx.parse_svg(svg), *_canvas(svg))
+        free = sum(1 for p in prims if p["k"] == "text" and not p.get("used"))
+        boxes = slide.count('txBox="1"')
+        assert boxes <= free, (f"{name}: {boxes} loose text boxes but only {free} free labels — "
+                               f"a shape's caption was split out of it")
+    # and merging really happens: a multi-line card must be ONE object
+    slide, _, svg, _ = _pptx_bytes(render_flow, load("ex_flow.json"))
+    multi = [sp for sp in re.findall(r"<p:sp>.*?</p:sp>", slide, re.S) if sp.count("<a:t>") >= 3]
+    assert multi, "no shape carries a multi-line caption — captions are still split"
+
+
+@check("pptx · a preset's adjust handles are supplied in FULL or not at all")
+def _():
+    """Writing <a:avLst> REPLACES a preset's defaults wholesale. The decision
+    node shipped `hexagon` with only `adj` and not `vf`; the geometry formula
+    then referenced a guide that no longer existed and PowerPoint refused to
+    open the file — while LibreOffice, python-pptx and the XSD all accepted it."""
+    import export_pptx
+    for name, mod, fx in _PPTX_CASES:
+        for mode in (None, "guizang"):
+            slide, _, _, _ = _pptx_bytes(mod, load(fx), mode)
+            for prst, av in re.findall(r'<a:prstGeom prst="(\w+)">(.*?)</a:prstGeom>', slide, re.S):
+                assert prst in export_pptx.PRESET_ADJUSTS, \
+                    f"{name}: preset {prst!r} has no declared adjust list — add it"
+                need = set(export_pptx.PRESET_ADJUSTS[prst])
+                got = set(re.findall(r'<a:gd name="(\w+)"', av))
+                assert got in (set(), need), \
+                    f"{name}: {prst} supplies {sorted(got)} but declares {sorted(need)}"
+
+
+@check("pptx · no zero-extent shape (PowerPoint treats them inconsistently)")
+def _():
+    for name, mod, fx in _PPTX_CASES:
+        slide, _, _, _ = _pptx_bytes(mod, load(fx))
+        for cx, cy in re.findall(r'<a:ext cx="(\d+)" cy="(\d+)"/>', slide):
+            assert int(cx) > 0 and int(cy) > 0, f"{name}: a shape has a zero extent"
+
+
+@check("pptx · the canvas background survives (歸藏风 paper + dot matrix)")
+def _():
+    """歸藏风 emits TWO <defs> with the paper rect between them. Parsing
+    "everything after the last </defs>" threw that rect away and the deck came
+    out with no background at all."""
+    import export_pptx, render as _r
+    svg, W, H = render_flow.render(load("ex_flow.json"))
+    gz = _r.to_guizang(svg)
+    assert gz.count("</defs>") >= 2, "fixture no longer exercises the two-defs case"
+    prims = export_pptx.parse_svg(gz)
+    m = re.search(r'<svg[^>]*width="([\d.]+)"[^>]*height="([\d.]+)"', gz)
+    W, H = float(m.group(1)), float(m.group(2))
+    paper = [p for p in prims if p["k"] == "rect" and p["w"] >= W - 1 and p["h"] >= H - 1]
+    assert paper, "the full-canvas background rect was dropped by defs-stripping"
+    assert any(p.get("fill") for p in paper), "the paper colour was lost"
+    assert any(p.get("pattern") for p in paper), "the IKB dot matrix layer was lost"
+    slide, _, _, _ = _pptx_bytes(render_flow, load("ex_flow.json"), "guizang")
+    assert "FAFAF8" in slide, "歸藏风 deck has no paper colour"
+    assert "pattFill" in slide, "歸藏风 deck has no dot-matrix texture"
+
+
+@check("pptx · a sans stack never resolves to the Song face ('sans-serif' contains 'serif')")
+def _():
+    import export_pptx
+    sans_stack = "'PingFang SC','Microsoft YaHei','Noto Sans CJK SC',Arial,sans-serif"
+    assert export_pptx._face({"family": sans_stack}) == export_pptx._FONTS["sans"], \
+        "a sans-serif stack resolved to the serif face — body text would render as Song"
+    assert export_pptx._face({"family": "'方正小标宋简体','思源宋体',serif"}) == \
+        export_pptx._FONTS["serif"], "the Song title stack no longer resolves to a Song face"
+    # and in practice: 奇川风 uses Song for the title only, 歸藏风 not at all
+    slide, _, _, _ = _pptx_bytes(render_flow, load("ex_flow.json"))
+    n_serif = slide.count(f'<a:ea typeface="{export_pptx.FONT_PROFILES["master"]["serif"]}"/>')
+    assert n_serif == 1, f"奇川风 deck uses the Song face {n_serif}x — it belongs on the title alone"
+    gz, _, _, _ = _pptx_bytes(render_flow, load("ex_flow.json"), "guizang")
+    assert f'<a:ea typeface="{export_pptx.FONT_PROFILES["master"]["serif"]}"/>' not in gz, \
+        "歸藏风 deck carries a Song face — the mode is sans throughout"
+
+
+@check("歸藏风 · the dot grid is GREY — the Klein blue stays a single anchor")
+def _():
+    """Reference: 歸藏's own Swiss decks lay a faint LIGHT-GREY dot grid on warm
+    paper and spend the Klein blue on solid blocks and a few emphasised marks.
+    Tinting the whole backdrop with the accent spends the one anchor colour on
+    the background — the grid then competes with the content, which is what this
+    style exists to prevent."""
+    import render as _r, export_pptx
+    svg, _, _ = render_flow.render(load("ex_flow.json"))
+    gz = _r.to_guizang(svg)
+    dot = re.search(r'<pattern id="gzdot".*?</pattern>', gz, re.S)
+    assert dot, "歸藏风 lost its dot-matrix layer"
+    col = re.search(r'fill="(#[0-9A-Fa-f]{6})"', dot.group(0)).group(1).upper()
+    assert col != "#002FA7", "the dot grid is painted in the accent colour"
+    assert col in ("#D4D4D2", "#BDBDBD", "#E0E0E0"), f"dot grid colour {col} is not a light grey"
+    slide, _, _, _ = _pptx_bytes(render_flow, load("ex_flow.json"), "guizang")
+    pat = re.search(r'<a:pattFill.*?</a:pattFill>', slide, re.S)
+    assert pat and "002FA7" not in pat.group(0), "the deck's backdrop texture is blue"
+
+
+@check("歸藏风 · Latin/numeral runs carry TRACKING, in the SVG and in the deck")
+def _():
+    """Wide letter-spacing on the Latin run is half of what makes this style read
+    as engineered rather than merely sans."""
+    import render as _r
+    svg, _, _ = render_dated.render(load("ex_dated.json"))
+    gz = _r.to_guizang(svg)
+    tracked = re.findall(r'<text[^>]*letter-spacing="([\d.]+)"[^>]*>', gz)
+    assert tracked, "歸藏风 Latin runs carry no tracking"
+    assert all(float(t) > 0 for t in tracked)
+    # CJK must NOT be tracked — tracking Chinese just loosens it into mush
+    for tag in re.findall(r'<text[^>]*letter-spacing[^>]*>([^<]*)</text>', gz):
+        assert not re.search(r'[\u4E00-\u9FFF]', tag), f"CJK run was tracked: {tag[:12]!r}"
+    slide, _, _, _ = _pptx_bytes(render_dated, load("ex_dated.json"), "guizang")
+    assert re.search(r'spc="[1-9]\d*"', slide), "the deck dropped the tracking"
+
+
+@check("raster · integer scale + integer hairlines (a bar's two rules weigh the same)")
+def _():
+    """A reader spotted the timeline band printing a heavier rule underneath than
+    over it. Nothing in the SVG was asymmetric: the raster ran at 150 dpi — scale
+    1.5625 — so integer coordinates fell mid-pixel and a 1.2px centred stroke
+    resolved to one dark pixel above and two below. Both halves are locked here:
+    the scale must be an exact integer, and hairlines must be integer widths."""
+    import render as _render
+    assert _render.svg_to_png.__defaults__[0] % 96 == 0, \
+        "the raster dpi is not a whole multiple of 96 — the scale will be fractional"
+    for name, mod, fx in _PPTX_CASES:
+        for mode in (None, "mono", "guizang"):
+            svg, _, _ = mod.render(load(fx))
+            if mode == "mono":
+                svg = _render.to_monochrome(svg)
+            elif mode == "guizang":
+                svg = _render.to_guizang(svg)
+            for t in re.findall(r"<rect\b[^>]*/>", svg):
+                m = re.search(r'stroke-width="([\d.]+)"', t)
+                if not m:
+                    continue
+                w = float(m.group(1))
+                assert w == int(w), (f"{name}/{mode or 'qichuan'}: a rect hairline is "
+                                     f"{w}px — fractional widths render one edge of a "
+                                     f"bar heavier than the other")
+
+
+def _vsdx_page(mod, m, mode=None):
+    import export_vsdx, render as _r, tempfile, zipfile, os as _os
+    svg, W, H = mod.render(m)
+    if mode == "mono":
+        svg = _r.to_monochrome(svg)
+    elif mode == "guizang":
+        svg = _r.to_guizang(svg)
+    sp = tempfile.mktemp(suffix=".svg"); vp = tempfile.mktemp(suffix=".vsdx")
+    open(sp, "w", encoding="utf-8").write(svg)
+    export_vsdx.export(sp, vp)
+    with zipfile.ZipFile(vp) as z:
+        names = set(z.namelist())
+        page = z.read("visio/pages/page1.xml").decode("utf-8")
+        pages = z.read("visio/pages/pages.xml").decode("utf-8")
+    _os.unlink(sp); _os.unlink(vp)
+    return page, pages, svg, names
+
+
+@check("vsdx · every layout exports a well-formed Visio package")
+def _():
+    need = {"[Content_Types].xml", "_rels/.rels", "visio/document.xml",
+            "visio/pages/pages.xml", "visio/pages/page1.xml"}
+    for name, mod, fx in _PPTX_CASES:
+        page, pages, svg, names = _vsdx_page(mod, load(fx))
+        missing = need - names
+        assert not missing, f"{name}: .vsdx missing {sorted(missing)}"
+        _MD.parseString(page); _MD.parseString(pages)
+        assert page.count("<Shape ") >= 3, f"{name}: page has almost no shapes"
+
+
+@check("vsdx · inches, and the Y axis is flipped (Visio's origin is bottom-left)")
+def _():
+    """Visio measures in inches from the BOTTOM-left with Y pointing up, while
+    the master is pixels from the top-left with Y pointing down. Getting this
+    wrong mirrors the whole figure vertically, which still looks like a diagram."""
+    import export_vsdx
+    for name, mod, fx in (("flow", render_flow, "ex_flow.json"),
+                          ("dated", render_dated, "ex_dated.json")):
+        page, pages, svg, _ = _vsdx_page(mod, load(fx))
+        m = re.search(r'<svg[^>]*width="([\d.]+)"[^>]*height="([\d.]+)"', svg)
+        W, H = float(m.group(1)), float(m.group(2))
+        pw = float(re.search(r'<Cell N="PageWidth" V="([\d.]+)"', pages).group(1))
+        ph = float(re.search(r'<Cell N="PageHeight" V="([\d.]+)"', pages).group(1))
+        assert abs(pw - W / 96.0) < 0.01 and abs(ph - H / 96.0) < 0.01, \
+            f"{name}: page is not the master's canvas in inches"
+        # The master's TOPMOST element must land at the HIGHEST PinY. A weaker
+        # test ("something sits in the upper half") passes even with the flip
+        # removed, because an un-flipped figure still fills the page.
+        prims = export_vsdx.attach_text(export_vsdx.parse_svg(svg), W, H)
+        texts = [p for p in prims if p["k"] == "text"]
+        assert texts, "fixture has no text"
+        top = min(texts, key=lambda p: p["y"])
+        # No threshold needed: the expected PinY is (H - y)/96 by definition, and
+        # an un-flipped export would put it at y/96 instead. The equation IS the test.
+        want = (H - top["y"]) / 96.0
+        pins = [float(v) for v in re.findall(r'<Cell N="PinY" V="([\d.-]+)"', page)]
+        assert any(abs(v - want) < 0.12 for v in pins), (
+            f"{name}: the master's topmost text should sit at PinY≈{want:.2f}in "
+            f"(page {ph:.2f}in tall) — nothing does, so the figure is flipped")
+
+
+@check("vsdx · the arrowhead is the SOLID one (line-end enum pinned by measurement)")
+def _():
+    """Visio names its line ends by number, and the wrong number is the same class
+    of error as the wrong dash: the file stays valid and the arrow is still there,
+    it is simply the wrong shape. Measured by rasterising the same figure with
+    several values and counting ink, against a no-arrow baseline:
+
+        EndArrow=0 (none)  baseline      EndArrow=2   +560
+        EndArrow=1         -115  (open)  EndArrow=4   +952  <- solid, the master's
+        EndArrow=5         +757
+
+    4 lays down the most ink, i.e. it is the filled triangle the master draws.
+    Pinned here so it is not 'tidied' to a neighbouring value."""
+    import export_vsdx
+    page, _, _, _ = _vsdx_page(render_flow, load("ex_flow.json"))
+    ends = set(re.findall(r'<Cell N="EndArrow" V="(\d+)"', page))
+    assert ends, "no arrowhead in the .vsdx"
+    assert ends == {"4"}, f"line-end enum is {sorted(ends)}, expected the solid triangle (4)"
+
+
+@check("verbatim · <, >, & and quotes survive intact into all four formats")
+def _():
+    """Angle brackets and ampersands appear in real party names (甲<公司>&乙) and
+    are the classic way to lose text or produce an unopenable file.
+
+    draw.io's labels are HTML inside an XML attribute, so a literal `<` is stored
+    DOUBLE-escaped as `&amp;lt;` — correct, and easy to misread as corruption if
+    the check only unescapes once. That is checked here explicitly rather than
+    left as a surprise."""
+    import export_pptx, export_vsdx, export_drawio, tempfile, zipfile, html
+    import os as _os, shutil as _sh
+    import xml.dom.minidom as _md
+
+    m = load("edge_special_chars.json")
+    KEYS = {"title", "label", "text", "title_text"}
+    acc = []
+    def walk(o):
+        if isinstance(o, dict):
+            for k, v in o.items():
+                if k in KEYS and isinstance(v, str):
+                    acc.append(v)
+                else:
+                    walk(v)
+        elif isinstance(o, list):
+            for x in o:
+                walk(x)
+    walk(m)
+    risky = [x for x in acc if any(c in x for c in '<>&"\'')]
+    assert risky, "fixture no longer exercises special characters"
+
+    import render as _render
+    svg, W, H = _render.choose(m).render(m)
+    d = tempfile.mkdtemp(); sp = _os.path.join(d, "f.svg")
+    open(sp, "w", encoding="utf-8").write(svg)
+    pp = _os.path.join(d, "f.pptx"); export_pptx.export(sp, pp)
+    vp = _os.path.join(d, "f.vsdx"); export_vsdx.export(sp, vp)
+    bodies = {
+        "svg": svg,
+        "pptx": zipfile.ZipFile(pp).read("ppt/slides/slide1.xml").decode(),
+        "vsdx": zipfile.ZipFile(vp).read("visio/pages/page1.xml").decode(),
+    }
+    if m.get("layout") in export_drawio.SUPPORTED_LAYOUTS:
+        bodies["drawio"] = export_drawio.build_model(m)[0]
+    _sh.rmtree(d, ignore_errors=True)
+
+    for fmt, body in bodies.items():
+        _md.parseString(body)            # an unescaped & makes the file unopenable
+        if fmt == "svg":
+            runs = re.findall(r"<text[^>]*>(.*?)</text>", body, re.S)
+        elif fmt == "pptx":
+            runs = re.findall(r"<a:t>(.*?)</a:t>", body, re.S)
+        elif fmt == "vsdx":
+            runs = re.findall(r"<Text>(.*?)</Text>", body, re.S)
+        else:
+            runs = re.findall(r'value="([^"]*)"', body)
+        # draw.io labels are HTML inside XML — unescape twice there, once elsewhere
+        rounds = 2 if fmt == "drawio" else 1
+        text = ""
+        for r in runs:
+            r = re.sub(r"<[^>]+>", "", r)
+            for _ in range(rounds):
+                r = html.unescape(r)
+            text += r
+        text = re.sub(r"\s+", "", text)
+        for w in risky:
+            assert re.sub(r"\s+", "", w) in text, f"{fmt} mangled {w!r}"
+
+
+@check("verbatim · every word of the map survives into ALL FOUR formats")
+def _():
+    """The verbatim rule is the skill's oldest promise: only the visuals change,
+    never a character of the legal text. It was only being checked on the .pptx.
+
+    Text hides in a different PLACE in each format — element content in SVG,
+    PowerPoint and Visio, but an ATTRIBUTE value in .drawio — and the wrapping
+    positions differ (SVG breaks '…丙拒收不影 / 响效力；', draw.io breaks
+    '…不影响效 / 力；'). Comparing raw file text, or the SVG's per-line fragments,
+    reports losses that are not there. So: pull each format's text from where it
+    actually lives, drop the line-break markers, and compare against the SOURCE."""
+    import export_pptx, export_vsdx, export_drawio, tempfile, zipfile, os as _os
+    import render as _render
+
+    KEYS = {"title", "label", "text", "desc", "subtitle", "note", "title_text", "name"}
+
+    def source_strings(m):
+        out = []
+        def walk(o):
+            if isinstance(o, dict):
+                for k, v in o.items():
+                    if k in KEYS:
+                        if isinstance(v, str):
+                            out.append(v)
+                        elif isinstance(v, list):
+                            out.extend(x for x in v if isinstance(x, str))
+                    else:
+                        walk(v)
+            elif isinstance(o, list):
+                for x in o:
+                    walk(x)
+        walk(m)
+        return [x for x in out if x.strip()]
+
+    def unesc(t):
+        t = re.sub(r"&lt;br\s*/?&gt;|<br\s*/?>|&#10;", "", t)
+        for a, b in (("&amp;", "&"), ("&lt;", "<"), ("&gt;", ">"),
+                     ("&quot;", '"'), ("&#x27;", "'"), ("&apos;", "'")):
+            t = t.replace(a, b)
+        return re.sub(r"\s+", "", t)
+
+    def pull(fmt, body):
+        if fmt == "svg":
+            runs = re.findall(r"<text[^>]*>(.*?)</text>", body, re.S)
+        elif fmt == "pptx":
+            runs = re.findall(r"<a:t>(.*?)</a:t>", body, re.S)
+        elif fmt == "vsdx":
+            runs = re.findall(r"<Text>(.*?)</Text>", body, re.S)
+        else:
+            runs = re.findall(r'value="([^"]*)"', body)
+        return unesc("".join(re.sub(r"<[^>]+>", "", r) for r in runs))
+
+    for name, mod, fx in _PPTX_CASES:
+        m = load(fx)
+        want = source_strings(m)
+        assert want, f"{name}: fixture has no text to check"
+        svg, W, H = mod.render(m)
+        d = tempfile.mkdtemp()
+        sp = _os.path.join(d, "f.svg")
+        open(sp, "w", encoding="utf-8").write(svg)
+        got = {"svg": pull("svg", svg)}
+        pp = _os.path.join(d, "f.pptx"); export_pptx.export(sp, pp)
+        got["pptx"] = pull("pptx", zipfile.ZipFile(pp).read("ppt/slides/slide1.xml").decode())
+        vp = _os.path.join(d, "f.vsdx"); export_vsdx.export(sp, vp)
+        got["vsdx"] = pull("vsdx", zipfile.ZipFile(vp).read("visio/pages/page1.xml").decode())
+        if m.get("layout") in export_drawio.SUPPORTED_LAYOUTS:
+            got["drawio"] = pull("drawio", export_drawio.build_model(m)[0])
+        import shutil as _sh; _sh.rmtree(d, ignore_errors=True)
+        for w in want:
+            for fmt, body in got.items():
+                assert unesc(w) in body, f"{name}/{fmt} lost {w[:24]!r}"
+
+
+@check("dash · a dashed line stays a PLAIN dash in every format")
+def _():
+    """The master draws these as `stroke-dasharray="6 4"` — an even dash. Visio's
+    LinePattern 4 and OOXML's `dashDot` both draw dash·dot·dash instead, and that
+    error survives every structural check: the file is valid, the line is present
+    and in the right place, and only a reader sees it is the wrong KIND of dash.
+    Both formats are pinned to the plain-dash value."""
+    import export_pptx, export_vsdx, tempfile, zipfile, os as _os
+    svg, W, H = render_spans.render(load("ex_gantt.json"))
+    assert 'stroke-dasharray' in svg, "fixture no longer has a dashed line"
+    sp = tempfile.mktemp(suffix=".svg")
+    open(sp, "w", encoding="utf-8").write(svg)
+
+    vp = tempfile.mktemp(suffix=".vsdx")
+    export_vsdx.export(sp, vp)
+    with zipfile.ZipFile(vp) as z:
+        page = z.read("visio/pages/page1.xml").decode("utf-8")
+    _os.unlink(vp)
+    pats = set(re.findall(r'<Cell N="LinePattern" V="(\d+)"', page))
+    assert "2" in pats, "no plain-dash line in the .vsdx"
+    for bad, what in (("3", "dotted"), ("4", "dash-dot"), ("5", "dash-dot-dot")):
+        assert bad not in pats, f".vsdx draws a {what} line where the master has a plain dash"
+
+    pp = tempfile.mktemp(suffix=".pptx")
+    export_pptx.export(sp, pp)
+    with zipfile.ZipFile(pp) as z:
+        slide = z.read("ppt/slides/slide1.xml").decode("utf-8")
+    _os.unlink(pp); _os.unlink(sp)
+    vals = set(re.findall(r'<a:prstDash val="(\w+)"/>', slide))
+    assert "dash" in vals, "no plain-dash line in the .pptx"
+    for bad in ("dashDot", "lgDashDot", "lgDashDotDot", "sysDashDot", "sysDashDotDot", "dot"):
+        assert bad not in vals, f".pptx draws {bad} where the master has a plain dash"
+
+
+@check("vsdx · a caption that MIXES font sizes is split, so no tool can flatten it")
+def _():
+    """Visio's per-run formatting is spec-correct but LibreOffice's importer
+    collapses a CJK shape's text to one size — measured here, a card's 13px
+    sub-lines came out at the title's size. A caption of mixed sizes is therefore
+    emitted as one shape per size; a uniform caption stays inside its module."""
+    import export_vsdx
+    svg, W, H = render_flow.render(load("ex_flow.json"))
+    prims = export_vsdx.attach_text(export_vsdx.parse_svg(svg), W, H)
+    mixed = [p for p in prims if len(export_vsdx._size_groups(p.get("lines", []))) > 1]
+    assert mixed, "fixture no longer has a mixed-size caption to exercise this"
+    page, _, _, _ = _vsdx_page(render_flow, load("ex_flow.json"))
+    for sh in re.findall(r"<Shape .*?</Shape>", page, re.S):
+        sizes = set(re.findall(r'<Cell N="Size" V="([\d.]+)"', sh))
+        assert len(sizes) <= 1, f"a vsdx shape still carries {len(sizes)} font sizes"
+
+
+@check("emphasis · red is opt-in and the SCRIPTS enforce it, not the model")
+def _():
+    """The rule "if the user skips, use no red" lived only in SKILL.md, so the
+    model that wrote the map was also the only thing enforcing it — and the one
+    signal audit looked at (provenance.emphasis_note) was written by that same
+    model. A rule policed by asking the rule-breaker to confess is not a rule.
+    It now lives where the rest of this skill's guarantees live: unless the map
+    RECORDS that the user chose the emphasis, the renderer draws it away."""
+    import copy
+    import render as _render
+    from common import strip_unearned_emphasis, EMPHASIS_HOSTS
+
+    def painted_red(svg):
+        return svg.split("</defs>")[-1].upper().count("991B1B")
+
+    for name, fx in (("relation", "ex_relation.json"), ("dated", "ex_dated.json"),
+                     ("gantt", "ex_gantt.json"), ("tree", "ex_tree.json")):
+        base = load(fx)
+        marked = sum(1 for h in EMPHASIS_HOSTS for it in (base.get(h) or [])
+                     if isinstance(it, dict) and it.get("emphasis"))
+        if not marked:
+            continue
+
+        # (a) no checkpoint record -> the red is removed before anything is drawn.
+        #     The shipped examples DO carry the record (their author chose those
+        #     marks), so it is removed here to exercise the unattributed case.
+        m = copy.deepcopy(base)
+        m.pop("checkpoint", None)
+        notes = strip_unearned_emphasis(m)
+        assert notes, f"{name}: unattributed emphasis was left standing"
+        left = sum(1 for h in EMPHASIS_HOSTS for it in (m.get(h) or [])
+                   if isinstance(it, dict) and it.get("emphasis"))
+        assert left == 0, f"{name}: {left} unattributed emphasis survived"
+        svg, _, _ = _render.choose(m).render(m)
+        assert painted_red(svg) == 0, f"{name}: red was still painted without authorisation"
+
+        # (b) the user chose it -> it survives untouched
+        m2 = copy.deepcopy(base)
+        m2["checkpoint"] = {"emphasis_source": "user", "confirmed": True}
+        assert not strip_unearned_emphasis(m2), f"{name}: a user-chosen emphasis was stripped"
+        kept = sum(1 for h in EMPHASIS_HOSTS for it in (m2.get(h) or [])
+                   if isinstance(it, dict) and it.get("emphasis"))
+        assert kept == marked, f"{name}: user-chosen emphasis was altered"
+        svg2, _, _ = _render.choose(m2).render(m2)
+        assert painted_red(svg2) > 0, f"{name}: an authorised emphasis did not render"
+
+        # (c) the model cannot self-authorise through provenance
+        m3 = copy.deepcopy(base)
+        m3.pop("checkpoint", None)
+        m3.setdefault("provenance", {})["emphasis_note"] = "chosen by the model"
+        assert strip_unearned_emphasis(m3), f"{name}: a model-written note authorised red"
+
+
+@check("audit · the checkpoint record is authoritative, not contradicted")
+def _():
+    """Two mechanisms saying opposite things about the same figure — the map
+    recording `confirmed: true, emphasis_source: "user"` while the audit printed
+    `>> CHECKPOINT REQUIRED` and `emphasis was AI-chosen` — teaches the reader to
+    trust neither."""
+    import copy
+    import audit as _audit
+    base = load("ex_flow.json")
+
+    confirmed = copy.deepcopy(base)
+    confirmed["checkpoint"] = {"emphasis_source": "user", "confirmed": True}
+    r = _audit.report(confirmed)
+    assert not r["checkpoint_required"], "a confirmed figure still demanded a checkpoint"
+    assert not any("AI-chosen" in n for n in r["notes"]), \
+        "a user-chosen emphasis was still reported as AI-chosen"
+
+    unconfirmed = copy.deepcopy(base)
+    unconfirmed.pop("checkpoint", None)
+    r = _audit.report(unconfirmed)
+    assert r["checkpoint_required"], "an unconfirmed figure did not demand a checkpoint"
+
+    ai = copy.deepcopy(base)
+    ai["checkpoint"] = {"emphasis_source": "model", "confirmed": True}
+    r = _audit.report(ai)
+    assert any("AI-CHOSEN" in n for n in r["notes"]), \
+        "an AI-chosen emphasis was not announced"
+
+
+@check("export · a font profile cannot leak into the next deck")
+def _():
+    """`_FONTS` is module-level, so exporting with one profile used to leave it
+    set for whatever ran next — and the test suite renders with several profiles
+    in one process. The result would be a deck in the wrong typeface with no
+    error anywhere."""
+    import export_pptx, tempfile, os as _os
+    svg, W, H = render_flow.render(load("ex_flow.json"))
+    sp = tempfile.mktemp(suffix=".svg")
+    open(sp, "w", encoding="utf-8").write(svg)
+    before = dict(export_pptx._FONTS)
+    for profile in ("safe", "master", "safe"):
+        pp = tempfile.mktemp(suffix=".pptx")
+        export_pptx.export(sp, pp, fonts=profile)
+        _os.unlink(pp)
+        assert export_pptx._FONTS == before, \
+            f"exporting with {profile!r} left the module's font profile changed"
+    _os.unlink(sp)
+
+
+@check("raster · edge weights are symmetric in a rendered figure")
+def _():
+    """The reader-visible defect this exists for: a timeline band whose lower rule
+    printed heavier than its upper one. Measured on a real raster, not on the SVG,
+    because the cause was rasterisation. Skipped when the rasterizer is absent."""
+    import audit_edges, render as _render, tempfile, os as _os, shutil
+    if not (shutil.which("soffice") and shutil.which("pdftoppm")):
+        return
+    for name, mod, fx in (("dated", render_dated, "ex_dated.json"),
+                          ("gantt", render_spans, "ex_gantt.json")):
+        svg, W, H = mod.render(load(fx))
+        svg = _render.to_monochrome(svg)          # 白描 is where the hairlines live
+        d = tempfile.mkdtemp()
+        sp, pp = _os.path.join(d, "f.svg"), _os.path.join(d, "f.png")
+        open(sp, "w", encoding="utf-8").write(svg)
+        try:
+            _render.svg_to_png(sp, pp)
+            bad = audit_edges.run(sp, pp)
+        except Exception:
+            shutil.rmtree(d, ignore_errors=True)
+            return                                 # no rasterizer here; not a failure
+        shutil.rmtree(d, ignore_errors=True)
+        assert not bad, f"{name}: {bad[:2]}"
+
+
+@check("lint · catches text OUT OF ITS BOX and text ON TOP OF text")
+def _():
+    """The two failures that stay inside the canvas and still ruin a figure: a
+    caption wider than the card it sits in, and two labels printed over each
+    other. Check 2b only catches text leaving the CANVAS, so both used to pass
+    every automated check and were visible only to a reader."""
+    import lint as _lint
+    over = ('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200">'
+            '<rect width="400" height="200" fill="#FFFFFF"/>'
+            '<rect x="40" y="60" width="120" height="50" rx="12" fill="#E9ECEF"/>'
+            '<text x="100" y="90" font-size="17" text-anchor="middle" '
+            'fill="#1F2933">这段文字明显比框宽得多放不下</text></svg>')
+    w = _lint.lint_svg(over)
+    assert any("overflows its box" in x for x in w), f"box overflow not caught: {w}"
+    clash = ('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200">'
+             '<rect width="400" height="200" fill="#FFFFFF"/>'
+             '<text x="200" y="100" font-size="17" text-anchor="middle" '
+             'fill="#1F2933">保证期间届满</text>'
+             '<text x="200" y="103" font-size="17" text-anchor="middle" '
+             'fill="#1F2933">诉讼时效中断</text></svg>')
+    w = _lint.lint_svg(clash)
+    assert any("overlaps text" in x for x in w), f"text collision not caught: {w}"
+
+
+@check("lint · every shipped layout, in every mode, is lint-clean")
+def _():
+    """Including the two checks above — so a change that starts pushing captions
+    out of their modules, or stacking labels, fails here rather than in a bundle."""
+    import lint as _lint
+    import render as _render
+    for name, mod, fx in _PPTX_CASES:
+        for mode in (None, "mono", "guizang"):
+            svg, W, H = mod.render(load(fx))
+            if mode == "mono":
+                svg = _render.to_monochrome(svg)
+            elif mode == "guizang":
+                svg = _render.to_guizang(svg, load(fx).get("layout"))
+            w = _lint.lint_svg(svg)
+            assert not w, f"{name}/{mode or 'qichuan'}: {w[:2]}"
+
+
+@check("post-processing · no mode transform silently matches NOTHING")
+def _():
+    """The two mode transforms rewrite a generated SVG with regexes. The failure
+    that has actually bitten this project is not the number of regexes — it is one
+    that STOPS MATCHING when its target moves (a title at y=46 instead of 44, an
+    extra attribute before x=, a nested data-role). The substitution quietly does
+    nothing, the run completes, and the figure is wrong in a way only a human
+    looking at pixels would catch. Every step that must fire now records a miss;
+    this asserts there are none, for every layout."""
+    import render as _render
+    for name, mod, fx in _PPTX_CASES:
+        svg, _, _ = mod.render(load(fx))
+        _render._sub_reset()
+        _render.to_guizang(svg, load(fx).get("layout"))
+        misses = list(_render._SUB_MISSES)
+        assert not misses, (f"{name}: 歸藏风 post-processing matched nothing for "
+                            f"{misses} — the renderer's output moved out from under it")
+
+
+@check("delivery · the output folder holds deliverables only, no scratch files")
+def _():
+    """The PNG is produced by going through a PDF, and that PDF was being left in
+    the OUTPUT folder beside the figure — so the lawyer received a stray file they
+    never asked for, in a folder they may well forward as-is."""
+    import render as _render, tempfile, os as _os, shutil
+    if not shutil.which("soffice"):
+        return
+    d = tempfile.mkdtemp()
+    try:
+        _render.main(os.path.join(HERE, "..", "examples", "flowchart.json"),
+                     _os.path.join(d, "fig"))
+    except Exception:
+        shutil.rmtree(d, ignore_errors=True)
+        return
+    left = sorted(_os.listdir(d))
+    shutil.rmtree(d, ignore_errors=True)
+    allowed = {".svg", ".png", ".pptx", ".vsdx", ".drawio"}
+    strays = [f for f in left if _os.path.splitext(f)[1] not in allowed
+              and not f.endswith(".drawio.svg")]
+    assert not strays, f"scratch files left in the output folder: {strays}"
+
+
+@check("determinism · the same map renders to the same BYTES, in every format")
+def _():
+    """The premise of this skill is that a given map always produces a given
+    figure. It did not hold for the editable hand-offs: the .pptx and .vsdx parts
+    were byte-identical but their ZIP entries carried the wall clock, and the
+    .drawio embedded a `modified` timestamp. Beyond the principle, it broke the
+    safety net this project leans on hardest — byte-comparing a rebuild against a
+    known-good one worked for the SVG and silently could not work for the other
+    three."""
+    import export_drawio, export_pptx, export_vsdx, tempfile, os as _os, hashlib
+    def digest(f):
+        return hashlib.md5(open(f, "rb").read()).hexdigest()
+    for name, mod, fx in (("flow", render_flow, "ex_flow.json"),
+                          ("dated", render_dated, "ex_dated.json")):
+        m = load(fx)
+        svg, W, H = mod.render(m)
+        d = tempfile.mkdtemp()
+        sp = _os.path.join(d, "f.svg")
+        open(sp, "w", encoding="utf-8").write(svg)
+        import zipfile as _zf
+        for ext, fn, mod_ in (("pptx", lambda o: export_pptx.export(sp, o), export_pptx),
+                              ("vsdx", lambda o: export_vsdx.export(sp, o), export_vsdx)):
+            a, b = _os.path.join(d, f"a.{ext}"), _os.path.join(d, f"b.{ext}")
+            fn(a); fn(b)
+            assert digest(a) == digest(b), f"{name}: .{ext} differs between two identical runs"
+            # …and not merely because both ran inside the same second. Comparing
+            # two runs passes by luck when the clock does not tick between them,
+            # so the archive's stamp is asserted directly.
+            with _zf.ZipFile(a) as z:
+                stamps = {i.date_time for i in z.infolist()}
+            assert stamps == {mod_.ZIP_EPOCH}, \
+                f"{name}: .{ext} entries carry the wall clock ({sorted(stamps)[:2]})"
+        x1, _, _ = export_drawio.build_model(m)
+        x2, _, _ = export_drawio.build_model(m)
+        assert x1 == x2, f"{name}: .drawio differs between two identical runs"
+        assert "modified=" not in x1, ".drawio embeds a wall-clock timestamp again"
+
+
+@check("errors · a bad path or bad JSON fails with something you can act on")
+def _():
+    """The two commonest ways this goes wrong are a mistyped path and a
+    hand-edited JSON with a stray comma — and both used to surface as a raw
+    traceback. validate_map already reports structural problems clearly; the same
+    courtesy belongs one step earlier, where people actually make the mistake. A
+    traceback also tells a weaker model nothing it can fix, so it retries."""
+    import json as _json
+    import tempfile
+    from common import load_map
+    d = tempfile.mkdtemp()
+
+    try:
+        load_map(os.path.join(d, "nope.json"))
+        assert False, "a missing file did not raise"
+    except RuntimeError as e:
+        assert "check the path" in str(e), f"unhelpful message: {e}"
+    except Exception as e:
+        assert False, f"a missing file raised a raw {type(e).__name__}"
+
+    bad = os.path.join(d, "bad.json")
+    open(bad, "w", encoding="utf-8").write('{"layout": "graphviz_flow",}')
+    try:
+        load_map(bad)
+        assert False, "malformed JSON did not raise"
+    except RuntimeError as e:
+        msg = str(e)
+        assert "not valid JSON" in msg and "line" in msg, f"unhelpful message: {msg}"
+        assert "trailing comma" in msg, "the message does not name the usual cause"
+    except Exception as e:
+        assert False, f"malformed JSON raised a raw {type(e).__name__}"
+
+    try:
+        load_map(d)
+        assert False, "a directory did not raise"
+    except RuntimeError as e:
+        assert "folder" in str(e), f"unhelpful message: {e}"
+    except Exception as e:
+        assert False, f"a directory raised a raw {type(e).__name__}"
+
+
+@check("docs · the README obeys the discipline it describes (grayscale + ONE red)")
+def _():
+    """奇川风's rule is greyscale with a single deep red, and the emphasis rule is
+    "≤2 red, marking the ONE thing that matters". The README was breaking both on
+    its own front page: three red badges, two orange, one green — five accent
+    colours arguing with each other, on the page that tells you not to do that.
+
+    Third-party brand marks (the Anthropic badges) are exempt, the same way a logo
+    is: they identify someone else, they are not our accent."""
+    import urllib.parse
+    doc = open(os.path.join(HERE, "..", "README.md"), encoding="utf-8").read()
+    colours = []
+    for u in re.findall(r'shields\.io/badge/([^"]+)', doc):
+        d = urllib.parse.unquote(u).split("?")[0]
+        if "Claude" in d:                     # someone else's brand mark
+            continue
+        m = re.search(r"-([0-9A-Fa-f]{6})$", d)
+        if m:
+            colours.append(m.group(1).upper())
+    assert colours, "no badges found"
+    reds = [c for c in colours if c == "991B1B"]
+    assert len(reds) == 1, f"{len(reds)} red badges — the accent marks ONE thing"
+    others = {c for c in colours if c != "991B1B"}
+    assert len(others) == 1, f"badges use {len(others)} greys: {sorted(others)} — pick one"
+
+
+@check("gallery · the README's showcase images are what the code produces TODAY")
+def _():
+    """The gallery had gone stale without anyone noticing — it was still showing
+    flat arrowheads, a blue dot-grid, a stadium time band and 12px 白描 corners,
+    months after all four were changed. Nothing regenerates a PNG when behaviour
+    changes, so the front page kept advertising last month's output while every
+    other guard passed. The images are DERIVED now; this asserts they are current.
+
+    Slow (it renders the whole gallery), so it is skipped unless a rasterizer is
+    present — doctor.py reports that, and it is not needed to produce a figure."""
+    import shutil
+    if not (shutil.which("soffice") or shutil.which("rsvg-convert")):
+        return
+    import make_gallery
+    stale = make_gallery.build(check_only=True)
+    assert not stale, ("the checked-in gallery no longer matches the code — run "
+                       f"`python3 scripts/make_gallery.py`: {stale[:3]}")
+
+
+@check("gallery · the label rule is sized by the TEXT, not by the panel")
+def _():
+    """It was sized at `panel_width * 0.24` — a number picked because one was
+    needed — so the same label block changed proportion between a 900px panel and
+    a 2800px one. The rule is now exactly as wide as the name it underlines.
+
+    Found by COLOUR, not by "the first dark row": scanning for dark pixels picks
+    up the name's own glyphs and measures those instead."""
+    from PIL import Image
+    import make_gallery
+    fig = os.path.join(HERE, "..", "assets", "modes", "flowchart-3modes.png")
+    if not os.path.exists(fig):
+        return
+    im = Image.open(fig).convert("RGB")
+    W, panel = im.width, im.width // 3
+    RULE = (153, 27, 27)
+
+    def is_rule(px):
+        return all(abs(a - b) <= 24 for a, b in zip(px, RULE))
+
+    font = make_gallery._cjk_font(54)
+    for i, name in enumerate(("奇川风", "歸藏风", "白描")):
+        cx = panel * i + panel // 2
+        best = (0, None)
+        for y in range(100, 170):
+            row = [x for x in range(max(0, cx - 240), min(W, cx + 240))
+                   if is_rule(im.getpixel((x, y)))]
+            if len(row) > best[0]:
+                best = (len(row), (y, row[0], row[-1]))
+        assert best[1], f"no rule found under 「{name}」 in the accent colour"
+        y, x0, x1 = best[1]
+        bb = font.getbbox(name)
+        want = bb[2] - bb[0]
+        assert abs((x1 - x0) - want) <= 8, (
+            f"the rule under 「{name}」 is {x1 - x0}px but the name is {want}px "
+            f"— it is sized by the panel again")
+
+
+@check("gallery · labels use the SIMPLIFIED cut of the Song face, not the Japanese one")
+def _():
+    """`NotoSerifCJK-*.ttc` is a collection and face 0 is the JAPANESE cut, so
+    asking for the file and taking the default silently set 「歸藏风」 in Japanese
+    glyph forms — 2252 pixels different from the Simplified form, on a document
+    for Chinese lawyers, with nothing to complain about it."""
+    import make_gallery
+    f = make_gallery._cjk_font(46)
+    fam = f.getname()[0]
+    assert fam.endswith("SC"), f"labels are set in {fam!r}, not the Simplified cut"
+    assert "Serif" in fam, f"labels are set in {fam!r} — the mode names are a Song face"
+
+
+@check("gallery · comparison labels are REAL glyphs, not tofu boxes")
+def _():
+    """A previous release shipped comparison images whose Chinese labels were
+    empty boxes: the font in use had no CJK coverage and nothing complained,
+    because a renderer draws tofu perfectly happily. Coverage is verified against
+    a font that definitely LACKS the glyphs — if the two agree on width, ours is
+    drawing boxes too."""
+    from PIL import ImageFont
+    import make_gallery
+    ok = make_gallery._cjk_font(40)
+    bad = None
+    for p in ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",):
+        if os.path.exists(p):
+            bad = ImageFont.truetype(p, 40)
+    if bad is None:
+        return
+    for label, _ in make_gallery.MODE_SPECS:
+        a, b = ok.getbbox(label), bad.getbbox(label)
+        assert a != b, f"「{label}」 measures the same in a font without CJK — tofu"
+        assert a[2] - a[0] > 0, f"「{label}」 has zero width"
+
+
+@check("docs · the long-form artwork says nothing the code no longer does")
+def _():
+    """The long-form graphics are hand-designed and live outside the render path,
+    so nothing regenerates them when behaviour changes — they quietly keep
+    asserting last version's facts. Three had already drifted: the old mode names,
+    "不选就没有红" after the default became an AI-chosen mark, and 白描 described
+    as "only colour" after it started squaring corners."""
+    import glob
+    root = os.path.join(HERE, "..", "assets", "longform")
+    if not os.path.isdir(root):
+        return
+    banned = {
+        "奇川流": "the mode was renamed 奇川风",
+        "歸藏流": "the mode was renamed 歸藏风",
+        "歸葬": "the blogger's name is 歸藏",
+        "个人品牌": "that brand belongs to one user, not to the reader",
+        "不选就没有红": "an unanswered checkpoint now takes an AI-chosen mark",
+        # the CLAIM, not a substring of its replacement: "只换颜色与圆角" is the
+        # corrected wording and contains the old phrase inside it
+        "几何与奇川风逐字节相同": "白描 keeps positions byte-identical but squares the corners",
+    }
+    for f in glob.glob(os.path.join(root, "*.svg")):
+        t = open(f, encoding="utf-8", errors="replace").read()
+        for phrase, why in banned.items():
+            assert phrase not in t, \
+                f"{os.path.basename(f)} still says 「{phrase}」 — {why}"
+
+
+@check("portability · every path in the repo is ASCII")
+def _():
+    """Windows PowerShell's `Expand-Archive` reads ZIP entry names in the system
+    code page, not UTF-8, so Chinese filenames come out as mojibake and the
+    extraction fails outright with "路径中具有非法字符". Anyone on Windows who
+    downloads the repo as a ZIP — which is how most people get it — hits this.
+    The content is Chinese; the paths do not have to be."""
+    root = os.path.join(HERE, "..")
+    bad = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [d for d in dirnames if d not in ("__pycache__", ".git")]
+        for n in dirnames + filenames:
+            if any(ord(c) > 127 for c in n):
+                bad.append(os.path.relpath(os.path.join(dirpath, n), root))
+    assert not bad, f"non-ASCII paths break ZIP extraction on Windows: {bad[:5]}"
+
+
+@check("docs · every image the README references actually exists")
+def _():
+    """A broken image on the front page is the cheapest possible way to look
+    unfinished, and nothing else here would notice one."""
+    root = os.path.join(HERE, "..")
+    doc = open(os.path.join(root, "README.md"), encoding="utf-8").read()
+    missing = []
+    for src in re.findall(r'<img src="([^"]+)"', doc):
+        if src.startswith("http"):
+            continue
+        if not os.path.exists(os.path.join(root, src)):
+            missing.append(src)
+    assert not missing, f"README references images that do not exist: {missing}"
+
+
+@check("docs · README badges are current, INCLUDING what is percent-encoded")
+def _():
+    """The badges are the first thing anyone sees, and their Chinese is
+    percent-encoded — so `grep 葬` could not see them and the blogger's
+    mis-spelled name survived every sweep, on the front page, long after it was
+    fixed everywhere else. Decode before checking."""
+    import urllib.parse
+    doc = open(os.path.join(HERE, "..", "README.md"), encoding="utf-8").read()
+    badges = [urllib.parse.unquote(u) for u in
+              re.findall(r'shields\.io/badge/([^"]+)', doc)]
+    joined = " ".join(badges)
+    for stale in ("歸葬", "奇川流", "歸藏流", "白描流"):
+        assert stale not in joined, f"a badge still says 「{stale}」"
+    src = open(os.path.join(HERE, "run_checks.py"), encoding="utf-8").read()
+    n = len(re.findall(r"^@check\(", src, re.M))
+    m = re.search(r"tests-(\d+) checks", joined)
+    assert m, "no test-count badge"
+    assert int(m.group(1)) == n, \
+        f"the tests badge says {m.group(1)}, there are {n} guards"
+    ver = re.search(r"version-([\d.]+)-", joined)
+    assert ver, "no version badge"
+    std = open(os.path.join(HERE, "..", "references", "STANDARDS.md"), encoding="utf-8").read()
+    assert f"v{ver.group(1)}" in std, \
+        f"the version badge says {ver.group(1)}, which STANDARDS.md does not mention"
+    # …and the footer, which is where the version was last left behind
+    assert f"v{ver.group(1)}" in doc.strip().splitlines()[-1], \
+        "the README footer carries a different version from the badge"
+
+
+@check("docs · the guard count STANDARDS.md cites is the real one")
+def _():
+    """This number has drifted twice — 53 when it was 78, then 99 when it was 120.
+    A count in prose is a fact about the code that nothing was checking, so it
+    rots every time a guard is added. Checking it turns a recurring quiet
+    inaccuracy into a one-line fix at the moment it happens."""
+    doc = open(os.path.join(HERE, "..", "references", "STANDARDS.md"),
+               encoding="utf-8").read()
+    m = re.search(r"(\d+) regression guards, (\d+) assertions", doc)
+    assert m, "STANDARDS.md no longer states a guard count"
+    src = open(os.path.join(HERE, "run_checks.py"), encoding="utf-8").read()
+    # count DECORATOR LINES, not occurrences of the string: this guard's own body
+    # mentions "@check", and counting text made it report itself twice
+    real_checks = len(re.findall(r"^@check\(", src, re.M))
+    assert int(m.group(1)) == real_checks, (
+        f"STANDARDS.md says {m.group(1)} guards, there are {real_checks}")
+    # RESULTS is still being filled while this runs — this guard is one of the
+    # entries — so compare against the decorator count plus the ones that report
+    # more than one result. Simplest reliable form: the doc's assertion count must
+    # be at least the guard count and must match once the suite has finished.
+    assert int(m.group(2)) >= real_checks, (
+        f"STANDARDS.md says {m.group(2)} assertions but there are {real_checks} guards")
+    _DOC_ASSERTIONS.append(int(m.group(2)))
+
+
+@check("tuning · the gathered constants are LIVE, not a decorative table")
+def _():
+    """These were magic numbers scattered through the renderers, arrived at by
+    looking at output. Gathering them only helps if the code actually reads them:
+    a table nobody consults is worse than the numbers it replaced, because it
+    invites someone to 'adjust' a value that changes nothing."""
+    import importlib
+    import json as _json
+    import common as _c
+    tuning = _c.TOKENS["tuning"]
+    knobs = [k for k in tuning if not k.startswith("_") and not k.endswith("_note")]
+    assert len(knobs) >= 8, f"only {len(knobs)} constants gathered"
+    for k in knobs:
+        assert isinstance(tuning[k], (int, float)), f"{k} is not a number"
+    # each documented knob must be explained
+    for k in ("guizang_title_ratio", "guizang_top_margin", "guizang_decision_lift",
+              "flow_ranksep", "relation_side_label_bias", "guizang_pad_x"):
+        assert k in tuning, f"{k} was dropped from the tuning table"
+    # and they must be WIRED: nudging one has to move the figure
+    import render as _r, render_flow as _rf
+    before, _, _ = _rf.render(load("ex_flow.json"))
+    old = tuning["flow_ranksep"]
+    try:
+        tuning["flow_ranksep"] = old + 0.7
+        importlib.reload(_rf)
+        _rf.TOKENS["tuning"]["flow_ranksep"] = old + 0.7
+        after, _, _ = _rf.render(load("ex_flow.json"))
+    finally:
+        tuning["flow_ranksep"] = old
+        importlib.reload(_rf)
+    assert after != before, "flow_ranksep is in the table but nothing reads it"
+
+
+@check("checkpoint · the three questions are GENERATED, identically every time")
+def _():
+    """The consequences of these answers are enforced deterministically, so the
+    questions must be too: a question a hurried model might drop, shorten or
+    garble is not a reliable question."""
+    import checkpoint as _cp
+    for fx in ("ex_flow.json", "ex_relation.json", "ex_dated.json", "ex_gantt.json"):
+        m = load(fx)
+        out = _cp.render_questions(m)
+        assert out == _cp.render_questions(m), f"{fx}: not reproducible"
+        # all three questions present
+        for want in ("① 结构", "② 风格", "③ 重点"):
+            assert want in out, f"{fx}: the checkpoint dropped 「{want}」"
+        # all three modes, each with what it LOOKS like and what it is FOR
+        for mode in ("奇川风", "白描", "歸藏风"):
+            assert mode in out, f"{fx}: mode {mode} not offered"
+        for _n, _f, look, use in _cp.MODES:
+            assert look in out and use in out, \
+                f"{fx}: a mode is offered without its look or its use"
+        # the emphasis question must offer BOTH escape hatches plus real candidates
+        assert "回 0 = 全图不标红" in out, f"{fx}: no way to decline the red"
+        assert "由我挑一处" in out or "采纳建议" in out, f"{fx}: no way to delegate the red"
+        cands = _cp.candidates(m)
+        assert cands, f"{fx}: no emphasis candidates offered"
+        if len(cands) <= 10:
+            assert all(str(c["label"])[:8] in out for c in cands[:3]), \
+                f"{fx}: candidates are not actually listed"
+        else:
+            assert f"共 {len(cands)} 处可选" in out, \
+                f"{fx}: a long candidate list is neither shown nor accounted for"
+        # and the defaults must be stated, not left implicit
+        assert "不回 = 1" in out, f"{fx}: the style default is not stated"
+        assert "-draft" in out, f"{fx}: the draft consequence is not disclosed"
+
+
+@check("checkpoint · the layout is SHOWN with its reason and its real alternatives")
+def _():
+    """The layout is decided by the data, not by taste (extraction-guide's ladder),
+    so it is presented as a reading to correct — with why it was chosen and the
+    forms this data could actually be swapped to — rather than as a free menu that
+    would offer shapes the data cannot support."""
+    import checkpoint as _cp
+    seen = set()
+    for fx in ("ex_flow.json", "ex_relation.json", "ex_tree.json", "ex_dated.json",
+               "ex_gantt.json", "ex_points.json", "ex_compare.json"):
+        m = load(fx)
+        lay = m.get("layout")
+        assert lay in _cp.LAYOUT_WHY, f"{lay}: no name/reason — the menu would show a raw id"
+        name, why = _cp.LAYOUT_WHY[lay]
+        out = _cp.render_questions(m)
+        assert name in out and why in out, f"{fx}: layout shown without its reason"
+        fam, others = _cp._siblings(lay)
+        assert fam, f"{lay} belongs to no family"
+        for o in others:
+            assert o in out, f"{fx}: sibling {o} not offered"
+        seen.add(lay)
+    assert seen == set(_cp.LAYOUT_WHY), "a layout exists that the checkpoint cannot describe"
+
+
+@check("checkpoint · the three modes appear in the author's order, everywhere")
+def _():
+    """奇川风 → 歸藏风 → 白描. Fixed, so a reader meets them the same way in the
+    menu, in SKILL.md and in the README rather than having to re-orient."""
+    import checkpoint as _cp
+    assert tuple(m[0] for m in _cp.MODES) == _cp.MODE_ORDER, "the menu is out of order"
+    out = _cp.render_questions(load("ex_flow.json"))
+    at = [out.find(m) for m in _cp.MODE_ORDER]
+    assert all(x >= 0 for x in at), "a mode is missing from the menu"
+    assert at == sorted(at), f"the rendered menu lists the modes out of order"
+    here = os.path.join(HERE, "..")
+    for doc in ("SKILL.md", "README.md", "references/visual-style.md"):
+        path = os.path.join(here, doc)
+        if not os.path.exists(path):
+            continue
+        t = open(path, encoding="utf-8").read()
+        firsts = [(t.find(m), m) for m in _cp.MODE_ORDER if t.find(m) >= 0]
+        assert [m for _, m in sorted(firsts)] == [m for _, m in firsts], \
+            f"{doc} introduces the modes out of order"
+
+
+@check("checkpoint · no mode is sold by whose style it is")
+def _():
+    """These mode names are the author's; the people reading this menu are other
+    lawyers choosing a look for their own case file. "Personal brand" is a reason
+    that belongs to exactly one user, and it does not belong in their interface."""
+    import checkpoint as _cp
+    banned = ("个人品牌", "品牌", "brand")
+    for name, flag, look, use in _cp.MODES:
+        for b in banned:
+            assert b not in look and b not in use, \
+                f"{name} is described in terms of branding: {look!r} / {use!r}"
+    out = _cp.render_questions(load("ex_flow.json"))
+    for b in banned:
+        assert b not in out, f"the checkpoint text still sells a mode as a brand ({b})"
+    assert "推荐" in out, "the default mode is not marked as the recommended one"
+
+
+@check("checkpoint · an edge is offered by its endpoints' TITLES, not internal ids")
+def _():
+    """The user is being asked which relationship the case turns on. "n3 → n4" is
+    not something anyone can weigh."""
+    import checkpoint as _cp
+    m = load("ex_relation.json")
+    edges = [c for c in _cp.candidates(m) if c["host"] == "edges"]
+    assert edges, "fixture has no edges"
+    ids = {n.get("id") for n in m.get("nodes", [])}
+    for c in edges:
+        head = c["label"].split(" → ")[0]
+        assert head not in ids, f"an edge is shown by raw id: {c['label']!r}"
+
+
+@check("emphasis · 'checkpoint' is a recognised field, so the record is not dropped")
+def _():
+    from common import validate_map
+    m = load("ex_relation.json")
+    m["checkpoint"] = {"emphasis_source": "user", "confirmed": True}
+    out = validate_map(m)
+    warns = out if isinstance(out, (list, tuple)) else []
+    assert not any("checkpoint" in str(w) for w in warns), \
+        "the checkpoint record is reported as an unknown field and would be ignored"
+    from common import _TOP_KEYS
+    assert "checkpoint" in _TOP_KEYS, "checkpoint is not on the accepted-field list"
+
+
+@check("delivery · an unconfirmed figure is named *-draft, a confirmed one is not")
+def _():
+    """A printed `>> CHECKPOINT REQUIRED` scrolls away; a filename travels with
+    the file into the folder, the email and the bundle. The failure this guards
+    against is specific and expensive: a draft read of a judgment filed as final."""
+    import render as _render
+    m = load("ex_relation.json")
+    m.pop("checkpoint", None)
+    b, draft = _render._draft_base("/tmp/x/fig", m)
+    assert draft and b.endswith("-draft"), "an unconfirmed map is not marked as a draft"
+    m["checkpoint"] = {"confirmed": False}
+    b, draft = _render._draft_base("/tmp/x/fig", m)
+    assert draft and b.endswith("-draft"), "confirmed=false is not marked as a draft"
+    m["checkpoint"] = {"confirmed": True}
+    b, draft = _render._draft_base("/tmp/x/fig", m)
+    assert not draft and b == "/tmp/x/fig", "a confirmed map was still marked as a draft"
+    # truthy-but-not-true must not pass: only an explicit confirmation counts
+    for sneaky in ("yes", 1, "true"):
+        m["checkpoint"] = {"confirmed": sneaky}
+        _, draft = _render._draft_base("/tmp/x/fig", m)
+        assert draft, f"confirmed={sneaky!r} was accepted as an explicit confirmation"
+
+
+@check("delivery · every editable format is written by DEFAULT")
+def _():
+    """The premise of this skill is that the lawyer's own tool is not ours to
+    guess — draw.io, PowerPoint, ProcessOn, Visio and WPS are all in real use."""
+    import render as _render
+    assert set(_render.ALL_FORMATS) == {"svg", "png", "drawio", "pptx", "vsdx"}, \
+        "the default delivery set changed"
+    import inspect
+    sig = inspect.signature(_render.main)
+    assert sig.parameters["formats"].default == _render.ALL_FORMATS, \
+        "main() no longer defaults to the full delivery set"
+
+
+@check("pptx · connectors carry a native arrowhead")
+def _():
+    for name, mod, fx in (("flow", render_flow, "ex_flow.json"),
+                          ("relation", render_relation, "ex_relation.json")):
+        slide, _, svg, _ = _pptx_bytes(mod, load(fx))
+        assert "a:tailEnd" in slide, f"{name}: connectors carry no arrowhead"
+        n_svg = len(re.findall(r'marker-end="url\(#', svg))
+        n_ppt = slide.count("a:tailEnd")
+        assert n_ppt >= n_svg, f"{name}: {n_svg} arrows in the figure but {n_ppt} in the deck"
+
+
+@check("pptx · all three visual modes transcribe (奇川风 / 歸藏风 / 白描)")
+def _():
+    for mode in (None, "guizang", "mono"):
+        slide, _, svg, _ = _pptx_bytes(render_flow, load("ex_flow.json"), mode)
+        assert "<a:t>" in slide and "<p:sp>" in slide, f"mode {mode}: empty deck"
+        if mode == "guizang":
+            assert "002FA7" in slide, "歸藏风 deck lost the Klein blue"
+        if mode == "mono":
+            assert "991B1B" not in slide, "白描 deck still carries the deep red"
 
 
 @check("aesthetic · cross-platform font stack (PingFang→YaHei→Noto)")
@@ -585,7 +2023,11 @@ def _():
 @check("flow-std · decision is a rounded hexagon (6 rounded corners), never a diamond")
 def _():
     svg, _, _ = render_flow.render(load("ex_flow.json"))
-    hexes = re.findall(r'<path d="([^"]+)" fill="[^"]+" stroke="[^"]+" stroke-width="1.4"', svg)
+    # find the decision node by its SHAPE, not by a stroke width — pinning the
+    # guard to "1.4" made it fail the moment hairlines were normalised to whole
+    # pixels, while telling us the hexagon had vanished, which it had not
+    hexes = [d for d in re.findall(r'<path d="([^"]+)" fill="[^"]+" stroke="', svg)
+             if d.count("Q") == 6]
     assert hexes, "no decision hexagon path found"
     for d in hexes:
         assert d.count("Q") == 6, f"decision not a 6-corner rounded hexagon ({d.count('Q')} corners)"
@@ -1067,11 +2509,14 @@ def _rel_side_spread():
 
 
 # ---- 白描 (monochrome court/print mode) ----------------------------------
-@check("白描 · monochrome mode is pure black line-art, geometry byte-identical")
+@check("白描 · pure black line-art; layout byte-identical, modules squared off")
 def _baimiao_mode():
     import re as _re
     import render as _render
-    for name in ("ex_flow.json", "ex_relation.json", "ex_tree.json"):
+    from common import TOKENS as _TOK
+    MOD_RX = float(_TOK["radius"]["corner"])
+    for name in ("ex_flow.json", "ex_relation.json", "ex_tree.json",
+                 "ex_dated.json", "ex_gantt.json", "ex_compare.json"):
         m = load(name)
         mod = _render.choose(m)
         colour, _, _ = mod.render(m)
@@ -1083,13 +2528,39 @@ def _baimiao_mode():
         strokes = set(_re.findall(r'stroke="(#[0-9A-Fa-f]{6})"', mono))
         assert fills <= {"#FFFFFF", "#111111"}, f"{name}: stray fill colour {fills}"
         assert strokes <= {"#111111"}, f"{name}: stray stroke colour {strokes}"
-        # 2. geometry is identical — only colour / stroke-weight / added hairlines change
-        strip = lambda s: _re.sub(r"\s+", " ", _re.sub(r'(?:fill|stroke|stroke-width)="[^"]*"', "", s))
-        assert strip(colour) == strip(mono), f"{name}: 白描 changed geometry, not just colour"
+        # 2. LAYOUT is still byte-identical — nothing moves, nothing resizes.
+        #    Only colour, stroke weight, added hairlines and the corner radius differ.
+        strip = lambda s: _re.sub(r"\s+", " ", _re.sub(
+            r'(?:fill|stroke|stroke-width|rx)="[^"]*"', "", s))
+        assert strip(colour) == strip(mono), f"{name}: 白描 moved or resized something"
+        # 3. modules are squared off toward a right angle …
+        def rects(s):
+            out = []
+            for t in _re.findall(r"<rect\b[^>]*/>", s):
+                rx = _re.search(r'\brx="([\d.]+)"', t)
+                h = _re.search(r'\bheight="([\d.]+)"', t)
+                out.append((float(rx.group(1)) if rx else None,
+                            float(h.group(1)) if h else None))
+            return out
+        for (rc, hc), (rm, hm) in zip(rects(colour), rects(mono)):
+            if rc is None:
+                assert rm is None, f"{name}: 白描 invented a radius on a square rect"
+                continue
+            if rc <= 0.01:
+                # 4. … but a BAR stays a bar: the timeline band and gantt period
+                #    bars are right angles and must never pick up a radius here
+                assert rm == 0, f"{name}: 白描 rounded a right-angle bar (rx {rc}->{rm})"
+            elif hc and rc >= hc / 2 - 0.5:
+                # 5. … and a terminal pill stays a pill: the stadium is what marks
+                #    a start/end node, a semantic cue rather than decoration
+                assert rm == rc, f"{name}: 白描 flattened a terminal pill (rx {rc}->{rm})"
+            else:
+                assert rm == MOD_RX, f"{name}: module radius is {rm}, expected {MOD_RX}"
+                assert rm < rc, f"{name}: module radius did not shrink"
 
 
-# ---- 歸葬流 (Guizang Swiss / IKB theme) -----------------------------------
-@check("歸葬流 · blue/grey/white only, blue diamond decision, top margin, mono Latin")
+# ---- 歸藏风 (Guizang Swiss / IKB theme) -----------------------------------
+@check("歸藏风 · blue/grey/white only, blue diamond decision, top margin, mono Latin")
 def _guizang_mode():
     import re as _re
     import render as _render
@@ -1105,11 +2576,11 @@ def _guizang_mode():
         svg = _render.to_guizang(colour)
         # 1. strictly blue / grey / white — no other colour survives
         cols = set(_re.findall(r'(?:fill|stroke)="(#[0-9A-Fa-f]{6})"', svg))
-        assert cols <= THEME, f"{name}: 歸葬流 has off-palette colour {cols - THEME}"
+        assert cols <= THEME, f"{name}: 歸藏风 has off-palette colour {cols - THEME}"
         # 2. a top margin (天头) was reserved for the big title
-        assert 'transform="translate(0,60)"' in svg, f"{name}: 歸葬流 reserved no top margin"
+        assert 'transform="translate(0,60)"' in svg, f"{name}: 歸藏风 reserved no top margin"
         # 3. the Song serif is gone (sans/mono only)
-        assert "宋体" not in svg and "Songti" not in svg, f"{name}: serif survived into 歸葬流"
+        assert "宋体" not in svg and "Songti" not in svg, f"{name}: serif survived into 歸藏风"
         if name == "ex_flow.json":
             # decision is a 4-point blue DIAMOND, and there is at least one solid blue block
             assert _re.search(r'<path d="M [\d.]+,[\d.]+ L [\d.]+,[\d.]+ L [\d.]+,[\d.]+ L [\d.]+,[\d.]+ Z" fill="#002FA7"', svg), \
@@ -1118,7 +2589,7 @@ def _guizang_mode():
 
 
 # ---- drawio theming ------------------------------------------------------
-@check("drawio export follows the visual mode (白描 mono / 歸葬流 blue-grey), 奇川流 untouched")
+@check("drawio export follows the visual mode (白描 mono / 歸藏风 blue-grey), 奇川风 untouched")
 def _drawio_themes():
     import re as _re
     import export_drawio as _ex
@@ -1127,11 +2598,11 @@ def _drawio_themes():
         base, _, _ = _ex.build_model(m)
         cols = lambda x: {c.upper() for c in _re.findall(r'Color=(#[0-9A-Fa-f]{6})', x)}
         # colour master is left exactly as-is
-        assert _ex.theme_drawio(base, None) == base, f"{name}: theme_drawio touched 奇川流"
+        assert _ex.theme_drawio(base, None) == base, f"{name}: theme_drawio touched 奇川风"
         # 白描 — black line-art only
         mono = cols(_ex.theme_drawio(base, "baimiao"))
         assert mono <= {"#FFFFFF", "#111111"}, f"{name}: 白描 drawio stray {mono}"
-        # 歸葬流 — blue / grey / white only
+        # 歸藏风 — blue / grey / white only
         _d = {n["id"]: 0 for n in m["nodes"]}
         for _e in m.get("edges", []):
             if _e.get("from") in _d: _d[_e["from"]] += 1
@@ -1142,8 +2613,8 @@ def _drawio_themes():
             _hub = "c%d" % [n["id"] for n in m["nodes"]].index(_hid)
         gz = cols(_ex.theme_drawio(base, "guizang", _hub))
         allowed = {"#002FA7", "#333333", "#737373", "#BDBDBD", "#D4D4D2", "#FFFFFF"}
-        assert gz <= allowed, f"{name}: 歸葬流 drawio stray {gz - allowed}"
-        assert "#002FA7" in gz, f"{name}: 歸葬流 drawio lost its blue"
+        assert gz <= allowed, f"{name}: 歸藏风 drawio stray {gz - allowed}"
+        assert "#002FA7" in gz, f"{name}: 歸藏风 drawio lost its blue"
         # structure untouched — only colours changed
         strip = lambda x: _re.sub(r'(?:fill|stroke|font)Color=#[0-9A-Fa-f]{6}', '', x)
         assert strip(_ex.theme_drawio(base, "guizang", _hub)) == strip(base), \
@@ -1205,6 +2676,10 @@ def main():
         print(line)
         passed += ok
     total = len(RESULTS)
+    if _DOC_ASSERTIONS and _DOC_ASSERTIONS[0] != total:
+        print(f"\n! STANDARDS.md cites {_DOC_ASSERTIONS[0]} assertions; this run has {total}")
+        RESULTS.append(("docs · assertion count matches", False))
+        total = len(RESULTS)
     print(f"\n{passed}/{total} checks passed.")
     return 0 if passed == total else 1
 

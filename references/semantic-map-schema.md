@@ -12,7 +12,7 @@ JSON contains no x/y.
   "diagram_type": "timeline",
   "layout": "numbered_point_timeline | dated_point_timeline | proportional_gantt",
   "title_text": "…",            // neutral chart name; verbatim if source had one
-  "visual_mode": "奇川流",        // OPTIONAL — 奇川流 (default) | 白描 (court/print) | 歸葬流 (online/lecture); set from the checkpoint. CLI --baimiao / --guizang override.
+  "visual_mode": "奇川风",        // OPTIONAL — 奇川风 (default) | 白描 (court/print) | 歸藏风 (online/lecture); set from the checkpoint. CLI --baimiao / --guizang override.
   "axis": { … },                // gantt only (see below)
   "axis_unit": "year | month",  // dated_point_timeline only, optional (auto by span)
   "events": [ … ],              // point layouts (numbered / dated)
@@ -131,7 +131,8 @@ and opposite `label_side` so labels don't overlap.
 - `kind`: `step` (rounded rect) | `decision` (rounded hexagon) | `terminal` (pill).
 - `title`: main verbatim label (bold). `lines`: optional verbatim detail lines
   (smaller). Text wraps automatically; the node grows to fit.
-- `emphasis`: solid deep-red block + white text; 1-2 per diagram.
+- `emphasis`: solid deep-red block + white text; 1-2 per diagram. **Only renders
+  when the map records that the USER chose it** — see `checkpoint` below.
 - `direction`: `"TB"` (default) or `"LR"` at the map top level.
 - `edges[].label`: optional branch label (是/否/合格…).
 - The renderer computes positions (via graphviz) and routes connectors itself,
@@ -232,4 +233,37 @@ Records what you did, for the audit summary and the human checkpoint:
 ```
 
 `uncertainties` is what you surface at the CHECKPOINT before rendering.
-$\n---\n\n> **把法律画出来 · Make the Law Visible** ｜ 新诉讼可视化 New Litigation Visualization ｜ 缪奇川 出品 ｜ v1.0.0
+
+---
+
+> **把法律画出来 · Make the Law Visible** ｜ 新诉讼可视化 New Litigation Visualization ｜ 缪奇川 出品 ｜ v1.0.2
+
+
+---
+
+## `checkpoint` — what the user actually decided
+
+```jsonc
+"checkpoint": {
+  "emphasis_source": "user",   // "user" = the user named what the red marks
+                               // "none" (or the block absent) = they did not
+  "confirmed": true            // the structure was confirmed at the checkpoint
+}
+```
+
+**Why this is a field and not a note.** The rule "red is opt-in; if the user
+skips, use no red" used to live only in prose, which meant the model writing the
+map was also the only thing enforcing it — and the one signal the audit looked at
+(`provenance.emphasis_note`) was written by that same model. A rule policed by
+asking the rule-breaker to confess is not a rule.
+
+So it moved into the deterministic layer, where the rest of this skill's
+guarantees live. `common.strip_unearned_emphasis()` runs before ANY rendering: if
+`emphasis_source` is not `"user"`, every `emphasis: true` is cleared and a note is
+printed saying so. The figure still renders — nobody is blocked — it simply
+renders without a mark nobody authorised, in every output format at once.
+
+Set `emphasis_source: "user"` **only** after the user has named the element the
+red marks. Never set it to pre-empt the question, and note that
+`provenance.emphasis_note` does NOT authorise anything: it is a record that the
+model made a guess, which is the situation this rule exists to catch.
