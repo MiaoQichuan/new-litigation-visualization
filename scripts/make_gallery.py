@@ -100,6 +100,16 @@ def _cjk_font(size):
     return _font(SONG_FILES + SANS_FILES, size)
 
 
+def has_cjk_font():
+    """Whether a CJK face is present at all.
+
+    Callers that only WANT to measure typography need to be able to ask, rather
+    than find out by catching the exception `_font` raises. A bare CI runner has
+    no Noto CJK installed, and a guard that dies there is reporting the runner's
+    package list, not a defect in this repo."""
+    return any(os.path.exists(p) for p in SONG_FILES + SANS_FILES)
+
+
 def _render(map_path, out_base, flags):
     """Render and hand back the PNG, whatever it ended up being called.
 

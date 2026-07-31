@@ -160,6 +160,17 @@ def main():
         _pil = True
     except ImportError:
         _pil = False
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import make_gallery as _mg
+        _cjk = _mg.has_cjk_font()
+    except Exception:
+        _cjk = False
+    rows.append((OK if _cjk else WARN, "CJK font file (gallery labels)",
+                 "found" if _cjk else
+                 "missing — the mode labels on comparison images cannot be drawn; "
+                 "guards that measure them SKIP. `apt install fonts-noto-cjk`"))
+
     rows.append((OK if _pil else WARN, "Pillow (image-measuring guards)",
                  "found" if _pil else
                  "missing — guards that measure rendered pixels will SKIP; "

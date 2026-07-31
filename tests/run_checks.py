@@ -1079,6 +1079,9 @@ def _():
         from PIL import Image          # noqa: F401
     except ImportError:
         return                          # measuring pixels needs Pillow; doctor reports it
+    import make_gallery as _mg
+    if not _mg.has_cjk_font():
+        return                          # a bare CI runner has no CJK face installed
     import audit_edges, render as _render, tempfile, os as _os, shutil
     if not (shutil.which("soffice") and shutil.which("pdftoppm")):
         return
@@ -1298,9 +1301,11 @@ def _():
     Slow (it renders the whole gallery), so it is skipped unless a rasterizer is
     present — doctor.py reports that, and it is not needed to produce a figure."""
     import shutil
+    import make_gallery
     if not (shutil.which("soffice") or shutil.which("rsvg-convert")):
         return
-    import make_gallery
+    if not make_gallery.has_cjk_font():
+        return                          # labels cannot be drawn, so nothing to compare
     stale = make_gallery.build(check_only=True)
     assert not stale, ("the checked-in gallery no longer matches the code — run "
                        f"`python3 scripts/make_gallery.py`: {stale[:3]}")
@@ -1318,6 +1323,9 @@ def _():
         from PIL import Image          # noqa: F401
     except ImportError:
         return                          # measuring pixels needs Pillow; doctor reports it
+    import make_gallery as _mg
+    if not _mg.has_cjk_font():
+        return                          # a bare CI runner has no CJK face installed
     from PIL import Image
     import make_gallery
     fig = os.path.join(HERE, "..", "assets", "modes", "flowchart-3modes.png")
@@ -1358,6 +1366,9 @@ def _():
         from PIL import Image          # noqa: F401
     except ImportError:
         return                          # measuring pixels needs Pillow; doctor reports it
+    import make_gallery as _mg
+    if not _mg.has_cjk_font():
+        return                          # a bare CI runner has no CJK face installed
     import make_gallery
     f = make_gallery._cjk_font(46)
     fam = f.getname()[0]
@@ -1376,6 +1387,9 @@ def _():
         from PIL import Image          # noqa: F401
     except ImportError:
         return                          # measuring pixels needs Pillow; doctor reports it
+    import make_gallery as _mg
+    if not _mg.has_cjk_font():
+        return                          # a bare CI runner has no CJK face installed
     from PIL import ImageFont
     import make_gallery
     ok = make_gallery._cjk_font(40)
