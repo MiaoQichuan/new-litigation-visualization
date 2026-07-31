@@ -321,7 +321,7 @@ def _pptx_bytes(mod, m, mode=None):
     if mode == "mono":
         svg = _render.to_monochrome(svg)
     elif mode == "guizang":
-        svg = _render.to_guizang(svg)
+        svg = _render.to_guizang(svg, m.get("layout"))
     sp = tempfile.mktemp(suffix=".svg"); pp = tempfile.mktemp(suffix=".pptx")
     open(sp, "w", encoding="utf-8").write(svg)
     export_pptx.export(sp, pp)
@@ -423,7 +423,7 @@ def _():
             if mode == "mono":
                 import render as _r; svg = _r.to_monochrome(svg)
             elif mode == "guizang":
-                import render as _r; svg = _r.to_guizang(svg)
+                import render as _r; svg = _r.to_guizang(svg, load(fx).get("layout"))
             sp = tempfile.mktemp(suffix=".svg"); pp = tempfile.mktemp(suffix=".pptx")
             open(sp, "w", encoding="utf-8").write(svg)
             export_pptx.export(sp, pp)
@@ -504,7 +504,7 @@ def _():
     stadium (rx = height/2) and the numbered axis line with round caps."""
     import render as _r
     svg, _, _ = render_dated.render(load("ex_dated.json"))
-    for tag, s2 in (("奇川风", svg), ("白描", _r.to_monochrome(svg)), ("歸藏风", _r.to_guizang(svg))):
+    for tag, s2 in (("奇川风", svg), ("白描", _r.to_monochrome(svg)), ("歸藏风", _r.to_guizang(svg, "dated_point_timeline"))):
         m = re.search(r'<rect data-role="axis"[^>]*>', s2)
         assert m, f"{tag}: no axis band found"
         rx = re.search(r'rx="([\d.]+)"', m.group(0))
@@ -536,7 +536,7 @@ def _():
         for mode in (None, "guizang", "mono"):
             svg, W, H = mod.render(load(fx))
             if mode == "guizang":
-                svg = _r.to_guizang(svg)          # the pattern-fill backdrop lives here
+                svg = _r.to_guizang(svg, load(fx).get("layout"))   # the pattern-fill backdrop lives here
             elif mode == "mono":
                 svg = _r.to_monochrome(svg)
             sp = tempfile.mktemp(suffix=".svg"); pp = tempfile.mktemp(suffix=".pptx")
@@ -600,7 +600,7 @@ def _():
     out with no background at all."""
     import export_pptx, render as _r
     svg, W, H = render_flow.render(load("ex_flow.json"))
-    gz = _r.to_guizang(svg)
+    gz = _r.to_guizang(svg, "graphviz_flow")
     assert gz.count("</defs>") >= 2, "fixture no longer exercises the two-defs case"
     prims = export_pptx.parse_svg(gz)
     m = re.search(r'<svg[^>]*width="([\d.]+)"[^>]*height="([\d.]+)"', gz)
@@ -640,7 +640,7 @@ def _():
     style exists to prevent."""
     import render as _r, export_pptx
     svg, _, _ = render_flow.render(load("ex_flow.json"))
-    gz = _r.to_guizang(svg)
+    gz = _r.to_guizang(svg, "graphviz_flow")
     dot = re.search(r'<pattern id="gzdot".*?</pattern>', gz, re.S)
     assert dot, "歸藏风 lost its dot-matrix layer"
     col = re.search(r'fill="(#[0-9A-Fa-f]{6})"', dot.group(0)).group(1).upper()
@@ -657,7 +657,7 @@ def _():
     as engineered rather than merely sans."""
     import render as _r
     svg, _, _ = render_dated.render(load("ex_dated.json"))
-    gz = _r.to_guizang(svg)
+    gz = _r.to_guizang(svg, "dated_point_timeline")
     tracked = re.findall(r'<text[^>]*letter-spacing="([\d.]+)"[^>]*>', gz)
     assert tracked, "歸藏风 Latin runs carry no tracking"
     assert all(float(t) > 0 for t in tracked)
@@ -684,7 +684,7 @@ def _():
             if mode == "mono":
                 svg = _render.to_monochrome(svg)
             elif mode == "guizang":
-                svg = _render.to_guizang(svg)
+                svg = _render.to_guizang(svg, load(fx).get("layout"))
             for t in re.findall(r"<rect\b[^>]*/>", svg):
                 m = re.search(r'stroke-width="([\d.]+)"', t)
                 if not m:
@@ -701,7 +701,7 @@ def _vsdx_page(mod, m, mode=None):
     if mode == "mono":
         svg = _r.to_monochrome(svg)
     elif mode == "guizang":
-        svg = _r.to_guizang(svg)
+        svg = _r.to_guizang(svg, m.get("layout"))
     sp = tempfile.mktemp(suffix=".svg"); vp = tempfile.mktemp(suffix=".vsdx")
     open(sp, "w", encoding="utf-8").write(svg)
     export_vsdx.export(sp, vp)
@@ -1075,6 +1075,10 @@ def _():
     """The reader-visible defect this exists for: a timeline band whose lower rule
     printed heavier than its upper one. Measured on a real raster, not on the SVG,
     because the cause was rasterisation. Skipped when the rasterizer is absent."""
+    try:
+        from PIL import Image          # noqa: F401
+    except ImportError:
+        return                          # measuring pixels needs Pillow; doctor reports it
     import audit_edges, render as _render, tempfile, os as _os, shutil
     if not (shutil.which("soffice") and shutil.which("pdftoppm")):
         return
@@ -1310,6 +1314,10 @@ def _():
 
     Found by COLOUR, not by "the first dark row": scanning for dark pixels picks
     up the name's own glyphs and measures those instead."""
+    try:
+        from PIL import Image          # noqa: F401
+    except ImportError:
+        return                          # measuring pixels needs Pillow; doctor reports it
     from PIL import Image
     import make_gallery
     fig = os.path.join(HERE, "..", "assets", "modes", "flowchart-3modes.png")
@@ -1346,6 +1354,10 @@ def _():
     asking for the file and taking the default silently set 「歸藏风」 in Japanese
     glyph forms — 2252 pixels different from the Simplified form, on a document
     for Chinese lawyers, with nothing to complain about it."""
+    try:
+        from PIL import Image          # noqa: F401
+    except ImportError:
+        return                          # measuring pixels needs Pillow; doctor reports it
     import make_gallery
     f = make_gallery._cjk_font(46)
     fam = f.getname()[0]
@@ -1360,6 +1372,10 @@ def _():
     because a renderer draws tofu perfectly happily. Coverage is verified against
     a font that definitely LACKS the glyphs — if the two agree on width, ours is
     drawing boxes too."""
+    try:
+        from PIL import Image          # noqa: F401
+    except ImportError:
+        return                          # measuring pixels needs Pillow; doctor reports it
     from PIL import ImageFont
     import make_gallery
     ok = make_gallery._cjk_font(40)
@@ -2573,7 +2589,7 @@ def _guizang_mode():
             colour, _, _ = mod.render(m)
         finally:
             mod._THEME = None
-        svg = _render.to_guizang(colour)
+        svg = _render.to_guizang(colour, m.get("layout"))
         # 1. strictly blue / grey / white — no other colour survives
         cols = set(_re.findall(r'(?:fill|stroke)="(#[0-9A-Fa-f]{6})"', svg))
         assert cols <= THEME, f"{name}: 歸藏风 has off-palette colour {cols - THEME}"

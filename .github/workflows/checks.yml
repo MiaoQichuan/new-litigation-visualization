@@ -20,5 +20,13 @@ jobs:
       - name: Install graphviz (needed by flowchart / relationship layouts)
         run: sudo apt-get update && sudo apt-get install -y graphviz
 
-      - name: Run regression (all checks, no pip packages)
+      # Pillow is a TEST-ONLY dependency. Nothing in the render path imports it —
+      # the zero-dependency rule still holds for producing a figure. It is needed
+      # by the handful of guards that MEASURE a rendered image (edge weights,
+      # label typography), and those guards skip themselves when it is absent,
+      # so a contributor without it still gets a green run — just a less thorough one.
+      - name: Install Pillow (test-only; the render path stays stdlib)
+        run: python -m pip install --quiet pillow
+
+      - name: Run regression
         run: python tests/run_checks.py

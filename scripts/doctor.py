@@ -151,6 +151,20 @@ def main():
                      f"missing — {what} will silently fall back to a generic sans; "
                      f"`npm pack @fontsource/{face.lower()}` and convert the .woff"))
 
+    # Pillow: TEST-ONLY. Nothing in the render path imports it, so the
+    # zero-dependency rule still holds for producing a figure. Without it the
+    # handful of guards that MEASURE a rendered image skip themselves — the run
+    # stays green, it is simply less thorough, and that is worth saying out loud.
+    try:
+        import PIL  # noqa: F401
+        _pil = True
+    except ImportError:
+        _pil = False
+    rows.append((OK if _pil else WARN, "Pillow (image-measuring guards)",
+                 "found" if _pil else
+                 "missing — guards that measure rendered pixels will SKIP; "
+                 "`pip install pillow` to run them"))
+
     # optional QA tooling: renders a generated .pptx and measures where the text
     # actually landed. Not needed to PRODUCE anything — only to self-check.
     pdftotext = shutil.which("pdftotext")
