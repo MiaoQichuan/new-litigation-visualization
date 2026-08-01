@@ -37,7 +37,7 @@ unreadable/uncertain goes in `provenance.uncertainties` and is raised at the
    declined ledger in §9. Adopt schema/lint/CLI/rasterizer discipline; refuse
    model-places-coordinates, multi-colour, legends, and infographic shells.
 3. **Deterministic quality floor** — the pipeline (frozen tokens + scripts-do-geometry
-   + validate + audit + lint + 134 regression guards, 147 assertions) means a correct JSON always
+   + validate + audit + lint + 136 regression guards, 149 assertions) means a correct JSON always
    renders to standard, regardless of model strength.
 
 ---
