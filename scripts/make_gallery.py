@@ -239,6 +239,16 @@ def _quiet_broken_pipe():
 
 if __name__ == "__main__":
     _quiet_broken_pipe()
+    # Say what is missing instead of ending on a traceback. Regenerating the
+    # gallery needs a CJK face to draw the mode labels, and a Windows box has
+    # no Noto CJK by default — a stack trace tells that user nothing they can act on.
+    if not has_cjk_font():
+        print("cannot build the gallery: no CJK font found.\n"
+              "  the figures themselves render fine — this only affects the\n"
+              "  labelled comparison images in assets/modes/.\n"
+              "  install one (Linux: apt install fonts-noto-cjk · macOS: it ships with\n"
+              "  the system · Windows: Noto Serif CJK / Source Han Serif), then re-run.")
+        raise SystemExit(1)
     if "--check" in sys.argv[1:]:
         bad = build(check_only=True)
         if bad:

@@ -24,15 +24,53 @@ def _has(cmd):
 
 
 def _fonts():
-    """Return the list of installed font families (best effort, empty if unknown)."""
-    if not _has("fc-list"):
-        return None
-    try:
-        out = subprocess.run(["fc-list", "--format", "%{family}\n"],
-                             capture_output=True, text=True, timeout=20)
-        return out.stdout
-    except Exception:
-        return None
+    """Installed font families, as one newline-separated blob (None if unknown).
+
+    `fc-list` is a fontconfig tool — it exists on Linux and macOS and NEVER on
+    Windows, where most of this skill's users are. Reporting "cannot verify
+    typefaces" to all of them is not a check, it is a shrug: it leaves the one
+    platform whose font situation is least predictable with the least
+    information. So Windows is read directly from its font directories and the
+    registry, which is where the answer actually lives."""
+    if _has("fc-list"):
+        try:
+            out = subprocess.run(["fc-list", "--format", "%{family}\n"],
+                                 capture_output=True, text=True, timeout=20)
+            if out.stdout.strip():
+                return out.stdout
+        except Exception:
+            pass
+
+    if sys.platform.startswith("win"):
+        names = []
+        try:                                    # registered names, incl. CJK aliases
+            import winreg
+            key = winreg.OpenKey(
+                winreg.HKEY_LOCAL_MACHINE,
+                r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts")
+            for i in range(winreg.QueryInfoKey(key)[1]):
+                try:
+                    names.append(winreg.EnumValue(key, i)[0])
+                except OSError:
+                    break
+        except Exception:
+            pass
+        for d in (os.path.join(os.environ.get("WINDIR", r"C:\Windows"), "Fonts"),
+                  os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\Windows\Fonts")):
+            try:
+                names += [os.path.splitext(f)[0] for f in os.listdir(d)]
+            except OSError:
+                pass
+        # A Windows box always has these; naming them lets the checks below
+        # recognise the CJK faces the system ships rather than reporting them missing.
+        alias = {"simsun": "SimSun 宋体", "msyh": "Microsoft YaHei 微软雅黑",
+                 "simhei": "SimHei 黑体", "msjh": "Microsoft JhengHei",
+                 "simkai": "KaiTi 楷体", "simfang": "FangSong 仿宋"}
+        names += [v for k, v in alias.items()
+                  if any(k in n.lower() for n in names)]
+        if names:
+            return "\n".join(names)
+    return None
 
 
 def install_plex_mono():
@@ -118,9 +156,16 @@ def main():
                      "Install one: librsvg2-bin / inkscape / libreoffice"))
 
     # --- fonts (optional, affect looks only) ------------------------------
+    # Defined BEFORE the branch: this was set only inside the else, so on any
+    # machine without a font list — every Windows box — the later `if not
+    # mono_ok` raised UnboundLocalError and doctor died instead of reporting.
+    # A variable that only exists on the happy path is not a variable.
+    mono_ok = True                    # nothing to offer if we cannot look
     fl = _fonts()
     if fl is None:
-        rows.append((WARN, "fonts", "fc-list unavailable — cannot verify typefaces"))
+        rows.append((WARN, "fonts",
+                     "cannot list installed fonts on this system — the figure still "
+                     "renders; only the typeface may differ"))
     else:
         song = any(k in fl for k in ("Song", "宋", "SimSun", "Source Han Serif", "Noto Serif CJK"))
         rows.append((OK if song else WARN, "serif CJK (奇川风 titles)",

@@ -1433,6 +1433,79 @@ def _():
                 f"{os.path.basename(f)} still says 「{phrase}」 — {why}"
 
 
+@check("portability · every CLI entry point survives a bare Windows-like box")
+def _():
+    """Reported from a real Windows install: `doctor.py` died with an
+    UnboundLocalError. Rather than fix that one line and move on, every entry
+    point is now run with the whole Windows situation simulated — no fc-list, no
+    LibreOffice, no poppler, no Linux font paths — because the platform most of
+    this skill's users are on is the one it was never executed on."""
+    import subprocess as _sp
+    import tempfile
+    import textwrap
+    d = tempfile.mkdtemp()
+    with open(os.path.join(d, "sitecustomize.py"), "w") as f:
+        f.write(textwrap.dedent("""
+            import shutil, os.path
+            MISSING = {"fc-list","fc-cache","soffice","libreoffice","pdftoppm",
+                       "pdftotext","rsvg-convert","inkscape","resvg","npm","tar"}
+            _w = shutil.which
+            shutil.which = lambda c, *a, **k: None if c in MISSING else _w(c, *a, **k)
+            _e = os.path.exists
+            os.path.exists = lambda p: False if isinstance(p, str) and \
+                p.startswith("/usr/share/fonts") else _e(p)
+        """))
+    env = dict(os.environ)
+    env["PYTHONPATH"] = d + os.pathsep + env.get("PYTHONPATH", "")
+    root = os.path.join(HERE, "..")
+    ex = os.path.join(root, "examples", "flowchart.json")
+    out_base = os.path.join(tempfile.mkdtemp(), "fig")
+    cases = [
+        ("doctor", ["scripts/doctor.py"], 0),
+        ("checkpoint", ["scripts/checkpoint.py", ex], 0),
+        ("validate", ["scripts/render.py", "validate", ex], 0),
+        ("render", ["scripts/render.py", ex, out_base, "--formats=svg"], 0),
+        ("make_gallery", ["scripts/make_gallery.py", "--check"], None),
+    ]
+    for name, args, want in cases:
+        args = [os.path.join(root, args[0])] + args[1:]
+        r = _sp.run([sys.executable] + args, capture_output=True, text=True,
+                    env=env, timeout=600)
+        blob = r.stdout + r.stderr
+        assert "Traceback" not in blob, \
+            f"{name} ends on a traceback on a bare box:\n{blob[-320:]}"
+        if want is not None:
+            assert r.returncode == want, f"{name} exited {r.returncode}, expected {want}"
+
+
+@check("portability · doctor survives a machine with no font tooling (i.e. Windows)")
+def _():
+    """`fc-list` is a fontconfig tool: Linux and macOS have it, Windows never
+    does — and that is where most of this skill's users are. A variable set only
+    inside the `else` of "did we get a font list" meant doctor raised
+    UnboundLocalError there and died, on the very command a new user runs first.
+    Reported from a real Windows install; it could not surface here."""
+    import subprocess as _sp
+    import tempfile
+    import textwrap
+    d = tempfile.mkdtemp()
+    with open(os.path.join(d, "sitecustomize.py"), "w") as f:
+        f.write(textwrap.dedent("""
+            import shutil
+            _w = shutil.which
+            shutil.which = lambda c, *a, **k: None if c == "fc-list" else _w(c, *a, **k)
+        """))
+    env = dict(os.environ)
+    env["PYTHONPATH"] = d + os.pathsep + env.get("PYTHONPATH", "")
+    r = _sp.run([sys.executable, os.path.join(HERE, "..", "scripts", "doctor.py")],
+                capture_output=True, text=True, env=env, timeout=180)
+    out = r.stdout + r.stderr
+    assert "Traceback" not in out, f"doctor crashed without fc-list:\n{out[-400:]}"
+    assert "UnboundLocalError" not in out, "a variable is defined on only one branch"
+    assert r.returncode == 0, f"doctor exited {r.returncode} on a machine with no fc-list"
+    assert "Result:" in out, "doctor produced no verdict"
+
+
 @check("portability · every path in the repo is ASCII")
 def _():
     """Windows PowerShell's `Expand-Archive` reads ZIP entry names in the system
