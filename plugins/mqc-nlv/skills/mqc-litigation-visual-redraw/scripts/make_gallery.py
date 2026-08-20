@@ -140,9 +140,24 @@ def build(check_only=False):
             if not os.path.exists(path):
                 stale.append(os.path.basename(path) + " (missing)")
                 return
-            tmp = os.path.join(work, "cmp.png")
-            im.save(tmp)
-            if open(tmp, "rb").read() != open(path, "rb").read():
+            # **按像素比，不按字节比。** 字节比会在任何异机环境下误报：
+            # PNG 的字节受编码器版本与压缩参数影响，同一份 SVG 在本机
+            # （soffice 24.2）与 CI（libreoffice-draw，版本不同）渲出的 PNG
+            # 像素完全相同、字节却不同 —— CI 上实测三张全部误报，
+            # 而逐像素比对显示 diff.getbbox() 是 None（完全一致）。
+            # 这条检查要抓的是「代码改了、图没跟着更新」，那是**内容**差异；
+            # 按字节比会把编码差异也算进来，成了一条会误报的检查。
+            # 「有反例的检查一条不留」—— 所以改判据，不是删检查。
+            from PIL import ImageChops
+            _a = im.convert("RGB")
+            try:
+                _b = Image.open(path).convert("RGB")
+            except Exception:
+                stale.append(os.path.basename(path) + " (unreadable)")
+                return
+            if _a.size != _b.size:
+                stale.append(f"{os.path.basename(path)} (size {_a.size} != {_b.size})")
+            elif ImageChops.difference(_a, _b).getbbox() is not None:
                 stale.append(os.path.basename(path))
         else:
             im.save(path)

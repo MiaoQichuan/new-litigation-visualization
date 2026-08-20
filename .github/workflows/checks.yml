@@ -44,8 +44,13 @@ jobs:
       # 渲中文可靠，而 rsvg-convert 排在候选链第一位、会抢在 soffice 之前被用，
       # 它对 CJK 的表现我**在本机装不上、验不了**（容器无网）。
       # 没验过的东西不写进 CI —— 装 librsvg 换来的一分钟，不值得拿中文渲染去赌。
-      - name: Install LibreOffice + poppler (SVG -> PNG, reliable for CJK)
-        run: sudo apt-get install -y libreoffice-draw poppler-utils
+      # **-draw 与 -impress 都要装。** 只装 -draw 时 CI 报
+      # 「LibreOffice produced no PDF」—— 那条守卫（pptx 渲出来要与母版一致）
+      # 要把 .pptx 转成 PDF 再量文字落点，而 pptx 支持在 Impress 里，不在 Draw 里。
+      # -draw 只够把 SVG 转 PDF（出 PNG 那条路）。
+      # poppler 提供 pdftoppm（栅格化）与 pdftotext（量文字落点，那条守卫要它）。
+      - name: Install LibreOffice (draw + impress) and poppler
+        run: sudo apt-get install -y libreoffice-draw libreoffice-impress poppler-utils
 
       # 读 .docx 与出 PDF 探测样本。两者都是 test-only：
       # 出图那条路一行都不 import 它们，零第三方依赖的口径对交付物仍然成立。
