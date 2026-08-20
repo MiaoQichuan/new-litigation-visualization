@@ -34,6 +34,30 @@ jobs:
       - name: Install CJK fonts (test-only)
         run: sudo apt-get install -y fonts-noto-cjk
 
+      # ---- 以下三样是 mqc-timeline-master 需要的（v1 不需要，所以先前没装）----
+      # 装它们而不是让守卫跳过：作者定的 —— 出 PNG、出溯源索引、探测扫描件
+      # 都是这个 skill 的核心交付，CI 的绿色必须真的买到「这些能力还在」。
+      # 跳过换来的绿色是假的。
+
+      # SVG -> PNG。**装 LibreOffice 而不是 librsvg**，虽然它慢一分钟。
+      # 理由在 render.py 的注释里：这个 skill 的文字全是中文，soffice + Noto
+      # 渲中文可靠，而 rsvg-convert 排在候选链第一位、会抢在 soffice 之前被用，
+      # 它对 CJK 的表现我**在本机装不上、验不了**（容器无网）。
+      # 没验过的东西不写进 CI —— 装 librsvg 换来的一分钟，不值得拿中文渲染去赌。
+      - name: Install LibreOffice + poppler (SVG -> PNG, reliable for CJK)
+        run: sudo apt-get install -y libreoffice-draw poppler-utils
+
+      # 读 .docx 与出 PDF 探测样本。两者都是 test-only：
+      # 出图那条路一行都不 import 它们，零第三方依赖的口径对交付物仍然成立。
+      - name: Install python-docx and reportlab (test-only)
+        run: python -m pip install --quiet python-docx reportlab
+
+      # 溯源索引（Word 三线表）由 scripts/trace_index.js 出，它 require("docx")。
+      # 那是 npm 的 docx 包，本机是全局装的、仓库里没有 package.json，所以 CI 上没有 ——
+      # 于是「索引文档没出来」。全局装一份，让那条守卫真的能跑。
+      - name: Install npm docx (needed by trace_index.js)
+        run: npm install -g docx@9
+
       # run_checks.py resolves every path from its own __file__, so it can be
       # invoked from the repository root without a working-directory change.
       # One line per skill; add the next skill's entry beside these.

@@ -402,6 +402,10 @@ def _refused():
     return list(REFUSED)
 
 
+class _ProbeSkip(Exception):
+    """探测判据的样本造不出来（缺 reportlab）。已经把原因记进 msgs，这里只做跳出。"""
+
+
 def main_render_guards():
     """Guards that need a rendered figure. Returns (passed, failed_msgs)."""
     msgs = []
@@ -1761,7 +1765,17 @@ def main_render_guards():
         _sp2.run(["node", os.path.join(SKILL, "scripts", "trace_index.js"),
                   _tj2.name, _td2], capture_output=True, text=True, timeout=120)
         if not os.path.exists(_td2):
-            msgs.append("引号守卫：索引文档没出来")
+            # **报清原因**，不要只说「没出来」。CI 上撞过一次：trace_index.js
+            # require("docx")（npm 的包，本机是全局装的、仓库里没有 package.json），
+            # CI 那台机器没有它，于是这条只印「没出来」，看不出该装什么。
+            _why2 = ""
+            _r2 = _sp2.run(["node", "-e", "require('docx')"],
+                           capture_output=True, text=True, timeout=60)
+            if _r2.returncode:
+                _why2 = ("：node 找不到 docx 包（npm install -g docx@9）"
+                         if "Cannot find module" in (_r2.stderr or "")
+                         else f"：node 报 {(_r2.stderr or '')[:60]}")
+            msgs.append(f"引号守卫：索引文档没出来{_why2}")
         else:
             import zipfile as _zp2
             _dx2 = _zp2.ZipFile(_td2).read("word/document.xml").decode()
@@ -1933,8 +1947,16 @@ def main_render_guards():
     _t_pdf = _TF.NamedTemporaryFile(suffix=".pdf", delete=False)
     _t_pdf.close()
     try:
-        # 用 reportlab 造（仓库本来就用它出 PDF，不新增依赖；ps2pdf 容器里没有）
-        from reportlab.pdfgen import canvas as _cv
+        # 用 reportlab 造（test-only：出图那条路一行都不 import 它；
+        # ps2pdf 容器里没有）。**缺了如实报出来，不抛裸的 ModuleNotFoundError** ——
+        # 这条守卫的价值就在于「不许因为样本不存在就跳过」（见上面那段注释），
+        # 所以也不许因为缺库就静默跳过；报出来，让 CI 日志一眼看出该装什么。
+        try:
+            from reportlab.pdfgen import canvas as _cv
+        except ModuleNotFoundError:
+            msgs.append("探测判据跑不了：本机没装 reportlab，造不出带文字层的 PDF 样本。"
+                        "装它：pip install reportlab（CI 的 workflow 里已经装了）")
+            raise _ProbeSkip()
         _c = _cv.Canvas(_t_pdf.name)
         for _i in range(2):
             _c.setFont("Helvetica", 12)
@@ -1978,6 +2000,9 @@ def main_render_guards():
                 for _f in (_t_img.name,):
                     if os.path.exists(_f):
                         os.unlink(_f)
+    except _ProbeSkip:
+        # 缺库的原因已经记进 msgs（那一条会让回归红），这里只做跳出，不重复报。
+        pass
     except Exception as _e_pdf:
         msgs.append(f"验探测判据时出错：{type(_e_pdf).__name__}: {str(_e_pdf)[:50]}")
     finally:
