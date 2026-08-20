@@ -34,5 +34,11 @@ jobs:
       - name: Install CJK fonts (test-only)
         run: sudo apt-get install -y fonts-noto-cjk
 
-      - name: Run regression
-        run: python tests/run_checks.py
+      # run_checks.py resolves every path from its own __file__, so it can be
+      # invoked from the repository root without a working-directory change.
+      # One line per skill; add the next skill's entry beside these.
+      - name: Run regression · mqc-litigation-visual-redraw
+        run: python plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/tests/run_checks.py
+
+      - name: Run regression · mqc-timeline-master
+        run: python plugins/mqc-nlv/skills/mqc-timeline-master/tests/run_checks.py

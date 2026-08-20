@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1154" height="443" viewBox="0 0 1154 443">
+<rect width="1154" height="443" fill="#FFFFFF"/>
+<g transform="translate(43.0,29)">
+<rect data-role="canvas-bg" width="1068" height="385" fill="#FFFFFF"/>
+<text data-role="title" x="534.0" y="52.0" font-size="30" font-weight="700" font-family="'方正小标宋简体','思源宋体','Source Han Serif SC','Noto Serif CJK SC','华文中宋',serif" fill="#1F2933" stroke="#1F2933" stroke-width="0.3" text-anchor="middle">委托加工合同货款纠纷经过</text>
+<line data-role="axis" x1="56.0" y1="211.5" x2="1012.0" y2="211.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="150.5" y1="150.5" x2="150.5" y2="198.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="260.5" y1="224.5" x2="260.5" y2="272.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="369.5" y1="150.5" x2="369.5" y2="198.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="479.5" y1="224.5" x2="479.5" y2="272.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="588.5" y1="150.5" x2="588.5" y2="198.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="698.5" y1="224.5" x2="698.5" y2="272.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="807.5" y1="150.5" x2="807.5" y2="198.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="917.5" y1="224.5" x2="917.5" y2="272.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<rect x="56.0" y="78.5" width="189.0" height="72" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="150.5" y="100.5" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2020.09.16</text>
+<text x="150.5" y="119.5" font-size="13" fill="#1F2933" text-anchor="middle">原告与被告签订委托加工合</text>
+<text x="150.5" y="136.5" font-size="13" fill="#1F2933" text-anchor="middle">同</text>
+<rect x="166.0" y="272.5" width="189.0" height="55" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="260.5" y="294.5" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2021.03.08</text>
+<text x="260.5" y="313.5" font-size="13" fill="#1F2933" text-anchor="middle">原告分批向被告交付货物</text>
+<rect x="275.0" y="95.5" width="189.0" height="55" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="369.5" y="117.5" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2021.07.20</text>
+<text x="369.5" y="136.5" font-size="13" fill="#1F2933" text-anchor="middle">原告再次交付第二批货物</text>
+<rect x="385.0" y="272.5" width="189.0" height="55" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="479.5" y="294.5" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2022.05.12</text>
+<text x="479.5" y="313.5" font-size="13" fill="#1F2933" text-anchor="middle">被告出具付款计划并盖章</text>
+<rect x="494.0" y="95.5" width="189.0" height="55" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="588.5" y="117.5" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2022.05.30</text>
+<text x="588.5" y="136.5" font-size="13" fill="#1F2933" text-anchor="middle">被告仍未付款</text>
+<rect x="604.0" y="272.5" width="189.0" height="55" rx="12" fill="#991B1B"/>
+<text x="698.5" y="294.5" font-size="12" font-weight="600" fill="#FFFFFF" text-anchor="middle">2023.05.04</text>
+<text x="698.5" y="313.5" font-size="13" fill="#FFFFFF" text-anchor="middle">原告发出催款律师函</text>
+<rect x="713.0" y="95.5" width="189.0" height="55" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="807.5" y="117.5" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2023.08.09</text>
+<text x="807.5" y="136.5" font-size="13" fill="#1F2933" text-anchor="middle">原告向法院提起诉讼</text>
+<rect x="823.0" y="272.5" width="189.0" height="55" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="917.5" y="294.5" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2023.12.01</text>
+<text x="917.5" y="313.5" font-size="13" fill="#1F2933" text-anchor="middle">法院立案受理</text>
+<circle data-role="node" data-id="1" cx="150.5" cy="211.5" r="13.0" fill="#374151"/>
+<text x="150.5" y="216.5" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">1</text>
+<circle data-role="node" data-id="2" cx="260.5" cy="211.5" r="13.0" fill="#374151"/>
+<text x="260.5" y="216.5" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">2</text>
+<circle data-role="node" data-id="3" cx="369.5" cy="211.5" r="13.0" fill="#374151"/>
+<text x="369.5" y="216.5" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">3</text>
+<circle data-role="node" data-id="4" cx="479.5" cy="211.5" r="13.0" fill="#374151"/>
+<text x="479.5" y="216.5" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">4</text>
+<circle data-role="node" data-id="5" cx="588.5" cy="211.5" r="13.0" fill="#374151"/>
+<text x="588.5" y="216.5" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">5</text>
+<circle data-role="node" data-id="6" cx="698.5" cy="211.5" r="13.0" fill="#991B1B"/>
+<text x="698.5" y="216.5" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">6</text>
+<circle data-role="node" data-id="7" cx="807.5" cy="211.5" r="13.0" fill="#374151"/>
+<text x="807.5" y="216.5" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">7</text>
+<circle data-role="node" data-id="8" cx="917.5" cy="211.5" r="13.0" fill="#374151"/>
+<text x="917.5" y="216.5" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">8</text>
+</g>
+</svg>

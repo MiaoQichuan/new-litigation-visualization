@@ -1,0 +1,32 @@
+{
+  "name": "mqc-nlv",
+  "description": "新诉讼可视化 · New Litigation Visualization —— 把法律画出来。缪奇川出品的诉讼可视化 skill 集。",
+  "owner": {
+    "name": "缪奇川",
+    "url": "https://github.com/MiaoQichuan"
+  },
+  "plugins": [
+    {
+      "name": "mqc-nlv",
+      "source": "./plugins/mqc-nlv",
+      "description": "诉讼可视化 skill 集：把诉讼材料与诉讼图画成克制、专业、可直接进诉讼材料的图，并交出可继续编辑的源文件。",
+      "author": {
+        "name": "缪奇川",
+        "url": "https://github.com/MiaoQichuan"
+      },
+      "homepage": "https://github.com/MiaoQichuan/new-litigation-visualization",
+      "repository": "https://github.com/MiaoQichuan/new-litigation-visualization",
+      "license": "MIT",
+      "category": "legal",
+      "keywords": [
+        "litigation",
+        "legal",
+        "visualization",
+        "timeline",
+        "flowchart",
+        "diagram",
+        "诉讼可视化"
+      ]
+    }
+  ]
+}

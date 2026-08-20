@@ -1,0 +1,19 @@
+{
+  "name": "mqc-nlv",
+  "description": "新诉讼可视化 · New Litigation Visualization。诉讼可视化 skill 集：模型只出 JSON，确定性脚本算全部几何；同时交付 SVG / PNG / PPTX / VSDX / drawio 五种格式。",
+  "version": "1.0.0",
+  "author": {
+    "name": "缪奇川",
+    "url": "https://github.com/MiaoQichuan"
+  },
+  "homepage": "https://github.com/MiaoQichuan/new-litigation-visualization",
+  "repository": "https://github.com/MiaoQichuan/new-litigation-visualization",
+  "license": "MIT",
+  "keywords": [
+    "litigation",
+    "legal",
+    "visualization",
+    "timeline",
+    "diagram"
+  ]
+}
