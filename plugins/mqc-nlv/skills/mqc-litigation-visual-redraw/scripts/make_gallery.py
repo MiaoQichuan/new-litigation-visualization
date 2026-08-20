@@ -151,6 +151,23 @@ def renderer_id():
     return "none"
 
 
+def font_id():
+    """签进仓库的 gallery 图，它上面的字是**哪一份字体文件**画的。
+
+    与 renderer_id 同一个道理：`ImageFont.getbbox` 的结果随字体版本变化，
+    而有一条守卫拿它与图上那条深红标线的宽度比（容差只有 8px）——
+    换一台机器、字体版本不同，那 8px 兜不住，必然假红。
+    """
+    try:
+        f = _cjk_font(54)
+        import os as _os
+        path = getattr(f, "path", "") or ""
+        size = _os.path.getsize(path) if path and _os.path.exists(path) else 0
+        return f"{_os.path.basename(path)}:{size}"
+    except Exception:
+        return "none"
+
+
 def stamp_path():
     return os.path.join(ROOT, "assets", "screenshots", ".renderer")
 
@@ -165,16 +182,33 @@ def build(check_only=False):
     stale, written = [], 0
 
     # 换了渲染器就不比 —— 比了必然假红（见 renderer_id 的说明）。
+    #
+    # **能确定同机才比；只要不确定就不比。** 第一版写成
+    # `if _was and _was != _rid`：身份戳缺席时 `_was` 是空串，条件不成立，
+    # 于是**照旧比对** —— 而身份戳缺席恰恰说明「无从判断是不是同一台机器」，
+    # 那时最该跳过。CI 上第三次假红就是这个口子
+    # （点号开头的文件在 Windows 上拷贝时容易漏，`.github` 已经漏过一次）。
+    #
+    # 判据反过来写：**只有身份戳存在且与本机一致，才真的比对。**
     _rid = renderer_id()
     if check_only:
         _stamp = stamp_path()
-        _was = (open(_stamp, encoding="utf-8").read().strip()
-                if os.path.exists(_stamp) else "")
-        if _was and _was != _rid:
-            print(f"  略过 gallery 比对：签进仓库的图由「{_was}」渲出，"
-                  f"本机是「{_rid}」")
-            print(f"    换渲染器必有像素差异，与代码改没改无关。"
-                  f"要重生成就跑 python3 scripts/make_gallery.py")
+        _was = ""
+        try:
+            if os.path.exists(_stamp):
+                _was = open(_stamp, encoding="utf-8").read().strip()
+        except OSError:
+            _was = ""
+        if _was != _rid:
+            if not _was:
+                print(f"  略过 gallery 比对：没有渲染器身份戳"
+                      f"（assets/screenshots/.renderer），无从判断是不是同一台机器")
+            else:
+                print(f"  略过 gallery 比对：签进仓库的图由「{_was}」渲出，"
+                      f"本机是「{_rid}」")
+            print(f"    gallery 是光栅化产物，换渲染器必有像素差异，"
+                  f"与代码改没改无关。")
+            print(f"    要在本机重生成并认领身份：python3 scripts/make_gallery.py")
             return []
 
     def emit(path, im):
@@ -284,7 +318,7 @@ def build(check_only=False):
     # 生成成功之后记下是谁渲的 —— 下次比对时据此判断能不能比（见 renderer_id）
     try:
         with open(stamp_path(), "w", encoding="utf-8") as _fh:
-            _fh.write(_rid + "\n")
+            _fh.write(_rid + "\n" + font_id() + "\n")
     except OSError:
         pass
     print(f"gallery: wrote {written} image(s)　（渲染器：{_rid}）")
