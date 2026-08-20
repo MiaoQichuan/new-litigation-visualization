@@ -1987,6 +1987,13 @@ def main_render_guards():
                                for f in os.listdir(_dir_img) if f.endswith(".jpg"))
                 if not _jpgs:
                     msgs.append("造不出纯图 PDF 样本，探测的反向那一条等于没跑")
+                elif not __import__("shutil").which("img2pdf"):
+                    # **如实报缺，不抛裸的 FileNotFoundError。** CI 上撞过：
+                    # 它被外层 except Exception 接住、报成「验探测判据时出错」，
+                    # 看不出该装什么。img2pdf 是 test-only（出图那条路不 import 它）。
+                    msgs.append("探测的反向那一条跑不了：本机没装 img2pdf，"
+                                "造不出纯图 PDF 样本。装它：pip install img2pdf"
+                                "（CI 的 workflow 里已经装了）")
                 else:
                     _sp2.run(["img2pdf", "-o", _t_img.name] + _jpgs,
                              capture_output=True, timeout=120)

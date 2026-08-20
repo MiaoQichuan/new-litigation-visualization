@@ -60,8 +60,21 @@ jobs:
       # 溯源索引（Word 三线表）由 scripts/trace_index.js 出，它 require("docx")。
       # 那是 npm 的 docx 包，本机是全局装的、仓库里没有 package.json，所以 CI 上没有 ——
       # 于是「索引文档没出来」。全局装一份，让那条守卫真的能跑。
+      # **装了还不够：node 的模块查找路径里没有全局目录。**
+      # CI 上撞过 —— npm install -g docx@9 装成功了，但 trace_index.js
+      # require("docx") 仍报「Cannot find module」，因为 node 只找
+      # ./node_modules 一路往上，不看 npm 的全局目录。
+      # 要么设 NODE_PATH，要么装到工作目录。这里设 NODE_PATH（对后续步骤都生效）。
       - name: Install npm docx (needed by trace_index.js)
-        run: npm install -g docx@9
+        run: |
+          npm install -g docx@9
+          echo "NODE_PATH=$(npm root -g)" >> $GITHUB_ENV
+
+      # img2pdf：造「纯图 PDF」样本用的 —— 探测判据的**反向验证**要它
+      # （扫描件必须判成 scanned；少了这一条，把探测写成「永远有字」也能通过）。
+      # 与 reportlab 一样是 test-only：出图那条路一行都不 import。
+      - name: Install img2pdf (test-only, scanned-PDF sample)
+        run: python -m pip install --quiet img2pdf
 
       # run_checks.py resolves every path from its own __file__, so it can be
       # invoked from the repository root without a working-directory change.
