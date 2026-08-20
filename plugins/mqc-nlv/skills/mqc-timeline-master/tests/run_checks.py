@@ -956,7 +956,19 @@ def main_render_guards():
     # 折叠短片段不许跨段落：小标题自己成段时（「证据清单。」五个字）不能被折回上一段，
     # 否则溯源索引的原文摘录里会混进下一段的标题（真材料里出现过）。
     _dpath = os.path.join(SKILL, "tests", "fixtures", "m3-complaint.docx")
-    _dsents = _rsrc.read(_dpath)["sentences"] if os.path.exists(_dpath) else None
+    # **缺 python-docx 时跳过这一条，不让整个回归崩掉。** CI 那台机器是干净的，
+    # 于是这里抛裸的 ModuleNotFoundError、退出码 1，前面五组守卫的结果全被埋掉。
+    # 这个 skill 的口径是零第三方依赖：缺一样只该少一种能力
+    # （与 doctor.py 那套「缺什么就退化成什么样」一致），不该让整条路崩。
+    # 跳过时**必须印一行**，否则就成了静默失效 —— 那比报错更坏。
+    _dsents = None
+    if os.path.exists(_dpath):
+        try:
+            _dsents = _rsrc.read(_dpath)["sentences"]
+        except getattr(_rsrc, "DocxUnavailable", RuntimeError) as _e_docx:
+            print("  略过「小标题不许折进上一句」这一条："
+                  "本机没装 python-docx，读不了 .docx 样本")
+            print("    装它就能跑：pip install python-docx")
     if _dsents:
         for _s19 in _dsents:
             if "。" in _s19[:-1] and len(_s19.split("。")[-1].strip()) in range(1, 6):
@@ -2212,6 +2224,36 @@ def main_render_guards():
         # 单档时一律不问（原有判据，不许丢）
         if _pk_sp.span_worth_asking([{"id": 1, "label": "x", "n": 30}], 30)[0]:
             msgs.append("只分出一档时还在问第二轮 —— 一个选项的问题不该问")
+
+    # ---- 第三方库缺席时只许少一种能力，不许整条路崩 -------------------------------
+    # CI 上撞过一次：那台机器没装 python-docx，读 .docx 的守卫抛裸的
+    # ModuleNotFoundError、退出码 1，**前面五组守卫的结果全被埋掉**，
+    # 而报错信息只有一行 import 失败，看不出该装什么。
+    # 这个 skill 的口径是零第三方依赖，与 doctor.py 那套「缺什么就退化成什么样」
+    # 一致：缺一样只该少一种能力。
+    _srcs = {}
+    for _fn3 in sorted(os.listdir(os.path.join(SKILL, "scripts"))):
+        if _fn3.endswith(".py"):
+            _srcs[_fn3] = _code_only(open(os.path.join(SKILL, "scripts", _fn3),
+                                          encoding="utf-8").read())
+    # 每一处第三方 import 都要在 try 里，并且给出说得清的替代
+    _THIRD = ("docx", "PIL", "fontTools", "lxml", "numpy", "yaml", "requests")
+    for _fn3, _s3 in _srcs.items():
+        for _lib in _THIRD:
+            for _m3 in re.finditer(rf"^(\s*)(?:from {_lib}[\w.]* import|"
+                                   rf"import {_lib})\b", _s3, re.M):
+                _indent = len(_m3.group(1))
+                # 往上找最近的 try:，缩进要比 import 浅
+                _before = _s3[:_m3.start()].splitlines()
+                _guarded = False
+                for _l3 in reversed(_before[-6:]):
+                    if _l3.strip() == "try:" and (len(_l3) - len(_l3.lstrip())) < _indent:
+                        _guarded = True
+                        break
+                if not _guarded:
+                    msgs.append(f"{_fn3}: `{_m3.group(0).strip()}` 没有包在 try 里 —— "
+                                f"这台机器没装 {_lib} 时会抛裸的 ModuleNotFoundError，"
+                                f"把整条路带崩。缺一样只该少一种能力")
 
     # ---- 仓库里每个路径都必须是 ASCII ---------------------------------------------
     # 理由抄自 v1 的同名守卫（它写得很清楚）：Windows PowerShell 的 Expand-Archive

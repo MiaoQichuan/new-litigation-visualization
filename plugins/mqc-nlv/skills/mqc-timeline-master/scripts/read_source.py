@@ -330,6 +330,10 @@ def solve_order(events):
 
 # ---------------------------------------------------------------------- entry
 
+class DocxUnavailable(RuntimeError):
+    """读 .docx 时缺 python-docx。单独一个类型，好让调用方决定是跳过还是报错。"""
+
+
 def read_docx(path):
     """读 .docx：段落按顺序取，**表格单独处理**，不与正文混排。
 
@@ -339,7 +343,16 @@ def read_docx(path):
     docx 里表格是结构化的 <w:tbl>，逐行逐格读得出来，所以这条路能做对 —— 每一行
     还原成「编号、名称：内容」这样一句，编号线索就保住了。
     """
-    from docx import Document                     # 只有读 docx 时才需要
+    # 只有读 docx 时才需要。缺了就抛一个说得清的错，而不是裸的 ModuleNotFoundError ——
+    # 这个 skill 的口径是零第三方依赖，缺一样只该少一种能力，不该让整条路崩掉。
+    try:
+        from docx import Document
+    except ModuleNotFoundError:
+        raise DocxUnavailable(
+            f"读 .docx 需要 python-docx，当前环境没装：{path}\n"
+            f"  装它：pip install python-docx\n"
+            f"  或者把这份材料另存为 .txt / .md 再给我 —— 那两种不需要任何库。"
+        ) from None
     d = Document(path)
     out = []
     body = d.element.body

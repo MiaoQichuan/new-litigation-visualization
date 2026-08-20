@@ -1,64 +1,174 @@
 <p align="center">
-  <img src="plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/assets/brand/nlv-logo-red.png" width="128" alt="新诉讼可视化 New Litigation Visualization"/>
+  <img src="assets/cover.png" width="560" alt="新诉讼可视化 · New Litigation Visualization"/>
 </p>
 
-<h1 align="center">新诉讼可视化 · New Litigation Visualization</h1>
-<p align="center"><b>把法律画出来 · Make the Law Visible</b></p>
-
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-6B7280" alt="License: MIT"/></a>
-  <img src="https://img.shields.io/badge/Python-3-6B7280" alt="Python 3"/>
-  <img src="https://img.shields.io/badge/dependencies-none%20(stdlib)-6B7280" alt="zero third-party dependencies"/>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-3FB950" alt="License: MIT"/></a>
+  <img src="https://img.shields.io/badge/Python-3-3776AB?logo=python&logoColor=white" alt="Python 3"/>
+  <img src="https://img.shields.io/badge/dependencies-none%20(stdlib)-991B1B" alt="zero third-party dependencies"/>
   <a href="https://github.com/MiaoQichuan/new-litigation-visualization/actions/workflows/checks.yml"><img src="https://github.com/MiaoQichuan/new-litigation-visualization/actions/workflows/checks.yml/badge.svg" alt="checks"/></a>
   <img src="https://img.shields.io/badge/Built%20with-Claude-D97757?logo=anthropic&logoColor=white" alt="Built with Claude"/>
   <img src="https://img.shields.io/badge/Claude-Skills-D97757?logo=anthropic&logoColor=white" alt="Claude Skills"/>
-  <img src="https://img.shields.io/badge/DeepSeek%20Harness-compatible-1E293B" alt="DeepSeek Harness compatible"/>
+  <img src="https://img.shields.io/badge/DeepSeek%20Harness-supported-4D6BFE" alt="DeepSeek Harness supported"/>
+  <img src="https://img.shields.io/badge/A4%20%E6%89%93%E5%8D%B0-%E8%AE%BE%E8%AE%A1%E5%89%8D%E6%8F%90-0F766E" alt="A4 打印是设计前提"/>
+  <img src="https://img.shields.io/badge/%E8%BE%93%E5%87%BA-%E4%BA%94%E7%A7%8D%E5%8F%AF%E7%BC%96%E8%BE%91%E6%A0%BC%E5%BC%8F-7C3AED" alt="五种可编辑格式"/>
 </p>
 
 ---
 
-**给法律人的诉讼可视化工具集。** 两个模块：一个把你手上那张凌乱的图重画成能进诉讼
-材料的图，一个直接吃案件材料、把经过画成时间轴。
+几乎每个法律人都说诉讼可视化是好东西：讲座上点头，朋友圈转发，也羡慕那些图做得
+漂亮的同行。可真到自己办案，绝大多数人还是回到老样子 —— 大段大段的文字、密密麻麻
+的表格、一份谁也不愿意多看一眼的代理词。心里那道坎是：画图，会不会显得不够专业。
 
-<p align="center">
-  <img src="plugins/mqc-nlv/skills/mqc-timeline-master/assets/screenshots/timeline-example.png" width="880" alt="时间轴成品示例"/>
-</p>
-<p align="center"><sub>时间轴大师的真实输出：八个事项、深红标在你指定的那一处、A4 横版直接打印</sub></p>
+**画图不是把法律变轻佻，而是把思考变透明。** 一段绕来绕去的长论未必是严谨，有时
+只是想得还不够清楚，便用文字盖住了。可视化恰恰相反 —— 它逼你先把案子想透，再把
+骨架摊开，每一个节点、每一条因果，都经得起对方和法官逐一推敲。能画出来，本身就是
+对法律有深度的理解。而今天连门槛都没有了：过去要花大功夫才能做出来的图，几句话、
+一个下午就能完成。
 
-一条共同的工程主张贯穿全部模块：**模型只产出 JSON，绝不碰坐标；所有布局、防重叠、
-换行、渲染都交给确定性脚本。** 所以在较弱的模型上也能出稳定、专业的效果，这是它
-区别于多数「AI 画图」的地方。
+诉讼可视化不是新词。在它前面加一个「新」字，不是要另起炉灶，而是顺着前人趟出来的
+路接着往下走 —— 视野从画一个案子放大到整个法律世界，深度从画看得见的事实往下沉到
+把法律推理本身结构化，工具由 AI 把门槛抹平。**这个仓库是这套体系里「工具」那一层
+的开源实现**：给你的不是照着画好的某一张图，而是一套能画出你自己那张图的工具，
+以及它背后那套可以被检验的规矩。
 
-## 两个模块
+它为法律人的工作习惯而写，不是给设计师用的绘图软件：材料怎么顺手怎么给，中文说一句
+要什么就出图；出来的东西是 A4 打印得下、能插进代理词、能在 PPT 里继续改的成品；
+图上每一句话都指得回材料里的哪一句。**你不需要写代码，也不需要懂它内部怎么算。**
 
-| 模块 | 状态 | 一句话 |
-| --- | --- | --- |
-| [**诉讼可视化重画**](plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/) | v1.0.2 已发布 | 你先画一张，它升级审美 |
-| [**时间轴大师**](plugins/mqc-nlv/skills/mqc-timeline-master/) | 开发中 | 直接吃材料，把经过画准 |
+## 现在有什么
 
-### 诉讼可视化重画
+两个模块，都是可以直接拿去办案用的成品：
+
+| 模块 | 状态 | 一句话 | 输入 | 输出 |
+| --- | --- | --- | --- | --- |
+| [**诉讼可视化重画**](plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/) | v1.0.2 已发布 | 你先画一张，它升级审美 | 一张已有的图（手绘、截图、AI 生成、Mermaid、甚至一段纯文字） | SVG · PNG · PPTX · VSDX · drawio |
+| [**时间轴大师**](plugins/mqc-nlv/skills/mqc-timeline-master/) | 开发中 | 直接吃材料，把经过画准 | 判决书 · 起诉状 · 答辩状 · 合同 · 证据目录 · 流水 · 聊天记录 · 扫描件 · 照片 · 口述 | 同上 + 溯源索引 Word |
+
+**更多模块会陆续在这个仓库里开源**（证据目录、文书生成、案情结构化提取等），
+共用同一套几何与视觉内核，命名同族。**每个模块都可独立使用。**
+
+**支持 DeepSeek Harness。** 两个模块都是标准的 `SKILL.md` 目录，没有任何产品特定的
+胶水代码 —— Claude Code、Codex、DeepSeek Harness、Cursor、Gemini CLI、Copilot、
+Cline、Aider 都装得上，同一份仓库不需要维护两套。
+
+## 仓库结构
+
+```
+new-litigation-visualization/
+├── assets/                       仓库封面
+├── .claude-plugin/
+│   └── marketplace.json          插件市场清单
+├── plugins/
+│   └── mqc-nlv/
+│       ├── .claude-plugin/
+│       │   └── plugin.json       插件清单（版本只在这里声明）
+│       └── skills/
+│           ├── mqc-litigation-visual-redraw/    诉讼可视化重画
+│           │   ├── SKILL.md      技能主文档
+│           │   ├── references/   规程与标准
+│           │   ├── scripts/      确定性渲染管线
+│           │   └── schemas/ examples/ assets/ tests/
+│           └── mqc-timeline-master/             时间轴大师
+│               ├── SKILL.md      技能主文档
+│               ├── references/   规程与约束表（69 条编号约束）
+│               ├── scripts/      确定性渲染管线
+│               ├── docs/adr/     一件事为什么这么定
+│               └── schemas/ examples/ assets/ tests/
+└── .github/workflows/checks.yml  每次 push 与 PR 自动跑全部回归
+```
+
+**共享内核只有一份。** 多个模块共用的几何、字体、换行、导出代码放在插件根，模块
+不许各自分叉一份。这是纪律，不是设计。
+
+## 诉讼可视化重画
 
 把一张凌乱、或者一眼「AI 味」的诉讼图，重画成克制、专业、可直接进诉讼材料的图，
-并把能继续改的源文件一并交给你。**三类七种布局、三种视觉模式、五种格式同时交付。**
+并把能继续改的源文件一并交给你。**律师只做两件事：上传原图，说一句改图的提示词。**
 
 <p align="center">
-  <img src="plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/assets/longform/seven-layouts.png" width="760" alt="三类七种图形"/>
+  <img src="plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/assets/longform/how-it-works.png" width="820" alt="Skill 运行全过程"/>
 </p>
 
-时间、流程、关系 —— 诉讼里要画的东西基本都落在这三类里。图种不由你选，由材料的
-性质算出来。
+### 三类七种布局
+
+时间、流程、关系 —— 诉讼里要画的东西基本都落在这三类里。**图种不由你选，由材料的
+性质算出来。**
 
 <p align="center">
-  <img src="plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/assets/modes/timeline-dated-3modes.png" width="880" alt="同一张图的三种视觉模式"/>
+  <img src="plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/assets/longform/seven-layouts.png" width="820" alt="三类七种图形"/>
 </p>
-<p align="center"><sub>同一份数据、同一套几何，三种视觉模式：奇川风（呈报）· 白描（打印）· 歸藏风（讲课）</sub></p>
+
+### 三种视觉风格
+
+同一份数据、同一套几何，只换表面。**位置与尺寸一字不差。**
 
 <p align="center">
-  <img src="plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/assets/longform/how-it-works.png" width="760" alt="Skill 运行全过程"/>
+  <img src="plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/assets/longform/visual-system-qichuan.png" width="820" alt="视觉系统 · 奇川风"/>
 </p>
-<p align="center"><sub>律师只做两件事：上传原图，说一句改图的提示词</sub></p>
 
-### 时间轴大师
+<p align="center">
+  <img src="plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/assets/longform/visual-system-baimiao.png" width="820" alt="视觉系统 · 白描"/>
+</p>
+
+<p align="center">
+  <img src="plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/assets/longform/visual-system-guizang.png" width="820" alt="视觉系统 · 歸藏风"/>
+</p>
+
+### 七种布局 × 三种风格
+
+每一种布局在三种风格下的样子，逐张对照。
+
+<p align="center">
+  <img src="plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/assets/modes/timeline-points-3modes.png" width="820" alt="编号型时间轴 · 三种风格"/>
+</p>
+<p align="center"><sub>编号型时间轴　numbered_point_timeline</sub></p>
+
+<p align="center">
+  <img src="plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/assets/modes/timeline-dated-3modes.png" width="820" alt="日期型时间轴 · 三种风格"/>
+</p>
+<p align="center"><sub>日期型时间轴　dated_point_timeline</sub></p>
+
+<p align="center">
+  <img src="plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/assets/modes/timeline-gantt-3modes.png" width="820" alt="期间型时间轴 · 三种风格"/>
+</p>
+<p align="center"><sub>期间型时间轴　proportional_gantt</sub></p>
+
+<p align="center">
+  <img src="plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/assets/modes/flowchart-3modes.png" width="820" alt="流程图 · 三种风格"/>
+</p>
+<p align="center"><sub>流程图　graphviz_flow</sub></p>
+
+<p align="center">
+  <img src="plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/assets/modes/flow-contract-review-3modes.png" width="820" alt="流程图（合同审查）· 三种风格"/>
+</p>
+<p align="center"><sub>流程图 · 合同审查路径</sub></p>
+
+<p align="center">
+  <img src="plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/assets/modes/relationship-3modes.png" width="820" alt="关系网络 · 三种风格"/>
+</p>
+<p align="center"><sub>关系网络　graphviz_relation</sub></p>
+
+<p align="center">
+  <img src="plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/assets/modes/relation-dense-3modes.png" width="820" alt="关系网络（密集）· 三种风格"/>
+</p>
+<p align="center"><sub>关系网络 · 密集情形</sub></p>
+
+<p align="center">
+  <img src="plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/assets/modes/relation-tree-3modes.png" width="820" alt="层级树 · 三种风格"/>
+</p>
+<p align="center"><sub>层级树　relation_tree</sub></p>
+
+<p align="center">
+  <img src="plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/assets/modes/comparison-table-3modes.png" width="820" alt="对比表 · 三种风格"/>
+</p>
+<p align="center"><sub>对比表　comparison_table</sub></p>
+
+模块完整说明见 [它自己的 README](plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/)。
+
+## 时间轴大师
+
+**更多模块会陆续在这个仓库里开源，时间轴大师是第二个。**
 
 不用你先画。把判决书、起诉状、答辩状、合同、证据目录、流水、聊天记录、扫描件、
 手机照片、甚至一段口述丢给它，它读完最多问你五个问题，然后出图。
@@ -66,16 +176,29 @@
 **时间轴大师，用数学，画准一张时间轴。**
 
 <p align="center">
-  <img src="plugins/mqc-nlv/skills/mqc-timeline-master/assets/longform/01-mathematics.png" width="760" alt="01 数学：用数学算清楚一张时间轴怎么画"/>
+  <img src="plugins/mqc-nlv/skills/mqc-timeline-master/assets/screenshots/timeline-example.png" width="880" alt="时间轴成品示例"/>
 </p>
+<p align="center"><sub>真实输出：八个事项、深红标在你指定的那一处、A4 横版直接打印</sub></p>
+
+### 用数学算清楚一张时间轴怎么画
 
 <p align="center">
-  <img src="plugins/mqc-nlv/skills/mqc-timeline-master/assets/longform/02-exact.png" width="760" alt="02 画准：前端负责读懂，后端负责算准"/>
+  <img src="plugins/mqc-nlv/skills/mqc-timeline-master/assets/longform/01-mathematics.png" width="820" alt="01 数学"/>
 </p>
 
+### 前端负责读懂，后端负责算准
+
 <p align="center">
-  <img src="plugins/mqc-nlv/skills/mqc-timeline-master/assets/longform/03-the-figure.png" width="760" alt="03 时间轴：使用手册"/>
+  <img src="plugins/mqc-nlv/skills/mqc-timeline-master/assets/longform/02-exact.png" width="820" alt="02 画准"/>
 </p>
+
+### 使用手册
+
+<p align="center">
+  <img src="plugins/mqc-nlv/skills/mqc-timeline-master/assets/longform/03-the-figure.png" width="820" alt="03 时间轴"/>
+</p>
+
+模块完整说明见 [它自己的 README](plugins/mqc-nlv/skills/mqc-timeline-master/)。
 
 ## 安装
 
@@ -93,14 +216,10 @@ Claude Code：
 python3 plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/scripts/doctor.py
 ```
 
-### 装在别的 agent 里
+### DeepSeek Harness
 
-两个模块都是标准的 `SKILL.md` 目录，**没有任何产品特定的胶水代码**，所以凡是能读
-skill 指令的 agent 都能用：Claude Code、Codex、DeepSeek Harness、Cursor、
-Gemini CLI、Copilot、Cline、Aider 等等。**同一份仓库，不需要维护两套。**
-
-DeepSeek Harness 挂目录即可，不必构建（dsh 的技能发现是扁平的，指到 `skills/`
-这一层，它会扫到下面每一个 `<模块名>/SKILL.md`）：
+挂目录即可，不必构建（dsh 的技能发现是扁平的，指到 `skills/` 这一层，它会扫到
+下面每一个 `<模块名>/SKILL.md`）：
 
 ```yaml
 skills:
@@ -112,6 +231,11 @@ skills:
 dsh 的技能发现优先级（先命中先生效）：项目 `.dsh` → 项目 `.agents` →
 `customSkillDirs` → 用户 `.dsh` → 用户 `.agents`。dsh 目前把 `allowed-tools` /
 `disallowed-tools` 当未知字段处理，技能内的工具约束需要你在 harness 层自行保证。
+
+### 其他 agent
+
+Codex、Cursor、Gemini CLI、Copilot、Cline、Aider 等：把模块目录放进它们各自的
+skills 目录即可，`SKILL.md` 是通用格式。
 
 ## 常见问题
 
@@ -187,33 +311,6 @@ Word 直接能印。要交法院就选白描：纯黑白线稿，复印、传真
 由材料里有几方各自的主张决定。日期型排不开就走编号型，横向排不开就转成纵向长图
 并分页 —— 它永远给得出一张图，或者当场告诉你为什么给不出。
 
-## 仓库结构
-
-```
-new-litigation-visualization/
-├── .claude-plugin/
-│   └── marketplace.json          插件市场清单
-├── plugins/
-│   └── mqc-nlv/
-│       ├── .claude-plugin/
-│       │   └── plugin.json       插件清单（版本只在这里声明）
-│       └── skills/
-│           ├── mqc-litigation-visual-redraw/    诉讼可视化重画
-│           └── mqc-timeline-master/             时间轴大师
-│               ├── SKILL.md      技能主文档
-│               ├── references/   规程与约束表
-│               ├── scripts/      确定性渲染管线
-│               ├── docs/adr/     一件事为什么这么定
-│               └── schemas/ examples/ assets/ tests/
-└── .github/workflows/checks.yml  每次 push 与 PR 自动跑全部回归
-```
-
-**共享内核只有一份。** 多个模块共用的几何、字体、换行、导出代码放在插件根，模块
-不许各自分叉一份。这是纪律，不是设计。
-
-后续模块（证据目录、文书生成、案情结构化提取等）将陆续加入同一命名族。
-**每个模块都可独立使用。**
-
 ## 工程
 
 ```bash
@@ -235,6 +332,7 @@ python3 plugins/mqc-nlv/skills/mqc-timeline-master/tests/run_checks.py
   「否掉的替代方案」这一节 —— 结论有价值，被排除的路同样有价值。
 - **有反例的检查一条不留。** 宁可少一条检查，也不要一条会误判的。会哭狼的报告
   没人看。
+- **缺一样只该少一种能力。** 第三方库缺席时退化，不是崩掉。这一条是 CI 上撞出来的。
 
 ## 许可
 
