@@ -125,6 +125,36 @@ def _render(map_path, out_base, flags):
     raise RuntimeError(f"no PNG produced for {map_path}")
 
 
+def renderer_id():
+    """当前机器用什么渲染器、什么版本。gallery 的图是**光栅化产物**，
+    换一个渲染器（或同一个的不同版本）就会有像素差异 —— 与代码改没改无关。
+
+    CI 上撞过两次：本机 LibreOffice 24.2 渲出来与签进仓库的图一致，
+    CI 的 LibreOffice（Ubuntu 源，版本不同）字体光栅化结果不同，于是三张全判过期。
+    第一次我以为是字节差异、改成按像素比，没解决 —— 差异本来就在像素层面。
+
+    所以记下身份：换了渲染器就跳过比对并说明，不假装检查过。
+    在生成 gallery 的那台机器上，这条门禁照旧是真的。
+    """
+    import shutil
+    import subprocess
+    for exe, args in (("rsvg-convert", ["--version"]), ("resvg", ["--version"]),
+                      ("inkscape", ["--version"]), ("soffice", ["--version"])):
+        if shutil.which(exe):
+            try:
+                out = subprocess.run([exe] + args, capture_output=True, text=True,
+                                     timeout=60)
+                ver = (out.stdout or out.stderr).strip().splitlines()[0][:60]
+            except Exception:
+                ver = "unknown"
+            return f"{exe} {ver}"
+    return "none"
+
+
+def stamp_path():
+    return os.path.join(ROOT, "assets", "screenshots", ".renderer")
+
+
 def build(check_only=False):
     from PIL import Image, ImageDraw
     shots_dir = os.path.join(ROOT, "assets", "screenshots")
@@ -133,6 +163,19 @@ def build(check_only=False):
     os.makedirs(modes_dir, exist_ok=True)
     work = tempfile.mkdtemp(prefix="gallery-")
     stale, written = [], 0
+
+    # 换了渲染器就不比 —— 比了必然假红（见 renderer_id 的说明）。
+    _rid = renderer_id()
+    if check_only:
+        _stamp = stamp_path()
+        _was = (open(_stamp, encoding="utf-8").read().strip()
+                if os.path.exists(_stamp) else "")
+        if _was and _was != _rid:
+            print(f"  略过 gallery 比对：签进仓库的图由「{_was}」渲出，"
+                  f"本机是「{_rid}」")
+            print(f"    换渲染器必有像素差异，与代码改没改无关。"
+                  f"要重生成就跑 python3 scripts/make_gallery.py")
+            return []
 
     def emit(path, im):
         nonlocal written
@@ -238,7 +281,13 @@ def build(check_only=False):
 
     if check_only:
         return stale
-    print(f"gallery: wrote {written} image(s)")
+    # 生成成功之后记下是谁渲的 —— 下次比对时据此判断能不能比（见 renderer_id）
+    try:
+        with open(stamp_path(), "w", encoding="utf-8") as _fh:
+            _fh.write(_rid + "\n")
+    except OSError:
+        pass
+    print(f"gallery: wrote {written} image(s)　（渲染器：{_rid}）")
     return []
 
 
