@@ -1,0 +1,8 @@
+out/
+*.png
+*.svg
+*.xlsx
+!examples/*.json
+__pycache__/
+*.pyc
+runs/

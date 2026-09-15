@@ -5,7 +5,6 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-3FB950" alt="License: MIT"/></a>
   <img src="https://img.shields.io/badge/Python-3-3776AB?logo=python&logoColor=white" alt="Python 3"/>
-  <img src="https://img.shields.io/badge/dependencies-none%20(stdlib)-991B1B" alt="zero third-party dependencies"/>
   <a href="https://github.com/MiaoQichuan/new-litigation-visualization/actions/workflows/checks.yml"><img src="https://github.com/MiaoQichuan/new-litigation-visualization/actions/workflows/checks.yml/badge.svg" alt="checks"/></a>
   <img src="https://img.shields.io/badge/Built%20with-Claude-D97757?logo=anthropic&logoColor=white" alt="Built with Claude"/>
   <img src="https://img.shields.io/badge/Claude-Skills-D97757?logo=anthropic&logoColor=white" alt="Claude Skills"/>
@@ -26,12 +25,15 @@
 | --- | --- | --- | --- | --- |
 | [**诉讼可视化重画**](plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/) | v1.0.2 已发布 | 你先画一张，它升级审美 | 一张已有的图（手绘、截图、AI 生成、Mermaid、甚至一段纯文字） | SVG · PNG · PPTX · VSDX · drawio |
 | [**时间轴大师**](plugins/mqc-nlv/skills/mqc-timeline-master/) | v2.0.1 已发布 | 直接吃材料，把经过画准 | 判决书 · 起诉状 · 答辩状 · 合同 · 证据目录 · 流水 · 聊天记录 · 扫描件 · 照片 · 口述 | 同上 + 溯源索引 Word |
+| [**大事记表大师**](plugins/mqc-nlv/skills/mqc-chronicle-master/) | v1.0.0 首次发布 | 庭前三大法宝之一：什么时候发生了什么 | 一批案件材料（文字层 PDF、扫描件、Word、照片） | 案件大事记 Word · Excel 母表 · A4 简表 · 案件事实底稿 |
+| [**庭审对抗图大师**](plugins/mqc-nlv/skills/mqc-trial-confrontation-master/) | v1.0.0 首次发布 | 庭前三大法宝之一：谁主张什么、对方怎么抗辩、法院审查什么 | 起诉状 · 答辩状 · 证据目录 · 代理意见等 | 庭审对抗图 SVG · PNG · 分析表 Excel |
+| [**法律关系图大师**](plugins/mqc-nlv/skills/mqc-legal-relation-master/) | v1.0.0 首次发布 | 庭前三大法宝之一：谁与谁、就什么标的、成立何种关系 | 一批案件材料 | SVG · PNG · PPTX · VSDX · drawio |
 
 <p align="center">
-  <img src="assets/modules.png" width="100%" alt="两个模块"/>
+  <img src="assets/modules.png" width="100%" alt="五个模块"/>
 </p>
 
-**支持 DeepSeek Harness。** 两个模块都是标准的 `SKILL.md` 目录，没有任何产品特定的胶水代码，凡是能读 skill 指令的 agent 都装得上：Claude Code、Codex、DeepSeek Harness、Cursor、Gemini CLI、Copilot、Cline、Aider。同一份仓库，不维护两套。
+**支持 DeepSeek Harness。** 五个模块都是标准的 `SKILL.md` 目录，没有任何产品特定的胶水代码，凡是能读 skill 指令的 agent 都装得上：Claude Code、Codex、DeepSeek Harness、Cursor、Gemini CLI、Copilot、Cline、Aider。同一份仓库，不维护两套。
 
 ## 仓库结构
 
@@ -50,13 +52,16 @@ new-litigation-visualization/
 │           │   ├── references/   规程与标准
 │           │   ├── scripts/      确定性渲染管线
 │           │   └── schemas/ examples/ assets/ tests/
-│           └── mqc-timeline-master/             时间轴大师
-│               ├── SKILL.md      技能主文档
-│               ├── references/   规程与约束表（69 条编号约束）
-│               ├── scripts/      确定性渲染管线
-│               ├── docs/adr/     一件事为什么这么定
-│               └── schemas/ examples/ assets/ tests/
-└── .github/workflows/checks.yml  每次 push 与 PR 自动跑全部回归
+│           ├── mqc-timeline-master/             时间轴大师
+│           │   ├── SKILL.md      技能主文档
+│           │   ├── references/   规程与约束表（69 条编号约束）
+│           │   ├── scripts/      确定性渲染管线
+│           │   ├── docs/adr/     一件事为什么这么定
+│           │   └── schemas/ examples/ assets/ tests/
+│           ├── mqc-chronicle-master/            大事记表大师
+│           ├── mqc-trial-confrontation-master/  庭审对抗图大师
+│           └── mqc-legal-relation-master/       法律关系图大师
+└── .github/workflows/checks.yml  每次 push 与 PR 自动跑重画与时间轴大师的回归
 ```
 
 **共享内核只有一份。** 几何、字体、换行、导出这些多个模块共用的代码放在插件根，
@@ -231,12 +236,14 @@ skills 目录即可，`SKILL.md` 是通用格式。
 不学任何语法。
 
 **它要联网吗？我的案卷会不会传出去？**
-这两个模块不联网、不调外部接口、不需要任何凭据，只读你给它的材料，只往你指定的
+五个模块都不联网、不调外部接口、不需要任何凭据，只读你给它的材料，只往你指定的
 目录写文件。你的材料本身去了哪里，取决于你用的那个 agent 怎么处理，
-与这两个模块无关。
+与这些模块无关。
 
 **要装什么？会不会很麻烦？**
-Python 3（零第三方依赖）。出 PNG 需要 LibreOffice 或 poppler，读扫描件需要
+重画与时间轴大师：Python 3（零第三方依赖）。庭前三大法宝另需少量第三方库（如
+openpyxl、cairosvg，大事记表出 Word 还需 node），各自的 SKILL.md 列明；法律关系图大师可以先跑
+`python scripts/make.py --check` 查环境。出 PNG 需要 LibreOffice 或 poppler，读扫描件需要
 poppler 的 `pdftoppm`，溯源索引需要 node。跑一次 `doctor.py` 它会逐项告诉你缺
 什么、缺了会退化成什么样。没有一项是装不上，都是少一种格式。
 
@@ -283,11 +290,16 @@ Word 直接能印。要交法院就选白描：纯黑白线稿，复印、传真
 再画（这一步由 agent 完成，不用你动手）。一张看着正常其实排错了的图，才是最危险
 的那一种。
 
-### 两个模块怎么选
+### 模块怎么选
 
 **重画和时间轴大师有什么区别？我该用哪个？**
 手上已经有一张图（自己画的、别人给的、AI 生成的），想让它变好看又不变意思，用
 重画。手上只有材料、还没有图，用时间轴大师。
+
+**庭前三大法宝是什么？**
+开庭前把一个案件看清楚的三张图表：大事记表大师回答什么时候发生了什么，庭审对抗图大师
+回答谁主张什么、对方怎么抗辩、法院审查什么，法律关系图大师回答谁与谁、就什么标的、成立
+何种关系。
 
 **深红标在哪一处，是谁定的？**
 你定。深红在诉讼图里标的是本案的胜负手，全图只标一处，多了就等于没标。它会列出
@@ -304,6 +316,9 @@ Word 直接能印。要交法院就选白描：纯黑白线稿，复印、传真
 ```bash
 python3 plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/tests/run_checks.py
 python3 plugins/mqc-nlv/skills/mqc-timeline-master/tests/run_checks.py
+python3 plugins/mqc-nlv/skills/mqc-chronicle-master/tests/run_checks.py
+python3 plugins/mqc-nlv/skills/mqc-trial-confrontation-master/tests/run_checks.py
+python3 plugins/mqc-nlv/skills/mqc-legal-relation-master/tests/make_checks.py
 ```
 
 退出码 0 = 全过。回归套件把已修复的问题固化成守卫。**每条守卫都必须能失败**：加一

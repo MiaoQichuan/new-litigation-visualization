@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1160" height="1298" viewBox="0 0 1160 1298" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei','Noto Sans SC','Helvetica Neue',Arial,sans-serif">
+<rect width="1160" height="1298" fill="#FFFFFF"/>
+<defs><marker id="a" markerWidth="12" markerHeight="8.4" refX="0" refY="4.2" markerUnits="userSpaceOnUse" orient="auto"><path d="M 0 0 L 12 4.2 L 0 8.4 Z" fill="#4B5563"/></marker><marker id="ar" markerWidth="12" markerHeight="8.4" refX="0" refY="4.2" markerUnits="userSpaceOnUse" orient="auto"><path d="M 0 0 L 12 4.2 L 0 8.4 Z" fill="#991B1B"/></marker></defs>
+<text x="580" y="58" font-family="'Noto Serif CJK SC','方正小标宋简体','FZXiaoBiaoSong-B05S','思源宋体','Source Han Serif SC','华文中宋','STZhongsong',serif" font-size="30" font-weight="700" stroke="#1F2933" stroke-width="0.3" fill="#1F2933" text-anchor="middle">测试案件 · 法律关系图</text>
+<g data-role="node">
+<rect data-kind="node" x="830" y="370" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="900" y="393" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">某甲公司</text>
+<text x="900" y="409" font-size="11" fill="#6B7280" text-anchor="middle">备注</text></g>
+<g data-role="node" data-emph="1">
+<rect data-kind="node" x="490" y="970" width="140" height="48" rx="12" fill="#991B1B"/>
+<text x="560" y="993" font-size="14" fill="#FFFFFF" text-anchor="middle" font-weight="700">某乙公司</text>
+<text x="560" y="1009" font-size="11" fill="#E8D5D5" text-anchor="middle">备注</text></g>
+<g data-role="node">
+<rect data-kind="node" x="490" y="770" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="560" y="793" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">某丙公司</text>
+<text x="560" y="809" font-size="11" fill="#6B7280" text-anchor="middle">备注</text></g>
+<g data-role="node">
+<rect data-kind="node" x="150" y="170" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="220" y="193" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">某丁公司</text>
+<text x="220" y="209" font-size="11" fill="#6B7280" text-anchor="middle">备注</text></g>
+<g data-role="node">
+<rect data-kind="node" x="490" y="170" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="560" y="193" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">某戊公司</text>
+<text x="560" y="209" font-size="11" fill="#6B7280" text-anchor="middle">备注</text></g>
+<g data-role="node">
+<rect data-kind="node" x="150" y="370" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="220" y="393" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">某己公司</text>
+<text x="220" y="409" font-size="11" fill="#6B7280" text-anchor="middle">备注</text></g>
+<g data-role="node">
+<rect data-kind="node" x="490" y="1170" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="560" y="1193" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">某庚公司</text>
+<text x="560" y="1209" font-size="11" fill="#6B7280" text-anchor="middle">备注</text></g>
+<g data-role="node">
+<rect data-kind="node" x="830" y="170" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="900" y="193" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">某辛公司</text>
+<text x="900" y="209" font-size="11" fill="#6B7280" text-anchor="middle">备注</text></g>
+<g data-role="node">
+<rect data-kind="node" x="830" y="970" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="900" y="993" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">某壬公司</text>
+<text x="900" y="1009" font-size="11" fill="#6B7280" text-anchor="middle">备注</text></g>
+<g data-role="node">
+<rect data-kind="node" x="830" y="570" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="900" y="593" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">某癸公司</text>
+<text x="900" y="609" font-size="11" fill="#6B7280" text-anchor="middle">备注</text></g>
+<g data-role="node">
+<rect data-kind="node" x="150" y="1170" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="220" y="1193" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">某子公司</text>
+<text x="220" y="1209" font-size="11" fill="#6B7280" text-anchor="middle">备注</text></g>
+<g data-role="node">
+<rect data-kind="node" x="830" y="1170" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="900" y="1193" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">某丑公司</text>
+<text x="900" y="1209" font-size="11" fill="#6B7280" text-anchor="middle">备注</text></g>
+<g data-role="node">
+<rect data-kind="node" x="150" y="770" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="220" y="793" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">某寅公司</text>
+<text x="220" y="809" font-size="11" fill="#6B7280" text-anchor="middle">备注</text></g>
+<g data-role="node">
+<rect data-kind="node" x="150" y="970" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="220" y="993" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">某卯公司</text>
+<text x="220" y="1009" font-size="11" fill="#6B7280" text-anchor="middle">备注</text></g>
+<g data-role="node">
+<rect data-kind="node" x="490" y="370" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="560" y="393" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">某辰公司</text>
+<text x="560" y="409" font-size="11" fill="#6B7280" text-anchor="middle">备注</text></g>
+<path data-kind="edge" d="M 830.00,394.00 L 703.12,394.00 A 3.12 3.12 0 0 0 700.00,397.12 L 700.00,890.88 A 3.12 3.12 0 0 1 696.88,894.00 L 589.12,894.00 A 3.12 3.12 0 0 0 586.00,897.12 L 586.00,958.00" fill="none" stroke="#4B5563" stroke-width="1.3" stroke-dasharray='4 3' marker-end="url(#a)"/>
+<path data-kind="edge" d="M 926.00,370.00 L 926.00,348.00 A 3.12 3.12 0 0 1 929.12,344.88 L 1006.88,344.88 A 3.12 3.12 0 0 0 1010.00,341.76 L 1010.00,93.12 A 3.12 3.12 0 0 0 1006.88,90.00 L 363.12,90.00 A 3.12 3.12 0 0 0 360.00,93.12 L 360.00,190.88 A 3.12 3.12 0 0 1 356.88,194.00 L 302.00,194.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 900.00,370.00 L 900.00,230.00" fill="none" stroke="#991B1B" stroke-width="3" marker-end="url(#ar)"/>
+<path data-kind="edge" d="M 900.00,418.00 L 900.00,558.00" fill="none" stroke="#4B5563" stroke-width="1.3" stroke-dasharray='4 3' marker-end="url(#a)"/>
+<path data-kind="edge" d="M 560.00,970.00 L 560.00,830.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 560.00,1018.00 L 560.00,1158.00" fill="none" stroke="#4B5563" stroke-width="1.3" stroke-dasharray='4 3' marker-end="url(#a)"/>
+<path data-kind="edge" d="M 630.00,994.00 L 818.00,994.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 220.00,818.00 L 220.00,958.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 290.00,794.00 L 416.88,794.00 A 3.12 3.12 0 0 0 420.00,790.88 L 420.00,497.12 A 3.12 3.12 0 0 1 423.12,494.00 L 556.88,494.00 A 3.12 3.12 0 0 0 560.00,490.88 L 560.00,430.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 220.00,770.00 L 220.00,697.12 A 3.12 3.12 0 0 1 223.12,694.00 L 556.88,694.00 A 3.12 3.12 0 0 1 560.00,697.12 L 560.00,758.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 290.00,994.00 L 478.00,994.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 220.00,1018.00 L 220.00,1158.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 586.00,370.00 L 586.00,297.12 A 3.12 3.12 0 0 1 589.12,294.00 L 870.88,294.00 A 3.12 3.12 0 0 1 874.00,297.12 L 874.00,358.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 220.00,170.00 L 220.00,93.12 A 3.12 3.12 0 0 0 216.88,90.00 L 73.12,90.00 A 3.12 3.12 0 0 0 70.00,93.12 L 70.00,890.88 A 3.12 3.12 0 0 0 73.12,894.00 L 416.88,894.00 A 3.12 3.12 0 0 0 420.00,890.88 L 420.00,797.12 A 3.12 3.12 0 0 1 423.12,794.00 L 478.00,794.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 246.00,170.00 L 246.00,133.12 A 3.12 3.12 0 0 1 249.12,130.00 L 556.88,130.00 A 3.12 3.12 0 0 1 560.00,133.12 L 560.00,158.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 220.00,218.00 L 220.00,358.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 490.00,194.00 L 363.12,194.00 A 3.12 3.12 0 0 0 360.00,197.12 L 360.00,290.88 A 3.12 3.12 0 0 1 356.88,294.00 L 113.12,294.00 A 3.12 3.12 0 0 0 110.00,297.12 L 110.00,654.88 A 3.12 3.12 0 0 0 113.12,658.00 L 242.88,658.00 A 3.12 3.12 0 0 1 246.00,661.12 L 246.00,758.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 560.00,218.00 L 560.00,358.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 290.00,394.00 L 416.88,394.00 A 3.12 3.12 0 0 0 420.00,390.88 L 420.00,297.12 A 3.12 3.12 0 0 1 423.12,294.00 L 582.88,294.00 A 3.12 3.12 0 0 0 586.00,290.88 L 586.00,230.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 490.00,1194.00 L 302.00,1194.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 900.00,1018.00 L 900.00,1158.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 900.00,970.00 L 900.00,897.12 A 3.12 3.12 0 0 1 903.12,894.00 L 1006.88,894.00 A 3.12 3.12 0 0 0 1010.00,890.88 L 1010.00,497.12 A 3.12 3.12 0 0 0 1006.88,494.00 L 589.12,494.00 A 3.12 3.12 0 0 1 586.00,490.88 L 586.00,430.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="718" y="647" font-size="12" fill="#6B7280" text-anchor="start">签订</text>
+<text x="685" y="72" font-size="12" fill="#6B7280" text-anchor="middle">签订</text>
+<text x="918" y="297" font-size="12" fill="#6B7280" text-anchor="start">签订</text>
+<text x="918" y="531" font-size="12" fill="#6B7280" text-anchor="start">签订</text>
+<text x="542" y="897" font-size="12" fill="#6B7280" text-anchor="end">签订</text>
+<text x="578" y="1097" font-size="12" fill="#6B7280" text-anchor="start">签订</text>
+<text x="730" y="976" font-size="12" fill="#6B7280" text-anchor="middle">签订</text>
+<text x="238" y="931" font-size="12" fill="#6B7280" text-anchor="start">签订</text>
+<text x="438" y="647" font-size="12" fill="#6B7280" text-anchor="start">签订</text>
+<text x="390" y="676" font-size="12" fill="#6B7280" text-anchor="middle">签订</text>
+<text x="390" y="976" font-size="12" fill="#6B7280" text-anchor="middle">签订</text>
+<text x="238" y="1097" font-size="12" fill="#6B7280" text-anchor="start">签订</text>
+<text x="730" y="276" font-size="12" fill="#6B7280" text-anchor="middle">签订</text>
+<text x="52" y="495" font-size="12" fill="#6B7280" text-anchor="end">签订</text>
+<text x="403" y="112" font-size="12" fill="#6B7280" text-anchor="middle">签订</text>
+<text x="238" y="331" font-size="12" fill="#6B7280" text-anchor="start">签订</text>
+<text x="128" y="479" font-size="12" fill="#6B7280" text-anchor="start">签订</text>
+<text x="542" y="331" font-size="12" fill="#6B7280" text-anchor="end">签订</text>
+<text x="503" y="276" font-size="12" fill="#6B7280" text-anchor="middle">签订</text>
+<text x="390" y="1176" font-size="12" fill="#6B7280" text-anchor="middle">签订</text>
+<text x="918" y="1097" font-size="12" fill="#6B7280" text-anchor="start">签订</text>
+<text x="798" y="476" font-size="12" fill="#6B7280" text-anchor="middle">签订</text>
+</svg>

@@ -9,7 +9,7 @@
     {
       "name": "mqc-nlv",
       "source": "./plugins/mqc-nlv",
-      "description": "诉讼可视化 skill 集：把诉讼材料与诉讼图画成克制、专业、可直接进诉讼材料的图，并交出可继续编辑的源文件。",
+      "description": "诉讼可视化 skill 集：把诉讼材料与诉讼图画成克制、专业、可直接进诉讼材料的图，并交出可继续编辑的源文件。含诉讼可视化重画、时间轴大师与庭前三大法宝（大事记表大师、庭审对抗图大师、法律关系图大师）。",
       "author": {
         "name": "缪奇川",
         "url": "https://github.com/MiaoQichuan"
@@ -25,7 +25,11 @@
         "timeline",
         "flowchart",
         "diagram",
-        "诉讼可视化"
+        "诉讼可视化",
+        "chronicle",
+        "confrontation",
+        "庭前三大法宝",
+        "法律关系图"
       ]
     }
   ]

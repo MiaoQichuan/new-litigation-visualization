@@ -1,0 +1,534 @@
+{
+ "schema": "mqc-casefile/1",
+ "case": {
+  "cid": "C-EXAMPLE",
+  "title": "示例案件（脱敏）",
+  "program": "一审",
+  "generated_by": "mqc-chronicle-master",
+  "generated_at": "2026-09-12"
+ },
+ "materials": [
+  {
+   "mid": "M01",
+   "name": "甲方学校货物（设备）买卖合同",
+   "medium": "text",
+   "submitted_by": "原告",
+   "evidence_prefix": "原证"
+  },
+  {
+   "mid": "M02",
+   "name": "田径运动会设备购置公开招标文件（节选）",
+   "medium": "text",
+   "submitted_by": "原告",
+   "evidence_prefix": "原证"
+  },
+  {
+   "mid": "M03",
+   "name": "政府采购投标文件（节选）",
+   "medium": "text",
+   "submitted_by": "原告",
+   "evidence_prefix": "原证"
+  },
+  {
+   "mid": "M04",
+   "name": "项目问题的澄清",
+   "medium": "text",
+   "submitted_by": "原告",
+   "evidence_prefix": "原证"
+  },
+  {
+   "mid": "M05",
+   "name": "中标通知书",
+   "medium": "text",
+   "submitted_by": "原告",
+   "evidence_prefix": "原证"
+  },
+  {
+   "mid": "M06",
+   "name": "两次供货查验情况说明及第二次到货查验情况表",
+   "medium": "text",
+   "submitted_by": "原告",
+   "evidence_prefix": "原证"
+  },
+  {
+   "mid": "M07",
+   "name": "律师函、快递封面及快递信息",
+   "medium": "text",
+   "submitted_by": "原告",
+   "evidence_prefix": "原证"
+  },
+  {
+   "mid": "M08",
+   "name": "民事起诉状",
+   "medium": "text",
+   "submitted_by": "原告",
+   "evidence_prefix": null
+  },
+  {
+   "mid": "M09",
+   "name": "民事反诉状",
+   "medium": "text",
+   "submitted_by": "被告",
+   "evidence_prefix": null
+  },
+  {
+   "mid": "M10",
+   "name": "（20××）某0000民初0000号民事判决书",
+   "medium": "text",
+   "submitted_by": "法院",
+   "evidence_prefix": null
+  }
+ ],
+ "reconcile": {
+  "pages_declared": 0,
+  "pages_read": 0,
+  "unreadable": 0,
+  "external_anchor": "证据目录所载页码区间 1-152 与判决书证据清单"
+ },
+ "parties": [
+  {
+   "pid": "P1",
+   "name": "甲方学校",
+   "aliases": [
+    "原告",
+    "反诉被告",
+    "甲方"
+   ],
+   "roles_verbatim": [
+    "原告",
+    "反诉被告",
+    "甲方",
+    "买受人"
+   ],
+   "source": [
+    "F005"
+   ]
+  },
+  {
+   "pid": "P2",
+   "name": "乙方公司",
+   "aliases": [
+    "被告",
+    "反诉原告",
+    "乙方"
+   ],
+   "roles_verbatim": [
+    "被告",
+    "反诉原告",
+    "乙方",
+    "供货商"
+   ],
+   "source": [
+    "F005"
+   ]
+  },
+  {
+   "pid": "P3",
+   "name": "丙方厂商",
+   "aliases": [
+    "某意公司"
+   ],
+   "roles_verbatim": [
+    "生产厂家"
+   ],
+   "source": [
+    "F005"
+   ]
+  },
+  {
+   "pid": "P4",
+   "name": "某区人民法院",
+   "aliases": [
+    "本院"
+   ],
+   "roles_verbatim": [
+    "本院"
+   ],
+   "source": [
+    "F015"
+   ]
+  },
+  {
+   "pid": "P5",
+   "name": "某律师事务所",
+   "aliases": [],
+   "roles_verbatim": [
+    "受委托发函的某律师事务所"
+   ],
+   "source": [
+    "F011"
+   ]
+  }
+ ],
+ "issues": [],
+ "issues_note": "争点表由律师在 Excel 母表内填写后回填；底稿生成时 facts.iid 一律为空（E2）",
+ "facts": [
+  {
+   "fid": "F001",
+   "date": "2025-01",
+   "date_certainty": "month",
+   "item": "发布《公开招标文件》",
+   "content": "载明：货物明细：径赛电动计时仪（彩色专业型）、自动发令系统、田赛激光测距仪、影像测量仪；径赛电动计时仪（彩色专业型）图像分辨率：高分辨率，如不低于1024×768像素，提供细腻的图像细节，支持镜头光圈电动调节；自动发令系统电子发令枪具备高亮指示灯；田赛激光测距仪测量精度达到2毫米或更高，测量时间通常在1.5秒以内；影像测量仪器测量误差0-10m时±2㎜，配备专业测量软件，支持自动测量",
+   "parties": [
+    "P1"
+   ],
+   "mid": "M02",
+   "locator": "第8至14页",
+   "evidence_no": "原证2",
+   "iid": null,
+   "relations": [],
+   "evidence_status": "有书证",
+   "new_evidence": false
+  },
+  {
+   "fid": "F002",
+   "date": "2025-02-12",
+   "date_certainty": "exact",
+   "item": "提交《政府采购投标文件》",
+   "content": "承诺：接受招标文件中全部合同条款，且无任何异议，保证忠实地执行双方所签订的合同，并承担合同规定的责任和义务；完全满足和响应招标文件中的各项商务和技术要求，若有偏差，已在投标文件中明确说明。《商务条款偏离表》及《技术条款偏离表》栏中均载明：全部满足招标文件中所有条款的要求",
+   "parties": [
+    "P2",
+    "P1"
+   ],
+   "mid": "M03",
+   "locator": "第15至128页",
+   "evidence_no": "原证3",
+   "iid": null,
+   "relations": [
+    "F001"
+   ],
+   "evidence_status": "有书证",
+   "new_evidence": false
+  },
+  {
+   "fid": "F003",
+   "date": "2025-02-12",
+   "date_certainty": "exact",
+   "item": "作出《项目问题的澄清》",
+   "content": "承诺其投标报价符合市场行情且具备品牌资质认证，列举服务名校赛事案例佐证产品质量，声明澄清内容不改变投标文件实质性条款",
+   "parties": [
+    "P2",
+    "P1"
+   ],
+   "mid": "M04",
+   "locator": "第129页",
+   "evidence_no": "原证4",
+   "iid": null,
+   "relations": [],
+   "evidence_status": "有书证",
+   "new_evidence": false
+  },
+  {
+   "fid": "F004",
+   "date": "2025-02-12",
+   "date_certainty": "exact",
+   "item": "发出《中标通知书》",
+   "content": "载明：中标金额为（大写）陆拾伍万伍仟元整，（小写）￥655000元，供货周期：签订合同后1个月内提供测试仪器并完成验收、安装、调试和运行、培训工作",
+   "parties": [
+    "P1",
+    "P2"
+   ],
+   "mid": "M05",
+   "locator": "第130页",
+   "evidence_no": "原证5",
+   "iid": null,
+   "relations": [],
+   "evidence_status": "有书证",
+   "new_evidence": false
+  },
+  {
+   "fid": "F005",
+   "date": "2025-03-13",
+   "date_certainty": "exact",
+   "item": "签订《货物（设备）买卖合同》",
+   "content": "编号合同编号略，总金额人民币￥655000元；乙方所提供的货物（设备）必须是全新、未使用的原装产品；如乙方对验收结果有异议，应在收到验收结果之日起7日内向甲方书面提出，否则视为认可甲方的验收结果；若乙方提供的货物（设备）不符合合同约定且未能通过甲方验收，补救不能或者经补救仍不能达到质量要求时，甲方有权拒绝接受货物（设备），单方解除本合同并要求乙方退款，此外乙方应向甲方支付合同总金额20%违约金",
+   "parties": [
+    "P1",
+    "P2",
+    "P3"
+   ],
+   "mid": "M01",
+   "locator": "第1至7页",
+   "evidence_no": "原证1",
+   "iid": null,
+   "relations": [],
+   "evidence_status": "有书证",
+   "new_evidence": false
+  },
+  {
+   "fid": "F006",
+   "date": "2025-03-14",
+   "date_certainty": "exact",
+   "item": "支付履约保证金",
+   "content": "被告向原告支付了65500元履约保证金",
+   "parties": [
+    "P2",
+    "P1"
+   ],
+   "mid": "M10",
+   "locator": "第15页",
+   "evidence_no": null,
+   "iid": null,
+   "relations": [
+    "F005"
+   ],
+   "evidence_status": "仅当事人陈述",
+   "new_evidence": false
+  },
+  {
+   "fid": "F007",
+   "date": "2025-04-01",
+   "date_certainty": "exact",
+   "item": "交付设备",
+   "content": "被告交付设备，原告于当日组织查验",
+   "parties": [
+    "P2",
+    "P1"
+   ],
+   "mid": "M10",
+   "locator": "第16页",
+   "evidence_no": null,
+   "iid": null,
+   "relations": [],
+   "evidence_status": "仅当事人陈述",
+   "new_evidence": false
+  },
+  {
+   "fid": "F008",
+   "date": "2025-04-01",
+   "date_certainty": "exact",
+   "item": "作出首次查验结果",
+   "content": "查验结果：未通过。未通过原因：供货商提供的设备与招标文件和合同承诺设备性能参数严重不符",
+   "parties": [
+    "P1",
+    "P2"
+   ],
+   "mid": "M06",
+   "locator": "第131至146页",
+   "evidence_no": "原证6",
+   "iid": null,
+   "relations": [
+    "F007"
+   ],
+   "evidence_status": "有书证",
+   "new_evidence": false
+  },
+  {
+   "fid": "F009",
+   "date": "2025-04-11",
+   "date_certainty": "exact",
+   "item": "交付设备",
+   "content": "被告将设备再次运到原告处，原告遂组织查验",
+   "parties": [
+    "P2",
+    "P1"
+   ],
+   "mid": "M10",
+   "locator": "第16页",
+   "evidence_no": null,
+   "iid": null,
+   "relations": [],
+   "evidence_status": "仅当事人陈述",
+   "new_evidence": false
+  },
+  {
+   "fid": "F010",
+   "date": "2025-04-11",
+   "date_certainty": "exact",
+   "item": "作出第二次查验结果",
+   "content": "查验结果：未通过。径赛电动计时仪虽能提供1024×768像素图像，但是放大后变虚，无法判定多名运动员抵达终点线清晰图像；供货商提供的镜头光圈为手动调节，不符合支持镜头光圈电动调节；自动发令系统电子发令枪不具备高亮指示灯；田赛激光测距仪测量时间不满足通常在1.5秒以内，现场测试供货商专业人士测试均为10秒以上；影像测量仪调试时长为3.5小时，调试人员先用钢尺测量成绩，然后再到电脑系统软件上作假标定，在室内跑廊跑道平地查验时测量误差达2厘米，现场多次查验测量误差达8mm以上，最高达2.5厘米",
+   "parties": [
+    "P1",
+    "P2"
+   ],
+   "mid": "M06",
+   "locator": "第131至146页",
+   "evidence_no": "原证6",
+   "iid": null,
+   "relations": [
+    "F009"
+   ],
+   "evidence_status": "有书证",
+   "new_evidence": false
+  },
+  {
+   "fid": "F011",
+   "date": "2025-04-23",
+   "date_certainty": "exact",
+   "item": "发出《律师函》",
+   "content": "原告委托某律师事务所通过EMS国内特快专递向被告发送律师函，函告：委托人现依法行使合同解除权，自本函送达之日起解除编号为合同编号略的《货物（设备）买卖合同》，贵司须向委托人支付相应的违约金",
+   "parties": [
+    "P1",
+    "P5",
+    "P2"
+   ],
+   "mid": "M07",
+   "locator": "第149至152页",
+   "evidence_no": "原证9",
+   "iid": null,
+   "relations": [
+    "F005"
+   ],
+   "evidence_status": "有书证",
+   "new_evidence": false
+  },
+  {
+   "fid": "F012",
+   "date": "2025-04-25",
+   "date_certainty": "exact",
+   "item": "收到《律师函》",
+   "content": "被告方于2025年4月25日签收了该函件",
+   "parties": [
+    "P2"
+   ],
+   "mid": "M07",
+   "locator": "第149至152页",
+   "evidence_no": "原证9",
+   "iid": null,
+   "relations": [
+    "F011"
+   ],
+   "evidence_status": "有书证",
+   "new_evidence": false
+  },
+  {
+   "fid": "F013",
+   "date": "2025-04-28",
+   "date_certainty": "exact",
+   "item": "投诉至纪检部门",
+   "content": "在反诉原告数次据理力争无果后，2025年4月28日书面投诉到反诉被告的纪检部门",
+   "parties": [
+    "P2",
+    "P1"
+   ],
+   "mid": "M09",
+   "locator": "第2页",
+   "evidence_no": null,
+   "iid": null,
+   "relations": [],
+   "evidence_status": "仅当事人陈述",
+   "new_evidence": false
+  },
+  {
+   "fid": "F014",
+   "date": "2025-05",
+   "date_certainty": "month",
+   "item": "提起本诉",
+   "content": "诉讼请求：1、请求人民法院判令解除原告与被告在2025年3月13日签订的《甲方学校货物（设备）买卖合同》；2、请求人民法院判令被告向原告支付违约金人民币131000元；3、本案的诉讼费、保全费等全部诉讼费用由被告承担",
+   "parties": [
+    "P1",
+    "P2"
+   ],
+   "mid": "M08",
+   "locator": "第1页",
+   "evidence_no": null,
+   "iid": null,
+   "relations": [
+    "F005"
+   ],
+   "evidence_status": "仅当事人陈述",
+   "new_evidence": false
+  },
+  {
+   "fid": "F015",
+   "date": "2025-06-06",
+   "date_certainty": "exact",
+   "item": "立案",
+   "content": "本院于2025年6月6日立案后，依法适用普通程序，公开开庭进行了审理",
+   "parties": [
+    "P4"
+   ],
+   "mid": "M10",
+   "locator": "第1页",
+   "evidence_no": null,
+   "iid": null,
+   "relations": [
+    "F014"
+   ],
+   "evidence_status": "仅当事人陈述",
+   "new_evidence": false
+  },
+  {
+   "fid": "F016",
+   "date": "2025-06-26",
+   "date_certainty": "exact",
+   "item": "提起反诉",
+   "content": "反诉请求：依法判令反诉被告接收四套田径运动会比赛设备，继续履行合同",
+   "parties": [
+    "P2",
+    "P1"
+   ],
+   "mid": "M09",
+   "locator": "第1页",
+   "evidence_no": null,
+   "iid": null,
+   "relations": [],
+   "evidence_status": "仅当事人陈述",
+   "new_evidence": false
+  },
+  {
+   "fid": "F017",
+   "date": "2025-12-05",
+   "date_certainty": "exact",
+   "item": "判决",
+   "content": "一、解除原告甲方学校与被告乙方公司签订的编号为合同编号略的《甲方学校货物（设备）买卖合同》；二、被告乙方公司于本判决生效后十日内给付原告甲方学校违约金65500元；三、驳回反诉原告乙方公司的诉讼请求",
+   "parties": [
+    "P4",
+    "P1",
+    "P2"
+   ],
+   "mid": "M10",
+   "locator": "第18至19页",
+   "evidence_no": null,
+   "iid": null,
+   "relations": [
+    "F014",
+    "F016"
+   ],
+   "evidence_status": "仅当事人陈述",
+   "new_evidence": false
+  }
+ ],
+ "uncertainties": [
+  {
+   "fid": "F006",
+   "what": "履约保证金支付日期与金额",
+   "why": "判决书查明，未见付款凭证在证据目录中单独列明"
+  },
+  {
+   "fid": "F007",
+   "what": "首次交付日期",
+   "why": "判决书查明，未见交付单据"
+  },
+  {
+   "fid": "F009",
+   "what": "第二次交付日期",
+   "why": "判决书查明，未见交付单据"
+  },
+  {
+   "fid": "F013",
+   "what": "投诉至纪检部门",
+   "why": "仅见于反诉状陈述，未见书证"
+  },
+  {
+   "fid": "F014",
+   "what": "起诉日期",
+   "why": "起诉状落款为2025年5月，未填具体日"
+  },
+  {
+   "fid": "F015",
+   "what": "立案",
+   "why": "判决书记载"
+  },
+  {
+   "fid": "F016",
+   "what": "反诉提起日期",
+   "why": "反诉状落款2025年6月26日"
+  },
+  {
+   "fid": "F017",
+   "what": "判决",
+   "why": "判决书本身"
+  }
+ ]
+}

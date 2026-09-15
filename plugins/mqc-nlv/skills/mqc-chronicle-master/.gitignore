@@ -1,0 +1,11 @@
+# 真实卷宗产出的底稿与交付物一律不进仓库（含当事人信息、证据编号、金额）
+runs/
+out/
+*.docx
+*.xlsx
+!examples/*.json
+
+__pycache__/
+*.pyc
+node_modules/
+.DS_Store

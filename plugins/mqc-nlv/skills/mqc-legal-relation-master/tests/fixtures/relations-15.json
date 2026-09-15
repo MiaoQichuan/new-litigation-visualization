@@ -1,0 +1,203 @@
+{
+ "slug": "case15",
+ "title": "股权转让纠纷 · 法律关系图",
+ "nodes": [
+  {
+   "id": "ZHAO",
+   "name": "张某",
+   "note": "被上诉人 / 投资方 / 受托人",
+   "kind": "主体"
+  },
+  {
+   "id": "NI",
+   "name": "李某某",
+   "note": "上诉人 / 原股东 / 委托人",
+   "kind": "主体"
+  },
+  {
+   "id": "WANG",
+   "name": "刘某某",
+   "note": "",
+   "kind": "主体"
+  },
+  {
+   "id": "JIA",
+   "name": "某甲公司",
+   "note": "",
+   "kind": "主体"
+  },
+  {
+   "id": "JIAH",
+   "name": "某甲 Holdings Limited",
+   "note": "某甲公司股份受让方",
+   "kind": "主体"
+  },
+  {
+   "id": "BING",
+   "name": "某丙控股有限公司",
+   "note": "某乙公司全资附属公司",
+   "kind": "主体"
+  },
+  {
+   "id": "DING",
+   "name": "某丁公司",
+   "note": "《投资协议》目标公司",
+   "kind": "主体"
+  },
+  {
+   "id": "ALPHA",
+   "name": "Example（China）Limited",
+   "note": "登记受让方",
+   "kind": "主体"
+  },
+  {
+   "id": "INV",
+   "name": "《投资协议》",
+   "note": "2020年1月1日",
+   "kind": "客体"
+  },
+  {
+   "id": "SUP",
+   "name": "《补充协议》",
+   "note": "",
+   "kind": "客体"
+  },
+  {
+   "id": "PROXY",
+   "name": "《股权代持协议》",
+   "note": "",
+   "kind": "客体"
+  },
+  {
+   "id": "JIA6",
+   "name": "某甲公司股份",
+   "note": "数量经调整",
+   "kind": "客体"
+  },
+  {
+   "id": "DING100",
+   "name": "某丁公司100%股权",
+   "note": "李某某80% / 刘某某20%",
+   "kind": "客体"
+  },
+  {
+   "id": "DIV",
+   "name": "年度特别分红",
+   "note": "",
+   "kind": "客体"
+  },
+  {
+   "id": "YI",
+   "name": "某乙公司",
+   "note": "",
+   "kind": "主体"
+  }
+ ],
+ "edges": [
+  {
+   "from": "ZHAO",
+   "to": "INV",
+   "label": "签订"
+  },
+  {
+   "from": "NI",
+   "to": "INV",
+   "label": "签订"
+  },
+  {
+   "from": "WANG",
+   "to": "INV",
+   "label": "签订"
+  },
+  {
+   "from": "INV",
+   "to": "DING100",
+   "label": "100%股权转让"
+  },
+  {
+   "from": "DING100",
+   "to": "ALPHA",
+   "label": "过户至其名下"
+  },
+  {
+   "from": "INV",
+   "to": "JIA6",
+   "label": "股份支付"
+  },
+  {
+   "from": "ZHAO",
+   "to": "JIA6",
+   "label": "名义持有"
+  },
+  {
+   "from": "NI",
+   "to": "JIA6",
+   "label": "实际享有股东权利"
+  },
+  {
+   "from": "ZHAO",
+   "to": "NI",
+   "label": "应及时转付"
+  },
+  {
+   "from": "ZHAO",
+   "to": "SUP",
+   "label": "签订"
+  },
+  {
+   "from": "SUP",
+   "to": "JIA6",
+   "label": "自动调整"
+  },
+  {
+   "from": "NI",
+   "to": "PROXY",
+   "label": "委托人"
+  },
+  {
+   "from": "ZHAO",
+   "to": "PROXY",
+   "label": "受托人"
+  },
+  {
+   "from": "NI",
+   "to": "DING100",
+   "label": "转让80%股权"
+  },
+  {
+   "from": "WANG",
+   "to": "DING100",
+   "label": "转让20%股权"
+  },
+  {
+   "from": "JIAH",
+   "to": "JIA",
+   "label": "某甲公司股份受让方"
+  },
+  {
+   "from": "BING",
+   "to": "YI",
+   "label": "全资附属"
+  },
+  {
+   "from": "INV",
+   "to": "DING",
+   "label": "作为目标公司"
+  },
+  {
+   "from": "JIA6",
+   "to": "DIV",
+   "label": "分红"
+  },
+  {
+   "from": "ZHAO",
+   "to": "DIV",
+   "label": "收取"
+  },
+  {
+   "from": "DIV",
+   "to": "NI",
+   "label": "应转付"
+  }
+ ]
+}

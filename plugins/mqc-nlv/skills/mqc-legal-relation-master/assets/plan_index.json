@@ -1,0 +1,1430 @@
+{
+ "星形:5": {
+  "ok": true,
+  "tall": false,
+  "core": 4,
+  "grids": [
+   [
+    3,
+    3
+   ],
+   [
+    4,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "星形:6": {
+  "ok": true,
+  "tall": false,
+  "core": 5,
+  "grids": [
+   [
+    4,
+    2
+   ],
+   [
+    3,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "星形:7": {
+  "ok": true,
+  "tall": false,
+  "core": 6,
+  "grids": [
+   [
+    3,
+    4
+   ],
+   [
+    4,
+    2
+   ],
+   [
+    5,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "星形:8": {
+  "ok": true,
+  "tall": false,
+  "core": 7,
+  "grids": [
+   [
+    2,
+    4
+   ],
+   [
+    4,
+    2
+   ],
+   [
+    5,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "星形:9": {
+  "ok": true,
+  "tall": false,
+  "core": 8,
+  "grids": [
+   [
+    3,
+    3
+   ],
+   [
+    5,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "星形:10": {
+  "ok": true,
+  "tall": false,
+  "core": 9,
+  "grids": [
+   [
+    4,
+    3
+   ],
+   [
+    5,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "星形:11": {
+  "ok": true,
+  "tall": false,
+  "core": 10,
+  "grids": [
+   [
+    5,
+    3
+   ],
+   [
+    4,
+    3
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "星形:12": {
+  "ok": true,
+  "tall": true,
+  "core": 11,
+  "grids": [
+   [
+    4,
+    3
+   ],
+   [
+    5,
+    3
+   ]
+  ],
+  "node": [
+   140,
+   78
+  ],
+  "row": 260,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "星形:13": {
+  "ok": true,
+  "tall": true,
+  "core": 12,
+  "grids": [
+   [
+    5,
+    3
+   ],
+   [
+    3,
+    6
+   ],
+   [
+    4,
+    4
+   ]
+  ],
+  "node": [
+   140,
+   78
+  ],
+  "row": 260,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "星形:14": {
+  "ok": false,
+  "core": 13,
+  "reason": "关系最多的那个主体有 13 条，超过单个主体能挂的上限 12。需要拆图，或把其中几条合并表述。"
+ },
+ "星形:15": {
+  "ok": false,
+  "core": 14,
+  "reason": "关系最多的那个主体有 14 条，超过单个主体能挂的上限 12。需要拆图，或把其中几条合并表述。"
+ },
+ "星形:16": {
+  "ok": false,
+  "core": 15,
+  "reason": "关系最多的那个主体有 15 条，超过单个主体能挂的上限 12。需要拆图，或把其中几条合并表述。"
+ },
+ "双核带核间边:5": {
+  "ok": true,
+  "tall": false,
+  "core": 4,
+  "grids": [
+   [
+    3,
+    3
+   ],
+   [
+    4,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "双核带核间边:6": {
+  "ok": true,
+  "tall": false,
+  "core": 5,
+  "grids": [
+   [
+    2,
+    4
+   ],
+   [
+    4,
+    2
+   ],
+   [
+    3,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "双核带核间边:7": {
+  "ok": true,
+  "tall": false,
+  "core": 6,
+  "grids": [
+   [
+    6,
+    2
+   ],
+   [
+    4,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "双核带核间边:8": {
+  "ok": true,
+  "tall": false,
+  "core": 7,
+  "grids": [
+   [
+    2,
+    4
+   ],
+   [
+    4,
+    2
+   ],
+   [
+    5,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "双核带核间边:9": {
+  "ok": true,
+  "tall": false,
+  "core": 8,
+  "grids": [
+   [
+    3,
+    4
+   ],
+   [
+    5,
+    2
+   ],
+   [
+    4,
+    3
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "双核带核间边:10": {
+  "ok": true,
+  "tall": false,
+  "core": 9,
+  "grids": [
+   [
+    4,
+    3
+   ],
+   [
+    5,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "双核带核间边:11": {
+  "ok": true,
+  "tall": false,
+  "core": 10,
+  "grids": [
+   [
+    7,
+    2
+   ],
+   [
+    4,
+    3
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "双核带核间边:12": {
+  "ok": true,
+  "tall": true,
+  "core": 11,
+  "grids": [
+   [
+    4,
+    3
+   ],
+   [
+    5,
+    3
+   ]
+  ],
+  "node": [
+   140,
+   78
+  ],
+  "row": 260,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "双核带核间边:13": {
+  "ok": true,
+  "tall": true,
+  "core": 12,
+  "grids": [
+   [
+    5,
+    3
+   ],
+   [
+    3,
+    6
+   ],
+   [
+    4,
+    4
+   ]
+  ],
+  "node": [
+   140,
+   78
+  ],
+  "row": 260,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "双核带核间边:14": {
+  "ok": false,
+  "core": 13,
+  "reason": "关系最多的那个主体有 13 条，超过单个主体能挂的上限 12。需要拆图，或把其中几条合并表述。"
+ },
+ "双核带核间边:15": {
+  "ok": false,
+  "core": 14,
+  "reason": "关系最多的那个主体有 14 条，超过单个主体能挂的上限 12。需要拆图，或把其中几条合并表述。"
+ },
+ "双核带核间边:16": {
+  "ok": false,
+  "core": 15,
+  "reason": "关系最多的那个主体有 15 条，超过单个主体能挂的上限 12。需要拆图，或把其中几条合并表述。"
+ },
+ "纯双核:5": {
+  "ok": true,
+  "tall": false,
+  "core": 3,
+  "grids": [
+   [
+    3,
+    3
+   ],
+   [
+    4,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "纯双核:6": {
+  "ok": true,
+  "tall": false,
+  "core": 4,
+  "grids": [
+   [
+    2,
+    4
+   ],
+   [
+    4,
+    2
+   ],
+   [
+    3,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "纯双核:7": {
+  "ok": true,
+  "tall": false,
+  "core": 5,
+  "grids": [
+   [
+    6,
+    2
+   ],
+   [
+    4,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "纯双核:8": {
+  "ok": true,
+  "tall": false,
+  "core": 6,
+  "grids": [
+   [
+    2,
+    4
+   ],
+   [
+    4,
+    2
+   ],
+   [
+    5,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "纯双核:9": {
+  "ok": true,
+  "tall": false,
+  "core": 7,
+  "grids": [
+   [
+    3,
+    4
+   ],
+   [
+    5,
+    2
+   ],
+   [
+    4,
+    3
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "纯双核:10": {
+  "ok": true,
+  "tall": false,
+  "core": 8,
+  "grids": [
+   [
+    4,
+    3
+   ],
+   [
+    5,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "纯双核:11": {
+  "ok": true,
+  "tall": false,
+  "core": 9,
+  "grids": [
+   [
+    7,
+    2
+   ],
+   [
+    4,
+    3
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "纯双核:12": {
+  "ok": true,
+  "tall": false,
+  "core": 10,
+  "grids": [
+   [
+    2,
+    6
+   ],
+   [
+    5,
+    3
+   ],
+   [
+    4,
+    3
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "纯双核:13": {
+  "ok": true,
+  "tall": true,
+  "core": 11,
+  "grids": [
+   [
+    5,
+    3
+   ],
+   [
+    3,
+    6
+   ],
+   [
+    4,
+    4
+   ]
+  ],
+  "node": [
+   140,
+   78
+  ],
+  "row": 260,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "纯双核:14": {
+  "ok": true,
+  "tall": true,
+  "core": 12,
+  "grids": [
+   [
+    2,
+    7
+   ],
+   [
+    5,
+    3
+   ],
+   [
+    4,
+    4
+   ]
+  ],
+  "node": [
+   140,
+   78
+  ],
+  "row": 260,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "纯双核:15": {
+  "ok": false,
+  "core": 13,
+  "reason": "关系最多的那个主体有 13 条，超过单个主体能挂的上限 12。需要拆图，或把其中几条合并表述。"
+ },
+ "纯双核:16": {
+  "ok": false,
+  "core": 14,
+  "reason": "关系最多的那个主体有 14 条，超过单个主体能挂的上限 12。需要拆图，或把其中几条合并表述。"
+ },
+ "链:5": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    3,
+    3
+   ],
+   [
+    4,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "链:6": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    2,
+    4
+   ],
+   [
+    4,
+    2
+   ],
+   [
+    3,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "链:7": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    3,
+    4
+   ],
+   [
+    4,
+    2
+   ],
+   [
+    5,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "链:8": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    3,
+    4
+   ],
+   [
+    4,
+    2
+   ],
+   [
+    5,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "链:9": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    3,
+    3
+   ],
+   [
+    5,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "链:10": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    5,
+    2
+   ],
+   [
+    4,
+    3
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "链:11": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    2,
+    6
+   ],
+   [
+    4,
+    3
+   ],
+   [
+    6,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "链:12": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    6,
+    2
+   ],
+   [
+    5,
+    3
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "链:13": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    2,
+    8
+   ],
+   [
+    5,
+    3
+   ],
+   [
+    4,
+    4
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "链:14": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    4,
+    4
+   ],
+   [
+    5,
+    3
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "链:15": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    3,
+    5
+   ],
+   [
+    6,
+    3
+   ],
+   [
+    5,
+    3
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "链:16": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    2,
+    8
+   ],
+   [
+    6,
+    3
+   ],
+   [
+    4,
+    4
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "混合:5": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    3,
+    2
+   ],
+   [
+    4,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "混合:6": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    3,
+    3
+   ],
+   [
+    4,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "混合:7": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    4,
+    3
+   ],
+   [
+    4,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "混合:8": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    3,
+    3
+   ],
+   [
+    4,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "混合:9": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    2,
+    5
+   ],
+   [
+    5,
+    2
+   ],
+   [
+    4,
+    3
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "混合:10": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    5,
+    2
+   ],
+   [
+    4,
+    3
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "混合:11": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    3,
+    5
+   ],
+   [
+    4,
+    3
+   ],
+   [
+    6,
+    2
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "混合:12": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    6,
+    2
+   ],
+   [
+    5,
+    3
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "混合:13": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    8,
+    2
+   ],
+   [
+    5,
+    3
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "混合:14": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    5,
+    3
+   ],
+   [
+    4,
+    4
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "混合:15": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    5,
+    3
+   ],
+   [
+    6,
+    3
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ },
+ "混合:16": {
+  "ok": true,
+  "tall": false,
+  "core": null,
+  "grids": [
+   [
+    6,
+    3
+   ],
+   [
+    4,
+    4
+   ]
+  ],
+  "node": [
+   140,
+   48
+  ],
+  "row": 200,
+  "col": 340,
+  "restarts": 12,
+  "coarse": 1,
+  "fine": 2,
+  "portrait_bonus": 2
+ }
+}

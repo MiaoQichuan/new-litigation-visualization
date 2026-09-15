@@ -1,0 +1,111 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "案件事实底稿 mqc-casefile/1",
+  "description": "大事记表大师的唯一事实来源；Word 与 Excel 是它的渲染，下游 skill 读同一份。只装陈述与出处，不装判断。",
+  "type": "object",
+  "required": ["schema", "case", "materials", "reconcile", "parties", "facts"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {"const": "mqc-casefile/1"},
+    "case": {
+      "type": "object",
+      "required": ["cid", "title", "program"],
+      "properties": {
+        "cid": {"type": "string"},
+        "title": {"type": "string"},
+        "program": {"type": "string", "description": "诉前 / 一审 / 二审 / 再审 等，照录"},
+        "generated_by": {"type": "string"},
+        "generated_at": {"type": "string"}
+      }
+    },
+    "materials": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["mid", "name", "medium"],
+        "properties": {
+          "mid": {"type": "string", "pattern": "^M\\d{2}$"},
+          "name": {"type": "string"},
+          "medium": {"enum": ["text", "image", "transcript"]},
+          "pages": {"type": "integer"},
+          "submitted_by": {"type": ["string", "null"]},
+          "evidence_prefix": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "reconcile": {
+      "type": "object",
+      "required": ["pages_declared", "pages_read", "unreadable", "external_anchor"],
+      "description": "完备性对账。扫描件那条路上句数对账会变成自证，外部锚是唯一把手。",
+      "properties": {
+        "pages_declared": {"type": "integer"},
+        "pages_read": {"type": "integer"},
+        "unreadable": {"type": "integer"},
+        "external_anchor": {"type": "string"}
+      }
+    },
+    "parties": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["pid", "name", "roles_verbatim"],
+        "properties": {
+          "pid": {"type": "string", "pattern": "^P\\d+$"},
+          "name": {"type": "string"},
+          "aliases": {"type": "array", "items": {"type": "string"}},
+          "roles_verbatim": {"type": "array", "items": {"type": "string"},
+            "description": "照录材料用词，不归并同义、不改写成法律身份（E5）"},
+          "source": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "issues": {"type": "array", "description": "争点表由律师在 Excel 母表内填写后回填（E2）"},
+    "facts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["fid", "date", "date_certainty", "item", "content",
+                     "mid", "locator", "evidence_no", "iid", "evidence_status"],
+        "additionalProperties": false,
+        "properties": {
+          "fid": {"type": "string", "pattern": "^F\\d{3}$",
+            "description": "顺序分配，一旦分配不再变动，删行不回收（下游已引用）"},
+          "date": {"type": "string"},
+          "date_certainty": {"enum": ["exact", "month", "year", "range"]},
+          "item": {"type": "string", "maxLength": 15,
+            "description": "动词 + 《文书名》或动词 + 宾语；动词取自封闭表（C2）"},
+          "content": {"type": "string", "description": "照录原文，子序列可核验（B1/B3）"},
+          "parties": {"type": "array", "items": {"type": "string"}},
+          "mid": {"type": "string"},
+          "locator": {"type": "string", "description": "页码或段落，可指回原处"},
+          "evidence_no": {"type": ["string", "null"]},
+          "iid": {"type": "null", "description": "底稿生成时一律为空（E2）"},
+          "relations": {"type": "array", "items": {"type": "string"},
+            "description": "只在材料原文明确写出指向时填（E3）"},
+          "evidence_status": {"enum": ["有书证", "仅当事人陈述"],
+            "description": "由有无证据编号机械决定，不由模型判断（E4）"},
+          "new_evidence": {"type": "boolean"},
+          "medium": {"enum": ["text", "image"], "description": "image 来源须在产物上标明未经逐字核验"},
+          "note": {"type": "string"},
+          "quotes": {"type": "array"}
+        }
+      }
+    },
+    "uncertainties": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["fid", "what", "why"],
+        "properties": {"fid": {"type": "string"}, "what": {"type": "string"},
+                       "why": {"type": "string", "description": "只写材料上没有什么，不写倾向性判断"}}
+      }
+    },
+    "arithmetic_notes": {
+      "type": "array",
+      "description": "材料自带等式的核对。是证据不是判据：只报告，不修正（ADR 0002）。",
+      "items": {"type": "object",
+        "properties": {"where": {"type": "string"}, "check": {"type": "string"}, "result": {"type": "string"}}}
+    },
+    "issues_note": {"type": "string"}
+  }
+}

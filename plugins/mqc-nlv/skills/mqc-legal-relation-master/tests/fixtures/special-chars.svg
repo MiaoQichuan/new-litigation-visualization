@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="698" viewBox="0 0 1120 698" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei','Noto Sans SC','Helvetica Neue',Arial,sans-serif">
+<rect width="1120" height="698" fill="#FFFFFF"/>
+<defs><marker id="a" markerWidth="12" markerHeight="8.4" refX="0" refY="4.2" markerUnits="userSpaceOnUse" orient="auto"><path d="M 0 0 L 12 4.2 L 0 8.4 Z" fill="#4B5563"/></marker><marker id="ar" markerWidth="12" markerHeight="8.4" refX="0" refY="4.2" markerUnits="userSpaceOnUse" orient="auto"><path d="M 0 0 L 12 4.2 L 0 8.4 Z" fill="#991B1B"/></marker></defs>
+<text x="560" y="58" font-family="'Noto Serif CJK SC','方正小标宋简体','FZXiaoBiaoSong-B05S','思源宋体','Source Han Serif SC','华文中宋','STZhongsong',serif" font-size="30" font-weight="700" stroke="#1F2933" stroke-width="0.3" fill="#1F2933" text-anchor="middle">测试案件 · 法律关系图</text>
+<g data-role="node">
+<rect data-kind="node" x="490" y="570" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="560" y="593" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">A&amp;B Holdings Limited</text>
+<text x="560" y="609" font-size="11" fill="#6B7280" text-anchor="middle">《投资协议》目标公司</text></g>
+<g data-role="node">
+<rect data-kind="node" x="150" y="370" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="220" y="393" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">某甲公司&lt;筹&gt;</text>
+<text x="220" y="409" font-size="11" fill="#6B7280" text-anchor="middle">"代持"人</text></g>
+<g data-role="node">
+<rect data-kind="node" x="830" y="170" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="900" y="193" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">李某某</text>
+<text x="900" y="209" font-size="11" fill="#6B7280" text-anchor="middle">上诉人 / 原股东 / 委托人</text></g>
+<g data-role="node">
+<rect data-kind="node" x="830" y="370" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="900" y="393" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">Delta (China) Limited</text>
+<text x="900" y="409" font-size="11" fill="#6B7280" text-anchor="middle">登记受让方</text></g>
+<g data-role="node">
+<rect data-kind="node" x="490" y="170" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="560" y="193" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">《股权代持协议》</text>
+<text x="560" y="209" font-size="11" fill="#6B7280" text-anchor="middle">2020年1月1日</text></g>
+<g data-role="node" data-emph="1">
+<rect data-kind="node" x="490" y="370" width="140" height="48" rx="12" fill="#991B1B"/>
+<text x="560" y="393" font-size="14" fill="#FFFFFF" text-anchor="middle" font-weight="700">某丁公司100%股权</text>
+<text x="560" y="409" font-size="11" fill="#E8D5D5" text-anchor="middle">李某某80% / 刘某某20%</text></g>
+<g data-role="node">
+<rect data-kind="node" x="150" y="170" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="220" y="193" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">张某</text>
+<text x="220" y="209" font-size="11" fill="#6B7280" text-anchor="middle">被上诉人 / 投资方 / 受托人</text></g>
+<path data-kind="edge" d="M 830.00,194.00 L 642.00,194.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 290.00,194.00 L 478.00,194.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 560.00,218.00 L 560.00,358.00" fill="none" stroke="#4B5563" stroke-width="1.3" stroke-dasharray='4 3' marker-end="url(#a)"/>
+<path data-kind="edge" d="M 900.00,170.00 L 900.00,93.12 A 3.12 3.12 0 0 0 896.88,90.00 L 423.12,90.00 A 3.12 3.12 0 0 0 420.00,93.12 L 420.00,390.88 A 3.12 3.12 0 0 0 423.12,394.00 L 478.00,394.00" fill="none" stroke="#991B1B" stroke-width="3" marker-end="url(#ar)"/>
+<path data-kind="edge" d="M 830.00,394.00 L 642.00,394.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 490.00,594.00 L 223.12,594.00 A 3.12 3.12 0 0 1 220.00,590.88 L 220.00,430.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 220.00,370.00 L 220.00,230.00" fill="none" stroke="#4B5563" stroke-width="1.3" stroke-dasharray='4 3' marker-end="url(#a)"/>
+<path data-kind="edge" d="M 560.00,570.00 L 560.00,430.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="730" y="176" font-size="12" fill="#6B7280" text-anchor="middle">签订</text>
+<text x="390" y="176" font-size="12" fill="#6B7280" text-anchor="middle">签订</text>
+<text x="578" y="297" font-size="12" fill="#6B7280" text-anchor="start">代持标的 &amp; 收益</text>
+<text x="660" y="72" font-size="12" fill="#6B7280" text-anchor="middle">转让80%股权</text>
+<text x="730" y="376" font-size="12" fill="#6B7280" text-anchor="middle">过户至其名下</text>
+<text x="355" y="576" font-size="12" fill="#6B7280" text-anchor="middle">100%持股 &lt;间接&gt;</text>
+<text x="238" y="297" font-size="12" fill="#6B7280" text-anchor="start">名义持有</text>
+<text x="578" y="497" font-size="12" fill="#6B7280" text-anchor="start">作为目标公司</text>
+</svg>

@@ -1,0 +1,172 @@
+{
+ "schema": "mqc-casefile/1",
+ "case": {
+  "cid": "C-EXAMPLE",
+  "title": "示例案件（脱敏）",
+  "program": "诉前",
+  "generated_by": "mqc-chronicle-master",
+  "generated_at": "2026-09-12"
+ },
+ "materials": [
+  {
+   "mid": "M01",
+   "name": "建筑材料、设备买卖合同（编号编号略A）及某年度供货清单",
+   "medium": "image",
+   "pages": 6,
+   "submitted_by": "委托人",
+   "evidence_prefix": null
+  },
+  {
+   "mid": "M02",
+   "name": "建筑材料、设备买卖合同（编号编号略B）",
+   "medium": "image",
+   "pages": 6,
+   "submitted_by": "委托人",
+   "evidence_prefix": null
+  }
+ ],
+ "reconcile": {
+  "pages_declared": 12,
+  "pages_read": 12,
+  "unreadable": 0,
+  "external_anchor": "两份合同各6页，页脚印刷页码1至6"
+ },
+ "parties": [
+  {
+   "pid": "P1",
+   "name": "甲方公司",
+   "aliases": [
+    "买受人"
+   ],
+   "roles_verbatim": [
+    "买受人"
+   ],
+   "source": [
+    "F001"
+   ]
+  },
+  {
+   "pid": "P2",
+   "name": "乙方公司",
+   "aliases": [
+    "出卖人"
+   ],
+   "roles_verbatim": [
+    "出卖人"
+   ],
+   "source": [
+    "F001"
+   ]
+  },
+  {
+   "pid": "P3",
+   "name": "丙方厂商",
+   "aliases": [],
+   "roles_verbatim": [
+    "生产厂家"
+   ],
+   "source": [
+    "F003"
+   ]
+  }
+ ],
+ "issues": [],
+ "facts": [
+  {
+   "fid": "F001",
+   "date": "2020-05-27",
+   "date_certainty": "exact",
+   "item": "签订《建筑材料、设备买卖合同》",
+   "content": "合同编号编号略A，标的物辅料，含税单价164087.80，总价164087.80；第八条结算确认与支付：本月支付上月供货金额的50%，本项供货结束后付至结算金额的75%，剩余25%工程竣工验收后一年内无息付清；第十条违约责任：出卖人逾期交付标的物、交付标的物的质量、数量、品种、规格、型号、花色、包装方式不符合合同约定标准的，是出卖人违约，若延误时间超过3天，买受人有权单方面解除合同，出卖人自愿承诺按已供货款总金额的20%向买受人支付违约金；第十三条本合同在履行过程中发生争议的，由双方当事人协商解决，协商不成的，依法向某区人民法院起诉",
+   "parties": [
+    "P1",
+    "P2"
+   ],
+   "mid": "M01",
+   "locator": "第1至5页",
+   "evidence_no": null,
+   "iid": null,
+   "relations": [],
+   "evidence_status": "仅当事人陈述",
+   "new_evidence": false,
+   "medium": "image"
+  },
+  {
+   "fid": "F002",
+   "date": "2020-02-20/2020-04-08",
+   "date_certainty": "range",
+   "item": "交付标的物",
+   "content": "某年度供货清单。供货时间自2020.2.20至2020.4.8，材料名称含防火蓬布、防尘网、钢卷尺、白灰、灰砂砖、白喷漆、油漆、稀料、油漆刷、盒尺、警戒带、pvc管、清水模板、树脂井盖、雨水篦子不带框、马路边雨水篦子、球墨井盖、太阳能警示灯、土工布、草坪砖、透水砖等，合计164087.80",
+   "parties": [
+    "P2",
+    "P1"
+   ],
+   "mid": "M01",
+   "locator": "第6页",
+   "evidence_no": null,
+   "iid": null,
+   "relations": [
+    "F001"
+   ],
+   "evidence_status": "仅当事人陈述",
+   "new_evidence": false,
+   "medium": "image"
+  },
+  {
+   "fid": "F003",
+   "date": "2021-07-30",
+   "date_certainty": "exact",
+   "item": "签订《建筑材料、设备买卖合同》",
+   "content": "合同编号编号略B，标的物岩棉被，上述除税金额合计301303.88，增值税税额（税率13%）39169.50，暂定合同金额340473.38；第五条出卖人按约定的时间、地点向买受人交付标的物，并经买受人某验收人验收合格并签字确认后，方为正式交付；第九条出卖人对标的物的质量承担保修责任，保修期从整体工程竣工后年期满为止；第十条违约责任：出卖人逾期交付标的物，若延误时间超过3天，买受人有权单方面解除合同，出卖人自愿承诺按已供货款总金额的20%向买受人支付违约金",
+   "parties": [
+    "P1",
+    "P2",
+    "P3"
+   ],
+   "mid": "M02",
+   "locator": "第1至6页",
+   "evidence_no": null,
+   "iid": null,
+   "relations": [
+    "F001"
+   ],
+   "evidence_status": "仅当事人陈述",
+   "new_evidence": false,
+   "medium": "image"
+  }
+ ],
+ "uncertainties": [
+  {
+   "fid": "F001",
+   "what": "合同签订与供货的先后",
+   "why": "供货清单所载供货时间早于合同签订时间，未见解释"
+  },
+  {
+   "fid": "F002",
+   "what": "逐笔供货日期与数量",
+   "why": "清单为图像转写，未经逐字核验；共29行，此处按区间聚合为一条"
+  },
+  {
+   "fid": "F003",
+   "what": "保修期年限",
+   "why": "第九条保修期年数栏空白，未填"
+  }
+ ],
+ "arithmetic_notes": [
+  {
+   "where": "M02 第1页",
+   "check": "83980.00+52045.00+137985.12+27293.76=301303.88",
+   "result": "相符"
+  },
+  {
+   "where": "M02 第1页",
+   "check": "301303.88+39169.50=340473.38",
+   "result": "相符"
+  },
+  {
+   "where": "M01 第1页与第6页",
+   "check": "合同总价164087.80 与 供货清单合计164087.80",
+   "result": "相符"
+  }
+ ]
+}

@@ -1,0 +1,237 @@
+{
+ "schema": "mqc-casefile/1",
+ "case": {
+  "cid": "C2024-0417",
+  "title": "某某与广州某地产公司商品房买卖合同纠纷",
+  "program": "再审",
+  "generated_by": "mqc-chronicle-master",
+  "generated_at": "2026-09-12"
+ },
+ "materials": [
+  {
+   "mid": "M01",
+   "name": "一审原告证据册",
+   "medium": "text",
+   "pages": 48,
+   "submitted_by": "一审原告",
+   "evidence_prefix": "原证"
+  },
+  {
+   "mid": "M02",
+   "name": "二审被告证据册",
+   "medium": "image",
+   "pages": 63,
+   "submitted_by": "二审被告",
+   "evidence_prefix": "被证"
+  },
+  {
+   "mid": "M03",
+   "name": "重一审原告补充证据",
+   "medium": "text",
+   "pages": 12,
+   "submitted_by": "重一审原告",
+   "evidence_prefix": "重原证"
+  },
+  {
+   "mid": "M04",
+   "name": "当事人口述（谈案记录）",
+   "medium": "transcript",
+   "pages": 0,
+   "submitted_by": "委托人",
+   "evidence_prefix": null
+  }
+ ],
+ "reconcile": {
+  "pages_declared": 123,
+  "pages_read": 123,
+  "unreadable": 0,
+  "external_anchor": "卷宗目录页码与末页页码"
+ },
+ "parties": [
+  {
+   "pid": "P1",
+   "name": "广州某地产公司",
+   "aliases": [
+    "出卖人"
+   ],
+   "roles_verbatim": [
+    "出卖人"
+   ],
+   "source": [
+    "F001"
+   ]
+  },
+  {
+   "pid": "P2",
+   "name": "某某",
+   "aliases": [
+    "买受人"
+   ],
+   "roles_verbatim": [
+    "买受人",
+    "委托人"
+   ],
+   "source": [
+    "F001",
+    "F002"
+   ]
+  },
+  {
+   "pid": "P3",
+   "name": "某鉴定机构",
+   "aliases": [],
+   "roles_verbatim": [
+    "鉴定机构"
+   ],
+   "source": [
+    "F003"
+   ]
+  }
+ ],
+ "issues": [
+  {
+   "iid": "I1",
+   "label_verbatim": "《授权委托书》是否真实、签约是否有效"
+  },
+  {
+   "iid": "I2",
+   "label_verbatim": "尾款是否应当支付、合同是否已解除"
+  }
+ ],
+ "facts": [
+  {
+   "fid": "F001",
+   "date": "2004-04-08",
+   "date_certainty": "exact",
+   "item": "签订《商品房买卖合同》",
+   "content": "出卖人广州某地产公司与买受人某某签订，约定建筑面积128.6㎡，总价款1,286万元；第8条约定逾期交房违约金按日万分之五计",
+   "parties": [
+    "P1",
+    "P2"
+   ],
+   "mid": "M01",
+   "locator": "第6页",
+   "evidence_no": "原证3-1",
+   "iid": null,
+   "relations": [],
+   "evidence_status": "有书证",
+   "new_evidence": false,
+   "quotes": [
+    {
+     "text": "逾期交房违约金按日万分之五计",
+     "mid": "M01",
+     "locator": "第6页第8条"
+    }
+   ]
+  },
+  {
+   "fid": "F002",
+   "date": "2004-04-10",
+   "date_certainty": "exact",
+   "item": "出具《授权委托书》",
+   "content": "委托某某全权办理签约、收款事宜……加盖公章一枚",
+   "parties": [
+    "P1",
+    "P2"
+   ],
+   "mid": "M01",
+   "locator": "第11页",
+   "evidence_no": "原证4",
+   "iid": null,
+   "relations": [
+    "F003"
+   ],
+   "evidence_status": "有书证",
+   "new_evidence": false,
+   "note": "签字人时任项目负责人",
+   "quotes": []
+  },
+  {
+   "fid": "F003",
+   "date": "2011-03-21",
+   "date_certainty": "exact",
+   "item": "作出《司法鉴定意见书》",
+   "content": "经鉴定，《授权委托书》上加盖印章与备案印模不符",
+   "parties": [
+    "P3"
+   ],
+   "mid": "M02",
+   "locator": "第22至29页",
+   "evidence_no": "被证7",
+   "iid": null,
+   "relations": [
+    "F002"
+   ],
+   "evidence_status": "有书证",
+   "new_evidence": true,
+   "quotes": []
+  },
+  {
+   "fid": "F004",
+   "date": "2012-06-15",
+   "date_certainty": "exact",
+   "item": "支付工程款",
+   "content": "支付幕墙工程款1,200万元，付款凭证备注栏载明“第三期进度款”",
+   "parties": [
+    "P2",
+    "P1"
+   ],
+   "mid": "M03",
+   "locator": "第3页",
+   "evidence_no": "重原证2",
+   "iid": null,
+   "relations": [],
+   "evidence_status": "有书证",
+   "new_evidence": false,
+   "note": "该数字为三笔转账合计",
+   "quotes": []
+  },
+  {
+   "fid": "F005",
+   "date": "2013-09-02",
+   "date_certainty": "exact",
+   "item": "发出《催告函》",
+   "content": "催告十日内交付，逾期即解除合同",
+   "parties": [
+    "P2",
+    "P1"
+   ],
+   "mid": "M01",
+   "locator": "第40页",
+   "evidence_no": "原证12",
+   "iid": null,
+   "relations": [],
+   "evidence_status": "有书证",
+   "new_evidence": false,
+   "quotes": []
+  },
+  {
+   "fid": "F006",
+   "date": "2014-01-20",
+   "date_certainty": "exact",
+   "item": "未办理产权登记",
+   "content": "（未见书证，据当事人陈述）",
+   "parties": [
+    "P1",
+    "P2"
+   ],
+   "mid": "M04",
+   "locator": "谈案记录第2段",
+   "evidence_no": null,
+   "iid": null,
+   "relations": [],
+   "evidence_status": "仅当事人陈述",
+   "new_evidence": false,
+   "note": "庭审中对方未予否认",
+   "quotes": []
+  }
+ ],
+ "uncertainties": [
+  {
+   "fid": "F006",
+   "what": "是否已办理产权登记",
+   "why": "未见不动产登记簿或权属证书"
+  }
+ ],
+ "issues_note": "争点表由律师在 Excel 母表内填写后回填；底稿生成时 facts.iid 一律为空（E2）"
+}

@@ -7,13 +7,13 @@
 **Description**（一行，会出现在搜索结果里）：
 
 ```
-把法律画出来 · 给法律人的诉讼可视化工具集：把凌乱的诉讼图重画成能进材料的图，或直接读案件材料画准一张时间轴。Claude Skill / DeepSeek Harness 通用。
+把法律画出来 · 给法律人的诉讼可视化工具集：把凌乱的诉讼图重画成能进材料的图，直接读案件材料画准一张时间轴，并提供庭前三大法宝（大事记表、庭审对抗图、法律关系图）。Claude Skill / DeepSeek Harness 通用。
 ```
 
 英文版（若要双语）：
 
 ```
-Make the Law Visible — litigation visualisation skills for lawyers: redraw a messy case diagram into a court-ready one, or turn raw case materials into a faithful timeline. Works in Claude Code, Codex, DeepSeek Harness and any agent that reads SKILL.md.
+Make the Law Visible — litigation visualisation skills for lawyers: redraw a messy case diagram into a court-ready one, turn raw case materials into a faithful timeline, and prepare for trial with a case chronicle, a trial confrontation map and a legal relationship diagram. Works in Claude Code, Codex, DeepSeek Harness and any agent that reads SKILL.md.
 ```
 
 **Website**：公众号或个人站（若有）
@@ -66,15 +66,18 @@ Settings → General → Social preview → 上传
 ## 发布前自查
 
 ```bash
-# 两个模块的回归都要绿
+# 五个模块的回归都要绿
 python3 plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/tests/run_checks.py
 python3 plugins/mqc-nlv/skills/mqc-timeline-master/tests/run_checks.py
+python3 plugins/mqc-nlv/skills/mqc-chronicle-master/tests/run_checks.py
+python3 plugins/mqc-nlv/skills/mqc-trial-confrontation-master/tests/run_checks.py
+python3 plugins/mqc-nlv/skills/mqc-legal-relation-master/tests/make_checks.py
 
 # 脱敏：仓库里不许有真实案件的当事人、案号、账号
 python3 plugins/mqc-nlv/skills/mqc-timeline-master/tests/check_anonymised.py
 ```
 
-**路径必须全部是 ASCII。** 两个模块各有一条守卫盯这件事，理由是 Windows 的
+**路径必须全部是 ASCII。** 重画与时间轴大师各有一条守卫盯这件事，理由是 Windows 的
 `Expand-Archive` 按系统代码页读 ZIP 条目名，中文文件名会让解压直接失败 ——
 而下载 ZIP 是大多数人拿到仓库的方式。内容用中文没问题，文件名不行。
 
