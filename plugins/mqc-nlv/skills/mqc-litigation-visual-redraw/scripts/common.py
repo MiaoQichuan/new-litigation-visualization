@@ -121,7 +121,7 @@ NO_START = set("，。、；：！？）】》」』〕｝’”》〉…—·%�
 NO_END = set("（【《「『〔｛‘“《〈#￥")
 
 
-def wrap(text: str, fs: float, max_w: float):
+def wrap(text: str, fs: float, max_w: float, keep_alnum: bool = False):
     """Greedy character wrap to a max pixel width, honoring CJK 禁则 (no line may
     start with closing punctuation or end with opening punctuation). Returns a
     list of lines. Verbatim: only inserts line breaks, never edits characters."""
@@ -151,6 +151,28 @@ def wrap(text: str, fs: float, max_w: float):
             acc += w
     if cur:
         lines.append(cur)
+    # 末行孤字：只剩一个字时从上一行借一个下来。只挪断点、不改字。
+    # 同类毛病在法律关系图大师的真实运行里出现过（图上「…某某大酒 / 店」）；
+    # 实测本 skill 的八份示例里有一处，改后为零，只有一张图的产物随之变化。
+    # 门槛定在「只剩一个字」：早先试过「一两个字」，会动到五张示例，得不偿失。
+    if len(lines) >= 2 and len(lines[-1]) == 1 and len(lines[-2]) > 2:
+        _prev, _last = lines[-2], lines[-1]
+        if _prev[-1] not in NO_END and _last[0] not in NO_START:
+            if sum(char_w(c, fs) for c in _prev[-1] + _last) <= max_w:
+                lines[-2], lines[-1] = _prev[:-1], _prev[-1] + _last
+    if keep_alnum:
+        # 只给图名用：数字与拉丁字母串不许被折断。真实运行里图名中的案号被折在
+        # 「475 / 09」中间，看起来就像写错了号。断点往前挪到这一串之前；挪不动就保持原样。
+        _an = lambda c: c.isascii() and c.isalnum()
+        for _k in range(1, len(lines)):
+            prev, nxt = lines[_k - 1], lines[_k]
+            if not (prev and nxt and _an(prev[-1]) and _an(nxt[0])):
+                continue
+            cut = len(prev)
+            while cut > 0 and _an(prev[cut - 1]):
+                cut -= 1
+            if 0 < cut < len(prev):
+                lines[_k - 1], lines[_k] = prev[:cut], prev[cut:] + nxt
     return lines or [""]
 
 

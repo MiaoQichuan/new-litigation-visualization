@@ -10,6 +10,15 @@ HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE)
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
 import render_main as RM
 from to_figure import convert
+if __name__ == "__main__":
+    # Windows 中文控制台默认 GBK：这个脚本由 pipeline 以子进程方式调用，
+    # 不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的仍是乱码。
+    import sys as _sys
+    for _stream in (_sys.stdout, _sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
 
 M = json.load(open(os.path.join(ROOT, "examples/matrix-input.json"), encoding="utf-8"))
 errs = []
@@ -58,4 +67,23 @@ ck("B2", any("FAIL B2" in l for l in r.stdout.splitlines()), "左1右2 在数据
 
 print()
 print("  全部通过" if not errs else f"  未通过：{sorted(set(errs))}")
+# ---- 折行：收尾标点不落行首、末行不留孤字 ------------------------------------------
+# 同类毛病在法律关系图大师的真实运行里出现过（图上「…某某大酒 / 店」与「协议 / 》」），
+# 这里的 wrap_w 原来是纯贪心，两条都没有。只挪断点、不改字。
+# 下面的宽度是在「去掉规则」的副本上实测会出问题的。
+import sys as _sys8, os as _os8
+_sys8.path.insert(0, _os8.path.join(_os8.path.dirname(_os8.path.abspath(__file__)), "..", "scripts"))
+import geom as _geom8
+_NO_START8 = "》）」』、。，；：？！%"
+_h8, _o8 = [], []
+for _t8 in ("本院认为，双方签署的《借款（垫款）协议》合法有效；",
+            "被告某某公司返还垫款474600元，驳回其他诉讼请求。"):
+    for _w8 in (90, 105, 110, 115, 130, 160):
+        _L8 = _geom8.wrap_w(_t8, _w8, 13)
+        _h8 += [x for x in _L8[1:] if x and x[0] in _NO_START8]
+        if len(_L8) >= 2 and len(_L8[-1]) == 1:
+            _o8.append(_L8[-1])
+ck("W1", not _h8, f"折行后收尾标点不落行首（命中 {_h8[:3]}）")
+ck("W2", not _o8, f"折行后末行不留孤字（命中 {_o8[:3]}）")
+
 sys.exit(1 if errs else 0)

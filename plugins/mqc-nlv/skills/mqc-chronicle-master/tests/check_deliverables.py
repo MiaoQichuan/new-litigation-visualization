@@ -9,51 +9,75 @@ def ck(no,cond,msg):
 def dec(s): return re.sub(r'&#(\d+);',lambda m:chr(int(m.group(1))),s)
 
 import sys as _s
+if __name__ == "__main__":
+    # Windows 中文控制台默认 GBK：这个脚本由 pipeline 以子进程方式调用，
+    # 不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的仍是乱码。
+    import sys as _sys
+    for _stream in (_sys.stdout, _sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
 DOCX=_s.argv[1] if len(_s.argv)>1 else "案件大事记.docx"
 XLSX=_s.argv[2] if len(_s.argv)>2 else "案件大事记母表.xlsx"
 RI=_s.argv[3] if len(_s.argv)>3 else "渲染输入.json"
-z=zipfile.ZipFile(DOCX)
-st=z.read("word/styles.xml").decode(); dc=z.read("word/document.xml").decode()
+import os
 D=json.load(open(RI,encoding="utf-8"))
 N=len(D["rows"])
+MD=os.path.join(os.path.dirname(DOCX) or ".", "案件大事记.md")
+if not os.path.exists(DOCX) and os.path.exists(MD):
+    # 本机没有 node 时，Word 交付版由 pipeline 换成同内容的 Markdown 版。
+    # 那些判据（字体三槽、页边距、rFonts）说的是 Word 排版，对 Markdown 无从谈起，
+    # 所以这里改判 Markdown 自己的判据：表头与列序一致、行数与渲染输入一致。
+    print("— Word 交付版（本机缺 node，已改出 Markdown 版）—")
+    md=open(MD,encoding="utf-8").read().splitlines()
+    head=[l for l in md if l.startswith("| 序号")]
+    rows=[l for l in md if l.startswith("| ") and not l.startswith("| 序号") and "---" not in l]
+    ck("M1", bool(head) and head[0].strip()=="| 序号 | 日期 | 事项 | 主要内容 | 备注 |",
+       "Markdown 版列名与列序和 Word 交付版一致")
+    ck("M2", len(rows)==N, f"行数与渲染输入一致（{len(rows)} / {N}）")
+    print()
+else:
+    z=zipfile.ZipFile(DOCX)
+    st=z.read("word/styles.xml").decode(); dc=z.read("word/document.xml").decode()
 
-print("— Word 交付版 —")
-ck("W1", 'w:ascii="Times New Roman"' in st and 'w:eastAsia="宋体"' in st, "默认字体三槽：英文数字新罗马、中文宋体")
-ck("W2", '<w:autoSpaceDE w:val="0"/>' in st and '<w:autoSpaceDN w:val="0"/>' in st, "autoSpace 置 0：中英文之间不自动加空")
-ck("W3", st.index('<w:autoSpaceDE') < st.index('<w:spacing'), "CT_PPrBase 次序：autoSpace 在 spacing 之前")
-rf=re.findall(r'<w:rFonts[^>]*?/>',dc)
-ck("W4", all('w:hint="eastAsia"' in x for x in rf), f"全部 {len(rf)} 处 rFonts 带 hint=eastAsia（引号、省略号、书名号归中文）")
-ck("W5", '<w:sz w:val="23"/>' in dc or 'w:val="23"' in st, "表内字号 11.5 磅")
-ck("W6", '<w:sz w:val="44"/>' in dc, "标题二号字")
-ck("W7", dc.count('方正小标宋简体')==1, f"只有标题用小标宋，表内一律宋体（实得 {dc.count('方正小标宋简体')}）")
-mar=re.search(r'<w:pgMar[^>]*>',dc).group(0)
-vals={k:int(v) for k,v in re.findall(r'w:(top|bottom|left|right)="(\d+)"',mar)}
-ck("W8", set(vals.values())=={1360}, f"页边距四周 2.4cm = 1360 DXA（实得 {vals}）")
-grid=re.search(r'<w:tblGrid>(.*?)</w:tblGrid>',dc,re.S)
-ws=[int(x) for x in re.findall(r'w:w="(\d+)"',grid.group(1))]
-ck("W9", sum(ws)==9186, f"列宽合计等于可用宽度 9186（实得 {sum(ws)}：{ws}）")
-ck("W10", ws[1]>=1400, f"日期列不小于 1400，十位日期不拆行（实得 {ws[1]}）")
-ck("W11", '<w:numPr>' not in dc, "序号是静态数字，不用自动编号")
+    print("— Word 交付版 —")
+    ck("W1", 'w:ascii="Times New Roman"' in st and 'w:eastAsia="宋体"' in st, "默认字体三槽：英文数字新罗马、中文宋体")
+    ck("W2", '<w:autoSpaceDE w:val="0"/>' in st and '<w:autoSpaceDN w:val="0"/>' in st, "autoSpace 置 0：中英文之间不自动加空")
+    ck("W3", st.index('<w:autoSpaceDE') < st.index('<w:spacing'), "CT_PPrBase 次序：autoSpace 在 spacing 之前")
+    rf=re.findall(r'<w:rFonts[^>]*?/>',dc)
+    ck("W4", all('w:hint="eastAsia"' in x for x in rf), f"全部 {len(rf)} 处 rFonts 带 hint=eastAsia（引号、省略号、书名号归中文）")
+    ck("W5", '<w:sz w:val="23"/>' in dc or 'w:val="23"' in st, "表内字号 11.5 磅")
+    ck("W6", '<w:sz w:val="44"/>' in dc, "标题二号字")
+    ck("W7", dc.count('方正小标宋简体')==1, f"只有标题用小标宋，表内一律宋体（实得 {dc.count('方正小标宋简体')}）")
+    mar=re.search(r'<w:pgMar[^>]*>',dc).group(0)
+    vals={k:int(v) for k,v in re.findall(r'w:(top|bottom|left|right)="(\d+)"',mar)}
+    ck("W8", set(vals.values())=={1360}, f"页边距四周 2.4cm = 1360 DXA（实得 {vals}）")
+    grid=re.search(r'<w:tblGrid>(.*?)</w:tblGrid>',dc,re.S)
+    ws=[int(x) for x in re.findall(r'w:w="(\d+)"',grid.group(1))]
+    ck("W9", sum(ws)==9186, f"列宽合计等于可用宽度 9186（实得 {sum(ws)}：{ws}）")
+    ck("W10", ws[1]>=1400, f"日期列不小于 1400，十位日期不拆行（实得 {ws[1]}）")
+    ck("W11", '<w:numPr>' not in dc, "序号是静态数字，不用自动编号")
 
-def _cells(xml):
-    """把 Word 表格拆成逐行逐格的纯文本，供内容判据用。"""
-    rows=[]
-    for tr in re.findall(r"<w:tr[ >].*?</w:tr>", xml, re.S):
-        rows.append(["".join(re.findall(r"<w:t[^>]*>([^<]*)</w:t>", tc))
-                     for tc in re.findall(r"<w:tc>.*?</w:tc>", tr, re.S)])
-    return rows
-_tb=[r for r in _cells(dc) if len(r)>=5][1:]          # 去掉表头行
-ck("W16", [r[0] for r in _tb]==[str(i+1) for i in range(N)],
-   f"序号列是 1 起的连号（实得 {[r[0] for r in _tb][:5]}）")
-_need=[k for k,r in enumerate(D["rows"]) if [p for p in (r.get("note_parts") or []) if str(p).strip()]]
-ck("W17", all(_tb[k][4].strip() for k in _need if k < len(_tb)),
-   f"渲染输入里有备注的行，Word 备注列不得为空（应有 {len(_need)} 行）")
-ck("W12", len(re.findall(r'<w:b/>',dc))==N, f"加黑只在事项列、每行一次（实得 {len(re.findall(r'<w:b/>',dc))}，应为 {N}）")
-ck("W13", dc.count('<w:top w:type="dxa" w:w="115"/>')>=N and dc.count('<w:bottom w:type="dxa" w:w="115"/>')>=N,
-   "单元格上下边距 0.5 行 = 115 DXA，内文之间无段前段后")
-ck("W14", '<w:color w:val="000000"' in dc or 'w:color="000000"' in dc or dc.count('w:val="000000"')>0, "表格框线黑色")
-jc=dc.count('<w:jc w:val="both"/>')
-ck("W15", jc>=2*N, f"事项与主要内容两端对齐（实得 {jc} 处）")
+    def _cells(xml):
+        """把 Word 表格拆成逐行逐格的纯文本，供内容判据用。"""
+        rows=[]
+        for tr in re.findall(r"<w:tr[ >].*?</w:tr>", xml, re.S):
+            rows.append(["".join(re.findall(r"<w:t[^>]*>([^<]*)</w:t>", tc))
+                         for tc in re.findall(r"<w:tc>.*?</w:tc>", tr, re.S)])
+        return rows
+    _tb=[r for r in _cells(dc) if len(r)>=5][1:]          # 去掉表头行
+    ck("W16", [r[0] for r in _tb]==[str(i+1) for i in range(N)],
+       f"序号列是 1 起的连号（实得 {[r[0] for r in _tb][:5]}）")
+    _need=[k for k,r in enumerate(D["rows"]) if [p for p in (r.get("note_parts") or []) if str(p).strip()]]
+    ck("W17", all(_tb[k][4].strip() for k in _need if k < len(_tb)),
+       f"渲染输入里有备注的行，Word 备注列不得为空（应有 {len(_need)} 行）")
+    ck("W12", len(re.findall(r'<w:b/>',dc))==N, f"加黑只在事项列、每行一次（实得 {len(re.findall(r'<w:b/>',dc))}，应为 {N}）")
+    ck("W13", dc.count('<w:top w:type="dxa" w:w="115"/>')>=N and dc.count('<w:bottom w:type="dxa" w:w="115"/>')>=N,
+       "单元格上下边距 0.5 行 = 115 DXA，内文之间无段前段后")
+    ck("W14", '<w:color w:val="000000"' in dc or 'w:color="000000"' in dc or dc.count('w:val="000000"')>0, "表格框线黑色")
+    jc=dc.count('<w:jc w:val="both"/>')
+    ck("W15", jc>=2*N, f"事项与主要内容两端对齐（实得 {jc} 处）")
 
 print("— Excel 母表 —")
 sh=dec(zipfile.ZipFile(XLSX).read("xl/worksheets/sheet1.xml").decode())

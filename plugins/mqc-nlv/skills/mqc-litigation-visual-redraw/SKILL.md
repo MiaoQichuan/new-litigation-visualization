@@ -44,6 +44,32 @@ nothing else — do not invent new diagram types.**
 
 ## Intent router (what to read first)
 
+**Never open anything under `assets/`.** Those are the long-form graphics and screenshots
+written for humans; the runtime needs none of them. Their SVG copies are plain text to you —
+`visual-system-qichuan.svg` alone is 703 KB, roughly 200k tokens. What you actually read is
+`references/quick-map.md` (≈5 KB) and `examples/*.json` (≈2 KB each). See `assets/README.md`.
+
+**Step 0 — run the source check before anything else:**
+`python3 scripts/source_check.py <每个源文件>`. It names each source (vector / PDF with a
+text layer / bitmap / scan / vector original) and, when any source can only be read visually,
+prints the cost warning plus the one question you must put to the user, and exits with code 3.
+**Exit code 3 means stop and wait for the user's answer — do not start reading the image.**
+
+**Source format — ask before you start.** If the source is a screenshot or a photo, ask the
+user whether a vector original exists (an `.svg`, or an `.svg` exported from PPT / drawio /
+Figma / Visio). Vector text is real text: it is transcribed verbatim, costs a fraction of the
+tokens, and works even where the host cannot show images to the model. A bitmap has to be
+read visually — slower, dearer, and easier to misread. **Never reconstruct text from pixel
+measurements**; if you cannot read the image, stop and say so.
+
+**Writing a semantic map? Read `references/quick-map.md` first (≈5 KB).** It carries the
+layout decision tree, the exact fields of all seven layouts with a minimal example each,
+the five red lines, and the two commands — enough to write a map that renders. Open
+`extraction-guide.md` / `semantic-map-schema.md` only when the quick page is not enough;
+they are its source and win on any conflict (a guard in `tests/run_checks.py` reconciles
+the two against the shipped examples on every run).
+
+
 Read `SKILL.md` + `references/STANDARDS.md` always. Then, by intent, open only what
 you need (don't preload everything):
 
@@ -220,7 +246,7 @@ branches, merges), use the flowchart layout:
   **rounded hexagon = decision** (angled ends, corners r≈2.5, same height as a
   same-content step box — a hexagon holds multi-line Chinese far better than a
   diamond, which is a poor container for CJK text), pill = start/end terminal.
-  → `render_flow.py`. Requires `dot` (graphviz) on PATH. See
+  → `render_flow.py`. `dot` (graphviz) is used when present; graphviz is optional: when `dot` is absent the built-in layered layout (`layout_fallback.py`) computes the coordinates instead — measured on the shipped flowchart, the canvas differs from graphviz's by 2px. Installing graphviz only buys a slightly tighter packing. See
   `references/flowchart-spec.md`.
 
 For a **party / relationship** diagram (who the parties are and how they relate —

@@ -137,7 +137,8 @@ def render(path_svg=None, path_png=None):
         # 这是 v1 三风格变换认的结构：白描要认出实底块转轮廓，
         # 歸藏风要认出强调块转克莱因蓝实底。裸 rect 它一个都认不出，
         # 于是那两步「matched NOTHING」，风格就没真正生效。
-        O.append(f'<g data-role="node"{" data-emph=\"1\"" if hot else ""}>')
+        _emph_attr = ' data-emph="1"' if hot else ""   # 先算好：Python 3.11 不许 f-string 表达式里带反斜杠
+        O.append(f'<g data-role="node"{_emph_attr}>')
         if hot:
             O.append(f'<rect data-kind="node" x="{x}" y="{y}" width="{NW}" '
                      f'height="{NH}" rx="12" fill="{RED}"/>')

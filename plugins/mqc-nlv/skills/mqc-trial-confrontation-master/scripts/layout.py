@@ -105,6 +105,14 @@ def feasible(parts, total_w, g, max_h):
     }
 
 if __name__ == "__main__":
+    import sys
+    # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是
+    # 乱码。真实运行记录里，时间轴大师就因此让模型摸索了一轮编码。写法与其余 skill 一致。
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
     g = Geo(2.2)
     W, MAXH = 3000, 4800
     print("走线四形态（M5：只允许这四种，其余拒绝出图）")

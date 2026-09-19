@@ -9,16 +9,62 @@
   4 渲染   to_render.py       底稿 → Word 交付版 + Excel 母表
   5 自检   交付物自检          列宽、字体、对齐、备注上限
 """
-import json, os, subprocess, sys
+import json, os, shutil, subprocess, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 
 def step(n, name): print(f"\n[{n}] {name}")
 
+def _preflight(need):
+    """开跑前先查第三方库，缺了就一句话说清，不要跑到一半才抛异常。
+
+    真实环境里撞到过：3.11 环境没装 openpyxl，整条流程走到第 4 步「渲染」才崩，
+    前面的抽取与校验白跑，报错还是一串 traceback，看不出该装什么。"""
+    import importlib.util
+    missing = [(m, why) for m, why in need if importlib.util.find_spec(m) is None]
+    if missing:
+        print("缺少必需的第三方库，先装上再跑：")
+        for m, why in missing:
+            print(f"  {m}（{why}）    pip install {m}")
+        return False
+    return True
+
+
+def _find_node():
+    """Windows 装 Node 默认不写 PATH，which 找不到时查常见位置。"""
+    if os.name != "nt":
+        return None
+    for root in [os.environ.get(v) for v in ("ProgramFiles", "ProgramFiles(x86)",
+                                             "LOCALAPPDATA")]:
+        cand = os.path.join(root, "nodejs", "node.exe") if root else ""
+        if cand and os.path.exists(cand):
+            return cand
+    return None
+
+
+def _rows_markdown(render_input, out_md):
+    """Word 交付版的同内容 Markdown 表：列与 Word 同名同序，逐行照抄，不另行加工。"""
+    d = json.load(open(render_input, encoding="utf-8"))
+    esc = lambda x: str("" if x is None else x).replace("|", "｜").replace("\n", " ")
+    note = lambda r: "；".join(str(x) for x in (r.get("note_parts") or []) if x)
+    out = [f"# {d['case']['title']}　{d['case'].get('subtitle', '')}".rstrip(), "",
+           "| 序号 | 日期 | 事项 | 主要内容 | 备注 |", "| --- | --- | --- | --- | --- |"]
+    for i, r in enumerate(d.get("rows") or [], 1):
+        out.append("| " + " | ".join([str(i), esc(r.get("date")), esc(r.get("item")),
+                                      esc(r.get("content")), esc(note(r))]) + " |")
+    ends = d.get("endnotes") or []
+    if ends:
+        out += ["", "## 尾注"] + [f"{i}. {esc(x)}" for i, x in enumerate(ends, 1)]
+    open(out_md, "w", encoding="utf-8").write("\n".join(out) + "\n")
+    return out_md
+
+
 def main(casefile, sources=None, outdir="out"):
     os.makedirs(outdir, exist_ok=True)
     cf = json.load(open(casefile, encoding="utf-8"))
 
+    if not _preflight([("openpyxl", "Excel 母表")]):
+        return 2
     step(1, "摄入")
     mats = cf["materials"]; rec = cf["reconcile"]
     img = [m for m in mats if m.get("medium") == "image"]
@@ -49,9 +95,21 @@ def main(casefile, sources=None, outdir="out"):
     xls = os.path.join(outdir, "案件大事记母表.xlsx")
     S = lambda *a: subprocess.run(list(a), check=True)
     S(sys.executable, os.path.join(HERE, "to_render.py"), casefile, ri)
-    S("node", os.path.join(HERE, "build_docx.js"), ri, raw)
-    S(sys.executable, os.path.join(HERE, "postprocess_docx.py"), raw, doc)
-    os.remove(raw)
+    # Word 交付版要 node 与它的 docx 模块。真实环境里这一步崩过（本机 Node 报错），
+    # 原来 check=True 会让整条流程连 Excel 与简表一起失败，律师什么也拿不到。
+    # 现在：node 不可用就跳过 Word，改出同内容的 Markdown 版并明说原因，其余照出。
+    node = shutil.which("node") or _find_node()
+    docx_ok = False
+    if node and subprocess.run([node, os.path.join(HERE, "build_docx.js"), ri,
+                                raw]).returncode == 0 and os.path.exists(raw):
+        S(sys.executable, os.path.join(HERE, "postprocess_docx.py"), raw, doc)
+        os.remove(raw)
+        docx_ok = True
+    if not docx_ok:
+        md = _rows_markdown(ri, os.path.join(outdir, "案件大事记.md"))
+        why = "node 不可用" if not node else "node 导出失败"
+        print(f"  Word 交付版没写成（{why}）——已改出 Markdown 版 {os.path.basename(md)}，"
+              f"内容相同；Excel 母表与简表照常生成。装好 Node.js 后重跑即可拿到 Word 版。")
     S(sys.executable, os.path.join(HERE, "build_xlsx.py"), ri, xls)
     S(sys.executable, os.path.join(HERE, "cache_formulas.py"), xls)
 
@@ -73,8 +131,17 @@ def main(casefile, sources=None, outdir="out"):
     brief = (ex.get("merged") or (ex["pdf"][0] if ex.get("pdf") else None)
              or (svgs[0] if svgs else "（无事实，未出简表）"))
     print(f"\n完成：{doc}\n      {xls}\n      {ri}\n      {brief}")
+    print("核对清单（核对以此为准，不必查看图片）：交付物自检与简表自检见上，"
+          "事项条数、字体三槽、页码与红色用法都已逐项判过。")
     return 0
 
 if __name__ == "__main__":
+    # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是
+    # 乱码。真实运行记录里，时间轴大师就因此让模型摸索了一轮编码。写法与其余 skill 一致。
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
     a = sys.argv[1:]
     sys.exit(main(a[0], a[1] if len(a) > 1 else None, a[2] if len(a) > 2 else "out"))

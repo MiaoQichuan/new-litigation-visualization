@@ -36,6 +36,15 @@ def rich(t, sz=10.5, bold=False):
                           for k,s in segs])
 
 import sys
+if __name__ == "__main__":
+    # Windows 中文控制台默认 GBK：这个脚本由 pipeline 以子进程方式调用，
+    # 不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的仍是乱码。
+    import sys as _sys
+    for _stream in (_sys.stdout, _sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
 IN=sys.argv[1] if len(sys.argv)>1 else "渲染输入.json"
 OUT=sys.argv[2] if len(sys.argv)>2 else "案件大事记母表.xlsx"
 D=json.load(open(IN,encoding="utf-8"))
@@ -43,7 +52,7 @@ wb=Workbook(); ws=wb.active; ws.title="大事记母表"
 
 COLS=[("序号",6),("日期",12),("主体",14),("事项",26),("主要内容",52),
       ("来源",26),("争点",10),("关联",26),("说明",24),("新证据",9),("证据状态",14),("加黑",8)]
-# 样式与攻防图的母表一套：不用底色，层次靠字号、加粗与三档灰度的细线。
+# 样式与庭审对抗图大师的母表一套：不用底色，层次靠字号、加粗与三档灰度的细线。
 # 列头原先压一条浅色底，跟另一张表摆在一起就不是一家的。
 INK="1F2933"
 MUTED="6B7280"     # 说明性文字用灰，字号跟正文一样——靠缩小字号来区分，整张表就花了
@@ -53,7 +62,7 @@ BORD=Border(left=GRY, right=GRY, top=GRY, bottom=GRY)
 BORD_H=Border(left=GRY, right=GRY, top=GRY, bottom=MED)
 
 LAST=get_column_letter(len(COLS))
-# 表头：案件名单占一行，左对齐，方正小标宋，与攻防图的母表同一种起手式
+# 表头：案件名单占一行，左对齐，方正小标宋，与庭审对抗图大师的母表同一种起手式
 t=ws.cell(row=1,column=1,value=f'{D["case"]["subtitle"]}　·　大事记母表')
 t.font=Font(name=TITLE_EA,size=16,bold=True,color=INK)
 t.alignment=Alignment(horizontal="left",vertical="center")
@@ -66,7 +75,7 @@ for j,(h,wd) in enumerate(COLS,1):
     c.alignment=Alignment(horizontal="center",vertical="center",wrap_text=True)
     c.border=BORD_H
     ws.column_dimensions[get_column_letter(j)].width=wd
-ws.freeze_panes=f"B{HR+1}"        # 冻列头一行加编号一列，与攻防图一致
+ws.freeze_panes=f"B{HR+1}"        # 冻列头一行加编号一列，与庭审对抗图大师一致
 ws.row_dimensions[HR].height=30
 
 for i,r in enumerate(D["rows"],start=HR+1):

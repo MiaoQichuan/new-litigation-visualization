@@ -7,6 +7,16 @@ HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE)
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
 import build_brief as B
 
+if __name__ == "__main__":
+    # 由 pipeline 以子进程调用：中文 Windows 控制台默认 GBK，不固定成 UTF-8，
+    # 外部 AI（按 UTF-8 读）看到的是乱码。
+    import sys as _sys
+    for _stream in (_sys.stdout, _sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
+
 errs = []
 def ck(no, cond, msg):
     print(("  OK  " if cond else "  FAIL") + f" {no}  {msg}")
@@ -116,6 +126,25 @@ def main():
 
     print()
     print("  全部通过" if not errs else f"  未通过：{sorted(set(errs))}")
+    # ---- 折行：收尾标点不落行首、不超宽、末行不留孤字 --------------------------------
+    # 同类毛病在法律关系图大师的真实运行里出现过（图上「…某某大酒 / 店」与「协议 / 》」）。
+    # 这里额外要保证不越出版心：M3 是硬判据，让标点悬挂会当场越界，所以把末字连同标点
+    # 一起挪到下一行，挪完再逐行复核宽度、超宽的继续下推。
+    # 下面这几个宽度是在「去掉规则」的副本上实测会出问题的，不是随便挑的。
+    _NO_START = "》）」』、。，；：？！%"
+    _bad_head, _bad_wide, _bad_orphan = [], [], []
+    for _t in ("本院认为，双方签署的《借款（垫款）协议》合法有效；",
+               "被告某某公司返还垫款474600元，驳回其他诉讼请求。",
+               "（一）设备（含配套软件与备品备件）必须是全新、未使用的原装产品"):
+        for _w in (150, 168, 180, 186, 192, 200, 222, 228):
+            _L = B.wrap(_t, _w, 11.5)
+            _bad_head += [x for x in _L[1:] if x and x[0] in _NO_START]
+            _bad_wide += [x for x in _L if B.text_w(x, 11.5) > _w + 0.01]
+            if len(_L) >= 2 and len(_L[-1]) == 1:
+                _bad_orphan.append(_L[-1])
+    ck("L1", not _bad_head, f"折行后收尾标点不落行首（命中 {_bad_head[:3]}）")
+    ck("L2", not _bad_wide, f"折行后每行都不越出版心（超宽 {_bad_wide[:2]}）")
+    ck("L3", not _bad_orphan, f"折行后末行不留孤字（命中 {_bad_orphan[:3]}）")
     return 1 if errs else 0
 
 if __name__ == "__main__":

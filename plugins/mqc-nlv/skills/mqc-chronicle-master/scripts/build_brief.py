@@ -158,6 +158,39 @@ def wrap(s, width, fs):
         cur += t; acc += w
     if cur.strip():
         out.append(cur.rstrip())
+    # 避头：收尾标点不许落到行首。原来只有孤字那一条，遇到「…协议》，约定」这种
+    # 断在标点前的情形，逗号会落到下一行行首（关系图大师的真实运行里见过同类）。
+    # 避头：收尾标点不许落到行首。这里**不能让标点悬挂出版心**（M3 判据硬性要求
+    # 文字不越出版心，悬挂会当场越界），所以改成把上一行的末字一起挪到下一行，
+    # 让标点跟着它走。挪不动（上一行只剩一个字）就保持原样，不硬来。
+    # 避头：收尾标点不许落到行首。这里**不能让标点悬挂出版心**（M3 判据硬性要求
+    # 文字不越出版心），所以把上一行末字连同标点一起挪到下一行；挪完下一行可能变宽，
+    # 于是逐行复核宽度，超宽就把行尾多出来的字继续推给再下一行（级联），最后仍可能
+    # 多出一行 —— 宁可多一行，也不让标点吊在行首或文字越出版心。
+    _NO_START = "》）」』、。，；：？！%"
+    for _ in range(4):                      # 级联最多跑几轮，避免极端输入来回搬
+        moved = False
+        for _k in range(1, len(out)):
+            while (out[_k] and out[_k][0] in _NO_START
+                   and out[_k - 1] and len(out[_k - 1]) > 1):
+                out[_k] = out[_k - 1][-1] + out[_k]
+                out[_k - 1] = out[_k - 1][:-1]
+                moved = True
+        # 复核宽度：超宽的行把尾部推到下一行
+        _k = 0
+        while _k < len(out):
+            while len(out[_k]) > 1 and text_w(out[_k], fs) > width:
+                tail = out[_k][-1]
+                out[_k] = out[_k][:-1]
+                if _k + 1 < len(out):
+                    out[_k + 1] = tail + out[_k + 1]
+                else:
+                    out.append(tail)
+                moved = True
+            _k += 1
+        if not moved:
+            break
+    out = [x for x in out if x]
     # 避孤字：末行只剩一两个字时从上一行借，否则上一行被拉满、末行吊着一个「》」
     while len(out) >= 2 and len(out[-1]) <= 2 and len(out[-2]) > 3:
         out[-1] = out[-2][-1] + out[-1]; out[-2] = out[-2][:-1]
@@ -406,4 +439,11 @@ def build(src, outdir):
 
 
 if __name__ == "__main__":
+    # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是
+    # 乱码。真实运行记录里，时间轴大师就因此让模型摸索了一轮编码。写法与其余 skill 一致。
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
     build(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else "out")

@@ -4,6 +4,16 @@
 填了却不出现在图或表里的字段，等于让律师白填。实测抓到过三处：
 整块诉请固定（J 组校验的全部产出）、决定性要件的「真伪不明的后果」、三标之三的立场方向。"""
 import os, sys, json, subprocess, tempfile
+
+if __name__ == "__main__":
+    # 由 pipeline 以子进程调用：中文 Windows 控制台默认 GBK，不固定成 UTF-8，
+    # 外部 AI（按 UTF-8 读）看到的是乱码。
+    import sys as _sys
+    for _stream in (_sys.stdout, _sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
 HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
 
 # 白名单：由别处推导或只供校验用，不必单独露面

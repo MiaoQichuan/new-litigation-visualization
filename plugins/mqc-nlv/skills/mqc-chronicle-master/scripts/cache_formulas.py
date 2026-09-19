@@ -3,6 +3,15 @@
 理由：recalc 走 LibreOffice 会就地重写工作簿，替换本机未装的字体、
 并把宋体那条也合并掉，富文本与字体表都保不住。"""
 import zipfile, shutil, re, sys
+if __name__ == "__main__":
+    # Windows 中文控制台默认 GBK：这个脚本由 pipeline 以子进程方式调用，
+    # 不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的仍是乱码。
+    import sys as _sys
+    for _stream in (_sys.stdout, _sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
 src=sys.argv[1]; tmp=src+".tmp"
 zin=zipfile.ZipFile(src)
 def fix(xml):

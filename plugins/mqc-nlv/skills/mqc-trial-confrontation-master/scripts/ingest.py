@@ -6,6 +6,7 @@
 全套锚定判据（子序列核验、完备性对账）原封不动生效。零第三方依赖。
 """
 import os, re, json, subprocess, sys, zipfile
+import shutil
 
 PDF   = (".pdf",)
 IMAGE = (".jpg", ".jpeg", ".png", ".webp", ".tif", ".tiff", ".bmp", ".heic")
@@ -24,9 +25,45 @@ class UnknownFormat(Exception):
     """
 
 
+_TOOL_CACHE = {}
+
+
+def _find_tool(name):
+    """在 PATH 上找，找不到就查 Windows 的常见安装位置。
+
+    Windows 装 poppler、Node、Inkscape、LibreOffice 默认都不写 PATH，而 shutil.which
+    只看 PATH。真实运行记录里，用户机器上装了 Inkscape 却被报「找不到转换工具」，
+    Node 也在同一台机器上没被用上。找不到时返回原名，让原来的报错照旧出现。"""
+    if name in _TOOL_CACHE:
+        return _TOOL_CACHE[name]
+    found = shutil.which(name)
+    if not found and os.name == "nt":
+        rel = {"pdftotext": [("poppler", "bin", "pdftotext.exe"), ("poppler", "Library", "bin", "pdftotext.exe")],
+               "pdfinfo": [("poppler", "bin", "pdfinfo.exe"), ("poppler", "Library", "bin", "pdfinfo.exe")],
+               "pdftoppm": [("poppler", "bin", "pdftoppm.exe"), ("poppler", "Library", "bin", "pdftoppm.exe")],
+               "node": [("nodejs", "node.exe")],
+               "inkscape": [("Inkscape", "bin", "inkscape.exe"), ("Inkscape", "inkscape.exe")],
+               "rsvg-convert": [r"rsvg-convert.exe"],
+               "soffice": [("LibreOffice", "program", "soffice.exe")]}.get(name, [])
+        for root in [os.environ.get(v) for v in ("ProgramFiles", "ProgramFiles(x86)",
+                                                 "LOCALAPPDATA")]:
+            if not root:
+                continue
+            for tail in rel:
+                cand = os.path.join(root, *tail)
+                if os.path.exists(cand):
+                    found = cand
+                    break
+            if found:
+                break
+    _TOOL_CACHE[name] = found or name
+    return _TOOL_CACHE[name]
+
+
 def _run(cmd):
     # poppler 的 pdftotext / pdfinfo 输出 UTF-8。不指定编码时按系统区域设置解码，
     # 中文 Windows 上是 GBK：中文要么乱码、要么解码报错，文字层整份读坏。
+    cmd = [_find_tool(cmd[0])] + list(cmd[1:])
     return subprocess.run(cmd, capture_output=True, text=True,
                           encoding="utf-8", errors="replace")
 
@@ -154,6 +191,13 @@ def reconcile(materials, sources, external_anchor, read_images=(), waived=()):
 
 
 if __name__ == "__main__":
+    # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是
+    # 乱码。真实运行记录里，时间轴大师就因此让模型摸索了一轮编码。写法与其余 skill 一致。
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
     paths = sys.argv[1:-1]
     work = sys.argv[-1]
     try:

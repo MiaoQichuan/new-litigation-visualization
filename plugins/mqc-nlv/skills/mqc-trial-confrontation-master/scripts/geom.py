@@ -5,6 +5,16 @@
 """
 import math
 
+if __name__ == "__main__":
+    # 由 pipeline 以子进程调用：中文 Windows 控制台默认 GBK，不固定成 UTF-8，
+    # 外部 AI（按 UTF-8 读）看到的是乱码。
+    import sys as _sys
+    for _stream in (_sys.stdout, _sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
+
 def text_w(t, fs):
     """G1 字宽：中文全宽 = 1.0×字号，西文数字 ≈ 0.5×字号。
     此前按 0.52 一刀切，导致中文卡宽容量算大近一倍、正文溢出卡框。"""
@@ -20,6 +30,18 @@ def wrap_w(t, maxw, fs):
         else:
             cur += ch; w += cw
     if cur: out.append(cur)
+    # 收尾标点不落行首（避头），末行不留孤字。两条都只挪断点、不改字，
+    # 照录原文的纪律不受影响。同类毛病在法律关系图大师的真实运行里出现过：
+    # 图上出现「…金码大酒 / 店」与「《借款（垫款）协议 / 》」，判据不报，只有人眼看得出。
+    _NO_START = "》）」』、。，；：？！%"
+    for _k in range(1, len(out)):
+        while out[_k] and out[_k][0] in _NO_START and out[_k - 1]:
+            out[_k - 1] += out[_k][0]
+            out[_k] = out[_k][1:]
+    out = [x for x in out if x]
+    if len(out) >= 2 and len(out[-1]) == 1 and len(out[-2]) > 2:
+        out[-1] = out[-2][-1] + out[-1]
+        out[-2] = out[-2][:-1]
     return out or [""]
 
 class Rect:

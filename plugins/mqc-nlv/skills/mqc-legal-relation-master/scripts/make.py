@@ -49,19 +49,24 @@ def die(msg, code=2):
 
 # ------------------------------------------------------------------ 环境
 def png_backends():
+    """能出 PNG 的后端，**按中文可靠程度排序**。
+
+    cairosvg 放最后：它找不到中文字体时不报错，直接把汉字画成方框。真实运行里
+    就这样出过一张全是豆腐块的 PNG，靠人工复核才发现；而 Inkscape 与 rsvg 走系统
+    字体，中文正常。顺序即优先级，to_png 按这个顺序试。"""
     found = []
+    for exe in ("inkscape", "rsvg-convert"):
+        if _find_tool(exe):
+            found.append(exe)
+    if _find_tool("node"):
+        r = subprocess.run([_find_tool("node"), "-e", "require('sharp')"], capture_output=True)
+        if r.returncode == 0:
+            found.append("sharp")
     try:
         import cairosvg  # noqa: F401
         found.append("cairosvg")
     except Exception:
         pass
-    for exe in ("rsvg-convert", "inkscape"):
-        if shutil.which(exe):
-            found.append(exe)
-    if shutil.which("node"):
-        r = subprocess.run(["node", "-e", "require('sharp')"], capture_output=True)
-        if r.returncode == 0:
-            found.append("sharp")
     return found
 
 
@@ -79,6 +84,26 @@ def check_env(verbose=True):
     return all(ok for _, _, ok in rows), b
 
 
+def _find_tool(name):
+    """在 PATH 上找，找不到就查 Windows 的常见安装位置。
+
+    真实运行记录里撞到的：机器上装了 Inkscape（C:\\Program Files\\Inkscape\\bin），
+    `--check` 只看 PATH，于是报「PNG 渲染：无」，使用者以为环境不全，又去手工加 PATH。
+    与诉讼可视化重画那边用同一套判据。"""
+    got = shutil.which(name)
+    if not got and os.name == "nt":
+        rel = {"inkscape": [("Inkscape", "bin", "inkscape.exe"), ("Inkscape", "inkscape.exe")],
+               "rsvg-convert": [("rsvg-convert.exe",)],
+               "node": [("nodejs", "node.exe")]}.get(name, [])
+        for root in [os.environ.get(v) for v in ("ProgramFiles", "ProgramFiles(x86)",
+                                                 "LOCALAPPDATA")]:
+            for tail in (rel if root else []):
+                cand = os.path.join(root, *tail)
+                if os.path.exists(cand):
+                    return cand
+    return got
+
+
 def to_png(svg, png, backends, width=1700):
     for b in backends:
         try:
@@ -86,9 +111,11 @@ def to_png(svg, png, backends, width=1700):
                 import cairosvg
                 cairosvg.svg2png(url=svg, write_to=png, output_width=width)
             elif b == "rsvg-convert":
-                subprocess.run(["rsvg-convert", "-w", str(width), "-o", png, svg], check=True)
+                subprocess.run([_find_tool("rsvg-convert"), "-w", str(width), "-o", png, svg],
+                               check=True)
             elif b == "inkscape":
-                subprocess.run(["inkscape", svg, "--export-type=png", f"--export-filename={png}",
+                subprocess.run([_find_tool("inkscape"), svg, "--export-type=png",
+                                f"--export-filename={png}",
                                 f"--export-width={width}"], check=True, capture_output=True)
             elif b == "sharp":
                 js = ("const s=require('sharp');s(process.argv[1],{density:144})"
@@ -236,6 +263,20 @@ def wrap(s, fs, width):
             push_long(t)
     if cur.strip():
         lines.append(cur.rstrip())
+
+    # 收尾标点不许落到行首（避头），末行不许只剩一个字（孤字）。
+    # 真实运行记录里图上出现过两处：「…金码大酒 / 店」孤一个「店」，
+    # 《借款（垫款）协议 / 》右书名号单独一行。判据不报，只有人眼看得出来。
+    # 两条都只挪断点、不改字：照录原文的纪律不受影响。
+    _NO_START = "》）」』、。，；：？！%"
+    for _k in range(1, len(lines)):
+        while lines[_k] and lines[_k][0] in _NO_START and lines[_k - 1]:
+            lines[_k - 1] += lines[_k][0]          # 让它悬挂在上一行末尾
+            lines[_k] = lines[_k][1:]
+    lines = [x for x in lines if x]
+    if len(lines) >= 2 and len(lines[-1]) == 1 and len(lines[-2]) > 2:
+        lines[-1] = lines[-2][-1] + lines[-1]
+        lines[-2] = lines[-2][:-1]
     return lines or [s]
 
 
@@ -308,7 +349,8 @@ def render_svg(cf, nodes, edges, hot_n, hot_e, L, path):
         if total > NH - 6:
             problems.append(f"「{n['name']}」的名称与备注共 {len(rows)} 行，模块装不下；"
                             "名称照录不能删，请把备注改短或移入出处索引")
-        O.append(f'<g data-role="node"{" data-emph=\"1\"" if hot else ""}>')
+        _emph_attr = ' data-emph="1"' if hot else ""   # 先算好：Python 3.11 不许 f-string 表达式里带反斜杠
+        O.append(f'<g data-role="node"{_emph_attr}>')
         if hot:
             O.append(f'<rect data-kind="node" x="{x}" y="{y}" width="{NW}" height="{NH}" rx="12" fill="{RED}"/>')
         else:
@@ -318,8 +360,9 @@ def render_svg(cf, nodes, edges, hot_n, hot_e, L, path):
         for t, fs, bold in rows:
             cy += lh[fs]
             col = ("#FFFFFF" if bold else "#E8D5D5") if hot else (INK if bold else MUTED)
+            _bold_attr = ' font-weight="700"' if bold else ""   # 先算好：Python 3.11 不许 f-string 表达式里带反斜杠
             O.append(f'<text x="{x + NW / 2:.0f}" y="{cy - (lh[fs] - fs) / 2 - 1:.0f}" font-size="{fs}" '
-                     f'fill="{col}" text-anchor="middle"{" font-weight=\"700\"" if bold else ""}>'
+                     f'fill="{col}" text-anchor="middle"{_bold_attr}>'
                      f'{esc(t)}</text>')
         O.append("</g>")
     for i, p in enumerate(skel):
@@ -454,6 +497,13 @@ def main():
         die(d["reason"], 3)
     print(f"  规模：{len(nodes)} 个主体 {len(edges)} 条关系，结构 {d.get('kind')}，"
           f"查{d.get('src', '结构分档')}")
+    # 名称过长会让全图改用高模块、布局慢三到四倍。原来只有真正布局时才提示，
+    # 等于先跑一次慢布局才知道该把备注写短（自测时就撞上了）。这里提到规模判断这一步，
+    # 一秒内就说清楚是哪几个模块，改完再布局。判据与措辞与出图时那一处一致。
+    _tall = [n["name"] for n in nodes if sum(map(len, node_lines(n, 140))) > 2]
+    if _tall:
+        print("  提示：" + "、".join(_tall) + " 的名称加备注超过两行，全图改用高模块；"
+              "高模块布局实测慢三到四倍，备注能写短就写短")
     if len(edges) > 12 and not cf.get("over12") and len(nodes) <= 9:
         print(f"\n  关系 {len(edges)} 条，超过 12 条。先跑第〇轮：")
         print(f"  python scripts/ask.py trim {a.relations}")
@@ -486,7 +536,10 @@ def main():
     svg = open(master, encoding="utf-8").read()
     svg = styles.guizang(svg, "graphviz_relation") if st == "歸藏风" else styles.ALL[st](svg)
     open(base + ".svg", "w", encoding="utf-8").write(svg)
-    os.remove(master)
+    try:
+        os.remove(master)
+    except OSError as _e:          # 沙箱可能禁止删工作区内的文件（SAFE_DELETE_FAIL_CLOSED）
+        print(f"  中间文件没删成（{type(_e).__name__}），不影响交付：{os.path.basename(master)}")
     gok, gres = guard_lib.check(base + ".svg")
     files, eguard = exports.export_all(base + ".svg", base, style=st, return_guard=True,
                                        formats=("pptx", "vsdx", "drawio"))
@@ -515,6 +568,24 @@ def main():
     print()
     print(text)
     print(f"\n产物目录：{os.path.abspath(a.out)}")
+    # 文字核对清单：图上的结论在这里说清，外部模型不必再去转图、看图核对
+    # （时间轴那边实测：读图工具显示不了 PNG 时，模型会反复转格式、做预览页）。
+    print("核对清单（核对以此为准，不必查看图片）：")
+    print(f"  规模 {len(nodes)} 个主体 {len(edges)} 条关系｜风格 {st}｜"
+          f"强调 {emph.get('label') if isinstance(emph, dict) else emph}")
+    _g = {x["name"]: x for x in gres}
+    _warns = [x for x in gres if x.get("warn")]
+    print(f"  路线判据 {'全部通过' if gok else '未过：' + '、'.join(failed)}"
+          + (f"，另有 {len(_warns)} 条提示" if _warns else ""))
+    # 所有提示都在这里列全。真实运行记录：G14（图名被压住）只写进 checks.txt，
+    # 清单里没有，使用者以为「判据：全部通过」就没事了，交出去才发现图名被压。
+    for _w in _warns:
+        print(f"  {_w['name']} {_w['msg']}")
+    for _k in ("G7",):
+        if _k in _g and not _g[_k].get("warn"):
+            print(f"  {_k} {_g[_k]['msg']}")
+    for _f in sorted(os.listdir(a.out)):
+        print(f"  产物 {_f}")
 
 
 if __name__ == "__main__":

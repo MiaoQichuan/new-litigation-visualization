@@ -12,6 +12,15 @@ svgp= sys.argv[2] if len(sys.argv)>2 else os.path.join(_TMP, "_tcm_out", "庭审
 m=json.load(open(src,encoding="utf-8"))
 sys.path.insert(0, os.path.join(ROOT,"scripts"))
 from to_figure import convert
+if __name__ == "__main__":
+    # Windows 中文控制台默认 GBK：这个脚本由 pipeline 以子进程方式调用，
+    # 不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的仍是乱码。
+    import sys as _sys
+    for _stream in (_sys.stdout, _sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
 n=convert(m)   # 图由表派生，不另存一份
 svg=open(svgp,encoding="utf-8").read()
 errs=[]

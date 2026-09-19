@@ -182,6 +182,66 @@ _END = re.compile(r"(?<=[\u3002\uff01\uff1f])")
 _MIN = 6
 
 
+
+class PdfTextUnavailable(RuntimeError):
+    """读 PDF 时两种抽取库都没装，或 PDF 没有可用的文字层。"""
+
+
+def read_pdf(path):
+    """读有文字层的 PDF：逐页抽文字，页与页之间用换行接起来，页码交给 normalise 去清。
+
+    **为什么要有这个函数。** SKILL.md 一直写着支持有文字层的 PDF，而这里原来除了 .docx
+    一律当纯文本打开 —— 喂 PDF 进来，文件头被当成了句子。真实运行里两个外部模型都因此
+    自己写脚本转文字，其中一次花了 6 分钟：它先试 pdftotext，Windows 上那个版本一个汉字
+    都抽不出来，它便以为是劣质扫描件，又去翻源码，最后才换 PyMuPDF 抽成功。
+
+    **抽取工具固定顺序：PyMuPDF，其次 pypdf。** 实测同一份 32 页判决书，两者抽出的
+    汉字数相同、切句都是 344 句；pdftotext 切出 351 句，而且 Windows 版对中文字体经常
+    一个字都抽不出。**换工具会改变句数，也就改变句号**，所以不能「装了哪个用哪个」地
+    随意换 —— 顺序写死，并在读完时打印用的是哪一个。
+    两个都是纯 Python 包，不引系统依赖（本 skill 的口径：缺一样只少一种能力）。
+
+    **文字层太差就明说，不硬读。** 逐页数汉字，整份几乎没有汉字的，是扫描件或照片，
+    抛出 PdfTextUnavailable 并指向读图流程（scripts/read_image.py）。
+    """
+    pages, engine = None, None
+    try:
+        try:
+            import pymupdf as _mu
+        except ImportError:
+            import fitz as _mu
+        with _mu.open(path) as doc:
+            pages = [pg.get_text() for pg in doc]
+        engine = "PyMuPDF"
+    except ImportError:
+        try:
+            import pypdf
+            pages = [(pg.extract_text() or "") for pg in pypdf.PdfReader(path).pages]
+            engine = "pypdf"
+        except ImportError:
+            raise PdfTextUnavailable(
+                f"读 PDF 需要 PyMuPDF 或 pypdf，当前环境都没装：{path}\n"
+                f"  装一个即可：pip install pymupdf   （或 pip install pypdf）")
+    cjk = [len(re.findall(r"[\u4e00-\u9fff]", t)) for t in pages]
+    # 判据：平均每页不到 5 个汉字。正常判决书一页有五六百字，扫描件抽出来是 0 或零星几个。
+    if sum(cjk) < 5 * max(1, len(pages)):
+        raise PdfTextUnavailable(
+            f"《{os.path.basename(path)}》{len(pages)} 页只抽出 {sum(cjk)} 个汉字，"
+            f"是扫描件或照片，没有可用的文字层。请走读图流程：\n"
+            f"  python scripts/read_image.py probe \"{path}\"")
+    read_pdf.last_engine = engine
+    read_pdf.last_pages = len(pages)
+    return "\n".join(pages)
+
+
+def _read_raw(path):
+    low = str(path).lower()
+    if low.endswith(".docx"):
+        return read_docx(path)
+    if low.endswith(".pdf"):
+        return read_pdf(path)
+    return open(path, encoding="utf-8").read()
+
 def read_with_blocks(path):
     """一次读完，句子与叙述块**出自同一份规范化文本**，句号可以直接互用。
 
@@ -189,8 +249,7 @@ def read_with_blocks(path):
     paragraphs(raw)（33 段）去认叙述块 —— 段号根本不可比，换算出来的句号整体偏移。
     这不是换算函数的 bug，是上游两条路径没对齐；所以修在源头，只提供这一个入口。
     """
-    raw = read_docx(path) if str(path).lower().endswith(".docx") else \
-        open(path, encoding="utf-8").read()
+    raw = _read_raw(path)
     text, counts = normalise(raw)
     paras = paragraphs(text)
     sents = split_sentences(text)
@@ -390,10 +449,7 @@ def read_docx(path):
 
 
 def read(path):
-    if str(path).lower().endswith(".docx"):
-        raw = read_docx(path)
-    else:
-        raw = open(path, encoding="utf-8").read()
+    raw = _read_raw(path)
     text, counts = normalise(raw)
     sents = split_sentences(text)
     return {"path": path, "normalised": text, "sentences": sents,
@@ -401,9 +457,15 @@ def read(path):
 
 
 if __name__ == "__main__":
+    # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是乱码，
+    # 自检里的「↳」这类字符还会直接让程序崩溃。写法与关系图大师 make.py 一致。
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
     r = read(sys.argv[1])
-    _raw0 = (read_docx(sys.argv[1]) if sys.argv[1].lower().endswith(".docx")
-             else open(sys.argv[1], encoding="utf-8").read())
+    _raw0 = _read_raw(sys.argv[1])
     print(f"原始 {len(_raw0)} 字 -> "
           f"规范化 {len(r['normalised'])} 字")
     for k, v in r["normalise_counts"].items():

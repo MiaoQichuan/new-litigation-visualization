@@ -1580,6 +1580,226 @@ def _():
         "the README footer carries a different version from the badge"
 
 
+@check("wrap · 折行后末行不留孤字（只挪断点、不改字）")
+def _():
+    """同类毛病在法律关系图大师的真实运行里出现过（图上把机构名的末字甩成孤行）。
+    门槛定在「只剩一个字」：试过「一两个字」会动到五张示例，得不偿失；
+    只剩一个字这一档，八份示例里只有一处、改后为零。"""
+    import importlib.util as _il
+    spec = _il.spec_from_file_location("cm", os.path.join(HERE, "..", "scripts", "common.py"))
+    cm = _il.module_from_spec(spec); spec.loader.exec_module(cm)
+    bad = []
+    for t in ("甲公司与乙公司签署合作经营合同书",
+              "支持工程款请求", "签订借款合同和保证承诺书"):
+        for w in (90, 104, 118, 130, 146):
+            L = cm.wrap(t, 13, w)
+            if len(L) >= 2 and len(L[-1]) == 1:
+                bad.append((t[:6], w, L[-2:]))
+    assert not bad, f"折行后末行只剩一个字：{bad[:3]}"
+
+
+@check("graphviz · 没装 dot 时内置排布顶上：节点不重叠、画布与 dot 版相当")
+def _():
+    """真实反馈里已有两个人卡在「要先装 graphviz」。它在这里只当定位引擎用，
+    连线与画图本来就由本技能完成，所以没装时用纯 Python 的分层排布算坐标。
+    这条把 dot 强行「弄没」，检查兜底出的图能不能用。"""
+    import subprocess as _sp, importlib.util as _il
+    m = json.load(open(os.path.join(EXAMPLES, "flowchart.json"), encoding="utf-8"))
+    spec = _il.spec_from_file_location("rf", os.path.join(HERE, "..", "scripts",
+                                                          "render_flow.py"))
+    rf = _il.module_from_spec(spec); spec.loader.exec_module(rf)
+    real = _sp.run
+    def fake(*a, **k):
+        if a and isinstance(a[0], list) and a[0][0] in ("dot", "neato", "fdp", "circo"):
+            raise FileNotFoundError()
+        return real(*a, **k)
+    _sp.run = fake
+    rf.subprocess.run = fake
+    try:
+        svg_fb, w_fb, h_fb = rf.render(json.loads(json.dumps(m)))
+    finally:
+        _sp.run = real
+        rf.subprocess.run = real
+    svg_dot, w_dot, h_dot = rf.render(json.loads(json.dumps(m)))
+    assert svg_fb.count("</text>") == svg_dot.count("</text>"), "兜底排布掉了文字"
+    boxes = flow_geo(json.loads(json.dumps(m)))
+    assert 0.7 < (w_fb * h_fb) / (w_dot * h_dot) < 1.6, \
+        f"兜底排布的画布与 dot 版差太多（{w_fb}x{h_fb} 对 {w_dot}x{h_dot}）"
+    # 兜底出的图里，任何两张卡片不许重叠
+    rects = re.findall(r'<rect[^>]*x="([\d.]+)"[^>]*y="([\d.]+)"[^>]*width="([\d.]+)"'
+                       r'[^>]*height="([\d.]+)"', svg_fb)
+    rs = [tuple(map(float, r)) for r in rects if float(r[2]) < w_fb * 0.9]
+    for i in range(len(rs)):
+        for j in range(i + 1, len(rs)):
+            a, b = rs[i], rs[j]
+            if (a[0] < b[0] + b[2] - 1 and b[0] < a[0] + a[2] - 1
+                    and a[1] < b[1] + b[3] - 1 and b[1] < a[1] + a[3] - 1):
+                raise AssertionError(f"兜底排布让两张卡片重叠了：{a} / {b}")
+
+
+@check("doctor · 装在 Program Files 里的转图工具要能被认出来（不再误报 none found）")
+def _():
+    """真实运行记录里撞到的：用户装了 Inkscape（C:\\Program Files\\Inkscape\\bin），
+    出图那边已能自动找到，自检却只看 PATH，报「none found / PNG preview will not」，
+    使用者以为环境不全又去手工加 PATH。两处必须用同一套查找。"""
+    import importlib.util as _il, tempfile
+    spec = _il.spec_from_file_location("rnd", os.path.join(HERE, "..", "scripts", "render.py"))
+    rnd = _il.module_from_spec(spec); spec.loader.exec_module(rnd)
+    root = tempfile.mkdtemp()
+    exe = os.path.join(root, "Inkscape", "bin", "inkscape.exe")
+    os.makedirs(os.path.dirname(exe)); open(exe, "wb").write(b"")
+    old_name, old_pf = os.name, os.environ.get("ProgramFiles")
+    try:
+        os.name = "nt"                       # 只影响本进程内的这次查找
+        os.environ["ProgramFiles"] = root
+        rnd._TOOL_CACHE.clear()
+        got = rnd._find_tool("inkscape")
+    finally:
+        os.name = old_name
+        if old_pf is None:
+            os.environ.pop("ProgramFiles", None)
+        else:
+            os.environ["ProgramFiles"] = old_pf
+        rnd._TOOL_CACHE.clear()
+    assert got == exe, f"装在 Program Files 里的 Inkscape 没被找到：{got}"
+
+
+@check("tall · 搬自时间轴大师的三个文件必须与那边保持一致")
+def _():
+    """纵向时间轴那套（render_vcolumns / geom / paper）两边各留一份，互不依赖。
+    风险是改了一边忘了另一边，于是逐字节比对（只忽略文件头那段同步告示）。"""
+    other = os.path.join(HERE, "..", "..", "mqc-timeline-master", "scripts")
+    if not os.path.isdir(other):
+        return                       # 单目录分发包里没有邻居，跳过
+    strip = lambda t: "\n".join(l for l in t.splitlines() if not l.startswith("# ⚠")
+                                and "必须保持一致" not in l and "回归里有一条守卫" not in l
+                                and "它来自时间轴大师" not in l)
+    for f in ("render_vcolumns.py", "geom.py", "paper.py"):
+        a = strip(open(os.path.join(HERE, "..", "scripts", f), encoding="utf-8").read())
+        b = strip(open(os.path.join(other, f), encoding="utf-8").read())
+        assert a == b, f"{f} 与时间轴大师的版本不一致了，改了一边要同步另一边"
+
+
+@check("tall · 事件多时自动转纵向：判据、画布与逐字忠实")
+def _():
+    """真实运行里撞到的：28 个事件横向出图 6770x4668，内容只占 7%，A4 上读不出。
+    判据由代码算（超过 10 件转纵向），不问使用者；十件以内一切照旧，产物逐字节不变。"""
+    import importlib.util as _il, re as _re
+    spec = _il.spec_from_file_location("tall", os.path.join(HERE, "..", "scripts",
+                                                            "render_points_tall.py"))
+    tall = _il.module_from_spec(spec); spec.loader.exec_module(tall)
+    base = json.load(open(os.path.join(EXAMPLES, "timeline-points.json"), encoding="utf-8"))
+    assert not tall.should_go_tall(base), "7 个事件被误判成要转纵向"
+    many = json.loads(json.dumps(base))
+    src = many["events"]
+    many["events"] = [dict(e, id=str(i + 1)) for i in range(12)
+                      for e in [src[i % len(src)]]]
+    assert tall.should_go_tall(many), "12 个事件没有转纵向"
+    svg, w, h = tall.render(many)
+    # 判据不是「竖着」——事件少时纵向画布本来就矮（12 件实测 700x535）。
+    # 真正要保证的是：比横向省得多，且画布不失控。
+    spec2 = _il.spec_from_file_location("pts", os.path.join(HERE, "..", "scripts",
+                                                            "render_points.py"))
+    pts = _il.module_from_spec(spec2); spec2.loader.exec_module(pts)
+    _, hw, hh = pts.render(many)
+    assert w * h < hw * hh / 3, f"纵向没比横向省多少（纵 {w}x{h} 对 横 {hw}x{hh}）"
+    assert w <= 1200 and h <= 2400, f"纵向图的画布失控（{w}x{h}）"
+    flat = _re.sub(r"\s", "", "".join(_re.findall(r">([^<]+)</text>", svg)))
+    for e in many["events"]:
+        t = _re.sub(r"\s", "", e.get("text", ""))
+        assert t in flat, f"纵向图上找不到原文：{t[:12]}"
+
+
+@check("assets · 展示图必须标明「模型不要读」，SKILL.md 里也要写到")
+def _():
+    """真实隐患（打包时才发现）：assets/longform 下四张长图的 SVG 版合计约 67 万 token，
+    对模型来说是纯文本，打开一张这一轮就废了，而运行时一个字都用不到。
+    仓库里保留它们（公众号要用），但必须在两处写明不要读：assets/README.md 与 SKILL.md。"""
+    note = os.path.join(HERE, "..", "assets", "README.md")
+    assert os.path.exists(note), "assets/README.md 不见了（那是给模型的「不要读」告示）"
+    txt = open(note, encoding="utf-8").read()
+    assert "不要读" in txt and "token" in txt, "assets/README.md 没写清楚为什么不要读"
+    skill = re.sub(r"\s+", " ", open(os.path.join(HERE, "..", "SKILL.md"),
+                                     encoding="utf-8").read())
+    assert "Never open anything under `assets/`" in skill, "SKILL.md 缺「不要读 assets」这条"
+
+
+@check("source_check · 位图与扫描件要先警告代价并等使用者回话（退出码 3）")
+def _():
+    """真实运行里撞到的：源是截图，模型闷头去读、读不了又用像素猜字，花了大量时间与 token。
+    所以位图与扫描件必须在**开工之前**被拦一道：说清代价、给出更省的做法、问一句是否继续，
+    并以退出码 3 表示等使用者回话。矢量与有文字层的 PDF 不拦（退出码 0），不给人添堵。"""
+    import subprocess, tempfile
+    sc = os.path.join(HERE, "..", "scripts", "source_check.py")
+    d = tempfile.mkdtemp()
+    svg = os.path.join(d, "a.svg")
+    open(svg, "w", encoding="utf-8").write(
+        '<svg xmlns="http://www.w3.org/2000/svg"><text x="1" y="1">甲</text></svg>')
+    png = os.path.join(d, "b.png")
+    open(png, "wb").write(b"\x89PNG\r\n\x1a\n" + b"\0" * 32)
+    r_ok = subprocess.run([sys.executable, sc, svg], capture_output=True, text=True)
+    r_bad = subprocess.run([sys.executable, sc, png], capture_output=True, text=True)
+    assert r_ok.returncode == 0, "矢量源被无故拦下"
+    assert r_bad.returncode == 3, f"位图源没有拦住（退出码 {r_bad.returncode}）"
+    for kw in ("token", "继续", "SVG"):
+        assert kw in r_bad.stdout, f"位图的提醒里缺「{kw}」"
+    skill = re.sub(r"\s+", " ", open(os.path.join(HERE, "..", "SKILL.md"),
+                                     encoding="utf-8").read())
+    assert "source_check.py" in skill and "exit code 3" in skill.lower(), \
+        "SKILL.md 没把预检写成第一步"
+
+
+@check("checkpoint · 交互里提醒源图用矢量原件（省 token、文字可逐字抄）")
+def _():
+    """真实运行里撞到的：源图是截图，宿主又不让模型读图，模型就用像素测量去「还原」
+    文字，还标成逐字照录。提醒要落在**交互输出**里（那段是原样给使用者看的），
+    光写在文档里使用者看不到。"""
+    import importlib.util as _il
+    spec = _il.spec_from_file_location("cp_mod", os.path.join(HERE, "..", "scripts",
+                                                              "checkpoint.py"))
+    cp = _il.module_from_spec(spec); spec.loader.exec_module(cp)
+    m = json.load(open(os.path.join(EXAMPLES, "timeline-points.json"), encoding="utf-8"))
+    out = cp.render_questions(m, suggest=None)
+    assert "SVG" in out and "截图" in out, "确认问题里没有源图格式的提醒"
+    quick = open(os.path.join(HERE, "..", "references", "quick-map.md"),
+                 encoding="utf-8").read()
+    skill = open(os.path.join(HERE, "..", "SKILL.md"), encoding="utf-8").read()
+    # 文档里会换行，先把空白归一再找，免得守卫被一个换行骗过去（本条就这样漏过一次）
+    flat = lambda t: re.sub(r"\s+", " ", t)
+    assert "不许用像素测量" in flat(quick), "速查页缺「不许用像素还原文字」这条红线"
+    assert "Never reconstruct text from pixel measurements" in flat(skill), \
+        "SKILL.md 缺「不许用像素还原文字」这条红线"
+
+
+@check("docs · quick-map.md 与示例逐项对账（版式、顶层字段、元素字段）")
+def _():
+    """速查页是为了让模型不必读三份长文就能写对地图（约 4.8 万字节降到约 5 千）。
+    风险只有一个：它与真实格式脱节。所以逐个示例把实际用到的字段取出来，
+    与速查页比对；示例里有、速查页没写的，当场报错。"""
+    quick = open(os.path.join(HERE, "..", "references", "quick-map.md"),
+                 encoding="utf-8").read()
+    missing = []
+    for name in sorted(os.listdir(EXAMPLES)):
+        if not name.endswith(".json"):
+            continue
+        m = json.load(open(os.path.join(EXAMPLES, name), encoding="utf-8"))
+        lay = m.get("layout")
+        if lay and lay not in quick:
+            missing.append(f"{name}: 版式 {lay}")
+        for key in ("axis", "events", "spans", "points", "nodes", "edges",
+                    "columns", "rows"):
+            if key not in m:
+                continue
+            if key not in quick:
+                missing.append(f"{name}: 顶层 {key}")
+            first = m[key][0] if isinstance(m[key], list) and m[key] else m[key]
+            if isinstance(first, dict):
+                for f in first:
+                    if f not in quick:
+                        missing.append(f"{name}: {key}[].{f}")
+    assert not missing, "速查页没写到的字段：" + "；".join(sorted(set(missing))[:8])
+
+
 @check("docs · the guard count STANDARDS.md cites is the real one")
 def _():
     """This number has drifted twice — 53 when it was 78, then 99 when it was 120.

@@ -219,7 +219,7 @@ Python 3。出 PNG 需要 LibreOffice 或 poppler，读扫描件需要 poppler �
 
 自检脚本属于共享内核。在完整仓库里，它在同级的重画模块下：
 
-    python3 ../mqc-litigation-visual-redraw/scripts/doctor.py
+    python3 ../mqc-litigation-visual-redraw/scripts/doctor.py --for timeline
 
 在 SkillHub 那种单目录分发包里，内核随包带上，直接跑：
 
@@ -230,6 +230,16 @@ Python 3。出 PNG 需要 LibreOffice 或 poppler，读扫描件需要 poppler �
 ---
 
 以下为供 AI 读取的操作说明，请勿改写。
+
+**不要打开 `assets/` 下的任何文件。** 那是给人看的长图与截图，运行一次都用不到；
+长图的 SVG 版对你来说是纯文本，`longform/03-the-figure.svg` 读一遍约 3.8 万 token。
+运行要读的是 `references/model-steps.md`、`shape` 命令打印的形状说明与 `examples/*.json`。
+
+**开工前三条（真实运行里外部 AI 在这三处花掉了一半时间）：**
+
+1. **中途接手、换了会话、不确定做到哪一步：先跑 `python scripts/pipeline.py next`**，它会说清当前状态与下一步。不必读 state.json、开发文档或源代码。
+2. **全流程只用 `pipeline.py` 的命令。** 命令报错就按报错改输入文件；四份 JSON 怎么写，`python scripts/pipeline.py shape skeleton.json` 这类命令给出完整例子。**不许自己写脚本组地图、出图或跳过校验**；确实走不通，停下来把报错告诉用户。
+3. **材料是 PDF 就直接交给 `read`**，不必先转成文字；出图后照打印的核对清单核对，不必查看图片。
 
 # 时间轴大师
 
@@ -302,7 +312,8 @@ v1 已冻结，本模块复用它的渲染内核与五种格式导出器，不�
 | `pick` | **用户** | 第一轮：勾材料来源（可全选；只有一份时自动跳过） | |
 | `span <编号\|全部>` | **用户** | 第二轮：勾时间段（粒度按跨度自适应：多年按年、半年按季度） | |
 | `style <1-4>` | **用户** | 第三轮：呈报给谁 → 白描 / 奇川风 / 歸藏风 / 让我定 | |
-| `offer` | 模型 | 划分并给勾选清单 | `verdicts.json` + `parts.json` |
+| `scope` | 代码 | 列出勾选范围内的句子，逐句判定只判这些 | |
+| `offer` | 模型 | 只判范围内的句子，划分并给勾选清单 | `verdicts.json` + `parts.json` |
 | `budget <编号\|all>` | **用户** | 勾哪几个部分 | |
 | `capacity` | 代码 | 按真实骨架算形态与容量 | `skeleton.json` |
 | `title '…'` | 模型 | 图名（容量内） | |

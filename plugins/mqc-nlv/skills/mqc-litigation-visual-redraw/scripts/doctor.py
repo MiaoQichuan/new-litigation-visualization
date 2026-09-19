@@ -19,8 +19,22 @@ import sys
 OK, WARN, BAD = "  ok  ", " warn ", " MISS "
 
 
+def _find(cmd):
+    """与 render.py 用同一套查找：PATH 之外还查 Windows 的常见安装位置。
+
+    真实运行记录里撞到的：用户机器上装了 Inkscape（C:\\Program Files\\Inkscape\\bin），
+    出图那边已经能自动找到，自检这边还只看 PATH，于是报「none found / PNG preview will not」，
+    使用者以为环境不全，又去手工加 PATH。两处必须用同一套判据。"""
+    try:
+        from render import _find_tool          # 同目录，出图用的就是它
+        got = _find_tool(cmd)
+        return got if got and os.path.exists(got) or got != cmd else None
+    except Exception:
+        return shutil.which(cmd)
+
+
 def _has(cmd):
-    return shutil.which(cmd) is not None
+    return _find(cmd) is not None
 
 
 def _fonts():
@@ -129,6 +143,14 @@ def install_plex_mono():
     return 0 if n else 1
 
 
+def _importable(name):
+    import importlib.util
+    try:
+        return importlib.util.find_spec(name) is not None
+    except Exception:
+        return False
+
+
 def main():
     if "--fix-fonts" in sys.argv[1:]:
         return install_plex_mono()
@@ -140,19 +162,37 @@ def main():
                  f"found {sys.version.split()[0]}" if py_ok else "upgrade Python"))
     fatal |= not py_ok
 
+    # 时间轴大师也用这份自检（单目录分发包里它就在 pipeline.py 旁边）。graphviz 只有
+    # 诉讼可视化重画画流程图才要；对时间轴用户报「MISS / REQUIRED」是误导 —— 真实运行
+    # 里模型据此以为环境不全。用 --for timeline，或与 pipeline.py 同目录时自动认出。
+    _timeline = ("--for" in sys.argv and "timeline" in sys.argv) or \
+        os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), "pipeline.py"))
     dot = _has("dot")
-    rows.append((OK if dot else BAD, "graphviz (dot)",
-                 "flowchart node positioning" if dot else
-                 "REQUIRED for flowcharts — apt install graphviz / brew install graphviz"))
-    fatal |= not dot
+    if _timeline:
+        rows.append((OK if dot else WARN, "graphviz (dot)",
+                     "found" if dot else "not needed by the timeline skill (flowcharts only)"))
+        _pdf = [m for m in ("pymupdf", "fitz", "pypdf") if _importable(m)]
+        rows.append((OK if _pdf else WARN, "PDF text layer (PyMuPDF / pypdf)",
+                     f"using {_pdf[0]}" if _pdf else
+                     "missing — PDF materials cannot be read directly: pip install pymupdf"))
+    else:
+        # graphviz 不再是必需项：没装时由内置排布算坐标（layout_fallback.py），
+        # 流程图与关系图照样出得来，实测画布与 graphviz 版只差两三个像素。
+        # 装它仍有好处（分层更紧凑），所以留作建议，不再拦人。
+        rows.append((OK if dot else WARN, "graphviz (dot)",
+                     "flowchart node positioning" if dot else
+                     "not installed — 内置排布会顶上（装上可得到更紧凑的分层）"))
 
     # --- png rasteriser (any one) -----------------------------------------
     raster = [c for c in ("rsvg-convert", "inkscape", "soffice") if _has(c)]
+    # 找到了就把路径也报出来，免得使用者以为技能没用上它
+    _paths = {c: _find(c) for c in raster}
     if raster:
-        rows.append((OK, "PNG rasteriser", f"using {raster[0]}"))
+        rows.append((OK, "PNG rasteriser",
+                     f"using {raster[0]}（{_paths.get(raster[0]) or 'PATH'}）"))
     else:
         rows.append((WARN, "PNG rasteriser",
-                     "none found — SVG still renders, PNG preview will not. "
+                     "none found (PATH 与常见安装位置都没有) — SVG still renders, PNG preview will not. "
                      "Install one: librsvg2-bin / inkscape / libreoffice"))
 
     # --- fonts (optional, affect looks only) ------------------------------
@@ -223,7 +263,7 @@ def main():
 
     # optional QA tooling: renders a generated .pptx and measures where the text
     # actually landed. Not needed to PRODUCE anything — only to self-check.
-    pdftotext = shutil.which("pdftotext")
+    pdftotext = _find("pdftotext")
     rows.append((OK if pdftotext else WARN, "pdftotext (pptx render self-check)",
                  "verify_pptx.py can measure a rendered deck" if pdftotext else
                  "missing — `python3 scripts/verify_pptx.py fig.svg fig.pptx` will skip; "
@@ -260,5 +300,12 @@ def _quiet_broken_pipe():
         pass
 
 if __name__ == "__main__":
+    # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是乱码，
+    # 自检里的「↳」这类字符还会直接让程序崩溃。写法与关系图大师 make.py 一致。
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
     _quiet_broken_pipe()
     raise SystemExit(main())

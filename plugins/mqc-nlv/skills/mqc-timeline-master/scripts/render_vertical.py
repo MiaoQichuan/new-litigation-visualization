@@ -239,6 +239,13 @@ def render(m, budget_layers, out_path):
 
 
 if __name__ == "__main__":
+    # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是乱码，
+    # 自检里的「↳」这类字符还会直接让程序崩溃。写法与关系图大师 make.py 一致。
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
     m = json.load(open(os.path.join(HERE, "map_verdict.json"), encoding="utf-8"))
     H, packs, _ = render(m, 0, os.path.join(HERE, "vertical.svg"))
     npara = sum(1 for e in m["events"] if e.get("body"))

@@ -264,6 +264,52 @@ ck("G12", not over,
 for o in over[:3]:
     print(f"        「{o[0]}」宽 {o[1]} 位于 x={o[2]}，画布宽 {CW:.0f}")
 
+# G14　关系名不得压住图名
+#
+# 真实运行里撞到的：一条从右下绕到左上的回环，关系名落到画布顶端与图名挤在一起，
+# 而当时 13 条判据全绿 —— 没有任何一条管「文字与文字互相压」。图名区是固定的，
+# 就在画布顶部那一带，量它与其余文字的包围盒有没有重叠即可。
+_title_boxes, _other_boxes = [], []
+for _m in re.finditer(r'<text([^>]*)>([^<]*)</text>', s):
+    at, txt = _m.group(1), _m.group(2)
+    if not txt.strip():
+        continue
+    _x = re.search(r'\sx="([\d.-]+)"', at)
+    _y = re.search(r'\sy="([\d.-]+)"', at)
+    _fs = re.search(r'font-size="([\d.]+)"', at)
+    if not (_x and _y and _fs):
+        continue
+    x, y, fs = float(_x.group(1)), float(_y.group(1)), float(_fs.group(1))
+    anc = (re.search(r'text-anchor="(\w+)"', at) or [None, "start"])[1] \
+        if re.search(r'text-anchor="(\w+)"', at) else "start"
+    tw = _textw(txt, fs)
+    left = x - tw / 2 if anc == "middle" else (x - tw if anc == "end" else x)
+    box = (left, y - fs, left + tw, y + fs * 0.3, txt[:14], fs)
+    (_title_boxes if fs >= 22 and y < CH * 0.18 else _other_boxes).append(box)
+_clash = []
+for _t in _title_boxes:
+    for _o in _other_boxes:
+        # 只算**实质重叠**：横向与纵向都压住三成以上才算。擦边一两像素
+        # （比如顶部模块的标签与图名的下沿）看不出问题，报了反而是噪音。
+        _ox = min(_t[2], _o[2]) - max(_t[0], _o[0])
+        _oy = min(_t[3], _o[3]) - max(_t[1], _o[1])
+        if _ox <= 0 or _oy <= 0:
+            continue
+        if (_ox / max(1.0, min(_t[2] - _t[0], _o[2] - _o[0])) > 0.3
+                and _oy / max(1.0, min(_t[3] - _t[1], _o[3] - _o[1])) > 0.3):
+            _clash.append((_t[4], _o[4]))
+# 定为提示而非拦截：仓库自带的 15 主体用例精简后就出现过一次（图名基线 y=58 字号 30，
+# 关系名「签订」落在 y=72，字形相叠约 5px）。这类拥挤要靠挪关系名或换短图名来解，
+# 属于版面取舍，不该把整张图判成不合格；但必须报出来 —— 真实运行里正是「13 条判据
+# 全绿、图名却被压住」，谁都没提醒。
+if _clash:
+    print(f"  WARN G14  图名被其他文字压住（{len(_clash)} 处）"
+          f"　——　挪开那条关系名或把图名改短")
+else:
+    print("  OK   G14  图名不被其他文字压住（重叠 0 处）")
+for c in _clash[:3]:
+    print(f"        图名「{c[0]}」被「{c[1]}」压住")
+
 # G13　模块内的文字不得超出模块本身
 spill = []
 for _m in re.finditer(r'<text([^>]*)>([^<]*)</text>', s):

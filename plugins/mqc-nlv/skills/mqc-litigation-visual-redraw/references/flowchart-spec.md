@@ -1,7 +1,7 @@
 # Flowchart spec (frozen)
 
 For process / procedure diagrams: steps, decisions, branches, merges. Rendered
-by `render_flow.py`. Requires `dot` (graphviz) on PATH.
+by `render_flow.py`. graphviz is optional: when `dot` is absent the built-in layered layout (`layout_fallback.py`) computes the coordinates instead — measured on the shipped flowchart, the canvas differs from graphviz's by 2px. Installing graphviz only buys a slightly tighter packing.
 
 ## Positioning: graphviz for coordinates ONLY
 

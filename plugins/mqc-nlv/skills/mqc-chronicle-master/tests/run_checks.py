@@ -9,6 +9,7 @@ def run(title, cmd, cwd=ROOT):
     return r.returncode
 fails=0
 fails+= run("摄入分派与完备性对账", [sys.executable, "tests/ingest_checks.py"])
+fails+= run("下游 skill 叫法一致", [sys.executable, "tests/naming_checks.py"])
 fails+= run("改坏验证", [sys.executable, "tests/break_tests.py"])   # 项数由脚本自己报，别写死
 fails+= run("样例底稿校验", [sys.executable, "scripts/check_facts.py", "tests/casefile.json"])
 fails+= run("样例 · 文字型", [sys.executable, "scripts/check_facts.py", "examples/case-text-layer.json"])
@@ -17,6 +18,15 @@ fails+= run("样例 · 扫描件（含 B3 子序列核验）", [sys.executable, 
 for _f in ["tests/casefile.json","examples/case-text-layer.json","examples/case-scanned.json"]:
     fails+= run(f"结构校验 {_f}", [sys.executable, "scripts/check_schema.py", _f])
 import tempfile as _tf
+if __name__ == "__main__":
+    # Windows 中文控制台默认 GBK：这个脚本由 pipeline 以子进程方式调用，
+    # 不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的仍是乱码。
+    import sys as _sys
+    for _stream in (_sys.stdout, _sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
 for _f in ["tests/casefile.json","examples/case-text-layer.json"]:
     fails+= run(f"渲染层 {_f}", [sys.executable, "tests/render_checks.py", _f])
 for _f in ["tests/casefile.json","examples/case-text-layer.json"]:

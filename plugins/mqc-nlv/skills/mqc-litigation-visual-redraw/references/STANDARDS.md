@@ -37,7 +37,7 @@ unreadable/uncertain goes in `provenance.uncertainties` and is raised at the
    declined ledger in §9. Adopt schema/lint/CLI/rasterizer discipline; refuse
    model-places-coordinates, multi-colour, legends, and infographic shells.
 3. **Deterministic quality floor** — the pipeline (frozen tokens + scripts-do-geometry
-   + validate + audit + lint + 136 regression guards, 149 assertions) means a correct JSON always
+   + validate + audit + lint + 145 regression guards, 158 assertions) means a correct JSON always
    renders to standard, regardless of model strength.
 
 ---
@@ -49,8 +49,8 @@ unreadable/uncertain goes in `provenance.uncertainties` and is raised at the
 | timeline · numbered | `numbered_point_timeline` | order matters, spacing does NOT (dense / undated events) | render_points | no |
 | timeline · dated | `dated_point_timeline` | real time distances matter; long, well-separated points | render_dated | no |
 | timeline · gantt | `proportional_gantt` | periods that run/overlap/gap (时效, 保证期间) | render_spans | no |
-| flowchart | `graphviz_flow` | steps / decisions / branches / merges | render_flow | **yes** |
-| relationship · network | `graphviz_relation` | free-form labeled relationships | render_relation | **yes** |
+| flowchart | `graphviz_flow` | steps / decisions / branches / merges | render_flow | optional (built-in fallback) |
+| relationship · network | `graphviz_relation` | free-form labeled relationships | render_relation | optional (built-in fallback) |
 | relationship · tree | `relation_tree` | top-down hierarchy (主体关系图, 股权/控制) | render_tree | no |
 | relationship · table | `comparison_table` | A vs B read across, dimension by dimension (两裁判要旨 / 两方案) | render_compare | no |
 

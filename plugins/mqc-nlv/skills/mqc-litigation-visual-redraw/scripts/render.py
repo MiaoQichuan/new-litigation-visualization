@@ -15,6 +15,7 @@ import sys, os, re, shutil, subprocess
 from common import load_map, validate_map, strip_unearned_emphasis, TITLE_FONT, TOKENS
 import math
 import render_points, render_spans, render_flow, render_relation, render_tree, render_dated, render_compare
+import render_points_tall
 import export_drawio
 import export_pptx
 import export_vsdx
@@ -70,6 +71,11 @@ def _png_safe_svg(svg_path):
 def choose(m):
     layout = m.get("layout", "")
     if layout == "numbered_point_timeline":
+        # 事件多到横向排不下时自动改用纵向：横向的列距是定值，画布宽度随事件数线性增长，
+        # 高度又按固定比例从宽度反推，内容占比一路掉到 7%（28 件实测 6770x4668）。
+        # 判据由代码算，不问使用者；现有示例最多 7 件，不受影响。
+        if render_points_tall.should_go_tall(m):
+            return render_points_tall
         return render_points
     if layout == "dated_point_timeline":
         return render_dated
@@ -100,26 +106,63 @@ def _svg_px_size(svg_path):
     return (float(m.group(1)), float(m.group(2))) if m else None
 
 
+_TOOL_CACHE = {}
+
+
+def _find_tool(name):
+    """在 PATH 上找，找不到就查 Windows 的常见安装位置。
+
+    真实运行里撞上的：用户机器上装了 Inkscape 1.4.4，技能却报「找不到 SVG 转 PNG 的
+    工具」，只能自己在外面手动转图。Windows 装 Inkscape 与 LibreOffice 默认都不写 PATH，
+    而 shutil.which 只看 PATH。"""
+    if name in _TOOL_CACHE:
+        return _TOOL_CACHE[name]
+    found = shutil.which(name)
+    if not found and os.name == "nt":
+        roots = [os.environ.get(v) for v in ("ProgramFiles", "ProgramFiles(x86)",
+                                             "LOCALAPPDATA")]
+        # 路径按「目录片段」写，用 os.path.join 拼。原来是硬拼反斜杠的字符串，
+        # 只有真 Windows 上才成立，在别处既测不了也容易写错。
+        rel = {"inkscape": [("Inkscape", "bin", "inkscape.exe"), ("Inkscape", "inkscape.exe")],
+               "soffice": [("LibreOffice", "program", "soffice.exe"),
+                           ("LibreOffice 7", "program", "soffice.exe")],
+               "pdftoppm": [("poppler", "bin", "pdftoppm.exe"),
+                            ("poppler", "Library", "bin", "pdftoppm.exe")],
+               "rsvg-convert": [("rsvg-convert.exe",)],
+               "resvg": [("resvg.exe",)]}.get(name, [])
+        # 逐个拼出来看在不在
+        for root in [r for r in roots if r]:
+            for tail in rel:
+                cand = os.path.join(root, *tail)
+                if os.path.exists(cand):
+                    found = cand
+                    break
+            if found:
+                break
+    _TOOL_CACHE[name] = found
+    return found
+
+
 def svg_to_png(svg_path, png_path, dpi=192):
     """Render SVG -> PNG with whatever is installed. Prefer a real SVG
     rasterizer; fall back to soffice -> PDF -> pdftoppm (works everywhere
     LibreOffice is present, which is the common minimal environment)."""
     def has(x):
-        return shutil.which(x) is not None
+        return _find_tool(x) is not None
 
     wh = _svg_px_size(svg_path)
     scale = max(1, int(round(dpi / 96.0)))
     if has("rsvg-convert"):
-        cmd = ["rsvg-convert", "-d", str(dpi), "-p", str(dpi)]
+        cmd = [_find_tool("rsvg-convert"), "-d", str(dpi), "-p", str(dpi)]
         if wh:                      # exact integer scale — see the note below
             cmd += ["-w", str(int(wh[0] * scale)), "-h", str(int(wh[1] * scale))]
         subprocess.run(cmd + [svg_path, "-o", png_path], check=True)
         return "rsvg-convert"
     if has("resvg"):
-        subprocess.run(["resvg", "--dpi", str(dpi), svg_path, png_path], check=True)
+        subprocess.run([_find_tool("resvg"), "--dpi", str(dpi), svg_path, png_path], check=True)
         return "resvg"
     if has("inkscape"):
-        subprocess.run(["inkscape", svg_path, "--export-type=png",
+        subprocess.run([_find_tool("inkscape"), svg_path, "--export-type=png",
                         f"--export-dpi={dpi}", f"--export-filename={png_path}"], check=True)
         return "inkscape"
     # LibreOffice SVG -> PDF -> pdftoppm. Preferred over cairosvg for THIS skill
@@ -129,7 +172,7 @@ def svg_to_png(svg_path, png_path, dpi=192):
     if has("soffice") and has("pdftoppm"):
         outdir = os.path.dirname(os.path.abspath(png_path)) or "."
         src_svg, tmp = _png_safe_svg(svg_path)   # title Song-first so soffice picks a Song, not its sans default
-        subprocess.run(["soffice", "--headless", "--convert-to", "pdf",
+        subprocess.run([_find_tool("soffice"), "--headless", "--convert-to", "pdf",
                         "--outdir", outdir, src_svg], check=True,
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         pdf = os.path.splitext(src_svg)[0] + ".pdf"
@@ -142,7 +185,7 @@ def svg_to_png(svg_path, png_path, dpi=192):
         # sub-pixel phases and print at different weights (a visibly heavier rule
         # under the timeline band than over it). An exact scale puts every integer
         # coordinate on a pixel boundary and both edges come out equal.
-        cmd = ["pdftoppm", "-png", "-r", str(dpi)]
+        cmd = [_find_tool("pdftoppm"), "-png", "-r", str(dpi)]
         wh = _svg_px_size(svg_path)
         if wh:
             scale = max(1, int(round(dpi / 96.0)))
@@ -602,6 +645,11 @@ def main(mapfile, base="final", strict=False, mono=False, theme=None,
     except RuntimeError as e:
         print(f"Error: {e}")
         return 1
+    # 输出目录不存在时自己建。真实运行记录里，使用者给的输出路径带一层目录，
+    # 这里报的是 FileNotFoundError，看起来像地图有问题，实际只是目录没建。
+    _dir = os.path.dirname(os.path.abspath(base))
+    if _dir and not os.path.isdir(_dir):
+        os.makedirs(_dir, exist_ok=True)
     # Red is opt-in, and that is enforced HERE rather than requested of the model:
     # an emphasis the map does not attribute to the user is removed before anything
     # is drawn, so no downstream format can carry it either.
@@ -630,6 +678,9 @@ def main(mapfile, base="final", strict=False, mono=False, theme=None,
     except Exception as e:
         print(f"Error: {type(e).__name__}: {e}")
         return 1
+    if mod is render_points_tall:
+        print(f"版式：{len(m.get('events') or [])} 个事件，横向排不下（内容只占画布高度一成上下），"
+              f"已自动改用纵向时间轴。这是代码算出来的，不需要你选。")
     svg = fit_title(svg)          # long titles wrap before any theme is applied
     if is_guizang:
         svg = to_guizang(svg, m.get("layout"))
@@ -718,7 +769,31 @@ def main(mapfile, base="final", strict=False, mono=False, theme=None,
             print("lint: clean")
     except Exception as e:
         print(f"(lint unavailable: {e})")
+    _print_checklist(m, base, svg_path)
     return 0
+
+
+def _print_checklist(m, base, svg_path):
+    """文字核对清单：图上的结论用文字给出，模型不必再去转图、看图核对。
+
+    起因是真实运行记录（时间轴那边）：PNG 出不来时，模型反复转格式、做预览网页，
+    白花了五分多钟。这里只打印已经算好的事实，不新增判据。"""
+    import os as _os
+    lay = m.get("layout", "")
+    n = next((len(m[k]) for k in ("events", "spans", "nodes", "rows") if m.get(k)), 0)
+    cp = m.get("checkpoint") or {}
+    def _emph(x):
+        return [e.get("id") or e.get("title") or e.get("label_text")
+                for e in x if isinstance(e, dict) and e.get("emphasis")]
+    marks = sum((_emph(m.get(k) or []) for k in ("events", "spans", "points", "nodes")), [])
+    print("核对清单（核对以此为准，不必查看图片）：")
+    print(f"  版式 {lay}｜元素 {n} 个｜深红 "
+          f"{('、'.join(str(x) for x in marks) if marks else '全图不标')}"
+          f"（来源 {cp.get('emphasis_source', '未记录')}）")
+    d = _os.path.dirname(_os.path.abspath(svg_path)) or "."
+    stem = _os.path.basename(base)
+    for f in sorted(x for x in _os.listdir(d) if x.startswith(stem)):
+        print(f"  产物 {f}")
 
 
 def _cli(argv):
@@ -772,5 +847,12 @@ def _quiet_broken_pipe():
         pass
 
 if __name__ == "__main__":
+    # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是乱码，
+    # 自检里的「↳」这类字符还会直接让程序崩溃。写法与关系图大师 make.py 一致。
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
     _quiet_broken_pipe()
     sys.exit(_cli(sys.argv[1:]) or 0)

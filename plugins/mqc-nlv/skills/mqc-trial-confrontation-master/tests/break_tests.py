@@ -113,6 +113,15 @@ import json as _j
 sys.path.insert(0, os.path.join(ROOT,"scripts"))
 from check_claims import check as _ck
 import io as _io, contextlib as _cl
+if __name__ == "__main__":
+    # Windows 中文控制台默认 GBK：这个脚本由 pipeline 以子进程方式调用，
+    # 不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的仍是乱码。
+    import sys as _sys
+    for _stream in (_sys.stdout, _sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
 _M=_j.load(open(os.path.join(ROOT,"examples","matrix-input.json"),encoding="utf-8"))
 def _run_ck(mut):
     d=copy.deepcopy(_M); mut(d)

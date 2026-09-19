@@ -1,5 +1,42 @@
 # Changelog
 
+## 未发布（版本号待作者发布时再定）
+
+Fixes found by running the timeline skill on a real Windows machine (Python 3.11,
+GBK console). Rendering, geometry and the gallery are unchanged — the gallery is
+still reproduced byte for byte.
+
+### Added
+- **`references/quick-map.md`** — a 5 KB quick page: the layout decision tree, the exact
+  fields of all seven layouts with a minimal example each, the five red lines and the two
+  commands. Writing a map used to require reading three documents (≈48 KB). The long
+  documents are unchanged and still win on any conflict; a guard reconciles the quick page
+  against the shipped examples on every run, so it cannot drift.
+- **A text checklist after rendering** — layout, element count, where the deep red landed
+  and who chose it, and the files produced, so a model never has to look at the image.
+
+### Fixed
+- **`.pptx` / `.vsdx`: the date line no longer sits on top of the card body.** A card
+  whose body is set flush-left (three lines and more) under a centred date used to
+  adopt only the date, so the date was centred vertically over the body. Such a card
+  now adopts every line and keeps each line's alignment.
+- **`.vsdx`: the second line of a caption kept the caption's format.** Only the first
+  character row was written, so later lines fell back to the reader's default
+  (a white caption on a red card came out black and small in ProcessOn).
+  Borderless caption boxes are also widened so readers do not re-wrap them.
+- **Python 3.11:** `render_relation.py` used a backslash inside an f-string
+  expression (3.12 only). `render.py` imports it, so PNG export failed on 3.11.
+- **Windows GBK consoles:** every entry script now writes UTF-8, so agents no longer
+  read mojibake and `doctor.py` no longer crashes on `↳`.
+- **`.vsdx`: every line is now its own paragraph.** A plain newline is honoured by
+  Visio and PowerPoint but not by ProcessOn, which joined the lines of a card into
+  one long run: the text ran outside the card and a two-line date read `201911.29`.
+- **Windows: renderers installed outside `PATH` are found.** Inkscape and LibreOffice
+  do not add themselves to `PATH` on Windows, so `shutil.which` missed them and PNG
+  export reported that no rasterizer was available.
+- **`doctor.py --for timeline`** (auto-detected next to the timeline pipeline) no
+  longer reports graphviz as required, and checks the PDF text-layer libraries.
+
 ## v1.0.2
 
 Editable PowerPoint output, and a way to check rendered results without eyes.

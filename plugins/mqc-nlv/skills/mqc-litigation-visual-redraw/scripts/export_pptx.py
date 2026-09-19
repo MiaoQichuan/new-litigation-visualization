@@ -255,6 +255,52 @@ def attach_text(prims, W=None, H=None):
         if host is not None:
             host.setdefault("lines", []).append(p)
             p["used"] = True
+
+    # Second pass: a card whose caption is MIXED — a centred date over a body
+    # that the renderer set flush-left or justified (three lines and more).
+    # The first pass adopted only the centred date, so the box carried one line
+    # and centred it vertically, while the body stayed as free text boxes on
+    # their true baselines: the date landed on top of the body, in PowerPoint
+    # and in ProcessOn alike.
+    #
+    # The fix is deliberately narrow, because a wide host swallowing labels is
+    # exactly the bug the first pass was written against. A shape takes the
+    # flush-left lines only when it is plainly ONE CARD:
+    #   * it already adopted a centred caption in the first pass;
+    #   * no other shape sits inside it (a panel holding bars is not a card);
+    #   * every flush-left line inside it shares one left edge, and all of them
+    #     lie below the centred caption (date on top, body underneath);
+    #   * nothing else inside it would be left behind.
+    # Anything failing a condition keeps the old behaviour exactly.
+    def inside(t, s):
+        return (s["x"] - 1 <= t["x"] <= s["x"] + s["w"] + 1
+                and s["y"] <= t["y"] <= s["y"] + s["h"])
+
+    for s in [q for q in shapes if q.get("lines")]:
+        if any(o is not s and o["x"] >= s["x"] - 0.5 and o["y"] >= s["y"] - 0.5
+               and o["x"] + o["w"] <= s["x"] + s["w"] + 0.5
+               and o["y"] + o["h"] <= s["y"] + s["h"] + 0.5 for o in shapes):
+            continue
+        loose = [t for t in prims if t["k"] == "text" and not t.get("used") and inside(t, s)]
+        body = [t for t in loose if t["anchor"] == "start"]
+        if not body or len(body) != len(loose):
+            continue
+        if max(t["x"] for t in body) - min(t["x"] for t in body) > 0.5:
+            continue
+        if min(t["y"] for t in body) <= max(l["y"] for l in s["lines"]):
+            continue
+        # 允许「标点悬挂」：中文排版里行末的逗号、句号、引号可以探出边界一点点
+        # （common.wrap 的避头避尾就是这么排的），实测有一行探出 8px 就让整张卡片
+        # 被这条判据挡掉，日期于是又被单独居中、压回正文上（真实运行记录里的那张
+        # 《沟通函》卡片）。文本框本来就设了 wrap="none"，悬挂不会触发重新折行，
+        # 所以这里放宽到一个字的宽度；真正排不下的（超过一个字）仍旧不收。
+        if any(t["x"] + _text_w(t["t"], t["fs"], t.get("track", 0))
+               > s["x"] + s["w"] + 1 + t["fs"] for t in body):
+            continue
+        for t in body:
+            t["marl"] = t["x"] - s["x"]
+            t["used"] = True
+        s["lines"] = sorted(s["lines"] + body, key=lambda l: l["y"])
     return prims
 
 
@@ -323,8 +369,14 @@ def _txbody(lines, align="ctr", anchor="ctr"):
     if not lines:
         return '<p:txBody><a:bodyPr/><a:lstStyle/><a:p/></p:txBody>'
     spc = _lnspc(lines)
+    def ppr(l):
+        # A flush-left body line inside a card keeps its own left edge; every
+        # other line keeps the box's alignment, byte-for-byte as before.
+        if l.get("marl") is not None:
+            return f'<a:pPr marL="{_emu(l["marl"])}" indent="0" algn="l">'
+        return f'<a:pPr algn="{align}">'
     paras = "".join(
-        f'<a:p><a:pPr algn="{align}">{spc}</a:pPr>{_run({**l, "face": _face(l)})}</a:p>'
+        f'<a:p>{ppr(l)}{spc}</a:pPr>{_run({**l, "face": _face(l)})}</a:p>'
         for l in lines)
     return ('<p:txBody><a:bodyPr wrap="none" lIns="0" tIns="0" rIns="0" bIns="0" '
             f'anchor="{anchor}"><a:noAutofit/></a:bodyPr>'
@@ -693,6 +745,14 @@ def export(svg_path, out_path, fonts="master"):
 
 
 if __name__ == "__main__":
+    import sys
+    # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是乱码，
+    # 自检里的「↳」这类字符还会直接让程序崩溃。写法与关系图大师 make.py 一致。
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
     import sys
     p, n = export(sys.argv[1], sys.argv[2],
                   sys.argv[3] if len(sys.argv) > 3 else "master")

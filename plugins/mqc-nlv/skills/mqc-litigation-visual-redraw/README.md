@@ -13,7 +13,7 @@
   <a href="https://github.com/MiaoQichuan/mqc-litigation-visual-redraw/actions/workflows/checks.yml"><img src="https://github.com/MiaoQichuan/mqc-litigation-visual-redraw/actions/workflows/checks.yml/badge.svg" alt="checks"/></a>
   <img src="https://img.shields.io/badge/Built%20with-Claude-D97757?logo=anthropic&logoColor=white" alt="Built with Claude"/>
   <img src="https://img.shields.io/badge/Claude-Skill-D97757?logo=anthropic&logoColor=white" alt="Claude Skill"/>
-  <img src="https://img.shields.io/badge/tests-136%20checks-6B7280" alt="136 regression guards"/>
+  <img src="https://img.shields.io/badge/tests-145%20checks-6B7280" alt="145 regression guards"/>
   <img src="https://img.shields.io/badge/%E8%A7%86%E8%A7%89%E6%A8%A1%E5%BC%8F-%E5%A5%87%E5%B7%9D%E9%A3%8E%20%C2%B7%20%E6%AD%B8%E8%97%8F%E9%A3%8E%20%C2%B7%20%E7%99%BD%E6%8F%8F-6B7280" alt="三种视觉模式：奇川风 · 歸藏风 · 白描"/>
   <img src="https://img.shields.io/badge/%E5%9B%BE%E8%A1%A8%E7%B1%BB%E5%9E%8B-7-6B7280" alt="7 种图表类型"/>
   <img src="https://img.shields.io/badge/output-SVG%20%C2%B7%20PNG%20%C2%B7%20PPTX%20%C2%B7%20VSDX%20%C2%B7%20drawio-991B1B" alt="output formats: SVG · PNG · PPTX · VSDX · drawio"/>
@@ -375,7 +375,7 @@ python3 tests/run_checks.py        # 回归自测
 ## 依赖
 
 - **Python 3** —— 仅标准库，**无需 `pip` 安装任何第三方包**
-- **graphviz（`dot`）**：流程图 / 关系图定位需要；时间轴不需要
+- **graphviz（`dot`）**：可选。流程图 / 关系图没装它也能出（内置排布顶上，实测画布只差 2 像素）；装上排布更紧凑。时间轴不需要
 - CJK 字体（如 Noto Sans CJK SC），否则 PNG 中文显示为空框
 - SVG→PNG：自动探测 `rsvg-convert`/`resvg`/`inkscape`/`cairosvg`，都没有则回落 `soffice`(LibreOffice)→PDF→`pdftoppm`
 
@@ -427,11 +427,11 @@ python3 tests/run_checks.py        # 回归自测
 **不删字、不改字、不改法律含义**。
 
 **跑一次要装什么？**
-Python 3 + graphviz + 一个光栅化器（soffice/rsvg/inkscape 任一）。
+Python 3 + 一个光栅化器（soffice/rsvg/inkscape 任一）；graphviz 可选。
 零第三方 Python 依赖。`python3 scripts/doctor.py` 会逐项告诉你缺什么、缺了会退化成什么样。
 
 **怎么确认它没画错？**
-`python3 tests/run_checks.py` —— 136 项回归守卫 / 149 条断言，几何、排版、交付、三档一致性全覆盖，
+`python3 tests/run_checks.py` —— 145 项回归守卫 / 158 条断言，几何、排版、交付、三档一致性全覆盖，
 每一条都做过"故意改坏必须报错"的验证。另有 `verify_pptx.py`（渲染后量文字实际落点）
 和 `audit_edges.py`（量边缘墨量）两个自检工具。
 

@@ -174,6 +174,109 @@ ll = {"nodes": [{"id": "A", "name": "甲"}, {"id": "B", "name": "乙"}],
 code, log = run(dump(ll, "ll.json"), "--out", os.path.join(tmp, "ll"), "--name", "ll")
 expect(code == 0 and "判据：全部通过" in log, "长关系名不越出画布（G12）", log)
 
+# ---- 八、图名不被关系名压住（G14）与本机环境的三条 ---------------------------------
+# 真实运行记录：一条从右下绕到左上的回环，关系名落在画布顶端与图名挤在一起，
+# 而当时 13 条判据全绿 —— 没有一条管「文字压文字」。G14 定为提示档：报出来，
+# 但不把整张图判成不合格（这类拥挤要靠挪关系名或换短图名解决，属版面取舍）。
+import re as _re8, glob as _glob8
+
+
+def _title_of(svg_text):
+    """画布上方字号最大的那行文字就是图名；没有图名的图返回 None。"""
+    _h = _re8.search(r'<svg[^>]*height="([\d.]+)"', svg_text)
+    if not _h:
+        return None
+    H = float(_h.group(1))
+    best = None
+    for m in _re8.finditer(r'<text([^>]*)>([^<]+)</text>', svg_text):
+        fs = _re8.search(r'font-size="([\d.]+)"', m.group(1))
+        y = _re8.search(r'\sy="([\d.]+)"', m.group(1))
+        x = _re8.search(r'\sx="([\d.]+)"', m.group(1))
+        if fs and y and x and float(y.group(1)) < H * 0.25 and float(fs.group(1)) >= 20:
+            cand = (float(fs.group(1)), x.group(1), y.group(1))
+            best = cand if best is None or cand[0] > best[0] else best
+    return best
+
+
+_picked8 = None
+for _p8 in sorted(_glob8.glob(os.path.join(tmp, "**", "*.svg"), recursive=True)):
+    if "-master" in _p8 or _p8.endswith(".drawio.svg"):
+        continue
+    _s8 = open(_p8, encoding="utf-8").read()
+    _t8 = _title_of(_s8)
+    if _t8:
+        _picked8 = (_p8, _s8, _t8)
+        break
+if not _picked8:
+    print("  （本轮产物里没有带图名的图，G14 验证跳过）")
+else:
+    _p8, _s8, (_fs8, _x8, _y8) = _picked8
+    _bad8 = os.path.join(tmp, "g14-bad.svg")
+    open(_bad8, "w", encoding="utf-8").write(_s8.replace(
+        "</svg>", f'<text x="{_x8}" y="{_y8}" font-size="13" text-anchor="middle">'
+                  f'系其总公司，承担清偿责任</text></svg>'))
+    _RG = os.path.join(HERE, "..", "scripts", "route_guard.py")
+    _r8 = subprocess.run([sys.executable, _RG, _bad8], capture_output=True, text=True,
+                         encoding="utf-8", errors="replace", env=ENV)
+    expect("WARN G14" in _r8.stdout, "关系名压住图名会被 G14 报出来（提示档）",
+           _r8.stdout[-200:])
+    # 不误报这一条要用**已知干净**的图来验：现出一张示例案的图。
+    # （随手挑到的图可能本就有拥挤——仓库自带的 15 主体用例精简后就是一例，
+    # 图名基线 y=58 字号 30、关系名落在 y=72，字形相叠约 5px，属真实现象。）
+    _clean_dir = os.path.join(tmp, "g14clean")
+    _cc, _cl = run(FX, "--out", _clean_dir, "--name", "g14c")
+    _cf = os.path.join(_clean_dir, "g14c-qichuan.svg")
+    if _cc == 0 and os.path.exists(_cf):
+        _r8b = subprocess.run([sys.executable, _RG, _cf], capture_output=True, text=True,
+                              encoding="utf-8", errors="replace", env=ENV)
+        expect("G14" in _r8b.stdout and "WARN G14" not in _r8b.stdout,
+               "干净的图不会被 G14 误报", _r8b.stdout[-200:])
+    else:
+        expect(False, "没出成用于 G14 不误报验证的图", _cl[-200:])
+
+# ---- 模块名断行：收尾标点不落行首、末行不留孤字 ------------------------------------
+# 真实运行记录（第三轮）：图上出现「…某某大酒 / 店」孤一个字、
+# 《借款（垫款）协议 / 》右书名号单独一行。判据不报，只有人眼看得出来。
+# 两条规则只挪断点、不改字，照录原文的纪律不受影响。
+sys.path.insert(0, os.path.join(HERE, "..", "scripts"))
+import importlib as _il9
+_mk9 = _il9.import_module("make")
+_w9 = _mk9.wrap("北京某某科技发展有限公司某某大酒店", _mk9.FS_NODE, 128)
+expect(len(_w9) >= 2 and len(_w9[-1]) > 1, "模块名末行不留孤字", str(_w9))
+_w9b = _mk9.wrap("《借款（垫款）协议》", _mk9.FS_NODE, 100)
+expect(all(not x.startswith(("》", "）", "」", "、", "。", "，")) for x in _w9b[1:]),
+       "收尾标点不落到行首", str(_w9b))
+_w9c = _mk9.wrap("被上诉人 / 投资方 / 受托人", _mk9.FS_NODE, 120)
+expect(all("受托人" not in x or x.strip().endswith("受托人") for x in _w9c),
+       "原有的分隔处优先断行没被破坏", str(_w9c))
+
+# G14 必须参与候选布局的挑选：同样合格的候选里，优先选不压图名的。
+# 真实运行记录（第二轮）：12 条关系那一版交出了压住图名的布局，使用者只能回读
+# checks.txt 才发现 —— 提示档不等于不管，能换就该换。
+_lk8 = open(os.path.join(HERE, "..", "scripts", "lookup.py"), encoding="utf-8").read()
+expect("(_g14, sc) < (best_g14, best[0])" in _lk8,
+       "G14 参与候选布局的挑选（同样合格时优先不压图名的）",
+       "挑选的比较式里没有把 G14 排在前面")
+# 核对清单要把所有提示项列全（不能只让人回读 checks.txt）
+_mk8b = open(os.path.join(HERE, "..", "scripts", "make.py"), encoding="utf-8").read()
+expect("_warns = [x for x in gres if x.get(\"warn\")]" in _mk8b and "条提示" in _mk8b,
+       "出图后的核对清单把所有提示项列全（含 G14）", "清单仍只列固定几条")
+
+# PNG 后端顺序：cairosvg 必须排在最后（它缺中文字体时不报错，直接出豆腐块）
+sys.path.insert(0, os.path.join(HERE, "..", "scripts"))
+import importlib as _il8
+_mk8 = _il8.import_module("make")
+_order8 = [b for b in ("inkscape", "rsvg-convert", "sharp", "cairosvg")]
+_src_mk = open(os.path.join(HERE, "..", "scripts", "make.py"), encoding="utf-8").read()
+_pos = [_src_mk.index('found.append("%s")' % b) if 'found.append("%s")' % b in _src_mk else -1
+        for b in ("inkscape", "cairosvg")]
+expect(_src_mk.index('import cairosvg  # noqa: F401') > _src_mk.index('for exe in ("inkscape"'),
+       "PNG 后端里 cairosvg 排在 Inkscape 之后", "cairosvg 仍排在前面")
+expect("_find_tool" in _src_mk and "ProgramFiles" in _src_mk,
+       "转图工具会查 Windows 常见安装位置（不再误报「PNG 渲染：无」）", "没有按路径查找")
+expect("中间文件没删成" in _src_mk,
+       "中间文件删不掉时不再让整轮失败（沙箱会拦 os.remove）", "仍是硬失败")
+
 shutil.rmtree(tmp, ignore_errors=True)
 print("全部通过" if not fails else f"{len(fails)} 项未过")
 sys.exit(1 if fails else 0)

@@ -139,6 +139,12 @@ def render_questions(m, suggest=None):
     A = L.append
     A("出图前请确认三件事 · 回编号即可，也可以直接说「都按默认」")
     A("")
+    # 交互里提醒源图格式：位图要靠读图还原，慢、贵，环境不让读图时还会读不成；
+    # 矢量原件里的文字是真文字，逐字抄下来即可。真实运行里就撞到过：一张截图，
+    # 模型读不了，只能拿像素去估文本边界「还原」文字，既慢又不可靠。
+    A("　下次更省：源图若有矢量原件（SVG，或 PPT / drawio / Figma / Visio 导出的 SVG），")
+    A("　直接给 SVG，文字可逐字照抄；截图与照片只能靠读图还原，慢、费用高，也更容易读错。")
+    A("")
     A("① 结构 ─────────────────────────────")
     A(f"   图种　{name}　·　{why}")
     A(f"   内容　{' · '.join(counts)}")
@@ -217,5 +223,12 @@ def _quiet_broken_pipe():
         pass
 
 if __name__ == "__main__":
+    # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是乱码，
+    # 自检里的「↳」这类字符还会直接让程序崩溃。写法与关系图大师 make.py 一致。
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
     _quiet_broken_pipe()
     sys.exit(main(sys.argv[1:]) or 0)

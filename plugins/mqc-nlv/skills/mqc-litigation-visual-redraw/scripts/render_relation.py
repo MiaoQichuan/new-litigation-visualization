@@ -190,9 +190,14 @@ def run_dot(dot_src, engine="dot"):
     try:
         p = subprocess.run([engine, "-Tplain"], input=dot_src, capture_output=True, text=True, check=True)
     except FileNotFoundError:
-        raise RuntimeError(f"graphviz '{engine}' not found on PATH. Relationship "
-                           "layouts need graphviz — install it (e.g. `apt-get "
-                           "install graphviz`).")
+        # 没装 graphviz 就用内置排布顶上：这里 graphviz 只算坐标，连线与画图本来就由
+        # 本技能自己完成。装它要走命令行，律师的电脑上普遍没有（真实反馈里已卡住两人）。
+        import layout_fallback
+        print(f"graphviz（{engine}）未安装，已用内置排布算坐标；"
+              f"装上 graphviz 可得到更紧凑的排布。")
+        _n, _h = layout_fallback.layout(dot_src)
+        _w = max((x + w / 2.0 for x, _y, w, _hh in _n.values()), default=0.0)
+        return _n, _w, _h
     nodes, gw, gh = {}, 0.0, 0.0
     for ln in p.stdout.splitlines():
         t = ln.split()
@@ -514,7 +519,8 @@ def render(m):
     out.append('<g data-role="nodes">')
     for nid, g in geo.items():
         n = by_id[nid]
-        out.append(f'<g data-role="node" data-id="{nid}"{" data-emph=\"1\"" if nid == _hub else ""}>')
+        _emph_attr = ' data-emph="1"' if nid == _hub else ""   # 先算好：Python 3.11 不许 f-string 表达式里带反斜杠
+        out.append(f'<g data-role="node" data-id="{nid}"{_emph_attr}>')
         out.append(f'<rect x="{g["left"]:.1f}" y="{g["top"]:.1f}" width="{g["w"]:.1f}" height="{g["h"]:.1f}" '
                    f'rx="12" fill="{FC["step_fill"]}" stroke="{FC["step_stroke"]}" stroke-width="1"/>')
         out.append(f'<text x="{g["cx"]:.1f}" y="{g["cy"]+FS_T*0.35:.1f}" font-size="{FS_T}" font-weight="700" '
@@ -543,4 +549,11 @@ def main(mapfile, out):
     print(f"[relation] wrote {out}  {w}x{h}  ratio={w/h:.2f}")
 
 if __name__ == "__main__":
+    # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是乱码，
+    # 自检里的「↳」这类字符还会直接让程序崩溃。写法与关系图大师 make.py 一致。
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
     main(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else "out.svg")

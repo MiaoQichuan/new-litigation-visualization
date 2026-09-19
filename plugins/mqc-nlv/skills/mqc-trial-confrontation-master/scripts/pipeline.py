@@ -15,7 +15,24 @@ HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
 
 def step(n,name): print(f"\n[{n}] {name}")
 
+def _preflight(need):
+    """开跑前先查第三方库，缺了就一句话说清，不要跑到一半才抛异常。
+
+    真实环境里撞到过：环境缺库时，整条流程走到出表那一步才崩，前面的校验白跑，
+    报错还是一串 traceback，看不出该装什么。"""
+    import importlib.util
+    missing = [(m, why) for m, why in need if importlib.util.find_spec(m) is None]
+    if missing:
+        print("缺少必需的第三方库，先装上再跑：")
+        for m, why in missing:
+            print(f"  {m}（{why}）    pip install {m}")
+        return False
+    return True
+
+
 def main(case, outdir="out"):
+    if not _preflight([("openpyxl", "分析表 Excel")]):
+        return 2
     os.makedirs(outdir, exist_ok=True)
     D=json.load(open(case,encoding="utf-8"))
     S=lambda *a: subprocess.run(list(a), check=True)
@@ -68,7 +85,18 @@ def main(case, outdir="out"):
         print("    拒绝交付：图几何自检未通过"); return 1
 
     print(f"\n完成：{xls}\n      {svg}\n      {png}")
+    # 与其余 skill 一致：把结论用文字给出，模型不必再去转图、看图核对
+    # （时间轴大师的真实运行里，读图工具显示不了 PNG 时模型反复转格式，白花五分钟）。
+    print("核对清单（核对以此为准，不必查看图片）：图几何与图表一致两项自检见上；"
+          "文字、三栏、深红处数都已逐项判过。")
     return 0
 
 if __name__=="__main__":
+    # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是
+    # 乱码。真实运行记录里，时间轴大师就因此让模型摸索了一轮编码。写法与其余 skill 一致。
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
     sys.exit(main(sys.argv[1], sys.argv[2] if len(sys.argv)>2 else "out"))

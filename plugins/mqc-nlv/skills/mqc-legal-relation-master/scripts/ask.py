@@ -322,7 +322,7 @@ def needs_round2(choice_or_style):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["trim", "round1", "round2", "resolve"])
+    ap.add_argument("cmd", choices=["trim", "ask", "round1", "round2", "resolve"])
     ap.add_argument("--keep")
     ap.add_argument("--keep-edges")
     ap.add_argument("--out")
@@ -332,7 +332,22 @@ if __name__ == "__main__":
     a = ap.parse_args()
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
-    if a.cmd == "round1":
+    if a.cmd == "ask":
+        # 两问一次问完：风格与标红互不依赖（round2 只读 relations.json，不看第一轮的答案），
+        # 分两次问白白多一个来回。自测时实测：5 条命令降到 4 条，等用户回答从 2 次降到 1 次。
+        # 标红只有奇川风才用，所以这里说明白；选白描或歸藏风时 resolve 不要带 --mark。
+        if not a.relations:
+            sys.exit("需要 relations.json")
+        _nodes, _edges = _load(a.relations)
+        print(round1())
+        print()
+        print(round2(_nodes, _edges))
+        print()
+        print("两问一起回答即可，例如「2，7」= 奇川风 + 标第 7 项；"
+              "只答风格也行。深红只有奇川风才有，选 1 或 3 时第二问自动作废。")
+        print("拿到答案后跑：python scripts/ask.py resolve %s --style 编号 --mark 编号"
+              % a.relations)
+    elif a.cmd == "round1":
         print(round1())
     elif a.cmd == "trim":
         if not a.relations:

@@ -6,6 +6,15 @@ import json, copy, sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent/"scripts"))
 from check_facts import check
+if __name__ == "__main__":
+    # Windows 中文控制台默认 GBK：这个脚本由 pipeline 以子进程方式调用，
+    # 不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的仍是乱码。
+    import sys as _sys
+    for _stream in (_sys.stdout, _sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
 
 BASE=json.load(open(Path(__file__).parent/"casefile.json",encoding="utf-8"))
 # 子序列核验对照的是该条事实所属材料的全文；M01 这本册子里有三条事实，须给全

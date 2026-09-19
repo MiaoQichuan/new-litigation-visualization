@@ -11,6 +11,16 @@ to_render 是 Word 交付版、Excel 母表、大事记简表三件产物的共�
 """
 import json, os, re, subprocess, sys, tempfile
 
+if __name__ == "__main__":
+    # 由 pipeline 以子进程调用：中文 Windows 控制台默认 GBK，不固定成 UTF-8，
+    # 外部 AI（按 UTF-8 读）看到的是乱码。
+    import sys as _sys
+    for _stream in (_sys.stdout, _sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 

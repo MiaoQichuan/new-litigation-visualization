@@ -2,6 +2,15 @@
 # -*- coding: utf-8 -*-
 """底稿 → 两个生成器的渲染输入。底稿是唯一事实来源，这里只做映射，不新增内容。"""
 import json, sys, re
+if __name__ == "__main__":
+    # Windows 中文控制台默认 GBK：这个脚本由 pipeline 以子进程方式调用，
+    # 不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的仍是乱码。
+    import sys as _sys
+    for _stream in (_sys.stdout, _sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
 CF=json.load(open(sys.argv[1],encoding="utf-8"))
 M={m["mid"]:m for m in CF["materials"]}
 def DATE(d,c):

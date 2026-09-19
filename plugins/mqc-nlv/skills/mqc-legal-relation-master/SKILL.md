@@ -8,9 +8,9 @@ metadata:
 
 # 法律关系图大师
 
-庭前三大法宝之一。前两件是大事记表大师（时间线）与庭审对抗图大师
-（争点攻防），这一件回答的是**结构**：谁与谁、就哪份合同或哪段工程、
-发生了什么法律关系。
+庭前三大法宝（V3 到 V5）的第一件，也是三大主力（V1 到 V3）的第三件。
+另两件法宝是大事记表大师（V4，时间线）与庭审对抗图大师（V5，争点攻防）；
+这一件回答的是**结构**：谁与谁、就哪份合同或哪段工程、发生了什么法律关系。
 
 ## 一、这张图画什么
 
@@ -24,6 +24,9 @@ metadata:
 ```
 
 两者同为模块，靠底色深浅区分，形状一律圆角（奇川风不许直角边）。
+
+**不要打开 `assets/` 下的 JSON。** 那是 lookup.py 读的布局查表（合计约 6.4 万 token），
+代码按度序列去查，模型读了没有用。要读的是本文件与 `references/relations-guide.md`。
 
 ## 二、怎么跑
 
@@ -48,7 +51,7 @@ metadata:
 ```
 1　读材料，写 relations.json            格式见 references/relations-guide.md
 2　python scripts/make.py relations.json --plan-only      规模判断，一秒内返回
-3　两轮提问（见下）拿到 choice.json，然后
+3　提问（见下）拿到 choice.json，然后
    python scripts/make.py relations.json --out 目录 --choice choice.json
 ```
 
@@ -99,7 +102,8 @@ relations.json 里的先后补满（所以关系要按重要性从高到低写�
 问题的措辞由脚本打印，照抄给使用者，不要自己改写：
 
 ```
-python scripts/ask.py round1                      第一轮
+python scripts/ask.py ask relations.json          两问一次问完（推荐：风格与标红互不依赖）
+python scripts/ask.py round1                      第一轮（分开问也行）
 python scripts/ask.py round2 relations.json       第二轮
 python scripts/ask.py resolve relations.json --style 编号 --mark 编号
 ```

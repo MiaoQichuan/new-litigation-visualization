@@ -84,7 +84,7 @@
 ## 五 · 环境类：少一个工具
 
 跑一次环境自检，它逐项列出缺什么、缺了会退化成什么样。自检脚本属于共享内核：完整
-仓库里是 `python3 ../mqc-litigation-visual-redraw/scripts/doctor.py`，SkillHub 的
+仓库里是 `python3 ../mqc-litigation-visual-redraw/scripts/doctor.py --for timeline`，SkillHub 的
 单目录分发包里内核随包带上，直接跑 `python3 scripts/doctor.py`。
 **没有一项是装不上，都是少一种格式**：
 
@@ -93,7 +93,7 @@
 | LibreOffice 或 poppler | 出不了 PNG。SVG 母版照常交付，插进 Word 一样能用 |
 | poppler 的 `pdftoppm` | 读不了没有文字层的扫描件与照片。有文字层的材料不受影响 |
 | node | 出不了溯源索引 docx。图照常出 |
-| `python-docx` | 读不了 `.docx` 材料。把材料另存成 txt 或 PDF 即可 |
+| `python-docx` | 读不了 `.docx` 材料。把材料另存成 txt，或直接交 PDF（有文字层的 PDF 由 read 直接读） |
 
 **每一种格式独立守护**：任何一种失败都只是少一种格式，绝不影响已经写好的 SVG。
 
