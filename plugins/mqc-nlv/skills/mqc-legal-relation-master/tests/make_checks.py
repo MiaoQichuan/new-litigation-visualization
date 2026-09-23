@@ -344,6 +344,14 @@ expect(os.path.exists(os.path.join(_rt, "choice.json")), "ask.py resolve 直接�
 _c9, _l9 = run(FX, "--out", os.path.join(_rt, "o"))
 expect(_l9.count("高模块布局实测慢") <= 1, "名称过长的提示不重复打印", _l9[:200])
 
+# CI 上撞过：机器装的是 LibreOffice，而后端名单里没有 soffice，于是判「PNG 渲染：无」
+# 并停机，连 SVG 都不给出。两条：名单要认 V1 的完整转图链；PNG 不是必需项。
+_mk_src = open(os.path.join(HERE, "..", "scripts", "make.py"), encoding="utf-8").read()
+expect('found.append("v1:" + _t)' in _mk_src and '"soffice"' in _mk_src,
+       "PNG 后端名单认得 V1 的完整转图链（含 LibreOffice）", "名单里没有 soffice 这条")
+expect('"无 —— 只影响 PNG 这一种格式' in _mk_src,
+       "没有转图工具时不停机（PNG 不是必需项）", "PNG 仍被当成必需项")
+
 # PNG 后端顺序：cairosvg 必须排在最后（它缺中文字体时不报错，直接出豆腐块）
 sys.path.insert(0, os.path.join(HERE, "..", "scripts"))
 import importlib as _il8

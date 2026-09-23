@@ -69,6 +69,15 @@ def png_backends():
         import exports as _ex
         if _ex._V1 not in sys.path:
             sys.path.insert(0, _ex._V1)
+        # V1 的 svg_to_png 是一条完整的链：rsvg-convert → inkscape → soffice+pdftoppm →
+        # resvg-js → Playwright → cairosvg，并且会去 Windows 的常见安装位置找。
+        # 这里直接把它当一个后端收进来。CI 上撞过：机器装的是 LibreOffice，而这份名单
+        # 里没有 soffice，于是判成「PNG 渲染：无」并停机。
+        import render as _v1r
+        for _t in ("rsvg-convert", "inkscape", "soffice"):
+            if _v1r._find_tool(_t):
+                found.append("v1:" + _t)
+                break
         import raster_fallback as _rf
         if _rf._node() and _rf._module_dirs():
             found.append("resvg-js")
@@ -94,7 +103,11 @@ def check_env(verbose=True):
     rows.append(("V1 导出器", "在" if os.path.exists(os.path.join(v1, "export_pptx.py")) else "缺",
                  os.path.exists(os.path.join(v1, "export_pptx.py"))))
     b = png_backends()
-    rows.append(("PNG 渲染", "、".join(b) if b else "无（pip install cairosvg，或装 rsvg-convert）", bool(b)))
+    # PNG 不是必需项：默认交付的 SVG 与 PPTX 都不依赖转图工具，PNG 是选了才出的那一档。
+    # CI 上撞过：机器只有 LibreOffice，这里判「无」直接停机，连 SVG 都不给出。
+    rows.append(("PNG 渲染", "、".join(b) if b else
+                 "无 —— 只影响 PNG 这一种格式；SVG 与 PPTX 照常出。"
+                 "要 PNG 就装 Inkscape / LibreOffice 之一，或 npm install @resvg/resvg-js", True))
     if verbose:
         for k, v, ok in rows:
             print(f"  {'OK  ' if ok else 'FAIL'} {k}：{v}")
@@ -139,6 +152,9 @@ def to_png(svg, png, backends, width=1700):
                       ".resize({width:+process.argv[3]}).png().toFile(process.argv[2])"
                       ".catch(e=>{console.error(e);process.exit(1)})")
                 subprocess.run(["node", "-e", js, svg, png, str(width)], check=True)
+            elif b.startswith("v1:"):
+                import render as _v1r
+                _v1r.svg_to_png(svg, png, dpi=192)
             elif b == "resvg-js":
                 import raster_fallback as _rf
                 _rf.resvg_js(svg, png, zoom=2.0)
