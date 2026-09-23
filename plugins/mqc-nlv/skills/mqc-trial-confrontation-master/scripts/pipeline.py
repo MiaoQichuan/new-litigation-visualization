@@ -30,8 +30,35 @@ def _preflight(need):
     return True
 
 
-def main(case, outdir="out"):
-    if not _preflight([("openpyxl", "分析表 Excel")]):
+# 交付物菜单。默认 Excel + SVG：两者不依赖转图工具，任何机器都出得来；
+# PNG 要本机能把 SVG 转成位图（真实运行里这一步最常卡住），选了才出。
+FORMAT_MENU = (("excel", "分析表 Excel", "庭审对抗分析表.xlsx，逐项可改"),
+               ("svg", "对抗图 SVG", "主交付物，矢量可编辑"),
+               ("png", "对抗图 PNG", "位图预览，要本机有转图工具"))
+DEFAULT_FORMATS = ("excel", "svg")
+
+
+def parse_formats(ans):
+    a = str(ans or "").strip().lower().replace("，", ",").replace("、", ",")
+    keys = [k for k, _, _ in FORMAT_MENU]
+    if not a:
+        return DEFAULT_FORMATS
+    if a in ("全部", "all", "所有"):
+        return tuple(keys)
+    sel = []
+    for tok in [x.strip() for x in a.split(",") if x.strip()]:
+        if tok.isdigit() and 1 <= int(tok) <= len(keys):
+            sel.append(keys[int(tok) - 1])
+        elif tok in keys:
+            sel.append(tok)
+    out = tuple(k for k in keys if k in sel)
+    if "png" in out and "svg" not in out:      # PNG 从 SVG 转，必须先有 SVG
+        out = tuple(k for k in keys if k in set(out) | {"svg"})
+    return out or DEFAULT_FORMATS
+
+
+def main(case, outdir="out", formats=None):
+    if "excel" in set(parse_formats(formats)) and not _preflight([("openpyxl", "分析表 Excel")]):
         return 2
     os.makedirs(outdir, exist_ok=True)
     D=json.load(open(case,encoding="utf-8"))
@@ -63,9 +90,13 @@ def main(case, outdir="out"):
     if subprocess.run([sys.executable, os.path.join(HERE,"check_claims.py"), case]).returncode:
         print("    拒绝出表：诉请固定或抗辩归类不合规"); return 1
 
+    want = set(parse_formats(formats))
+    print("交付物：" + "、".join(n for k, n, _ in FORMAT_MENU if k in want)
+          + ("" if formats else "（默认；要别的就在命令行末尾加 1,2,3 或 全部）"))
     step(4,"出表")
     xls=os.path.join(outdir,"庭审对抗分析表.xlsx")
-    S(sys.executable, os.path.join(HERE,"build_matrix.py"), case, xls)
+    if "excel" in want:
+        S(sys.executable, os.path.join(HERE,"build_matrix.py"), case, xls)
 
     step(5,"出图")
     fig=os.path.join(outdir,"图输入.json")     # 产出目录里不留英文名
@@ -75,7 +106,10 @@ def main(case, outdir="out"):
 
     step(6,"光栅")
     png=os.path.join(outdir,"庭审对抗图.png")
-    S(sys.executable, os.path.join(HERE,"rasterize.py"), svg, png)
+    if "png" in want:
+        S(sys.executable, os.path.join(HERE,"rasterize.py"), svg, png)
+    else:
+        print("    未选 PNG，跳过（要就在命令行末尾加 3 或 全部）")
 
     step(7,"自检")
     xc = os.path.join(os.path.dirname(HERE), "tests", "cross_check.py")
@@ -84,7 +118,9 @@ def main(case, outdir="out"):
     if subprocess.run([sys.executable, os.path.join(HERE,"check_figure.py"), svg]).returncode:
         print("    拒绝交付：图几何自检未通过"); return 1
 
-    print(f"\n完成：{xls}\n      {svg}\n      {png}")
+    _made = [p for k, p in (("excel", xls), ("svg", svg), ("png", png))
+             if k in want and os.path.exists(p)]
+    print("\n完成：" + "\n      ".join(_made))
     # 与其余 skill 一致：把结论用文字给出，模型不必再去转图、看图核对
     # （时间轴大师的真实运行里，读图工具显示不了 PNG 时模型反复转格式，白花五分钟）。
     print("核对清单（核对以此为准，不必查看图片）：图几何与图表一致两项自检见上；"
@@ -99,4 +135,5 @@ if __name__=="__main__":
             _stream.reconfigure(encoding="utf-8")
         except Exception:
             pass
-    sys.exit(main(sys.argv[1], sys.argv[2] if len(sys.argv)>2 else "out"))
+    sys.exit(main(sys.argv[1], sys.argv[2] if len(sys.argv)>2 else "out",
+                  sys.argv[3] if len(sys.argv)>3 else None))

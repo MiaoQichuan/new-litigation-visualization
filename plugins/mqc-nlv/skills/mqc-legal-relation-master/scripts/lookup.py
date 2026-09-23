@@ -197,7 +197,7 @@ def run(nodes, edges, verbose=False, svg_path=None, render=None, force_tall=Fals
     # 判据放在运行时而非建索引时，是因为重建索引的代价太大；
     # 代价是每个候选多一次渲染与回读，约一两秒。
     best, fallback = None, None
-    best_g14 = True          # 还没有候选时，任何「不压图名」的候选都该胜出
+    best_g14 = 99            # 还没有候选时，任何候选都该胜出（数的是犯了 G14、G15 中的几条）
     # 判据不过时要有得换，所以多带几个候选进精修。
     # 14 主体与 16 主体的情形显示：只看前三个仍可能全都不过。
     for sc0, g, a, pos, rects in rough[:5]:
@@ -225,9 +225,13 @@ def run(nodes, edges, verbose=False, svg_path=None, render=None, force_tall=Fals
         # 12 条关系那一版就交出了压住图名的布局，使用者只能回读 checks.txt 才发现。
         # 所以同样合格的候选里，**优先选不压图名的那个**，指标略差也认。
         _g14 = "G14" in (msg or "")
-        if ok and (best is None or (_g14, sc) < (best_g14, best[0])):
-            best, best_g14 = cand, _g14
-            d["guard"] = dict(ok=True, msg=msg, grid=list(g), title_clash=_g14)
+        # G15（文字互相压住）同样参与挑选：真实运行里有过两段关系名重叠 38.6 像素、
+        # 判据却全绿的情况。同样合格的候选里，先挑两者都不犯的，再比指标。
+        _g15 = "G15" in (msg or "")
+        _bad = int(_g14) + int(_g15)
+        if ok and (best is None or (_bad, sc) < (best_g14, best[0])):
+            best, best_g14 = cand, _bad
+            d["guard"] = dict(ok=True, msg=msg, grid=list(g), title_clash=_g14, text_clash=_g15)
     if best is None and render is not None:
         # 候选全都没过判据时，再试一圈相邻网格（多一行或多一列，含转置）。
         # 7 主体只有 3x3 一个候选的案件，G9 差一段线贴边，

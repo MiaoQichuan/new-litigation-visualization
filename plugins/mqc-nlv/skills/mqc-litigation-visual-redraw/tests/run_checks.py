@@ -1580,6 +1580,145 @@ def _():
         "the README footer carries a different version from the badge"
 
 
+@check("2026-09-20 真实运行批次 · 金额不折断、Mermaid 放行、清单扫连线、10 件转纵向、编号型文案")
+def _():
+    """2026-09-20 真实运行（五个 skill 全跑）暴露的五条，一并盯住：
+      · 关系图连线标签把「4,912,376.06美元」折成「4,9 / 12,376.06」——法庭材料里的硬伤；
+      · Mermaid 导出的 SVG 文字在 foreignObject 里，被预检误判成位图拦下；
+      · 核对清单不扫连线，图上有红边却印「全图不标」；
+      · 10 件事件仍走横向，内容只占画布 22.7%；
+      · 确认清单把编号型说成「无精确日期」，而那次每条都到日。"""
+    import importlib.util as _il, subprocess, tempfile
+    sp = lambda n: _il.spec_from_file_location(n, os.path.join(HERE, "..", "scripts", n + ".py"))
+    cm = _il.module_from_spec(sp("common")); sp("common").loader.exec_module(cm)
+    L = cm.wrap("改判：甲方连带赔偿 4,912,376.06美元 折合人民币30,118,760.10元", 12, 130,
+                keep_alnum=True)
+    flat = "|".join(L)
+    assert "4,912,376.06" in flat and "30,118,760.10" in flat, f"金额被折断：{L}"
+    d = tempfile.mkdtemp(); f = os.path.join(d, "m.svg")
+    open(f, "w", encoding="utf-8").write(
+        '<svg xmlns="http://www.w3.org/2000/svg"><foreignObject width="9" height="9">'
+        '<div xmlns="http://www.w3.org/1999/xhtml">甲公司</div></foreignObject></svg>')
+    r = subprocess.run([sys.executable, os.path.join(HERE, "..", "scripts", "source_check.py"), f],
+                       capture_output=True, text=True)
+    assert r.returncode == 0, "Mermaid 式 SVG（文字在 foreignObject 里）被当成位图拦下"
+    rsrc = open(os.path.join(HERE, "..", "scripts", "render.py"), encoding="utf-8").read()
+    assert 'm.get("edges")' in rsrc.split("def _print_checklist")[1][:2500], "核对清单没扫连线上的深红"
+    tall = open(os.path.join(HERE, "..", "scripts", "render_points_tall.py"), encoding="utf-8").read()
+    assert ">= THRESHOLD" in tall, "10 件事件仍不转纵向"
+    ck = open(os.path.join(HERE, "..", "scripts", "checkpoint.py"), encoding="utf-8").read()
+    assert "只有先后顺序，无精确日期" not in ck, "编号型的说明仍在断言「无精确日期」"
+
+
+@check("guizang · 长图名按字数缩到装得下，不许被画布裁掉")
+def _():
+    """真实运行记录：42 字的图名（含案号）在歸藏风被按画布宽度放到 60px，
+    左右各超出画布约 164px，两端的字被裁掉，而奇川风同一图名正常。
+    这里量真出的 SVG：图名那一行必须完整落在画布内，短图名仍用大字号。"""
+    import subprocess, tempfile, json as _json
+    base = _json.load(open(os.path.join(EXAMPLES, "timeline-points.json"), encoding="utf-8"))
+    def _title_box(title):
+        m = _json.loads(_json.dumps(base))
+        m["title_text"] = title
+        m["checkpoint"] = {"confirmed": True, "emphasis_source": "none"}
+        d = tempfile.mkdtemp()
+        _json.dump(m, open(os.path.join(d, "m.json"), "w", encoding="utf-8"), ensure_ascii=False)
+        subprocess.run([sys.executable, os.path.join(HERE, "..", "scripts", "render.py"),
+                        os.path.join(d, "m.json"), os.path.join(d, "g"),
+                        "--formats=svg", "--guizang"], capture_output=True)
+        svg = open(os.path.join(d, "g.svg"), encoding="utf-8").read()
+        W = float(re.search(r'width="([\d.]+)"', svg).group(1))
+        for t in re.finditer(r'<text([^>]*)>([^<]+)</text>', svg):
+            fs = re.search(r'font-size="([\d.]+)"', t.group(1))
+            x = re.search(r'\sx="([\d.]+)"', t.group(1))
+            if fs and x and float(fs.group(1)) >= 20:
+                f = float(fs.group(1))
+                w = sum(f if ord(c) > 0x2E80 else f * 0.55 for c in t.group(2))
+                return float(x.group(1)) - w / 2, float(x.group(1)) + w / 2, W, f
+        return None
+    long_t = "某某公司与某某酒店管理公司合同纠纷·（某年）某民初字第某某某某号一审诉讼经过时间轴"
+    l, r, W, f = _title_box(long_t)
+    assert l >= 0 and r <= W, f"长图名被裁：左 {l:.0f} 右 {r:.0f}，画布 {W:.0f}（字号 {f:.0f}）"
+    l2, r2, W2, f2 = _title_box("担保纠纷案件事实经过时间轴")
+    assert f2 > f, f"短图名没用上大字号（短 {f2:.0f} vs 长 {f:.0f}）"
+
+
+@check("arrow · 线不许顶穿箭头：端点埋在三角内，且该处三角比线宽")
+def _():
+    """老毛病：线一直画到节点边，箭头贴在线端上，视觉上就成了平头（三角被线盖住）。
+    这里按 marker 定义硬算：端点到尖端的距离必须为正（线不露在三角外），
+    且端点处三角的高度必须大于线宽（两侧不露白）。量的是真出的 SVG，不是注释。"""
+    import subprocess, tempfile, glob
+    d = tempfile.mkdtemp()
+    for ex in ("flowchart", "relationship"):
+        subprocess.run([sys.executable, os.path.join(HERE, "..", "scripts", "render.py"),
+                        os.path.join(EXAMPLES, ex + ".json"), os.path.join(d, ex),
+                        "--formats=svg"], capture_output=True)
+    bad, n = [], 0
+    for f in glob.glob(os.path.join(d, "*.svg")):
+        svg = open(f, encoding="utf-8").read()
+        mk = {}
+        for m in re.finditer(r'<marker[^>]*id="([^"]+)"[^>]*>(.*?)</marker>', svg, re.S):
+            a = m.group(0)
+            gv = lambda k: float((re.search(rf'{k}="([\d.\-]+)"', a) or [0, 0])[1])
+            vb = re.search(r'viewBox="([\d.\- ]+)"', a)
+            vb = [float(x) for x in vb.group(1).split()] if vb else [0, 0, gv("markerWidth"),
+                                                                     gv("markerHeight")]
+            pts = re.findall(r'(-?[\d.]+)[ ,]+(-?[\d.]+)',
+                             (re.search(r'd="([^"]+)"', m.group(2)) or ["", ""])[1])
+            mk[m.group(1)] = (gv("refX"), gv("markerWidth"), vb,
+                              max((float(x) for x, _ in pts), default=vb[2]))
+        for pm in re.finditer(r'<path\s([^>]*?)(?<![\w-])d="([^"]+)"([^>]*?)/?>', svg):
+            at = pm.group(1) + pm.group(3)
+            me = re.search(r'marker-end="url\(#([^)]+)\)"', at)
+            if not me or me.group(1) not in mk:
+                continue
+            n += 1
+            refX, mw, vb, tipvb = mk[me.group(1)]
+            scale = (mw / vb[2]) if vb[2] else 1
+            ahead = (tipvb - refX) * scale
+            hgt = vb[3] * (1 - (refX / tipvb if tipvb else 0)) * scale
+            sw = float((re.search(r'stroke-width="([\d.]+)"', at) or [0, "1"])[1])
+            if ahead <= 0:
+                bad.append((os.path.basename(f), "线冲出尖端", round(ahead, 2)))
+            elif hgt <= sw:
+                bad.append((os.path.basename(f), "端点处三角比线细", round(hgt, 2), sw))
+    assert n >= 10, f"没量到足够多的箭头（只有 {n} 个），量具可能失灵"
+    assert not bad, f"箭头几何有问题：{bad[:3]}"
+
+
+@check("formats · 不选只出 SVG+PPTX；PNG 选了才出；转图兜底认得 resvg-js / Playwright")
+def _():
+    """2026-09-20 真实运行：五个 skill 在典型 Windows 上都出不了 PNG，模型每轮现场装工具；
+    而律师多数时候只要 SVG 与 PPTX。所以命令行默认只出这两种，PNG 选了才出；
+    转图链在 cairosvg 之前先试 resvg-js 与 Playwright（中文正常），都没有就说清怎么补。"""
+    import subprocess, tempfile, glob
+    d = tempfile.mkdtemp()
+    src = os.path.join(EXAMPLES, "flowchart.json")
+    subprocess.run([sys.executable, os.path.join(HERE, "..", "scripts", "render.py"), src,
+                    os.path.join(d, "f")], capture_output=True)
+    got = sorted(os.path.splitext(p)[1] for p in glob.glob(os.path.join(d, "f.*")))
+    assert got == [".pptx", ".svg"], f"不选格式时出了 {got}"
+    rsrc = open(os.path.join(HERE, "..", "scripts", "render.py"), encoding="utf-8").read()
+    body = rsrc.split("def svg_to_png")[1].split("\ndef ")[0]
+    assert body.index("raster_fallback") < body.index("import cairosvg"), \
+        "转图兜底要排在 cairosvg 之前（cairosvg 缺中文字体时会静默出豆腐块）"
+    import importlib.util as _il
+    sp = _il.spec_from_file_location("rf", os.path.join(HERE, "..", "scripts", "raster_fallback.py"))
+    rf = _il.module_from_spec(sp); sp.loader.exec_module(rf)
+    assert "npm install @resvg/resvg-js" in rsrc or "npm install @resvg/resvg-js" in \
+        open(os.path.join(HERE, "..", "scripts", "raster_fallback.py"), encoding="utf-8").read(), \
+        "转图工具都没有时，没说清怎么补"
+    other = os.path.join(HERE, "..", "..", "mqc-trial-confrontation-master", "scripts",
+                         "raster_fallback.py")
+    if os.path.exists(other):
+        strip = lambda t: "\n".join(l for l in t.splitlines() if not l.startswith("# ⚠")
+                                    and "单独分发、不带 V1 内核" not in l)
+        a = strip(open(os.path.join(HERE, "..", "scripts", "raster_fallback.py"), encoding="utf-8").read())
+        b = strip(open(other, encoding="utf-8").read())
+        assert a == b, "庭审对抗图大师里那份 raster_fallback.py 与本 skill 的不一致了"
+
+
 @check("wrap · 折行后末行不留孤字（只挪断点、不改字）")
 def _():
     """同类毛病在法律关系图大师的真实运行里出现过（图上把机构名的末字甩成孤行）。

@@ -11,7 +11,7 @@ Picks the layout from the map:
 
 SVG is the primary, editable deliverable. PNG is derived for preview/filing.
 """
-import sys, os, re, shutil, subprocess
+import sys, os, re, shutil, subprocess, json
 from common import load_map, validate_map, strip_unearned_emphasis, TITLE_FONT, TOKENS
 import math
 import render_points, render_spans, render_flow, render_relation, render_tree, render_dated, render_compare
@@ -208,14 +208,21 @@ def svg_to_png(svg_path, png_path, dpi=192):
                 except OSError:
                     pass
         return "soffice+pdftoppm"
+    # resvg-js（Node）与 Playwright（Chromium）排在 cairosvg 之前：两者走系统字体、中文正常，
+    # 而 cairosvg 找不到中文字体时不报错、直接画方框。真实运行里这两条路在使用者机器上
+    # 都装着，只是技能不认识，模型每轮都得现场另写脚本。
+    try:
+        import raster_fallback
+        return raster_fallback.try_all(svg_path, png_path, zoom=scale)
+    except Exception as _fb:
+        _fb_msg = str(_fb)
     try:
         import cairosvg  # noqa — last resort; may render CJK as tofu (see note above)
         cairosvg.svg2png(url=svg_path, write_to=png_path, dpi=dpi)
         return "cairosvg"
     except Exception:
         pass
-    raise RuntimeError("No SVG->PNG renderer found. Install rsvg-convert/resvg/"
-                       "inkscape, or LibreOffice(soffice)+pdftoppm (recommended for CJK).")
+    raise RuntimeError(_fb_msg)
 
 
 def to_monochrome(svg):
@@ -383,7 +390,15 @@ def to_guizang(svg, layout=None):
         t = re.sub(r'font-weight="\d+"', 'font-weight="300"', tm.group(0))
         t = re.sub(r' stroke="[^"]*"', '', t)
         t = re.sub(r' stroke-width="[^"]*"', '', t)
-        t = re.sub(r'font-size="\d+"', f'font-size="{_tfs}"', t)   # relative, not absolute
+        # 字号按画布宽度放大，但**放大后必须仍装得下**。真实运行记录：42 字的图名
+        # （含案号）在歸藏风被放到 60px，左右各超出画布约 164px，两端的字被裁掉。
+        # 这里先按实际字数反解一个装得下的上限，取两者中的小者；留出左右各 4% 的天地。
+        _txt = re.sub(r"<[^>]*>", "", tm.group(0))
+        _avail = _W * 0.92
+        _unit = sum(1.0 if ord(c) > 0x2E80 else 0.55 for c in _txt) or 1
+        _fit = int(_avail / _unit)
+        _use = max(_T["guizang_title_min"], min(_tfs, _fit))
+        t = re.sub(r'font-size="\d+"', f'font-size="{_use}"', t)
         t = re.sub(r'<text x="\d+"', f'<text x="{_cx}"', t)
         return t
     svg = _sub(r'<text [^>]*stroke-width="0\.3"[^>]*>[^<]*</text>', _title, svg,
@@ -691,11 +706,12 @@ def main(mapfile, base="final", strict=False, mono=False, theme=None,
     open(svg_path, "w", encoding="utf-8").write(svg)
     print(f"SVG: {svg_path}  {w}x{h}")
     png_path = base + ".png"
-    try:
-        engine = svg_to_png(svg_path, png_path)
-        print(f"PNG: {png_path}  (via {engine})")
-    except Exception as e:
-        print(f"PNG skipped: {e}")
+    if "png" in formats:                 # 选了才出：PNG 最常出不来，没选就不去碰它
+        try:
+            engine = svg_to_png(svg_path, png_path)
+            print(f"PNG: {png_path}  (via {engine})")
+        except Exception as e:
+            print(f"PNG skipped: {e}")
     # editable draw.io export (additive; NEVER breaks the SVG/PNG deliverable).
     # Node+edge layouts also get an editable .drawio and a .drawio.svg (a valid
     # SVG that additionally opens editable in draw.io). Guarded end-to-end so any
@@ -786,6 +802,10 @@ def _print_checklist(m, base, svg_path):
         return [e.get("id") or e.get("title") or e.get("label_text")
                 for e in x if isinstance(e, dict) and e.get("emphasis")]
     marks = sum((_emph(m.get(k) or []) for k in ("events", "spans", "points", "nodes")), [])
+    # 连线上的深红也要算：真实运行记录里图上明明有一条红边，清单却印「全图不标」，
+    # 与上方审计摘要 emphasized(red): 1 自相矛盾。
+    marks += [f"{e.get('from')}→{e.get('to')}" for e in (m.get("edges") or [])
+              if isinstance(e, dict) and e.get("emphasis")]
     print("核对清单（核对以此为准，不必查看图片）：")
     print(f"  版式 {lay}｜元素 {n} 个｜深红 "
           f"{('、'.join(str(x) for x in marks) if marks else '全图不标')}"
@@ -815,12 +835,21 @@ def _cli(argv):
                  "--歸葬流", "--归葬流")   # last two: deprecated v1.0.1 spelling
     theme = "guizang" if any(a in _GZ_FLAGS for a in argv) else None
     pptx_fonts = "safe" if "--pptx-fonts=safe" in argv else "master"
-    # Default is EVERY format. The premise of this skill is that the lawyer's own
-    # tool is not ours to guess — draw.io, PowerPoint, ProcessOn, Visio and WPS
-    # are all in real use — so all of them are written unless asked to narrow.
-    formats = ALL_FORMATS
+    # 命令行默认：先看确认清单第④问的答案（记在地图的 checkpoint.formats 里），
+    # 没答就只出 SVG + PPTX。原来一律五种全出，而 PNG 在典型的 Windows 机器上
+    # 出不来（真实运行里五个 skill 无一幸免），模型只好现场去装工具；律师多数时候
+    # 也只要 SVG 与 PPTX。要全套就 --formats=all。（Python API 的 main() 默认仍是全套，
+    # 图库与时间轴大师依赖它。）
     fmt_arg = next((a for a in argv if a.startswith("--formats=")), None)
-    if fmt_arg:
+    try:
+        import checkpoint as _cp
+        _mp = json.load(open(argv[0], encoding="utf-8")) if argv else {}
+        formats = _cp.parse_formats(",".join((_mp.get("checkpoint") or {}).get("formats") or []))
+    except Exception:
+        formats = ("svg", "pptx")
+    if fmt_arg and fmt_arg.split("=", 1)[1].strip().lower() in ("all", "全部"):
+        formats, fmt_arg_all = ALL_FORMATS, fmt_arg
+    elif fmt_arg:
         formats = tuple(x.strip().lower() for x in fmt_arg.split("=", 1)[1].split(",") if x.strip())
         unknown = [f for f in formats if f not in ALL_FORMATS]
         if unknown:

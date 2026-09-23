@@ -11,6 +11,7 @@ import shutil
 PDF   = (".pdf",)
 IMAGE = (".jpg", ".jpeg", ".png", ".webp", ".tif", ".tiff", ".bmp", ".heic")
 DOCX  = (".docx",)
+DOC   = (".doc",)          # 老式 Word：法院与律所往来里仍常见，见 read_doc.py
 PLAIN = (".txt", ".md", ".text")
 THIN_TEXT = 120               # 文字型材料低于此字数即提示，不阻断
 
@@ -74,12 +75,13 @@ PAGE_MARKER = re.compile(r'-\s*\d{1,4}\s*-')   # 「- 12 -」这类页脚，计�
 
 def kind_of(path):
     e = os.path.splitext(path)[1].lower()
-    for exts, k in ((PDF, "pdf"), (IMAGE, "image"), (DOCX, "docx"), (PLAIN, "plain")):
+    for exts, k in ((PDF, "pdf"), (IMAGE, "image"), (DOCX, "docx"), (DOC, "doc"),
+                    (PLAIN, "plain")):
         if e in exts:
             return k
     raise UnknownFormat(
         f"认不出的材料格式：{os.path.basename(path)}（扩展名 {e or '无'}）。"
-        f"支持 PDF／图片／docx／纯文本；请先转换，不要让它静默漏掉。")
+        f"支持 PDF／图片／docx／doc／纯文本；请先转换，不要让它静默漏掉。")
 
 
 def read_docx(path):
@@ -142,6 +144,13 @@ def ingest(paths, workdir):
             item.update(pages=1, medium="image", verdict="image", rasterized=[p])
             todo.append({"mid": mid, "name": item["name"], "pages": 1,
                          "images": [p], "est_tokens": 1600})
+        elif k == "doc":
+            import read_doc
+            try:
+                txt = read_doc.read_doc(p)
+            except read_doc.DocReadError as e:
+                raise SystemExit(f"{e}：{p}\n  用 Word 另存为 .docx，或 "
+                                 f"soffice --headless --convert-to docx \"{p}\"")
         elif k in ("docx", "plain"):
             txt = (read_docx(p) if k == "docx"
                    else open(p, encoding="utf-8", errors="ignore").read())

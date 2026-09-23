@@ -310,6 +310,45 @@ else:
 for c in _clash[:3]:
     print(f"        图名「{c[0]}」被「{c[1]}」压住")
 
+# G15　文字不得互相压住（标签压标签）
+#
+# 真实运行记录：密图里一条合并后的长关系名与另一条关系名重叠 38.6 像素，两段字
+# 互相压印，而当时 14 条判据全绿 —— G12 只管越出画布、G14 只管压图名，
+# 没有一条管「任意两段文字互相压」。这里逐对量包围盒。同一段文字的上下几行
+# （同一 x、纵向相邻）是正常排版，不算；只算实质重叠（横纵都压住三成以上）。
+_boxes15 = []
+for _m in re.finditer(r'<text([^>]*)>([^<]*)</text>', s):
+    at, txt = _m.group(1), _m.group(2)
+    if not txt.strip():
+        continue
+    _x = re.search(r'\sx="([\d.-]+)"', at); _y = re.search(r'\sy="([\d.-]+)"', at)
+    _fs = re.search(r'font-size="([\d.]+)"', at)
+    if not (_x and _y and _fs):
+        continue
+    x, y, fs = float(_x.group(1)), float(_y.group(1)), float(_fs.group(1))
+    if fs >= 22 and y < CH * 0.18:
+        continue                                  # 图名归 G14 管
+    anc = re.search(r'text-anchor="(\w+)"', at)
+    anc = anc.group(1) if anc else "start"
+    tw = _textw(txt, fs)
+    left = x - tw / 2 if anc == "middle" else (x - tw if anc == "end" else x)
+    _boxes15.append((left, y - fs * 0.85, left + tw, y + fs * 0.2, txt[:12]))
+_clash15 = []
+for _i in range(len(_boxes15)):
+    for _j in range(_i + 1, len(_boxes15)):
+        a1, b1 = _boxes15[_i], _boxes15[_j]
+        ox = min(a1[2], b1[2]) - max(a1[0], b1[0]); oy = min(a1[3], b1[3]) - max(a1[1], b1[1])
+        if ox <= 0 or oy <= 0:
+            continue
+        if (ox / max(1.0, min(a1[2] - a1[0], b1[2] - b1[0])) > 0.3
+                and oy / max(1.0, min(a1[3] - a1[1], b1[3] - b1[1])) > 0.3):
+            _clash15.append((a1[4], b1[4], round(ox, 1)))
+if _clash15:
+    print(f"  WARN G15  文字互相压住（{len(_clash15)} 处）　——　"
+          + "；".join(f"「{c[0]}」与「{c[1]}」重叠 {c[2]}px" for c in _clash15[:3]))
+else:
+    print("  OK   G15  文字不互相压住（重叠 0 处）")
+
 # G13　模块内的文字不得超出模块本身
 spill = []
 for _m in re.finditer(r'<text([^>]*)>([^<]*)</text>', s):

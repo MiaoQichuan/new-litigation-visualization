@@ -24,8 +24,17 @@ ORIGINAL = {".pptx", ".ppt", ".vsdx", ".drawio", ".xml", ".fig", ".ai", ".emf", 
 
 
 def _svg_text_runs(path):
+    """数 SVG 里的文字段：<text> 与 <foreignObject> 里的 HTML 文字都算。
+
+    真实运行记录：Mermaid 导出的关系图把 56 段文字全放在 foreignObject 里，
+    一个 <text> 都没有，于是被误判成位图、退出码 3 拦下；而那份 SVG 的文字
+    其实是真文字，逐字可抄。"""
     s = open(path, encoding="utf-8", errors="replace").read()
-    return len(re.findall(r"<text\b", s))
+    n = len(re.findall(r"<text\b", s))
+    for fo in re.findall(r"<foreignObject\b[\s\S]*?</foreignObject>", s):
+        if re.sub(r"<[^>]+>", "", fo).strip():
+            n += 1
+    return n
 
 
 def _pdf_pages_text(path):

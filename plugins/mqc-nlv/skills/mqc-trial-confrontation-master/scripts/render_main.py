@@ -34,9 +34,15 @@ def fillet(pts, r):
     return " ".join(d)
 
 def arrow(mid, color, sw, size, s):
-    """固定尺寸箭头；refX 按 cover=2.0 倍线宽算出，不钉死（visual-style）。"""
+    """固定尺寸箭头；refX 按 cover=2.0 倍线宽算出，不钉死（visual-style）。
+
+    **cover 是箭头伸到线端「前面」的那一段**（与 V1 的 arrow_geom 同一口径：
+    refX = 12 - 12*cover/L）。原来写成 refX = 12*cover/L，等于把 cover 当成埋在
+    线端后面的量，于是尖端比线端还往前伸 L-cover ≈ 17px，而收尾量 trim 又是按
+    「cover 是前伸量」算的（3.5s + cover），两边口径对不上 —— 实测箭头尖端插进
+    模块 2 到 4.5px。改成同一口径后，尖端正好停在模块前 3.5s（与 V1 的 tip_clear 一致）。"""
     L=size*s; HW=L/2; cover=2.0*sw
-    return (f'<marker id="{mid}" viewBox="0 0 12 12" refX="{12*cover/L:.3f}" refY="6" '
+    return (f'<marker id="{mid}" viewBox="0 0 12 12" refX="{12 - 12*cover/L:.3f}" refY="6" '
             f'markerWidth="{L:.2f}" markerHeight="{L:.2f}" markerUnits="userSpaceOnUse" orient="auto">'
             f'<path d="M 0 0 L 12 6 L 0 12 Z" fill="{color}"/></marker>'), cover
 
@@ -324,7 +330,9 @@ def render(data,out,s=2.2,W=3000):
                      f'text-anchor="{al}"{fam}>{txt}</text>')
     ey=tbl_y+tbl_h+26*s
     emph=[p for p in data["parts"] if p.get("emph")]
-    concl = (f'决定性要件 · {emph[0].get("concl") or emph[0]["label"]}' if emph else
+    # 决定性要件可有两处（L4 上限内），结论条要全部列出。真实运行记录：索引表两处都标红，
+    # 结论条却只报第一处，图表内部自相矛盾。
+    concl = ('决定性要件 · ' + ' ／ '.join((p.get("concl") or p["label"]) for p in emph) if emph else
              (f'决定性要件 {n_emph} 处，争点分散：' + " / ".join(p["id"] for p in data["parts"] if p.get("_hit"))
               if data.get("scattered") else ""))
     # T6 图例三行整宽排在上，结论条另起一行排在其下，两者纵向分开——

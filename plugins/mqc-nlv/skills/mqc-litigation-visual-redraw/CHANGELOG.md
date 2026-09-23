@@ -1,6 +1,6 @@
 # Changelog
 
-## 未发布（版本号待作者发布时再定）
+## v1.1.0
 
 Fixes found by running the timeline skill on a real Windows machine (Python 3.11,
 GBK console). Rendering, geometry and the gallery are unchanged — the gallery is

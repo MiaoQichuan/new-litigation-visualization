@@ -231,19 +231,28 @@ class Row:
         keep = "".join(kept).strip()
 
         if len(wrap(keep, w, FS_BODY)) > MAXL_CONTENT:
-            # 第一句本身就超行：退到次级边界（分句的逗号、顿号、冒号），
-            # 断在这些地方仍是一个说得完整的意群，末尾补句号收住。
-            for sep in ("，", "、", "："):
-                if sep not in keep:
-                    continue
-                acc, parts = "", keep.split(sep)
-                for p in parts[:-1]:
-                    if acc and len(wrap(acc + p + sep + "。", w, FS_BODY)) > MAXL_CONTENT:
+            # 第一句本身就超过常规行数。照文件头的承诺「宁可多占一行，也不让半句话出现」：
+            #   1. 整句放得进硬上限，就整句上（多占一两行）；
+            #   2. 放不进，才在次级边界（冒号、分号、逗号、顿号）处取**最长**的一段前缀，
+            #      并且这一段至少要占满一行 —— 否则就是「综上。」「二。」这种只剩开头
+            #      几个字的碎片。真实运行记录：一整段一审判决被压成了「综上。」四个字，
+            #      原因正是旧写法遇到第一个放不下的片段就整段停下，只留下逗号前的两个字。
+            if len(wrap(keep, w, FS_BODY)) <= HARD_MAX:
+                pass
+            else:
+                # 分隔按强弱分档：冒号分号 > 逗号 > 顿号。先在强的里面找，找不到才往下退，
+                # 否则会截在「甲、乙、丙」这种列举中间，收成「…乙。」仍是半句。
+                for tier in ("：；", "，", "、"):
+                    cands = []
+                    for i, ch in enumerate(keep):
+                        if ch in tier and i > 0:
+                            pre = keep[:i]
+                            n = len(wrap(pre + "。", w, FS_BODY))
+                            if 2 <= n <= HARD_MAX:
+                                cands.append(pre)
+                    if cands:
+                        keep = max(cands, key=len).rstrip("，、：；") + "。"
                         break
-                    acc += p + sep
-                if acc:
-                    keep = acc.rstrip("，、：；") + "。"
-                    break
 
         # 宁可多占一行，也不让半句话出现在呈报件上；实在收不住才让它走满硬上限
         return finish(keep)

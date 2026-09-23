@@ -163,7 +163,8 @@ def wrap(text: str, fs: float, max_w: float, keep_alnum: bool = False):
     if keep_alnum:
         # 只给图名用：数字与拉丁字母串不许被折断。真实运行里图名中的案号被折在
         # 「475 / 09」中间，看起来就像写错了号。断点往前挪到这一串之前；挪不动就保持原样。
-        _an = lambda c: c.isascii() and c.isalnum()
+        # 数字串里的千分位逗号与小数点也算在串内：否则「4,912,376.06」会断成「4,」「912…」
+        _an = lambda c: c.isascii() and (c.isalnum() or c in ",.")
         for _k in range(1, len(lines)):
             prev, nxt = lines[_k - 1], lines[_k]
             if not (prev and nxt and _an(prev[-1]) and _an(nxt[0])):

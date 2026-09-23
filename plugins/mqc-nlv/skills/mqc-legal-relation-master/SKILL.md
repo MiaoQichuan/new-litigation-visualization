@@ -28,6 +28,16 @@ metadata:
 **不要打开 `assets/` 下的 JSON。** 那是 lookup.py 读的布局查表（合计约 6.4 万 token），
 代码按度序列去查，模型读了没有用。要读的是本文件与 `references/relations-guide.md`。
 
+
+**同一对模块之间不许有方向相反的两条关系。** 走线层会把两条反向线放在同一对端口上，
+叠成一条（实测：两对双向即出现共线重叠，放进真实案子里四项判据不过）。股东与公司、
+甲乙互负义务这类天然双向的关系，两种画法任选：
+
+1. **经由客体**：甲 → 《章程》/出资 ← 乙，两条线各自照录关系名；
+2. **合成一条**：只留一个方向，两句关系名用「；」连起来原样写进同一条线，
+   另一方向写进 `unsure`（前缀「未入图·」），出处索引会原样列出。
+
+
 ## 二、怎么跑
 
 ```
@@ -103,6 +113,10 @@ relations.json 里的先后补满（所以关系要按重要性从高到低写�
 
 ```
 python scripts/ask.py ask relations.json          两问一次问完（推荐：风格与标红互不依赖）
+
+**输出格式由使用者选（可多选）**：`ask` 那一问里顺带问，`resolve … --formats 1,3` 记进
+choice.json（1 SVG 2 PNG 3 PPTX 4 VSDX 5 drawio，或 all）。**不选就只出 SVG 与 PPTX**：
+两者不依赖外部工具；PNG 要本机有转图工具，选了才出。临时要全套：`make.py … --formats all`。
 python scripts/ask.py round1                      第一轮（分开问也行）
 python scripts/ask.py round2 relations.json       第二轮
 python scripts/ask.py resolve relations.json --style 编号 --mark 编号

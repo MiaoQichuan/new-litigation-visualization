@@ -10,7 +10,7 @@ import numpy as np
 
 try:                                  # 装了就照旧用，行为与原来完全一致
     import cairosvg
-except ImportError:                   # 没装就走外部转换工具（见 _rasterize_external）
+except (ImportError, OSError):        # 没装、或装了壳缺 cairo-2.dll（Windows 常见，抛 OSError）
     cairosvg = None
 
 SANS = "Noto Sans CJK SC"
@@ -71,9 +71,12 @@ def _rasterize_external(svg_text, dst, width):
         subprocess.run([ppm, "-png", "-singlefile", "-scale-to-x", str(width),
                         "-scale-to-y", "-1", pdf, os.path.splitext(dst)[0]], check=True)
         return
-    raise RuntimeError(
-        "找不到 SVG 转 PNG 的工具：装 cairosvg（pip install cairosvg），"
-        "或安装 Inkscape / LibreOffice / rsvg-convert 其一。SVG 已经出好，PNG 可稍后补。")
+    # 最后两道兜底：本机装着的 resvg-js（Node）或 Playwright（Chromium）。真实运行记录：
+    # 那台机器 cairosvg 缺本体、没有 Inkscape，而 Playwright 其实装着，模型只好现场另写截图。
+    tmp = os.path.join(tempfile.mkdtemp(), "t.svg")
+    open(tmp, "w", encoding="utf-8").write(svg_text)
+    import raster_fallback
+    raster_fallback.try_all(tmp, dst, zoom=max(1.0, width / 1400.0 * 2))
 
 def verify(png, min_ratio=0.45):
     """中文若退化成豆腐块，笔画密度会明显偏低。量深色像素占比，低于阈值即判未命中。"""

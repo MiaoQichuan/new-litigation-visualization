@@ -4490,6 +4490,93 @@ def main():
             or "一审.txt 句3" not in _src7["locator"]:
         read_msgs.append(f"出处没按句子所属的材料记、或定位没换成材料内句号：{_src7}")
 
+    # ---- 横向排不开时要说清卡在哪条约束 ---------------------------------------------------
+    # 真实运行记录：只说「过于密集」，模型据此以为事项太多，删了又删、重渲六次；
+    # 实际卡住的是某几项正文太长。报错要点名是哪一条、哪几项、怎么改。
+    import render_multiband as _rm20, copy as _cp20
+    _ev20 = [{"id": str(i + 1), "head": "设备价款结算与违约责任协商" * 6,
+              "time": {"certainty": "exact", "date": "2021/5/17", "date_text": "2021.05.17"},
+              "emphasis": False, "source": {"file": "x.pdf", "locator": "句1"}}
+             for i in range(18)]
+    try:
+        _rm20.render(_cp20.deepcopy({"style": "奇川风", "title": "测试", "form": "numbered",
+                                     "events": _ev20}), os.path.join(_TF.mkdtemp(), "d.svg"))
+        read_msgs.append("这份密集用例居然排下了，密集用例失效，守卫等于没验")
+    except ValueError as _e20:
+        _msg20 = str(_e20)
+        for _need20 in ("卡在这一条", "行", "可行的改法"):
+            if _need20 not in _msg20:
+                read_msgs.append(f"横向排不开的报错没说清卡在哪：{_msg20[:80]}")
+                break
+
+    # ---- 老式 Word（.doc）能直接读，不必先转 docx --------------------------------------
+    # 真实运行记录：使用者给的判决书是 .doc，技能不认，模型现场装 olefile 写解析。
+    # 这里用 LibreOffice 现造一份 .doc（有就造，没有就跳过），验证纯 Python 解析读得出中文。
+    import read_doc as _rd19, shutil as _sh19, subprocess as _sp19, tempfile as _tf19
+    _d19 = _tf19.mkdtemp()
+    _docx19 = os.path.join(SKILL, "tests", "fixtures", "m1-judgment.txt")
+    _soffice = _sh19.which("soffice")
+    if _soffice:
+        _txt19 = os.path.join(_d19, "s.txt")
+        open(_txt19, "w", encoding="utf-8").write("某某公司于2019年3月28日提起诉讼。\n本院认为，应予支持。\n")
+        _sp19.run([_soffice, "--headless", "--convert-to", "doc", "--outdir", _d19, _txt19],
+                  capture_output=True, timeout=180)
+        _doc19 = os.path.join(_d19, "s.doc")
+        if os.path.exists(_doc19):
+            _got19 = _rd19.read_doc(_doc19)
+            if "2019年3月28日" not in _got19 or "本院认为" not in _got19:
+                read_msgs.append(f".doc 读出来的内容不对：{_got19[:60]}")
+    # 两份副本必须一致（大事记表大师单独分发，拷了一份）
+    _other19 = os.path.join(SKILL, "..", "mqc-chronicle-master", "scripts", "read_doc.py")
+    if os.path.exists(_other19):
+        _strip19 = lambda t: "\n".join(l for l in t.splitlines()
+                                       if not l.startswith("# ⚠") and "单独分发" not in l)
+        if _strip19(open(os.path.join(SKILL, "scripts", "read_doc.py"), encoding="utf-8").read()) \
+                != _strip19(open(_other19, encoding="utf-8").read()):
+            read_msgs.append("大事记表大师里那份 read_doc.py 与时间轴的不一致了")
+
+    # ---- 格式可选 + 选了哪种风格、所有格式都是哪种风格 ------------------------------------
+    # 真实运行记录：① 一律五种全出，PNG 在典型 Windows 上出不来，模型只好现场装工具；
+    # ② 「改成歸藏风」只换了 SVG（另存成 -歸藏风.svg），PPTX / VSDX / drawio 仍从奇川风主图
+    # 转出，模型手工补了四步。这里直接调 export_formats.deliver 验：不选只出 SVG + PPTX；
+    # 歸藏风时 drawio 用歸藏配色、不再残留奇川深红。
+    import export_formats as _EF18, tempfile as _tf18, shutil as _sh18
+    _d18 = _tf18.mkdtemp()
+    _src18 = os.path.join(SKILL, "..", "mqc-litigation-visual-redraw", "examples", "timeline-points.json")
+    _m18 = json.load(open(_src18, encoding="utf-8"))
+    _svg18 = os.path.join(_d18, "t.svg")
+    _v1r = __import__("render")
+    _v1r.main(_src18, os.path.join(_d18, "t"), formats=("svg",))
+    _got18 = [f for f, p, _n in _EF18.deliver(_svg18, _m18, formats=("svg", "pptx")) if p]
+    if sorted(_got18) != ["PPTX", "SVG"]:
+        read_msgs.append(f"选了 SVG + PPTX 却出了 {_got18}")
+    _out18 = _EF18.deliver(_svg18, _m18, formats=("svg", "drawio"), style="歸藏风")
+    _dx18 = next((p for f, p, _n in _out18 if f == "drawio" and p), None)
+    if not _dx18 or "991B1B" in open(_dx18, encoding="utf-8").read().upper():
+        read_msgs.append("歸藏风的 drawio 仍是奇川风配色（深红 991B1B 还在）")
+    _pl18 = open(os.path.join(SKILL, "scripts", "pipeline.py"), encoding="utf-8").read()
+    if 'f"-{style}.svg"' in _pl18:
+        read_msgs.append("风格变换仍另存一份、主图留着奇川风 —— 其余格式会从奇川风转出")
+
+    # ---- 风格编号只有一处来源（pick.round_three），文档与提示不许手写另一套 --------------
+    # 真实运行记录：提示写「1 法官白描 / 2 当事人奇川风 / 3 同行歸藏风」，代码却是
+    # 「1 奇川风 / 2 歸藏风 / 3 白描」，照提示敲 style 2 拿到的是歸藏风；
+    # 不带参数的 style 还默认填 "2"。三处都会让使用者拿到不是自己选的风格。
+    import pick as _pk17
+    _order17 = [s["name"] for s in _pk17.round_three()]
+    _src17 = open(os.path.join(SKILL, "scripts", "pipeline.py"), encoding="utf-8").read()
+    _doc17 = open(os.path.join(SKILL, "SKILL.md"), encoding="utf-8").read()
+    if 'else "2")' in _src17 or 'else "3")' in _src17:
+        read_msgs.append("style 不带参数时默认填了非第一档 —— 不回应当是 1")
+    # 只查会打印给使用者的语句（print 与 steps 表），注释里讲来龙去脉不算
+    _live17 = "\n".join(l for l in _src17.splitlines()
+                         if not l.lstrip().startswith("#") and ("print(" in l or '"style' in l))
+    if "style 2" in _live17 or "1 法官白描" in _live17:
+        read_msgs.append("pipeline.py 里仍有手写的风格编号（style 2 / 1 法官白描）")
+    for _n17, _name17 in enumerate(_order17, 1):
+        if f"{_n17} {_name17}" not in _doc17:
+            read_msgs.append(f"SKILL.md 没按代码写出「{_n17} {_name17}」—— 文档与代码的编号不一致")
+
     # ---- 两条报错文案：让模型一次改对，而不是猜 -------------------------------------------
     # 真实运行三轮都卡在同一处：跨句拼接的接缝上多了一个原句没有的字（多一个逗号、
     # 多一个「提出」），旧报错只说「不是子序列」，模型便去换一句概括，离原文更远。

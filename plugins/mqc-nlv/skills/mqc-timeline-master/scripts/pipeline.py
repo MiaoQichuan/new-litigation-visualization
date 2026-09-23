@@ -242,6 +242,11 @@ def stage_read(paths):
         except R.PdfTextUnavailable as e:
             print(e)
             sys.exit(1)
+        except RuntimeError as e:
+            # .doc 读不了（加密、结构对不上）等：照 PDF 那条路的做法，干净地说清怎么办，
+            # 不抛 traceback。真实运行里模型看到裸 traceback 就会自己去写解析脚本。
+            print(str(e))
+            sys.exit(1)
         if str(p).lower().endswith(".pdf"):
             print(f"《{os.path.basename(p)}》从 PDF 文字层读入（{R.read_pdf.last_pages} 页，"
                   f"抽取工具 {R.read_pdf.last_engine}）。不必另行转成文字。")
@@ -330,7 +335,7 @@ def stage_pick(paths_or_sel=None):
                 _save(st)
                 print(f"{_why}，不必再选时间段。")
                 print()
-                print("然后跑：python pipeline.py style 2")
+                _ask_style()
                 return
             print(f"第二轮 · 时间段　{note}")
             print()
@@ -379,7 +384,7 @@ def stage_pick(paths_or_sel=None):
         _save(st)
         print(f"{_why}，不必再选时间段。")
         print()
-        print("然后跑：python pipeline.py style 2")
+        _ask_style()
         return
     print(f"第二轮 · 时间段　{note}")
     print()
@@ -408,6 +413,16 @@ def stage_span(sel):
     _save(st)
     print(f"已勾时间段 {ids}")
     print()
+    _ask_style()
+
+
+def _ask_style():
+    """第三轮的问题：编号与名称一律从 pick.round_three() 取，不许在别处手写。
+
+    真实运行记录：文档与提示里写的是「1 白描 / 2 奇川风 / 3 歸藏风」，而代码是
+    「1 奇川风 / 2 歸藏风 / 3 白描」，模型照提示敲 `style 2` 拿到的是歸藏风。
+    手写一份编号就会与代码走偏，所以这里只从一处取。"""
+    import pick as PK
     print("第三轮 · 风格")
     print()
     for s in PK.round_three():
@@ -415,9 +430,14 @@ def stage_span(sel):
         print(f"      {s['look']}")
         print(f"      {s['use']}")
         print()
-    print("  不回 = 1")
+    first = PK.round_three()[0]
+    print(f"  不回 = 1（{first['name']}）")
     print()
-    print("然后跑：python pipeline.py style 1")
+    print("把使用者的选择填进去：python pipeline.py style <编号>")
+    print()
+    print("同一轮顺带问格式（可多选）：1 SVG　2 PNG　3 PPTX　4 VSDX　5 drawio")
+    print("  不回 = 1,3（SVG + PPTX）；PNG 要本机有转图工具，选了才出。")
+    print("  使用者要别的就跑：python pipeline.py formats <编号，如 1,2,3 或 全部>")
 
 
 def stage_style(sel):
@@ -1247,7 +1267,9 @@ def stage_render(out):
     _fmts = []
     try:
         import export_formats as EX
-        _fmts = EX.deliver(out, m)
+        import checkpoint as _CPF
+        _want = _CPF.parse_formats(",".join(st.get("formats") or []))
+        _fmts = EX.deliver(out, m, formats=_want, style=st.get("style"))
         print("可编辑格式：")
         for _f, _pth, _note in _fmts:
             print(f"  {_f:<11}{os.path.basename(_pth) if _pth else '（未生成）':<34}{_note}")
@@ -1319,9 +1341,11 @@ def _apply_style(st, out, layout=None):
     except Exception as exc:
         print(f"  {style} 变换失败：{str(exc).splitlines()[0][:60]}（保留奇川风）")
         return
-    alt = os.path.splitext(out)[0] + f"-{style}.svg"
-    open(alt, "w", encoding="utf-8").write(new_svg)
-    print(f"  {style}：{alt}")
+    # 选了哪种风格，主交付物就是哪种风格：直接写回主图，后面的 PPTX / VSDX / drawio
+    # 都从它转。原来另存成 -歸藏风.svg、主图留着奇川风，于是「改成歸藏风」之后
+    # 其余格式全是奇川风（真实运行记录：模型只好手工补四步，还踩出一个标题框铺满整页的坑）。
+    open(out, "w", encoding="utf-8").write(new_svg)
+    print(f"  风格：{style}（主图与所有格式都按这个风格出）")
 
 
 def _kill_autospace(docx):
@@ -1612,7 +1636,7 @@ def stage_next():
             # 按清单判的话，第一轮还没勾，next 就说下一步是第二轮（自检时撞出来的）。
             ("picked_files", "pick 第一轮·勾材料来源", "pick 全部", "只有一份材料时自动跳过"),
             ("picked_spans", "span 第二轮·勾时间段", "span 全部", "跨度短、日期少时自动跳过"),
-            ("style", "style 第三轮·选风格", "style 1", "1 法官白描 / 2 当事人奇川风 / 3 同行歸藏风 / 4 让我定"),
+            ("style", "style 第三轮·选风格", "style 1", "1 奇川风（当事人与客户）/ 2 歸藏风（同行、讲课、公众号）/ 3 白描（法官、打印）/ 4 让我定"),
             ("parts", "offer 划分并给清单", "offer",
              "先跑 scope 列出范围内的句子，再写 verdicts.json + parts.json"),
             # 键名一律照代码里实际写的那个 —— 第一版这里猜成 picked_parts，
@@ -1723,6 +1747,14 @@ if __name__ == "__main__":
     if cmd == "time":
         stage_time()
         sys.exit(0)
+    if cmd == "formats":
+        import checkpoint as _CPF
+        _st = _load(STATE, "先跑到 read")
+        _st["formats"] = list(_CPF.parse_formats(" ".join(sys.argv[2:])))
+        _save(_st)
+        print("出图格式：" + "、".join(x.upper() for x in _st["formats"]))
+        _log_time(cmd)
+        sys.exit(0)
     if cmd == "mark":
         stage_mark(sys.argv[2] if len(sys.argv) > 2 else "")
     elif cmd == "next":
@@ -1738,7 +1770,7 @@ if __name__ == "__main__":
     elif cmd == "span":
         stage_span(sys.argv[2] if len(sys.argv) > 2 else "全部")
     elif cmd == "style":
-        stage_style(sys.argv[2] if len(sys.argv) > 2 else "2")
+        stage_style(sys.argv[2] if len(sys.argv) > 2 else "")   # 不回 = 1（奇川风），与提示一致
     elif cmd == "scope":
         stage_scope()
     elif cmd == "offer":

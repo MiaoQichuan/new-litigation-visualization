@@ -2,8 +2,8 @@
 name: mqc-litigation-visual-redraw
 metadata:
   author: 缪奇川
-  version: 1.0.2
-  last_updated: 2026-07-09
+  version: 1.1.0
+  last_updated: 2026-09-20
 description: >-
   Redraw a litigation diagram into a restrained, court-ready presentation
   graphic (SVG + PNG) WITHOUT changing any text or legal meaning. Use this
@@ -182,11 +182,13 @@ from the model being clever about pixels.
    weaker one. Until `confirmed` is `true`, every file is written as `*-draft.*`.
 
 4. **Render deterministically**, in the mode chosen at the checkpoint. From `scripts/`.
-   Every run writes the master `.svg`, a `.png`, and three editable hand-offs —
-   `.drawio`, `.pptx` (PowerPoint / WPS) and `.vsdx` (ProcessOn / Visio / WPS /
-   Edraw). All five are transcribed from the same master, so none can drift from
-   the delivered figure. This is deliberate: which tool the lawyer edits in is not
-   ours to guess. Narrow it only if asked, with `--formats=svg,png`.
+   **Formats are the user's choice (checkpoint question ④, multi-select).** Record the
+   answer as `checkpoint.formats` in the map (e.g. `["svg","pptx","vsdx"]`). With no
+   answer the command line writes **SVG + PPTX only**: both need no external tool, so
+   they come out on any Windows machine; PNG is the one most often missing a
+   rasteriser, so it is written only when chosen. `--formats=all` writes all five
+   (`.svg`, `.png`, `.pptx`, `.vsdx`, `.drawio`); `--formats=svg,png` narrows it.
+   Every format is transcribed from the same master SVG, so none can drift.
    On an unfamiliar machine (a fresh clone), run `python3 scripts/doctor.py` first —
    it reports missing tooling (graphviz, rasteriser, fonts) instead of failing obscurely:
    ```bash

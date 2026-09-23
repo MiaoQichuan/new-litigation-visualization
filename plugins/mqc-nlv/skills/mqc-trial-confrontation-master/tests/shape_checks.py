@@ -67,6 +67,46 @@ ck("B2", any("FAIL B2" in l for l in r.stdout.splitlines()), "左1右2 在数据
 
 print()
 print("  全部通过" if not errs else f"  未通过：{sorted(set(errs))}")
+# ---- 交付物可选：不选 = Excel + SVG；PNG 要转图工具，选了才出 ------------------------
+import importlib.util as _ilg
+_spg = _ilg.spec_from_file_location("pl_g", __import__("os").path.join(
+    __import__("os").path.dirname(__import__("os").path.abspath(__file__)), "..", "scripts", "pipeline.py"))
+_plg = _ilg.module_from_spec(_spg); _spg.loader.exec_module(_plg)
+ck("D1", _plg.parse_formats("") == ("excel", "svg"), f"不选时给 Excel + SVG（得到 {_plg.parse_formats('')}）")
+ck("D2", _plg.parse_formats("2") == ("svg",), "只选 SVG 时不出 Excel 与 PNG")
+ck("D3", "svg" in _plg.parse_formats("3"), "选了 PNG 会自动带上 SVG（PNG 从它转）")
+
+# ---- 箭头几何：线不许顶穿箭头，尖端不许插进模块 --------------------------------------
+# 实测抓到过：marker 的 refX 与收尾量 trim 口径不一致（cover 一处当前伸、一处当后埋），
+# 尖端插进模块 2 到 4.5px。判据在 tests/arrow_geom_check.py，与 V1 那份逐字节一致。
+import importlib.util as _ilb, tempfile as _tfb, subprocess as _spb, glob as _glb, sys as _sysb, os as _osb
+_HEREB = _osb.path.dirname(_osb.path.abspath(__file__))
+_spb2 = _ilb.spec_from_file_location("agc", _osb.path.join(_HEREB, "arrow_geom_check.py"))
+_agcb = _ilb.module_from_spec(_spb2); _spb2.loader.exec_module(_agcb)
+_db = _tfb.mkdtemp()
+_spb.run([_sysb.executable, _osb.path.join(_HEREB, "..", "scripts", "pipeline.py"),
+          _osb.path.join(_HEREB, "..", "examples", "matrix-input.json"), _osb.path.join(_db, "o")],
+         capture_output=True)
+_fb = _glb.glob(_osb.path.join(_db, "o", "*.svg"))
+if _fb:
+    _nb, _badb = _agcb.check(_fb[0])
+    _flagb = {k: v for k, v in _badb.items() if v}
+    ck("A1", _nb >= 8 and not _flagb, f"箭头不顶穿、不插进模块（量了 {_nb} 个）{_flagb or ''}")
+else:
+    ck("A1", False, "没出图，箭头几何无法验")
+_stripb = lambda t: "\n".join(l for l in t.splitlines()
+                              if not l.startswith("# ⚠") and "各拷一份" not in l)
+ck("A2", _stripb(open(_osb.path.join(_HEREB, "arrow_geom_check.py"), encoding="utf-8").read())
+   == _stripb(open(_osb.path.join(_HEREB, "..", "..", "mqc-litigation-visual-redraw", "tests",
+                                  "arrow_geom_check.py"), encoding="utf-8").read()),
+   "箭头量具与 V1 的那份一致")
+
+# ---- 决定性要件两处时，结论条两处都要列出（真实运行：只列了第一处）------------------
+_rm9 = open(__import__("os").path.join(__import__("os").path.dirname(__import__("os").path.abspath(__file__)), "..", "scripts",
+                           "render_main.py"), encoding="utf-8").read()
+ck("C2", "emph[0]" not in _rm9 and "' ／ '.join(" in _rm9,
+   "结论条列出全部决定性要件（不只第一处）")
+
 # ---- 折行：收尾标点不落行首、末行不留孤字 ------------------------------------------
 # 同类毛病在法律关系图大师的真实运行里出现过（图上「…某某大酒 / 店」与「协议 / 》」），
 # 这里的 wrap_w 原来是纯贪心，两条都没有。只挪断点、不改字。

@@ -110,7 +110,7 @@ for `graphviz_flow` and `graphviz_relation` maps.
 
 ---
 
-> **把法律画出来 · Make the Law Visible** ｜ 新诉讼可视化 New Litigation Visualization ｜ 缪奇川 出品 ｜ v1.0.2
+> **把法律画出来 · Make the Law Visible** ｜ 新诉讼可视化 New Litigation Visualization ｜ 缪奇川 出品 ｜ v1.1.0
 
 
 ## Editable hand-offs (v1.0.2)

@@ -22,12 +22,42 @@ TITLE_CANDIDATES = ["方正小标宋简体", "FZXiaoBiaoSong-B05S", "FZXiaoBiaoS
                     "Source Han Serif SC Heavy", "Noto Serif CJK SC"]
 
 
+# Windows 字体目录里的文件名 → 字族名（fc-list 在 Windows 上通常没有）
+_WIN_FONT_FILES = {
+    "simsun.ttc": "SimSun 宋体", "simsunb.ttf": "SimSun 宋体",
+    "times.ttf": "Times New Roman", "timesbd.ttf": "Times New Roman",
+    "FZXBSJW.TTF": "方正小标宋简体 FZXiaoBiaoSong-B05S", "fzxbsjw.ttf": "方正小标宋简体 FZXiaoBiaoSong-B05S",
+    "SourceHanSerifSC-Regular.otf": "Source Han Serif SC",
+    "NotoSerifCJKsc-Regular.otf": "Noto Serif CJK SC", "NotoSerifSC-Regular.otf": "Noto Serif CJK SC",
+}
+
+
 def _installed():
+    """本机装了哪些字族，返回一段可供 `in` 查找的文本。
+
+    先问 fc-list；没有（Windows 上通常没有）就去扫系统字体目录按文件名认。
+    真实运行记录：Windows 上没有 fc-list，这里返回空串，下面直接判「本机没有可用的
+    中文字族」并中断导出，还把前面已经做好的 Word 与 Excel 一起拖垮 —— 而那台机器
+    明明装着宋体与新罗马。"""
     try:
-        return subprocess.run(["fc-list", ":", "family"],
-                              capture_output=True, text=True).stdout
-    except FileNotFoundError:
-        return ""
+        out = subprocess.run(["fc-list", ":", "family"],
+                             capture_output=True, text=True).stdout
+        if out.strip():
+            return out
+    except (FileNotFoundError, OSError):
+        pass
+    names = []
+    for d in (os.path.join(os.environ.get("WINDIR", r"C:\Windows"), "Fonts"),
+              os.path.join(os.environ.get("LOCALAPPDATA", ""), "Microsoft", "Windows", "Fonts")):
+        try:
+            files = os.listdir(d)
+        except OSError:
+            continue
+        low = {f.lower(): f for f in files}
+        for fn, fam in _WIN_FONT_FILES.items():
+            if fn.lower() in low:
+                names.append(fam)
+    return "\n".join(names)
 
 
 def pick_font():
@@ -60,7 +90,9 @@ def export(svgs, outdir, dpi=200):
     SVG 已经出来了，这里只是换格式，缺依赖就跳过导出并说清楚怎么补。"""
     try:
         import cairosvg
-    except ImportError:
+    except (ImportError, OSError):
+        # 缺 cairo 本体（Windows 上常见：pip 装了壳、没有 cairo-2.dll）时抛的是 OSError，
+        # 原来只捕 ImportError，于是直接崩掉，连前面做好的 Word 与 Excel 一起拖垮。
         print("  导出跳过：本机没装 cairosvg，PDF 与 PNG 出不了。"
               "SVG 已生成，可直接用或在装有 cairosvg 的机器上重出（pip install cairosvg）。")
         return {"pdf": [], "png": [], "merged": None, "svg": list(svgs)}

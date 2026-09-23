@@ -89,10 +89,10 @@
 ```
 python3 scripts/source_check.py 源文件…                              # 开工前先跑：位图会先问过使用者
 python3 scripts/checkpoint.py map.json --suggest=<你建议标红的编号>   # 把输出原样给使用者
-python3 scripts/render.py map.json <输出名>                          # 出 SVG/PNG/PPTX/VSDX/drawio
+python3 scripts/render.py map.json <输出名>                          # 按第④问所选出格式；不选 = SVG + PPTX
 ```
 
-使用者答完，把答案写回地图：`"checkpoint": {"confirmed": true, "emphasis_source": "user"}`
+使用者答完，把答案写回地图：`"checkpoint": {"confirmed": true, "emphasis_source": "user", "formats": ["svg","pptx"]}`
 （`user` / `model` / `none` 三选一）。出图后照打印出来的核对清单核对，不必查看图片。
 
 ## 五、这一页与长文的对账

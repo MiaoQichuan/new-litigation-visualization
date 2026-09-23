@@ -62,6 +62,23 @@ def png_backends():
         r = subprocess.run([_find_tool("node"), "-e", "require('sharp')"], capture_output=True)
         if r.returncode == 0:
             found.append("sharp")
+    # resvg-js（Node）与 Playwright（Chromium）排在 cairosvg 之前，走系统字体、中文正常。
+    # 真实运行记录：使用者机器上两者都装着，--check 却只认 cairosvg，报「PNG 渲染：无」
+    # 或挑中 cairosvg 出豆腐块。检测复用 V1 内核里的 raster_fallback，不另写一份。
+    try:
+        import exports as _ex
+        if _ex._V1 not in sys.path:
+            sys.path.insert(0, _ex._V1)
+        import raster_fallback as _rf
+        if _rf._node() and _rf._module_dirs():
+            found.append("resvg-js")
+        try:
+            import playwright  # noqa: F401
+            found.append("playwright")
+        except Exception:
+            pass
+    except Exception:
+        pass
     try:
         import cairosvg  # noqa: F401
         found.append("cairosvg")
@@ -122,11 +139,18 @@ def to_png(svg, png, backends, width=1700):
                       ".resize({width:+process.argv[3]}).png().toFile(process.argv[2])"
                       ".catch(e=>{console.error(e);process.exit(1)})")
                 subprocess.run(["node", "-e", js, svg, png, str(width)], check=True)
+            elif b == "resvg-js":
+                import raster_fallback as _rf
+                _rf.resvg_js(svg, png, zoom=2.0)
+            elif b == "playwright":
+                import raster_fallback as _rf
+                _rf.playwright(svg, png, zoom=2.0)
             if os.path.exists(png) and os.path.getsize(png) > 0:
                 return png
         except Exception:
             continue
-    return "失败：没有可用的 PNG 渲染器（先跑 make.py --check）"
+    return ("失败：没有可用的 PNG 渲染器。最省事的补法：装 Inkscape，或在任一目录 "
+            "npm install @resvg/resvg-js，或 pip install playwright 后 playwright install chromium")
 
 
 # ------------------------------------------------------------------ 读案件
@@ -188,8 +212,9 @@ def load(path):
                 a_ = next(n["name"] for n in nodes if n["id"] == e["from"])
                 b_ = next(n["name"] for n in nodes if n["id"] == e["to"])
                 errs.append(f"「{a_}」与「{b_}」之间有方向相反的两条关系，两条线会叠在一起；"
-                            "按本 skill 的画法经由客体连接（如 甲 → 《买卖合同》 ← 乙），"
-                            "或合成一条关系")
+                            "两种画法任选：① 经由客体连接（如 甲 → 《买卖合同》 ← 乙）；"
+                            "② 合成一条：只留一个方向，两句关系名用「；」连起来原样写进去，"
+                            "另一方向写进 unsure（前缀「未入图·」）。见 SKILL.md「怎么跑」之前那一段")
         linked = {x for e in edges for x in (e["from"], e["to"])}
         lonely = [n["name"] for n in nodes if n["id"] not in linked]
         if lonely:
@@ -225,7 +250,10 @@ def load_choice(path, nodes, edges):
     for h in he:
         if not isinstance(h, int) or not 0 <= h < len(edges):
             die(f"重点关系编号 {h} 越界")
-    return dict(style=st, emphasis=dict(nodes=hn, edges=he), label=c.get("label"))
+    # formats 也要带出来：load_choice 重新整理 choice 时原来只留了风格与强调，
+    # 使用者在 choice.json 里选的格式被丢掉，出图仍按默认。
+    return dict(style=st, emphasis=dict(nodes=hn, edges=he), label=c.get("label"),
+                formats=list(c.get("formats") or []))
 
 
 # ------------------------------------------------------------------ 字排
@@ -265,16 +293,22 @@ def wrap(s, fs, width):
         lines.append(cur.rstrip())
 
     # 收尾标点不许落到行首（避头），末行不许只剩一个字（孤字）。
-    # 真实运行记录里图上出现过两处：「…金码大酒 / 店」孤一个「店」，
+    # 真实运行记录里图上出现过两处：「…某某大酒 / 店」孤一个「店」，
     # 《借款（垫款）协议 / 》右书名号单独一行。判据不报，只有人眼看得出来。
     # 两条都只挪断点、不改字：照录原文的纪律不受影响。
+    # 避头：收尾标点不落行首。**并回上一行之前必须复核宽度** —— 判据 G13 要求模块内
+    # 文字不撑破模块（留 8px 余量），而「《借款（垫款）协议》」并成一整行正好 140px、
+    # 等于模块宽，当场撑破（全流程验证时抓到的回归）。放不下就保持原样，宁可让标点
+    # 落在行首，也不越出模块。
     _NO_START = "》）」』、。，；：？！%"
     for _k in range(1, len(lines)):
-        while lines[_k] and lines[_k][0] in _NO_START and lines[_k - 1]:
-            lines[_k - 1] += lines[_k][0]          # 让它悬挂在上一行末尾
+        while (lines[_k] and lines[_k][0] in _NO_START and lines[_k - 1]
+               and text_w(lines[_k - 1] + lines[_k][0], fs) <= width - 8):
+            lines[_k - 1] += lines[_k][0]
             lines[_k] = lines[_k][1:]
     lines = [x for x in lines if x]
-    if len(lines) >= 2 and len(lines[-1]) == 1 and len(lines[-2]) > 2:
+    if (len(lines) >= 2 and len(lines[-1]) == 1 and len(lines[-2]) > 2
+            and text_w(lines[-2][-1] + lines[-1], fs) <= width - 8):
         lines[-1] = lines[-2][-1] + lines[-1]
         lines[-2] = lines[-2][:-1]
     return lines or [s]
@@ -298,11 +332,14 @@ def get_layout(nodes, edges, out, relayout):
     from lookup import run
     from mini_render import render as mini
     need_tall = any(len(a) + len(b) > 2 for a, b in (node_lines(n, 140) for n in nodes))
-    if need_tall:
-        # 只是提示，不改做法：照录原文靠加高模块，不删字
+    if need_tall and not globals().get("_TALL_WARNED"):
+        # 只是提示，不改做法：照录原文靠加高模块，不删字。规模判断那一步已经说过就不再说
+        # （真实运行记录：同一句提示连打两遍）。
         who = [n["name"] for n in nodes if sum(map(len, node_lines(n, 140))) > 2]
-        print("  提示：" + "、".join(who) + " 的名称加备注超过两行，全图改用高模块；"
-              "高模块布局实测慢三到四倍，备注能写短就写短")
+        print("  提示：" + "、".join(who) + " 的名称加备注超过两行，全图改用高模块。"
+              "实测：同一结构下高模块比矮模块慢 0 到 30%（不是此前说的三到四倍，那次是网格不同"
+              "造成的错觉）；真正影响耗时的是规模——6 主体约 0.1 秒，9 主体约 5 秒。"
+              "备注写短能少占一行，有时会换到更省的网格")
     key = layout_key(nodes, edges, need_tall)
     cache = os.path.join(out, "layout.json")
     if not relayout and os.path.exists(cache):
@@ -468,6 +505,8 @@ def main():
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--relayout", action="store_true")
     ap.add_argument("--name", default=None, help="产物文件名前缀（英文数字），默认取 slug 或 relation")
+    ap.add_argument("--formats", default=None,
+                    help="要出哪几种：svg,png,pptx,vsdx,drawio 或 all；不给就看 choice.json，都没有 = svg,pptx")
     a = ap.parse_args()
 
     if a.check:
@@ -497,13 +536,16 @@ def main():
         die(d["reason"], 3)
     print(f"  规模：{len(nodes)} 个主体 {len(edges)} 条关系，结构 {d.get('kind')}，"
           f"查{d.get('src', '结构分档')}")
-    # 名称过长会让全图改用高模块、布局慢三到四倍。原来只有真正布局时才提示，
+    # 名称过长会让全图改用高模块。原来只有真正布局时才提示，
     # 等于先跑一次慢布局才知道该把备注写短（自测时就撞上了）。这里提到规模判断这一步，
     # 一秒内就说清楚是哪几个模块，改完再布局。判据与措辞与出图时那一处一致。
     _tall = [n["name"] for n in nodes if sum(map(len, node_lines(n, 140))) > 2]
     if _tall:
-        print("  提示：" + "、".join(_tall) + " 的名称加备注超过两行，全图改用高模块；"
-              "高模块布局实测慢三到四倍，备注能写短就写短")
+        print("  提示：" + "、".join(_tall) + " 的名称加备注超过两行，全图改用高模块。"
+              "实测：同一结构下高模块比矮模块慢 0 到 30%（不是此前说的三到四倍，那次是网格不同"
+              "造成的错觉）；真正影响耗时的是规模——6 主体约 0.1 秒，9 主体约 5 秒。"
+              "备注写短能少占一行，有时会换到更省的网格")
+        globals()["_TALL_WARNED"] = True
     if len(edges) > 12 and not cf.get("over12") and len(nodes) <= 9:
         print(f"\n  关系 {len(edges)} 条，超过 12 条。先跑第〇轮：")
         print(f"  python scripts/ask.py trim {a.relations}")
@@ -541,9 +583,20 @@ def main():
     except OSError as _e:          # 沙箱可能禁止删工作区内的文件（SAFE_DELETE_FAIL_CLOSED）
         print(f"  中间文件没删成（{type(_e).__name__}），不影响交付：{os.path.basename(master)}")
     gok, gres = guard_lib.check(base + ".svg")
+    # 出哪几种：命令行 --formats > choice.json 里的 formats > 默认 SVG + PPTX。
+    # 原来一律五种全出；PNG 在典型 Windows 上出不来（真实运行里连着几轮都卡在这），
+    # 律师多数时候也只要 SVG 与 PPTX。
+    _raw = a.formats if a.formats else ",".join(choice.get("formats") or [])
+    _all = ("svg", "png", "pptx", "vsdx", "drawio")
+    if _raw.strip().lower() in ("all", "全部"):
+        want = _all
+    else:
+        _pick = [x.strip().lower() for x in _raw.replace("，", ",").split(",") if x.strip()]
+        want = tuple(k for k in _all if k in _pick) or ("svg", "pptx")
     files, eguard = exports.export_all(base + ".svg", base, style=st, return_guard=True,
-                                       formats=("pptx", "vsdx", "drawio"))
-    files["png"] = to_png(base + ".svg", base + ".png", backends)
+                                       formats=tuple(k for k in ("pptx", "vsdx", "drawio") if k in want))
+    if "png" in want:
+        files["png"] = to_png(base + ".svg", base + ".png", backends)
     emph = "、".join([next(n["name"] for n in nodes if n["id"] == h) for h in choice["emphasis"]["nodes"]] +
                     [edges[h]["label"] for h in choice["emphasis"]["edges"]])
     if not emph:

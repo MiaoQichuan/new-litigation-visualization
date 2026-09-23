@@ -238,6 +238,17 @@ def _read_raw(path):
     low = str(path).lower()
     if low.endswith(".docx"):
         return read_docx(path)
+    if low.endswith(".doc"):
+        # 老式 Word（Word 97-2003）。法院与律所往来的判决书里仍然常见；真实运行记录里
+        # 使用者给的就是 .doc，技能不认，模型只好现场装 olefile 自己写解析。
+        import read_doc
+        try:
+            return read_doc.read_doc(path)
+        except read_doc.DocReadError as e:
+            raise RuntimeError(
+                f"{e}：{path}\n"
+                f"  两条补救任选：① 用 Word 打开后另存为 .docx；"
+                f"② soffice --headless --convert-to docx \"{path}\"")
     if low.endswith(".pdf"):
         return read_pdf(path)
     return open(path, encoding="utf-8").read()

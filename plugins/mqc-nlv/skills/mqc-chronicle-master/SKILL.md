@@ -7,7 +7,8 @@ metadata:
   author: 缪奇川
   license: MIT
   deliverables: [docx, xlsx, pdf, svg, png, casefile.json]
-  dependencies: none
+  dependencies: [openpyxl]
+  optional_dependencies: [cairosvg, pypdf, node+docx]
 ---
 
 # 庭前三大法宝 · 大事记表大师（V4）
@@ -172,8 +173,10 @@ metadata:
 
 摄入用 poppler 自带命令（pdfinfo / pdftotext / pdftoppm / pdfimages）。
 Word 生成走 docx（Node），Excel 生成走 openpyxl，简表的 SVG 生成零第三方依赖。
-**简表导出 PDF／PNG 需要 cairosvg**；多页合并成一个 PDF 需要 pypdf，
-没装就按页分开出、不阻断。此前 README 与本节都写着「零第三方依赖」，
+**简表导出 PDF／PNG 需要 cairosvg 及其依赖的 cairo 本体**；多页合并成一个 PDF 需要 pypdf，
+没装就按页分开出、不阻断。Windows 上两处坑已在代码里处理：没有 fc-list 时改扫系统字体
+目录认字族；pip 装了 cairosvg 却缺 cairo-2.dll 时跳过导出并说明，不再把 Word 与 Excel
+一起拖垮。此前 README 与本节都写着「零第三方依赖」，
 那是简表进来之前的说法，照着跑会在导出那一步失败。
 Excel 不要过 LibreOffice 重算：它会就地重写工作簿并替换本机未装的字体，
 公式缓存值由 `cache_formulas.py` 直接写入工作表 XML。

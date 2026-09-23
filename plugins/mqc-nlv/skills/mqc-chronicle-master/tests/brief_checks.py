@@ -126,6 +126,41 @@ def main():
 
     print()
     print("  全部通过" if not errs else f"  未通过：{sorted(set(errs))}")
+    # ---- 交付物可选：不选 = Word + Excel + 简表 SVG；PDF/PNG 要 cairosvg，选了才出 ------
+    import importlib.util as _ilf
+    _spf = _ilf.spec_from_file_location("pl_f", os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "..", "scripts", "pipeline.py"))
+    _plf = _ilf.module_from_spec(_spf); _spf.loader.exec_module(_plf)
+    ck("D1", _plf.parse_formats("") == ("word", "excel", "brief"),
+       f"不选时给 Word + Excel + 简表（得到 {_plf.parse_formats('')}）")
+    ck("D2", _plf.parse_formats("2") == ("excel",), "只选 Excel 时不出别的")
+    ck("D3", "brief" in _plf.parse_formats("4"), "选了简表 PDF 会自动带上简表 SVG（PDF 从它转）")
+    ck("D4", len(_plf.parse_formats("全部")) == 5, "「全部」= 五样都出")
+
+    # ---- 2026-09-20 真实运行批次----------------------------------------------
+    # 一整段判决被截成「综上。」四个字，与文件头「宁可多占一行也不出半句话」正好相反。
+    # 占位句要够长（超过常规 3 行）才会触发截取；用「某某公司」这种短名，句子只占 3 行，
+    # 旧代码也不出错，守卫就形同虚设 —— 第一版正是这样漏过了改坏验证。
+    _j = ("综上，一审法院于2015年12月29日作出（某年）某民初字第某某号民事判决："
+          "驳回某某微显示科技（深圳）有限公司的诉讼请求。案件受理费214711元，"
+          "由某某微显示科技（深圳）有限公司负担。")
+    _b = "".join(B.Row._brief(_j))
+    ck("S1", len(_b) > 20 and "判决" in _b, f"判决段不被截成开头几个字（得到「{_b[:24]}」）")
+    _long = ("综上，一审法院于2015年12月29日作出（某年）某民初字第某某号民事判决：驳回某某微显示"
+             "科技（深圳）有限公司关于判令甲、乙、丙、丁、戊、己连带赔偿公司损失4912376.06美元并承担本案全部诉讼费用"
+             "以及其他相关费用的全部诉讼请求，同时驳回其他当事人的相关请求。")
+    _bl = "".join(B.Row._brief(_long))
+    ck("S2", not _bl.rstrip("。").endswith(("甲", "乙", "丙", "丁", "戊", "己")),
+       f"超长单句不截在列举中间（得到「{_bl[-12:]}」）")
+    import json as _json_s
+    _vb = _json_s.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
+                                         "references", "verbs.json"), encoding="utf-8"))["verbs"]
+    ck("S3", "担任" in _vb and "提审" in _vb, "动词封闭表含「担任」「提审」")
+    _eb = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts",
+                            "export_brief.py"), encoding="utf-8").read()
+    ck("S4", "WINDIR" in _eb and "(ImportError, OSError)" in _eb,
+       "Windows 上查字族不依赖 fc-list，缺 cairo 本体不崩")
+
     # ---- 折行：收尾标点不落行首、不超宽、末行不留孤字 --------------------------------
     # 同类毛病在法律关系图大师的真实运行里出现过（图上「…某某大酒 / 店」与「协议 / 》」）。
     # 这里额外要保证不越出版心：M3 是硬判据，让标点悬挂会当场越界，所以把末字连同标点

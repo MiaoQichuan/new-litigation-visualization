@@ -113,7 +113,7 @@ def _svg_for_export(svg_path):
     return tmp, tmp
 
 
-def deliver(svg_path, m, base=None):
+def deliver(svg_path, m, base=None, formats=None, style=None):
     """出齐五种格式，返回 [(格式, 路径, 说明)]。
 
     **每一种都独立守护**：任何一种失败都只是少一种格式，绝不影响已经写好的 SVG。
@@ -121,34 +121,49 @@ def deliver(svg_path, m, base=None):
     """
     base = base or os.path.splitext(svg_path)[0]
     out = [("SVG", svg_path, "主交付物，全元素可编辑")]
+    # formats 为 None 时出全套（老调用方的行为不变）；管线会传入使用者的选择，
+    # 不选就是 SVG + PPTX。没选的格式一律不碰 —— PNG 尤其如此，它最常出不来。
+    want = set(formats) if formats else {"svg", "png", "pptx", "vsdx", "drawio"}
 
-    try:
+    if "png" in want:
+      try:
         import render as _v1render
         png = base + ".png"
         engine = _v1render.svg_to_png(svg_path, png)
         out.append(("PNG", png, f"位图预览与归档（{engine}）"))
-    except Exception as exc:
+      except Exception as exc:
         out.append(("PNG", "", f"未生成：{str(exc).splitlines()[0][:60]}"))
 
     # pptx / vsdx 读的是**摘掉背景矩形**的那一份（见 _svg_for_export）。
     _src, _tmp = _svg_for_export(svg_path)
-    try:
+    if "pptx" in want:
+      try:
         import export_pptx
         p, n = export_pptx.export(_src, base + ".pptx")
         out.append(("PPTX", p, f"{n} 个原生 PowerPoint 对象，逐个可改"))
-    except Exception as exc:
+      except Exception as exc:
         out.append(("PPTX", "", f"未生成：{str(exc).splitlines()[0][:60]}"))
 
-    try:
+    if "vsdx" in want:
+      try:
         import export_vsdx
         p, n = export_vsdx.export(_src, base + ".vsdx")
         out.append(("VSDX", p, f"{n} 个形状，ProcessOn / Visio / WPS 可打开编辑"))
-    except Exception as exc:
+      except Exception as exc:
         out.append(("VSDX", "", f"未生成：{str(exc).splitlines()[0][:60]}"))
 
+    if "drawio" not in want:
+        if _tmp and os.path.exists(_tmp):
+            os.unlink(_tmp)
+        return out
     try:
         import export_drawio
         mx, _a, _b = export_drawio.build_model(adapt_map(m))
+        # drawio 是从语义地图重建的，不读 SVG，所以风格要单独套一次（v1 自带 theme_drawio）。
+        # 真实运行记录：「改成歸藏风」后 SVG 换了，drawio 仍是灰 + 深红，模型只好手工改配色。
+        _mode = {"歸藏风": "guizang", "白描": "baimiao"}.get(style or "")
+        if _mode:
+            mx = export_drawio.theme_drawio(mx, _mode)
         p = base + ".drawio"
         open(p, "w", encoding="utf-8").write(mx)
         out.append(("drawio", p, f"{mx.count('<mxCell')} 个单元，draw.io 内可改"))

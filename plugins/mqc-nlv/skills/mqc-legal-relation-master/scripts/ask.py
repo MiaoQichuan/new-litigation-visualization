@@ -22,7 +22,7 @@ resolve 输出一份 choice.json 的内容，出图脚本只认它：
 为什么要把交互写死：不问风格，模型会把三种风格全出一遍，
 额度直接翻三倍；不问重点，模型会自己挑一个标红，违反红色选入制。
 """
-import sys, json, argparse
+import sys, json, argparse, os
 
 STYLES = [
     ("法官", "开庭、提交法院、打印", "白描"),
@@ -329,6 +329,7 @@ if __name__ == "__main__":
     ap.add_argument("relations", nargs="?")
     ap.add_argument("--style")
     ap.add_argument("--mark")
+    ap.add_argument("--formats", default=None, help="1 SVG 2 PNG 3 PPTX 4 VSDX 5 drawio，可多选；或 all")
     a = ap.parse_args()
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
@@ -343,9 +344,12 @@ if __name__ == "__main__":
         print()
         print(round2(_nodes, _edges))
         print()
+        print("第三问 · 格式（可多选）：1 SVG　2 PNG　3 PPTX　4 VSDX　5 drawio；"
+              "不回 = 1,3（SVG + PPTX），PNG 要本机有转图工具，选了才出。")
+        print()
         print("两问一起回答即可，例如「2，7」= 奇川风 + 标第 7 项；"
               "只答风格也行。深红只有奇川风才有，选 1 或 3 时第二问自动作废。")
-        print("拿到答案后跑：python scripts/ask.py resolve %s --style 编号 --mark 编号"
+        print("拿到答案后跑：python scripts/ask.py resolve %s --style 编号 --mark 编号 --formats 1,3（会直接写出 choice.json）"
               % a.relations)
     elif a.cmd == "round1":
         print(round1())
@@ -403,6 +407,27 @@ if __name__ == "__main__":
             print(round2(nodes, edges))
         else:
             try:
-                print(json.dumps(resolve(nodes, edges, a.style, a.mark), ensure_ascii=False))
+                ch = resolve(nodes, edges, a.style, a.mark)
             except ValueError as e:
                 sys.exit("选择无效：" + str(e))
+            if a.formats:
+                _keys = ["svg", "png", "pptx", "vsdx", "drawio"]
+                _t = a.formats.replace("，", ",").strip().lower()
+                if _t in ("all", "全部"):
+                    ch["formats"] = _keys
+                else:
+                    _sel = []
+                    for x in [y.strip() for y in _t.split(",") if y.strip()]:
+                        if x.isdigit() and 1 <= int(x) <= 5:
+                            _sel.append(_keys[int(x) - 1])
+                        elif x in _keys:
+                            _sel.append(x)
+                    ch["formats"] = ["svg"] + [k for k in _keys[1:] if k in _sel]
+            print(json.dumps(ch, ensure_ascii=False))
+            # 直接写成 choice.json。真实运行记录（两次复现）：只打到屏幕，模型以为已经
+            # 生成了 choice.json，实际没有，出图时拿不到风格与标红。
+            dst = a.out or os.path.join(os.path.dirname(os.path.abspath(a.relations)),
+                                        "choice.json")
+            json.dump(ch, open(dst, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+            print(f"已写入 {dst}；出图时带上：python scripts/make.py {a.relations} "
+                  f"--choice {os.path.basename(dst)}")

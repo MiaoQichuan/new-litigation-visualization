@@ -44,9 +44,15 @@ def dump(obj, name):
 out = os.path.join(tmp, "o")
 print("一、示例案")
 ch = dump({"style": "奇川风", "emphasis": {"nodes": ["PRICE"], "edges": [9]}}, "c1.json")
-code, log = run(FX, "--out", out, "--choice", ch, "--name", "demo")
+code, log = run(FX, "--out", out, "--choice", ch, "--name", "demo", "--formats", "all")
 chk = open(os.path.join(out, "demo-qichuan-checks.txt"), encoding="utf-8").read() if code == 0 else ""
-expect(code == 0 and "交付：svg、png、pptx、vsdx、drawio" in log, "五种格式全部交付", log)
+expect(code == 0 and "交付：svg、png、pptx、vsdx、drawio" in log, "要全部时五种格式都交付", log)
+# 默认（不选）只出 SVG + PPTX：两者不依赖外部工具，任何 Windows 都能一次出齐。
+_od = os.path.join(tmp, "o_default")
+_cd, _ld = run(FX, "--out", _od, "--choice", ch, "--name", "dflt")
+_made = sorted(os.path.splitext(f)[1] for f in os.listdir(_od)
+               if f.startswith("dflt-qichuan.") and not f.endswith((".txt", ".md", ".json")))
+expect(_cd == 0 and _made == [".pptx", ".svg"], "不选格式时只出 SVG 与 PPTX", str(_made))
 expect("FAIL" not in chk, "路线判据与导出物判据全过", chk)
 
 print("二、缓存")
@@ -254,13 +260,89 @@ expect(all("受托人" not in x or x.strip().endswith("受托人") for x in _w9c
 # 真实运行记录（第二轮）：12 条关系那一版交出了压住图名的布局，使用者只能回读
 # checks.txt 才发现 —— 提示档不等于不管，能换就该换。
 _lk8 = open(os.path.join(HERE, "..", "scripts", "lookup.py"), encoding="utf-8").read()
-expect("(_g14, sc) < (best_g14, best[0])" in _lk8,
-       "G14 参与候选布局的挑选（同样合格时优先不压图名的）",
+expect("(_bad, sc) < (best_g14, best[0])" in _lk8 and '"G15" in (msg or "")' in _lk8,
+       "G14、G15 参与候选布局的挑选（同样合格时优先不压图名、不压字的）",
        "挑选的比较式里没有把 G14 排在前面")
 # 核对清单要把所有提示项列全（不能只让人回读 checks.txt）
 _mk8b = open(os.path.join(HERE, "..", "scripts", "make.py"), encoding="utf-8").read()
 expect("_warns = [x for x in gres if x.get(\"warn\")]" in _mk8b and "条提示" in _mk8b,
        "出图后的核对清单把所有提示项列全（含 G14）", "清单仍只列固定几条")
+
+# 折行的避头与孤字合并，不许把文字撑出模块（G13）。全流程验证时抓到过：
+# 「《借款（垫款）协议》」被并成一整行 140px，正好等于模块宽，当场撑破。
+import importlib as _ilw
+sys.path.insert(0, os.path.join(HERE, "..", "scripts"))
+_mkw = _ilw.import_module("make")
+# 用 render 真正调用的那一层（node_lines）来验，并且判据要硬：每行都必须留出
+# G13 要求的 8px 余量。第一版守卫写虚了（带了一个恒真的分支），改坏也过得去。
+_n13 = {"id": "X", "name": "《借款（垫款）协议》", "note": "2021.05.17 签订"}
+_l13 = _mkw.node_lines(_n13, 140)[0]
+_wid13 = [round(_mkw.text_w(x, _mkw.FS_NODE)) for x in _l13]
+expect(all(w <= 140 - 8 for w in _wid13),
+       "避头合并后每行仍留出模块余量（G13 的 8px）", f"{_l13} 行宽 {_wid13}")
+for _sty in ("白描", "奇川风", "歸藏风"):
+    _dw = tempfile.mkdtemp()
+    _chw = os.path.join(_dw, "c.json")
+    json.dump({"style": _sty, "emphasis": {"nodes": [], "edges": []}},
+              open(_chw, "w", encoding="utf-8"), ensure_ascii=False)
+    _cw, _lw = run(FX, "--out", os.path.join(_dw, "o"), "--choice", _chw, "--name", "w13")
+    expect(_cw == 0 and "G13" not in _lw, f"{_sty}：折行不撑破模块（G13）", _lw[-200:])
+
+# ---- 提示里的耗时说法要有实测支撑 ----------------------------------------------------
+# 「高模块布局慢三到四倍」是早先凭一次观察写下的，实测不成立：同一结构下只慢 0 到 30%，
+# 那次的差别来自网格不同。没有实测支撑的倍数不许再写进提示与文档。
+import glob as _glc
+_bad_claim = []
+for _f in _glc.glob(os.path.join(HERE, "..", "**", "*.py"), recursive=True) + \
+        _glc.glob(os.path.join(HERE, "..", "**", "*.md"), recursive=True):
+    if "__pycache__" in _f or _f.endswith("make_checks.py"):
+        continue
+    if "慢三到四倍" in open(_f, encoding="utf-8").read():
+        _bad_claim.append(os.path.basename(_f))
+expect(not _bad_claim, "提示与文档里没有「慢三到四倍」这种未经实测的说法", str(_bad_claim))
+
+# ---- 箭头几何：线不许顶穿箭头，尖端不许插进模块 --------------------------------------
+# 老毛病：线画到模块边、箭头贴在线端上，视觉上成了平头；或尖端插进模块里。
+# 这里量真出的 SVG（三种风格各一张），判据在 tests/arrow_geom_check.py。
+import importlib.util as _ila
+_spa = _ila.spec_from_file_location("agc", os.path.join(HERE, "arrow_geom_check.py"))
+_agc = _ila.module_from_spec(_spa); _spa.loader.exec_module(_agc)
+for _sa in ("奇川风", "白描", "歸藏风"):
+    _da = tempfile.mkdtemp()
+    _cha = os.path.join(_da, "c.json")
+    json.dump({"style": _sa, "emphasis": {"nodes": [], "edges": []}},
+              open(_cha, "w", encoding="utf-8"), ensure_ascii=False)
+    run(FX, "--out", os.path.join(_da, "o"), "--choice", _cha, "--name", "arw")
+    _fa = [p for p in _glob8.glob(os.path.join(_da, "o", "*.svg")) if "-master" not in p]
+    if not _fa:
+        expect(False, f"{_sa}：没出图，箭头几何无法验", "")
+        continue
+    _na, _bada = _agc.check(_fa[0])
+    _flags = {k: v for k, v in _bada.items() if v}
+    expect(_na >= 8 and not _flags, f"{_sa}：箭头不顶穿、不插进模块（量了 {_na} 个）", str(_flags))
+# 两份量具必须一致
+_stripa = lambda t: "\n".join(l for l in t.splitlines()
+                              if not l.startswith("# ⚠") and "各拷一份" not in l)
+expect(_stripa(open(os.path.join(HERE, "arrow_geom_check.py"), encoding="utf-8").read())
+       == _stripa(open(os.path.join(HERE, "..", "..", "mqc-litigation-visual-redraw",
+                                    "tests", "arrow_geom_check.py"), encoding="utf-8").read()),
+       "箭头量具与 V1 的那份一致", "两份不一致")
+
+# ---- 2026-09-20 真实运行批次---------------------------------------------
+# G15：任意两段文字互相压住要报出来。真实运行里两段关系名重叠 38.6 像素，判据全绿。
+_rg9 = os.path.join(HERE, "..", "scripts", "route_guard.py")
+_rg9s = open(_rg9, encoding="utf-8").read()
+expect("G15" in _rg9s, "有「文字互相压住」判据（G15）", "route_guard 里没有 G15")
+# resolve 要直接写出 choice.json（两次真实运行都以为写了、其实没写）
+_rt = tempfile.mkdtemp()
+shutil.copy(FX, os.path.join(_rt, "r.json"))
+subprocess.run([sys.executable, os.path.join(HERE, "..", "scripts", "ask.py"), "resolve",
+                os.path.join(_rt, "r.json"), "--style", "2"], capture_output=True, env=ENV)
+expect(os.path.exists(os.path.join(_rt, "choice.json")), "ask.py resolve 直接写出 choice.json",
+       "只打到屏幕，没写文件")
+# 名称过长的提示一次出图只说一遍
+_c9, _l9 = run(FX, "--out", os.path.join(_rt, "o"))
+expect(_l9.count("高模块布局实测慢") <= 1, "名称过长的提示不重复打印", _l9[:200])
 
 # PNG 后端顺序：cairosvg 必须排在最后（它缺中文字体时不报错，直接出豆腐块）
 sys.path.insert(0, os.path.join(HERE, "..", "scripts"))

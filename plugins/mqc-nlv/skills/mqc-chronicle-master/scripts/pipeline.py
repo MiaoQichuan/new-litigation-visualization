@@ -59,11 +59,46 @@ def _rows_markdown(render_input, out_md):
     return out_md
 
 
-def main(casefile, sources=None, outdir="out"):
+# 交付物菜单。默认三样：Word、Excel、简表 SVG —— 都不依赖转图工具，任何机器都出得来。
+# 简表的 PDF 与 PNG 要 cairosvg（还要 cairo 本体），选了才出。
+FORMAT_MENU = (("word", "Word 交付版", "案件大事记.docx（没有 Node 时改出同内容的 Markdown）"),
+               ("excel", "Excel 母表", "案件大事记母表.xlsx，律师在里面填争点"),
+               ("brief", "简表 SVG", "A4 呈报件，矢量，可直接插进材料"),
+               ("pdf", "简表 PDF", "多页合并，要 cairosvg"),
+               ("png", "简表 PNG", "位图预览，要 cairosvg"))
+DEFAULT_FORMATS = ("word", "excel", "brief")
+
+
+def parse_formats(ans):
+    """把「1,2,4」「全部」「word,excel」或空，变成交付物元组。"""
+    a = str(ans or "").strip().lower().replace("，", ",").replace("、", ",")
+    keys = [k for k, _, _ in FORMAT_MENU]
+    if not a:
+        return DEFAULT_FORMATS
+    if a in ("全部", "all", "所有"):
+        return tuple(keys)
+    sel = []
+    for tok in [x.strip() for x in a.split(",") if x.strip()]:
+        if tok.isdigit() and 1 <= int(tok) <= len(keys):
+            sel.append(keys[int(tok) - 1])
+        elif tok in keys:
+            sel.append(tok)
+    out = tuple(k for k in keys if k in sel)
+    # PDF / PNG 是从简表 SVG 转的，选了它们就得有简表
+    if ("pdf" in out or "png" in out) and "brief" not in out:
+        out = tuple(k for k in keys if k in set(out) | {"brief"})
+    return out or DEFAULT_FORMATS
+
+
+def main(casefile, sources=None, outdir="out", formats=None):
     os.makedirs(outdir, exist_ok=True)
     cf = json.load(open(casefile, encoding="utf-8"))
+    want = set(parse_formats(formats) if isinstance(formats, str) or formats is None
+               else formats)
+    print("交付物：" + "、".join(n for k, n, _ in FORMAT_MENU if k in want)
+          + ("" if formats else "（默认；要别的就在命令行末尾加 1,2,4 或 全部）"))
 
-    if not _preflight([("openpyxl", "Excel 母表")]):
+    if "excel" in want and not _preflight([("openpyxl", "Excel 母表")]):
         return 2
     step(1, "摄入")
     mats = cf["materials"]; rec = cf["reconcile"]
@@ -98,27 +133,30 @@ def main(casefile, sources=None, outdir="out"):
     # Word 交付版要 node 与它的 docx 模块。真实环境里这一步崩过（本机 Node 报错），
     # 原来 check=True 会让整条流程连 Excel 与简表一起失败，律师什么也拿不到。
     # 现在：node 不可用就跳过 Word，改出同内容的 Markdown 版并明说原因，其余照出。
-    node = shutil.which("node") or _find_node()
-    docx_ok = False
-    if node and subprocess.run([node, os.path.join(HERE, "build_docx.js"), ri,
-                                raw]).returncode == 0 and os.path.exists(raw):
+    node = (shutil.which("node") or _find_node()) if "word" in want else None
+    docx_ok = "word" not in want          # 没选 Word 就不必去找 node，也不报缺
+    if "word" in want and node and subprocess.run([node, os.path.join(HERE, "build_docx.js"),
+                                                   ri, raw]).returncode == 0 \
+            and os.path.exists(raw):
         S(sys.executable, os.path.join(HERE, "postprocess_docx.py"), raw, doc)
         os.remove(raw)
         docx_ok = True
-    if not docx_ok:
+    if not docx_ok and "word" in want:
         md = _rows_markdown(ri, os.path.join(outdir, "案件大事记.md"))
         why = "node 不可用" if not node else "node 导出失败"
         print(f"  Word 交付版没写成（{why}）——已改出 Markdown 版 {os.path.basename(md)}，"
               f"内容相同；Excel 母表与简表照常生成。装好 Node.js 后重跑即可拿到 Word 版。")
-    S(sys.executable, os.path.join(HERE, "build_xlsx.py"), ri, xls)
-    S(sys.executable, os.path.join(HERE, "cache_formulas.py"), xls)
+    if "excel" in want:
+        S(sys.executable, os.path.join(HERE, "build_xlsx.py"), ri, xls)
+        S(sys.executable, os.path.join(HERE, "cache_formulas.py"), xls)
 
     step(5, "简表（呈报用）")
     sys.path.insert(0, HERE)
     from build_brief import build as build_brief
     from export_brief import export as export_brief
-    svgs = build_brief(ri, outdir)      # 与 Word、Excel 同一份输入，结构才不会漂
-    ex = export_brief(svgs, outdir) if svgs else {"merged": None, "pdf": []}
+    svgs = build_brief(ri, outdir) if "brief" in want else []
+    ex = (export_brief(svgs, outdir) if svgs and ("pdf" in want or "png" in want)
+          else {"merged": None, "pdf": []})
 
     step(6, "交付物自检")
     r = subprocess.run([sys.executable,
@@ -144,4 +182,5 @@ if __name__ == "__main__":
         except Exception:
             pass
     a = sys.argv[1:]
-    sys.exit(main(a[0], a[1] if len(a) > 1 else None, a[2] if len(a) > 2 else "out"))
+    sys.exit(main(a[0], a[1] if len(a) > 1 else None, a[2] if len(a) > 2 else "out",
+                  a[3] if len(a) > 3 else None))

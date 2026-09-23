@@ -510,7 +510,7 @@ def render(m):
             lcol = C["red"] if emph else C["ink2"]
             mode, line, along = label_anchor(pts, cy_center)
             maxw = LABEL_MAXW_SIDE if mode == "side" else LABEL_MAXW
-            label_reqs.append({"lines": wrap(e["label"], FS_EDGE, maxw),
+            label_reqs.append({"lines": wrap(e["label"], FS_EDGE, maxw, keep_alnum=True),
                                "mode": mode, "line": line, "along": along,
                                "emph": bool(emph), "col": lcol, "fw": "700" if emph else "600"})
     out.append('</g>')
