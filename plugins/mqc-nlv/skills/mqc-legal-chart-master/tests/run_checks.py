@@ -1010,6 +1010,15 @@ else:
         _tb = [x for x in _ex.map(_run, _jobs) if x]
     ok("V1–V5 每个命令行脚本：路径打错、JSON 写坏、文件不是 UTF-8，一律说人话，不甩 Python 堆栈（原来 136 处）",
        not _tb, _tb[:4])
+    # V5 的 SVG → PNG 给了不是 SVG 的文件：GitHub 上（没装 cairosvg、LibreOffice 没有 Writer）甩 CalledProcessError 堆栈，
+    # 本机（装着 Writer）则把 JSON 当成文字文档转出一张乱码 PNG。两种都不对：先认出不是 SVG、说清楚、不写图
+    _ro = os.path.join(tempfile.mkdtemp(), "out.png")
+    _rr = subprocess.run([sys.executable, os.path.join(_skills, "mqc-trial-confrontation-master", "scripts", "rasterize.py"),
+                          os.path.join(_bd, "坏.json"), _ro], capture_output=True, text=True, encoding="utf-8",
+                         errors="replace", cwd=tempfile.mkdtemp(), timeout=120)
+    ok("V5 光栅化给的不是 SVG：直接说「不是 SVG 图」，不硬转出乱码图、不甩堆栈",
+       _rr.returncode != 0 and "不是 SVG" in _rr.stderr and "Traceback" not in _rr.stderr and not os.path.exists(_ro),
+       (_rr.stderr or _rr.stdout)[-200:])
     _v6 = os.path.join(ROOT, "scripts")
     _jobs = [([sys.executable, os.path.join(_v6, "cases.py")] + a, "cases.py " + a[0] + " " + os.path.basename(a[1]), False)
              for a in (["ingest", "不存在.pdf", "-w", tempfile.mkdtemp()], ["ingest", os.path.join(_bd, "坏.json"), "-w", tempfile.mkdtemp()],

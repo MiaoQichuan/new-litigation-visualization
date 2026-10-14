@@ -67,7 +67,8 @@ def main():
 
     rc, out = run([os.path.join(HERE, "run_checks.py")])
     m = re.search(r"(\d+)/(\d+) 项通过", out)
-    counts["checks"] = int(m.group(2)) if m else 0
+    # 跳过的（可选依赖没装）也算一项：不然没装 jsonschema 的机器上项数少一，被判「项数变少」
+    counts["checks"] = (int(m.group(2)) + sum(l.startswith("  SKIP  ") for l in out.splitlines())) if m else 0
     names = check_names(out)
     rows.append(("回归", rc == 0, m.group(0) if m else out[-300:]))
 

@@ -29,6 +29,10 @@ SERIF = "Noto Serif CJK SC"
 
 def rasterize(src, dst, width=1400):
     s = open(src, encoding="utf-8-sig").read()
+    if "<svg" not in s:
+        # 给的不是 SVG（例如把 JSON 当成了图）：原来交给转换工具硬转，LibreOffice 把它当成文字文档，
+        # 本机装着 Writer 时转出一张满是乱码的 PNG，没装时甩 CalledProcessError 堆栈（GitHub 上撞到过）
+        raise ValueError(f"{src} 不是 SVG 图：这一步只把对抗图的 SVG 转成 PNG，请给出图那一步写出的 .svg 文件")
     s = re.sub(r'font-family="[^"]*方正小标宋[^"]*"', f'font-family="{SERIF}"', s)
     s = re.sub(r'font-family="[^"]*(?:PingFang|Microsoft YaHei)[^"]*"', f'font-family="{SANS}"', s)
     # 换过字族的那份是中间产物，直接喂给 cairosvg，不落盘——
@@ -62,7 +66,15 @@ def _find_tool(name):
 
 
 def _rasterize_external(svg_text, dst, width):
-    """SVG → PNG 的备用通道：rsvg-convert → Inkscape → LibreOffice+pdftoppm。"""
+    """SVG → PNG 的备用通道：rsvg-convert → Inkscape → LibreOffice+pdftoppm。转换工具失败时说是哪一个、怎么办，不甩堆栈。"""
+    try:
+        return _rasterize_external_(svg_text, dst, width)
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(f"转 PNG 没成功：{os.path.basename(str(e.cmd[0]))} 退出码 {e.returncode}。"
+                           "SVG 照常可用；要 PNG 可装 cairosvg（pip install cairosvg）或 Inkscape 后重跑这一步") from None
+
+
+def _rasterize_external_(svg_text, dst, width):
     tmp = os.path.join(tempfile.mkdtemp(), "t.svg")
     open(tmp, "w", encoding="utf-8").write(svg_text)
     rsvg, ink, sof, ppm = (_find_tool(x) for x in
