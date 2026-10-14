@@ -1,0 +1,17 @@
+# 文本统一用 LF：多条守卫按字节比对 SVG / JSON，Windows 上自动转成 CRLF 会让它们假红。
+* text=auto eol=lf
+
+# 二进制，不做换行转换、不做文本 diff
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.pdf  binary
+*.pptx binary
+*.docx binary
+*.xlsx binary
+*.vsdx binary
+*.zip  binary
+*.ttf  binary
+*.otf  binary
+*.ttc  binary

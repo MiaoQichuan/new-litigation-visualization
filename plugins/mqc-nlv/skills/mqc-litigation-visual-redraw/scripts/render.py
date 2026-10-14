@@ -29,7 +29,8 @@ def _best_installed_song():
     when present (so a lawyer's own machine renders the true face), then 思源宋/
     Noto Serif, then 华文中宋."""
     try:
-        out = subprocess.run(["fc-list"], capture_output=True, text=True).stdout
+        out = subprocess.run(["fc-list"], capture_output=True, text=True,
+                             encoding="utf-8", errors="replace").stdout   # fc-list 输出 UTF-8
     except Exception:
         return None
     for fam in ("方正小标宋", "FZXiaoBiaoSong", "思源宋体", "Source Han Serif SC",
@@ -44,7 +45,7 @@ def _png_safe_svg(svg_path):
     installed Song (see _best_installed_song). The on-disk master SVG is left
     untouched — it keeps 方正小标宋 first for viewers that DO walk the list."""
     song = _best_installed_song()
-    src = open(svg_path, encoding="utf-8").read()
+    src = open(svg_path, encoding="utf-8-sig").read()
     marker = f'font-family="{TITLE_FONT}"'
     if not song or marker not in src:
         return svg_path, None
@@ -99,7 +100,7 @@ def _svg_px_size(svg_path):
     """The master's own pixel canvas, so the raster can be pinned to an exact
     integer multiple of it."""
     try:
-        head = open(svg_path, encoding="utf-8").read(600)
+        head = open(svg_path, encoding="utf-8-sig").read(600)
     except OSError:
         return None
     m = re.search(r'<svg[^>]*\bwidth="([\d.]+)"[^>]*\bheight="([\d.]+)"', head)
@@ -843,7 +844,7 @@ def _cli(argv):
     fmt_arg = next((a for a in argv if a.startswith("--formats=")), None)
     try:
         import checkpoint as _cp
-        _mp = json.load(open(argv[0], encoding="utf-8")) if argv else {}
+        _mp = json.load(open(argv[0], encoding="utf-8-sig")) if argv else {}
         formats = _cp.parse_formats(",".join((_mp.get("checkpoint") or {}).get("formats") or []))
     except Exception:
         formats = ("svg", "pptx")
@@ -876,6 +877,14 @@ def _quiet_broken_pipe():
         pass
 
 if __name__ == "__main__":
+    if {"-h", "--help"} & set(__import__("sys").argv[1:]):   # 只打印用法、什么都不做（原来会把 --help 当成文件名）
+        getattr(__import__("sys").stdout, "reconfigure", lambda **k: None)(encoding="utf-8")
+        print((__doc__ or "").strip() or "用法见本模块的 SKILL.md")
+        raise SystemExit(0)
+    try:                                   # 常见输入错误（路径、JSON、编码）说人话，不甩堆栈
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
     # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是乱码，
     # 自检里的「↳」这类字符还会直接让程序崩溃。写法与关系图大师 make.py 一致。
     for _stream in (sys.stdout, sys.stderr):

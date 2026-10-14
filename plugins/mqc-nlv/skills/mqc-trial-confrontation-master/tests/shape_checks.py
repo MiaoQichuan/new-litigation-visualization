@@ -62,7 +62,7 @@ ck("L2", got == (1, 2) and err and err.startswith("L2"), f"左1右2 被几何层
 
 json.dump(bad, open(os.path.join(_TMP, "_shape.json"), "w", encoding="utf-8"), ensure_ascii=False)
 r = subprocess.run([sys.executable, os.path.join(ROOT, "scripts/check_claims.py"), os.path.join(_TMP, "_shape.json")],
-                   capture_output=True, text=True)
+                   capture_output=True, text=True, encoding="utf-8")
 ck("B2", any("FAIL B2" in l for l in r.stdout.splitlines()), "左1右2 在数据层也被拦下（反制为空而再回应有内容）")
 
 print()

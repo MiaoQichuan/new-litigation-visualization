@@ -104,7 +104,7 @@ def _svg_for_export(svg_path):
     幻灯片与画布本身就是白的。
     """
     import re as _re
-    src = open(svg_path, encoding="utf-8").read()
+    src = open(svg_path, encoding="utf-8-sig").read()
     cleaned = _re.sub(r'<rect data-role="canvas-bg"[^>]*/>\s*', "", src)
     if cleaned == src:
         return svg_path, None
@@ -168,7 +168,7 @@ def deliver(svg_path, m, base=None, formats=None, style=None):
         open(p, "w", encoding="utf-8").write(mx)
         out.append(("drawio", p, f"{mx.count('<mxCell')} 个单元，draw.io 内可改"))
         try:
-            svg = open(svg_path, encoding="utf-8").read()
+            svg = open(svg_path, encoding="utf-8-sig").read()
             p2 = base + ".drawio.svg"
             open(p2, "w", encoding="utf-8").write(export_drawio.embed_in_svg(svg, mx))
             out.append(("drawio.svg", p2, "正常 SVG，同时内嵌可编辑模型"))
@@ -183,6 +183,14 @@ def deliver(svg_path, m, base=None, formats=None, style=None):
 
 
 if __name__ == "__main__":
+    if {"-h", "--help"} & set(__import__("sys").argv[1:]):   # 只打印用法、什么都不做（原来会把 --help 当成文件名）
+        getattr(__import__("sys").stdout, "reconfigure", lambda **k: None)(encoding="utf-8")
+        print((__doc__ or "").strip() or "用法见本模块的 SKILL.md")
+        raise SystemExit(0)
+    try:                                   # 常见输入错误（路径、JSON、编码）说人话，不甩堆栈
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
     # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是乱码，
     # 自检里的「↳」这类字符还会直接让程序崩溃。写法与关系图大师 make.py 一致。
     for _stream in (sys.stdout, sys.stderr):
@@ -195,5 +203,5 @@ if __name__ == "__main__":
         print("用法：export_formats.py <出图.svg> <语义地图.json>")
         sys.exit(1)
     for fmt, path, note in deliver(sys.argv[1],
-                                   json.load(open(sys.argv[2], encoding="utf-8"))):
+                                   json.load(open(sys.argv[2], encoding="utf-8-sig"))):
         print(f"  {fmt:<11}{path or '（无）':<40}{note}")

@@ -842,6 +842,14 @@ def render(m, out_path, target_w=None, min_card=None, fs_body=None, fs_date=None
 
 
 if __name__ == "__main__":
+    if {"-h", "--help"} & set(__import__("sys").argv[1:]):   # 只打印用法、什么都不做（原来会把 --help 当成文件名）
+        getattr(__import__("sys").stdout, "reconfigure", lambda **k: None)(encoding="utf-8")
+        print((__doc__ or "").strip() or "用法见本模块的 SKILL.md")
+        raise SystemExit(0)
+    try:                                   # 常见输入错误（路径、JSON、编码）说人话，不甩堆栈
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
     # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是乱码，
     # 自检里的「↳」这类字符还会直接让程序崩溃。写法与关系图大师 make.py 一致。
     for _stream in (sys.stdout, sys.stderr):
@@ -851,7 +859,7 @@ if __name__ == "__main__":
             pass
     src = sys.argv[1]
     out = sys.argv[2]
-    m = json.load(open(src, encoding="utf-8"))
+    m = json.load(open(src, encoding="utf-8-sig"))
     tw = int(sys.argv[3]) if len(sys.argv) > 3 else None
     w, h, bu, bd, fits, pitch = render(m, out, tw)
     print(f"画布 {w}x{h}   上方 {bu} 层 / 下方 {bd} 层   卡宽 {CARD_W}px   "

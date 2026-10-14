@@ -1,0 +1,36 @@
+name: 提建议 · Feature request
+description: 想要一种新图、一个新功能，或觉得哪里可以更好
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        说清**法律场景**最有用：在哪类案件、给谁看、要回答什么问题。
+        请不要附真实案件材料。
+  - type: dropdown
+    id: module
+    attributes:
+      label: 哪个模块
+      options:
+        - V1 诉讼可视化重画
+        - V2 时间轴大师
+        - V3 法律关系图大师
+        - V4 大事记表大师
+        - V5 庭审对抗图大师
+        - V6 法律图表大师
+        - V7 法律课件大师
+        - 新模块 / 不确定
+    validations:
+      required: true
+  - type: textarea
+    id: scene
+    attributes:
+      label: 法律场景
+      placeholder: 例如：建设工程案件开庭前，想给法官一页图讲清实际施工人的请求权基础。
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: 希望怎样
+      description: 可以附一张手绘或参考图（不含真实信息）。

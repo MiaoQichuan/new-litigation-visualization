@@ -1,0 +1,1898 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>法律课件大师</title>
+<style>
+:root, body[data-style="奇川风"] {
+  --acc:#991B1B; --accC:#F7EAEA; --onAccC:#7A1414;
+  --bg:#ECEEF1; --panel:#FFFFFF; --tone:#F3F4F6; --tone2:#E9ECEF; --line:#D6DAE0;
+  --ink:#1F2933; --ink2:#6B7280; --ink3:#9CA3AF;
+  --rs:10px; --rm:16px; --rl:24px; --pill:999px;
+}
+body[data-style="歸藏风"] {
+  --acc:#002FA7; --accC:#E8EDF8; --onAccC:#00227A;
+  --bg:#EDEDEB; --panel:#FAFAF8; --tone:#F2F2F0; --tone2:#E8E8E6; --line:#E0E0E0;
+  --ink:#333333; --ink2:#737373; --ink3:#BDBDBD;
+  --rs:0px; --rm:0px; --rl:0px; --pill:0px;
+}
+* { box-sizing:border-box }
+html,body { margin:0; height:100%; background:var(--bg); color:var(--ink);
+  font:14px/1.5 "PingFang SC","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC","Helvetica Neue",Arial,sans-serif; }
+button { font:inherit; color:inherit; border:0; background:none; cursor:pointer; }
+input, textarea, select { font:inherit; color:var(--ink); }
+svg.i { width:20px; height:20px; flex:none; }
+.app { --rw:64px; --sw:264px; --iw:288px; display:grid; grid-template-columns:var(--rw) var(--sw) minmax(0,1fr) var(--iw); grid-template-rows:minmax(0,100vh); height:100vh; }
+
+/* 左侧导轨 */
+.rail { display:flex; flex-direction:column; align-items:center; gap:6px; padding:14px 0; }
+.logo { width:44px; height:44px; border-radius:var(--rm); background:var(--acc); color:#fff; display:grid; place-items:center;
+  font-weight:700; font-size:15px; margin-bottom:12px; }
+.rbtn { width:56px; display:flex; flex-direction:column; align-items:center; gap:2px; font-size:12px; color:var(--ink2); padding:4px 0; }
+.rbtn .pill { width:52px; height:32px; border-radius:var(--pill); display:grid; place-items:center; transition:background .2s; }
+.rbtn:hover .pill { background:var(--tone2); }
+.rbtn.on { color:var(--ink); font-weight:600; }
+.rbtn.on .pill { background:var(--accC); color:var(--onAccC); }
+.rail .grow { flex:1; }
+
+/* 左面板 */
+.side { background:var(--panel); border-radius:var(--rl); margin:10px 0; padding:16px 14px; overflow:auto; }
+.side h3 { font-size:15px; margin:2px 4px 12px; }
+.sec { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--ink2); margin:16px 4px 8px; letter-spacing:.04em; }
+.sec::after { content:""; flex:1; height:1px; background:var(--line); }
+.tiles { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.tile { background:var(--tone); border-radius:var(--rm); padding:14px 8px 10px; display:flex; flex-direction:column; align-items:center; gap:6px;
+  font-size:12.5px; color:var(--ink); user-select:none; touch-action:none; cursor:grab; transition:background .15s, transform .15s; }
+.tile:hover { background:var(--accC); color:var(--onAccC); }
+.tile:active { transform:scale(.97); }
+.tile small { color:var(--ink2); font-size:11px; margin-top:-4px; }
+.asset { display:flex; gap:10px; align-items:center; background:var(--tone); border-radius:var(--rm); padding:10px 12px; margin-bottom:8px;
+  cursor:grab; user-select:none; touch-action:none; }
+.asset:hover { background:var(--accC); }
+.asset .ic { width:36px; height:36px; border-radius:var(--rs); background:var(--panel); display:grid; place-items:center; color:var(--acc); flex:none; }
+.asset b { display:block; font-weight:500; font-size:13px; line-height:1.35; }
+.asset span { font-size:11.5px; color:var(--ink2); }
+.asset.bad { opacity:.55; }
+.drop { border:1.5px dashed var(--line); border-radius:var(--rm); padding:14px; text-align:center; color:var(--ink2); font-size:12.5px; margin-top:8px; }
+.drop.hot { border-color:var(--acc); color:var(--acc); background:var(--accC); }
+.tpls { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.tpl { background:var(--tone); border-radius:var(--rm); padding:8px; text-align:center; font-size:12px; cursor:pointer; }
+.tpl:hover { background:var(--accC); color:var(--onAccC); }
+.mini { position:relative; aspect-ratio:16/9; background:var(--panel); border-radius:calc(var(--rs) * .6); margin-bottom:6px; overflow:hidden; }
+.mini i { position:absolute; background:var(--tone2); border-radius:calc(var(--rs) * .35); }
+.mini i.bare { background:none; border-bottom:2px solid var(--ink3); border-radius:0; }
+.mini i.chart, .mini i.figure { background:var(--panel); outline:1px solid var(--line); }
+.mini i.accent { background:var(--acc); }
+
+/* 中间舞台 */
+.main { display:flex; flex-direction:column; min-width:0; min-height:0; padding:10px 14px; gap:10px; }   /* min-height:0：放大后页面在中间这一块里滚动，不把整个界面撑高 */
+.bar { display:flex; align-items:center; gap:10px; min-width:0; }
+.group { display:flex; align-items:center; gap:2px; background:var(--panel); border-radius:var(--pill); padding:4px; }
+.ib { white-space:nowrap; flex:none; height:36px; min-width:36px; padding:0 10px; border-radius:var(--pill); display:inline-flex; align-items:center; justify-content:center; gap:6px; font-size:13px; }
+.ib:hover { background:var(--tone2); }
+.ib.on { background:var(--accC); color:var(--onAccC); }
+.ib[disabled] { opacity:.35; pointer-events:none; }
+.ib.primary { background:var(--acc); color:#fff; padding:0 18px; }
+.ib.primary:hover { filter:brightness(1.1); }
+.title-in { border:0; background:transparent; font-size:16px; font-weight:600; padding:6px 10px; border-radius:var(--rs); min-width:120px; max-width:300px; }
+.title-in:hover, .title-in:focus { background:var(--panel); outline:none; }
+.spacer { flex:1; }
+.status { font-size:12px; color:var(--ink2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.stagebox { flex:1; min-height:0; position:relative; display:flex; }
+.stagewrap { flex:1; min-width:0; min-height:0; display:grid; place-items:start; position:relative; overflow:auto; }
+/* 缩放按钮浮在画面右下角，不占顶栏（顶栏在 1366 宽的笔记本上已经满了） */
+.zoombar { position:absolute; right:6px; bottom:4px; display:flex; align-items:center; gap:2px; padding:3px; border-radius:var(--pill);
+  background:color-mix(in srgb, var(--panel) 92%, transparent); box-shadow:0 1px 2px rgba(0,0,0,.08), 0 4px 14px rgba(0,0,0,.08); z-index:20; }
+.zoombar .ib { height:28px; min-width:28px; padding:0 6px; justify-content:center; font-size:12px; }
+.zoombar #zoomFit { min-width:48px; font-variant-numeric:tabular-nums; }
+.stagewrap.zoomed { cursor:default; }
+.stage { margin:auto; position:relative; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.06), 0 8px 28px rgba(0,0,0,.07); border-radius:calc(var(--rs) * .6); overflow:hidden; }
+#svgHost, #svgHost svg { position:absolute; inset:0; width:100%; height:100%; display:block; }
+#overlay { position:absolute; inset:0; }
+#backdrop { position:absolute; inset:0; width:100%; height:100%; object-fit:fill; pointer-events:none; mix-blend-mode:multiply; opacity:.55; }
+#reserve { position:absolute; inset:0; pointer-events:none; }
+#reserve i { position:absolute; background:repeating-linear-gradient(135deg, rgba(120,120,120,.10) 0 6px, transparent 6px 12px); }
+#reserve b { position:absolute; border:1px dashed rgba(120,120,120,.55); }
+.insets { display:grid; grid-template-columns:repeat(2, 1fr); gap:6px 10px; }
+.insets .field { margin:0; display:flex; align-items:center; gap:8px; } .insets .field label { margin:0; flex:none; } .insets input { text-align:center; padding:7px 4px; }
+.gridlines { position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .2s; }
+.gridlines.on { opacity:1; }
+.gridlines i { position:absolute; background:color-mix(in srgb, var(--acc) 6%, transparent); outline:1px dashed color-mix(in srgb, var(--acc) 22%, transparent); }
+.mod { position:absolute; cursor:grab; touch-action:none; }
+.mod:hover { outline:1.5px solid color-mix(in srgb, var(--acc) 45%, transparent); outline-offset:2px; }
+.mod.sel { outline:2px solid var(--acc); outline-offset:2px; }
+.anc { position:absolute; border:1.5px dashed var(--acc); border-radius:6px; cursor:pointer; background:transparent; transition:background .12s; z-index:5; }
+.anc:hover { background:color-mix(in srgb, var(--acc) 12%, transparent); }
+.anc.on, .anc.pick { border-style:solid; background:color-mix(in srgb, var(--acc) 14%, transparent); }
+.anc b { position:absolute; right:-9px; top:-9px; width:18px; height:18px; border-radius:50%; background:#1F2933; color:#fff; font:700 11px/18px var(--sans, sans-serif); text-align:center; }
+.pinrow { display:flex; align-items:center; gap:8px; padding:5px 0; }
+.pinrow .n { flex:none; width:20px; height:20px; border-radius:50%; background:#1F2933; color:#fff; font-weight:700; font-size:12px; line-height:20px; text-align:center; }
+.pinrow .l { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.pinrow button { border:0; background:var(--tone); border-radius:8px; width:26px; height:26px; cursor:pointer; }
+.mod .chip { position:absolute; left:0; top:-26px; height:22px; padding:0 8px; border-radius:var(--pill); background:var(--acc); color:#fff;
+  font-size:11.5px; display:none; align-items:center; gap:4px; white-space:nowrap; pointer-events:none; }
+.mod:hover .chip, .mod.sel .chip { display:inline-flex; }
+.mod .hint { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+  color:var(--ink2); font-size:13px; pointer-events:none; text-align:center; padding:8px; }
+.mod .hint svg { width:28px; height:28px; color:var(--ink3); }
+.mod .dot { position:absolute; right:-6px; top:-6px; width:14px; height:14px; border-radius:50%; background:#B42318; border:2px solid #fff; }
+.mod .dot.warn { background:#B7791F; }
+.h { position:absolute; width:14px; height:14px; background:#fff; border:2px solid var(--acc); border-radius:50%; display:none; z-index:2; }
+.mod.sel .h { display:block; }
+.h.e { right:-9px; top:calc(50% - 7px); cursor:ew-resize; } .h.w { left:-9px; top:calc(50% - 7px); cursor:ew-resize; }
+.h.s { bottom:-9px; left:calc(50% - 7px); cursor:ns-resize; } .h.n { top:-9px; left:calc(50% - 7px); cursor:ns-resize; }
+.h.se { right:-9px; bottom:-9px; cursor:nwse-resize; }
+.ghost { position:absolute; pointer-events:none; background:color-mix(in srgb, var(--acc) 12%, transparent);
+  outline:2px dashed var(--acc); outline-offset:-2px;
+  transition:left .26s cubic-bezier(.34,1.56,.64,1), top .26s cubic-bezier(.34,1.56,.64,1), width .26s cubic-bezier(.34,1.56,.64,1), height .26s cubic-bezier(.34,1.56,.64,1), border-radius .2s; }
+.ghost.bad { background:rgba(180,35,24,.08); outline-color:#B42318; }
+.ghost.fill { background:color-mix(in srgb, var(--acc) 18%, transparent); outline-style:solid; }
+.peer { position:absolute; pointer-events:none; outline:2px solid color-mix(in srgb, var(--acc) 55%, transparent); outline-offset:-2px;
+  transition:border-radius .2s; }
+.gchip.bad { background:#B42318; }
+.guide { position:absolute; pointer-events:none; background:var(--acc); opacity:.75; z-index:6; }
+.peer.push { outline:2px dashed var(--acc); outline-offset:-2px; background:color-mix(in srgb, var(--acc) 8%, transparent); }
+.gchip { position:absolute; pointer-events:none; background:var(--ink); color:#fff; font-size:12px; padding:3px 10px; border-radius:var(--pill); white-space:nowrap; transform:translate(-50%,-130%); }
+/* 手感（借 M3E：按下微缩、拖起带一点重量的跟随、系统要求少动效时全关） */
+.mod { transition:transform .12s cubic-bezier(.2,0,0,1); }
+.mod:active { transform:scale(.985); }
+.mod.locked::after { content:""; position:absolute; right:8px; bottom:8px; width:10px; height:10px; border-radius:3px; border:2px solid var(--muted, #9CA3AF); }
+.lift { transition:left .08s cubic-bezier(.2,0,0,1), top .08s cubic-bezier(.2,0,0,1), width .2s, height .2s; }
+@media (prefers-reduced-motion: reduce) { .mod, .lift { transition:none; } .mod:active { transform:none; } }
+.lift { position:fixed; z-index:50; pointer-events:none; border-radius:var(--rm); background:color-mix(in srgb, var(--panel) 82%, transparent); color:var(--ink);
+  box-shadow:0 10px 30px rgba(0,0,0,.18), 0 2px 6px rgba(0,0,0,.08); display:flex; align-items:center; justify-content:center; gap:8px;
+  font-size:13px; transform:scale(1.02); opacity:.94; border:1.5px solid var(--acc); }
+.hidebody { opacity:.12; transition:opacity .15s; }
+
+/* 底部页面条 */
+.film { display:flex; gap:10px; align-items:center; overflow-x:auto; padding:6px 2px 4px; min-height:104px; }
+.thumb { position:relative; flex:none; width:144px; cursor:pointer; user-select:none; }
+.thumb .pic { width:144px; height:81px; border-radius:calc(var(--rs) * .6); background:#fff; overflow:hidden; outline:2px solid transparent; outline-offset:2px; }
+.thumb .pic img { width:100%; height:100%; display:block; }
+.thumb.on .pic { outline-color:var(--acc); }
+.thumb .no { position:absolute; left:6px; bottom:6px; font-size:11px; background:rgba(255,255,255,.9); border-radius:var(--pill); padding:0 6px; color:var(--ink2); }
+.thumb .bad { position:absolute; right:6px; top:6px; width:10px; height:10px; border-radius:50%; background:#B42318; }
+.thumb .tools { position:absolute; right:4px; bottom:4px; display:none; gap:2px; }
+.thumb:hover .tools { display:flex; }
+.thumb .tools button { width:24px; height:24px; border-radius:var(--pill); background:rgba(255,255,255,.95); display:grid; place-items:center; }
+.thumb .tools svg { width:15px; height:15px; }
+.thumb.dragover .pic { outline-color:var(--ink3); outline-style:dashed; }
+.addpage { flex:none; width:81px; height:81px; border-radius:var(--rm); background:var(--panel); display:grid; place-items:center; color:var(--acc); }
+.addpage:hover { background:var(--accC); }
+
+/* 右侧属性 */
+.insp { background:var(--panel); border-radius:var(--rl); margin:10px 10px 10px 0; padding:14px; overflow:auto; }
+.ihead { display:flex; align-items:center; gap:8px; background:var(--accC); color:var(--onAccC); border-radius:var(--pill); padding:6px 6px 6px 14px; font-weight:600; }
+.ihead .spacer { flex:1; }
+.ihead button { width:32px; height:32px; border-radius:var(--pill); display:grid; place-items:center; }
+.ihead button:hover { background:rgba(255,255,255,.6); }
+.field { margin:10px 2px; }
+.field label { display:block; font-size:12px; color:var(--ink2); margin-bottom:4px; }
+.field input, .field textarea, .field select { width:100%; border:0; background:var(--tone); border-radius:var(--rs); padding:9px 12px; resize:vertical; }
+.field input:focus, .field textarea:focus { outline:2px solid var(--acc); background:var(--panel); }
+.field textarea.code { font:12px/1.45 ui-monospace,Menlo,Consolas,monospace; min-height:160px; }
+.chips { display:flex; flex-wrap:wrap; gap:6px; }
+.c { height:32px; padding:0 12px; border-radius:var(--pill); background:var(--tone); font-size:12.5px; display:inline-flex; align-items:center; gap:4px; }
+.c:hover { background:var(--tone2); }
+.c.on { background:var(--accC); color:var(--onAccC); font-weight:600; }
+.c[disabled] { opacity:.4; pointer-events:none; }
+.sz { display:grid; grid-template-columns:auto 1fr auto 1fr; gap:6px 8px; align-items:center; font-size:12.5px; color:var(--ink2); }
+.step { display:flex; align-items:center; background:var(--tone); border-radius:var(--pill); }
+.step button { width:30px; height:30px; border-radius:var(--pill); }
+.step button:hover { background:var(--tone2); }
+.step span { flex:1; text-align:center; color:var(--ink); font-weight:600; }
+.msg { font-size:12.5px; border-radius:var(--rs); padding:8px 10px; margin:6px 0; line-height:1.5; }
+.msg.p { background:#FDECEA; color:#8A1C14; }
+.msg.w { background:#FDF3E1; color:#7A4A06; }
+.msg.n { background:var(--tone); color:var(--ink2); }
+.toggle { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:13px; margin:10px 2px; }
+.sw { width:46px; height:28px; border-radius:var(--pill); background:var(--tone2); position:relative; transition:background .2s; flex:none; }
+.sw::after { content:""; position:absolute; left:4px; top:4px; width:20px; height:20px; border-radius:var(--pill); background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.2); transition:left .2s; }
+.sw.on { background:var(--acc); } .sw.on::after { left:22px; }
+.parked { display:flex; flex-wrap:wrap; gap:6px; }
+.parked .c { cursor:grab; touch-action:none; }
+.ai-wait { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; gap:6px; font-size:13px; font-weight:600;
+  color:var(--onAccC); background:color-mix(in srgb, var(--accC) 78%, transparent); pointer-events:none;
+  background-image:linear-gradient(100deg, transparent 30%, rgba(255,255,255,.55) 50%, transparent 70%); background-size:220% 100%;
+  animation:shimmer 1.6s linear infinite; }
+@keyframes shimmer { from { background-position:120% 0 } to { background-position:-120% 0 } }
+.thumb .aib { position:absolute; left:6px; top:6px; font-size:10.5px; background:var(--acc); color:#fff; border-radius:var(--pill); padding:0 6px; }
+.ib.ai { background:var(--accC); color:var(--onAccC); font-weight:600; }
+.ib.ai:hover { filter:brightness(.97); }
+.aibox { background:var(--accC); border-radius:var(--rm); padding:10px; margin:8px 0; }
+.aibox textarea { width:100%; border:0; border-radius:var(--rs); padding:8px 10px; min-height:64px; resize:vertical; background:var(--panel); }
+.aibox .row { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; align-items:center; }
+.aibox .row .c { background:var(--panel); }
+.aibox .row .c.on { background:var(--acc); color:#fff; }
+.aibox .go { margin-left:auto; height:32px; padding:0 14px; border-radius:var(--pill); background:var(--acc); color:#fff; font-size:12.5px; }
+.req { display:flex; gap:8px; align-items:flex-start; font-size:12.5px; padding:8px 10px; border-radius:var(--rs); background:var(--tone); margin:6px 0; }
+.req b { font-weight:600; } .req .st { margin-left:auto; flex:none; font-size:11.5px; border-radius:var(--pill); padding:1px 8px; background:var(--panel); }
+.req .st.pending, .req .st.working { background:var(--acc); color:#fff; }
+.req .st.failed { background:#FDECEA; color:#8A1C14; }
+.req button.c { flex:none; white-space:nowrap; }   /* 窄栏里「取消」原来折成两行竖排 */
+.brandlogo { height:72px; border-radius:var(--rm); background:var(--tone); display:flex; align-items:center; justify-content:center; overflow:hidden; margin-bottom:8px; }
+.brandlogo img { max-height:56px; max-width:90%; }
+.lawyer { background:var(--tone); border-radius:var(--rm); padding:6px 10px; margin:8px 0; }
+.lawyer summary { cursor:pointer; font-weight:600; padding:4px 0; }
+.lawyer .field input, .lawyer .field textarea { background:var(--panel); }
+.toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:var(--ink); color:#fff; padding:10px 18px; border-radius:var(--pill);
+  font-size:13px; opacity:0; transition:opacity .2s; pointer-events:none; z-index:60; max-width:70vw; }
+.toast.on { opacity:1; }
+/* 悬停看出处：浮在光标旁，不挡鼠标 */
+.provtip { position:fixed; z-index:60; max-width:340px; pointer-events:none; background:var(--panel); color:var(--ink); border-radius:var(--rs);
+  box-shadow:0 2px 6px rgba(0,0,0,.10), 0 10px 28px rgba(0,0,0,.14); padding:10px 12px; font-size:12.5px; line-height:1.55; }
+.provtip b, .prov b { display:block; font-weight:600; }
+.provtip span, .prov span { display:block; color:var(--ink2); }
+.provtip q, .prov q { display:block; margin-top:4px; padding-left:8px; border-left:2px solid var(--acc); quotes:"「" "」"; }
+.provlist { display:flex; flex-direction:column; gap:8px; max-height:320px; overflow:auto; }
+.prov { font-size:12.5px; line-height:1.5; background:var(--tone); border-radius:var(--rs); padding:8px 10px; }
+.pop { position:absolute; z-index:40; background:var(--panel); border-radius:var(--rl); padding:14px; box-shadow:0 12px 40px rgba(0,0,0,.18); width:420px; }
+.sr { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+kbd { font:11px ui-monospace,monospace; background:var(--tone); border-radius:4px; padding:1px 5px; }
+.title-in { flex:0 1 auto; min-width:60px; }
+@media (max-width: 1500px) {
+  .app { --rw:64px; --sw:236px; --iw:272px; }
+  .rbtn { width:52px; } .rbtn .pill { width:46px; }
+  .tile { padding:10px 6px 8px; } .tile small { display:none; }
+  .ib { padding:0 8px; } .ib.primary { padding:0 12px; }
+  .bar .status { display:none; }
+  .main { padding:10px 10px; }
+}
+@media (max-width: 1280px) {
+  .app { --rw:60px; --sw:200px; --iw:248px; }
+  #gridBtn, #tidyBtn { font-size:0; gap:0; } #gridBtn svg, #tidyBtn svg { font-size:14px; }
+}
+
+body.noside .app { grid-template-columns:var(--rw) 0 minmax(0,1fr) var(--iw); }
+body.noside .side { display:none; }
+.rail { grid-column:1; } .side { grid-column:2; } .main { grid-column:3; } .insp { grid-column:4; }   /* 收起左栏时各栏不串位 */
+@media (max-width:1380px) { #gridBtn, #tidyBtn, #aiBtn { font-size:0; gap:0; padding:0 9px; } #gridBtn svg, #tidyBtn svg, #aiBtn svg { font-size:14px; } .bar .status { display:none; } #styleSeg .ib { padding:0 8px; } }
+.bar { overflow:hidden; }
+.bar .group, .bar .ib { flex:none; }
+.title-in { flex:1 1 120px; min-width:80px; }
+.ib.ai { background:var(--panel); color:var(--ink); font-weight:600; }
+.ib.ai svg.i { color:var(--acc); }
+.emptypage { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; }
+.emptypage b { font-size:20px; } .emptypage span { color:var(--ink2); font-size:13px; }
+.emptypage .scns { display:grid; grid-template-columns:repeat(3, 150px); gap:10px; margin-top:8px; }
+.scn { display:flex; flex-direction:column; align-items:center; gap:6px; padding:16px 8px; border-radius:var(--rm); background:var(--tone); font-size:13.5px; }
+.scn:hover { background:var(--panel); box-shadow:0 0 0 1.5px var(--line), 0 4px 12px rgba(0,0,0,.06); }
+.scn svg.i { color:var(--acc); }
+/* ---------- 0.7 协调：画布是主角，四周安静；红色只给主操作与当前选中；说明退成轻提示 ---------- */
+.rail { gap:2px; padding:12px 0; }
+.logo { width:40px; height:40px; margin-bottom:14px; }
+.rbtn { width:56px; font-size:11.5px; gap:3px; padding:5px 0; }
+.rbtn .pill { width:42px; height:30px; }
+.rbtn.on .pill { background:var(--panel); color:var(--acc); box-shadow:0 1px 2px rgba(0,0,0,.08); }
+.side { padding:14px 12px 18px; }
+.side h3 { font-size:16px; margin:2px 4px 4px; }
+.msg.n { background:none; padding:0 4px; margin:2px 0 10px; font-size:12px; line-height:1.55; color:var(--ink2); }
+.aibox .msg.n, .insp .msg.n { padding:0 2px; }
+.sec { margin:18px 4px 8px; }
+.tile, .tpl, .asset { transition:background .15s, box-shadow .15s, transform .15s; }
+.tile:hover, .tpl:hover, .asset:hover { background:var(--panel); color:var(--ink); box-shadow:0 0 0 1.5px var(--line), 0 4px 12px rgba(0,0,0,.06); }
+.tile svg.i { color:var(--ink2); }
+.tile:hover svg.i { color:var(--acc); }
+.c.on, .ib.on { background:var(--panel); color:var(--acc); font-weight:600; box-shadow:inset 0 0 0 1.5px var(--acc); }
+.aibox { background:var(--tone); }
+.aibox .row .c.on { background:var(--panel); color:var(--acc); box-shadow:inset 0 0 0 1.5px var(--acc); }
+.ihead { background:var(--tone); color:var(--ink); }
+.ihead svg.i { color:var(--acc); }
+.mini { box-shadow:0 0 0 1px var(--line); }
+.mini i.chart, .mini i.figure { outline:none; background:color-mix(in srgb, var(--acc) 13%, var(--panel)); }
+.mini i.conclusion { background:none; border-left:3px solid var(--ink); border-radius:0; }
+.bar { gap:8px; }
+.title-in { flex:1 1 180px; max-width:360px; min-width:140px; }
+.main { padding:10px 12px; gap:8px; }
+.film { min-height:92px; gap:8px; }
+.thumb, .thumb .pic { width:128px; } .thumb .pic { height:72px; }
+.insp { padding:14px 12px; }
+.drop { margin-top:4px; }
+</style>
+</head>
+<body data-style="奇川风">
+<div class="app">
+  <nav class="rail" aria-label="工具">
+    <div class="logo" title="法律课件大师">V7</div>
+    <button class="rbtn on" data-tab="pick"><span class="pill" data-ic="figure"></span>选图</button>
+    <button class="rbtn" data-tab="tpl"><span class="pill" data-ic="tpl"></span>排法</button>
+    <button class="rbtn" data-tab="parts"><span class="pill" data-ic="parts"></span>说明</button>
+    <button class="rbtn" data-tab="fit"><span class="pill" data-ic="frame"></span>适配</button>
+    <button class="rbtn" data-tab="export"><span class="pill" data-ic="download"></span>导出</button>
+    <div class="grow"></div>
+    <button class="rbtn" data-tab="more"><span class="pill" data-ic="more"></span>更多</button>
+    <button class="rbtn" id="helpBtn"><span class="pill" data-ic="help"></span>快捷键</button>
+  </nav>
+
+  <aside class="side" id="side"></aside>
+
+  <main class="main">
+    <div class="bar">
+      <input class="title-in" id="deckTitle" aria-label="课件标题">
+      <div class="group">
+        <button class="ib" id="undoBtn" title="撤销 Ctrl+Z" data-ic="undo"></button>
+        <button class="ib" id="redoBtn" title="重做 Ctrl+Shift+Z" data-ic="redo"></button>
+      </div>
+      <div class="group">
+        <button class="ib" id="gridBtn" title="显示网格 G"><span data-ic="grid"></span>网格</button>
+        <button class="ib" id="tidyBtn" title="整理：上推补缝、并排等高、补齐空白"><span data-ic="tidy"></span>整理</button>
+      </div>
+
+      <button class="ib ai" id="aiBtn" title="让对话里的 AI 按您的想法生成"><span data-ic="ai"></span>AI 生成</button>
+      <span class="status" id="status">载入中…</span>
+      <div class="spacer"></div>
+      <div class="group" id="styleSeg"></div>
+      <button class="ib primary" id="exportBtn" title="导出全部图表页：每页都能整页复制、或框选复制进您自己的课件"><span data-ic="download"></span>导出</button>
+    </div>
+    <div class="stagebox">
+      <div class="stagewrap" id="stagewrap">
+        <div class="stage" id="stage">
+          <div id="svgHost"></div>
+          <img id="backdrop" alt="" hidden>
+          <div id="reserve"></div>
+          <div class="gridlines" id="gridlines"></div>
+          <div id="overlay"></div>
+        </div>
+      </div>
+      <div class="zoombar" id="zoomGroup">
+        <button class="ib" id="zoomOut" title="缩小 Ctrl+-" data-ic="minus"></button>
+        <button class="ib" id="zoomFit" title="适应窗口 Ctrl+0（按住 Ctrl / ⌘ 滚轮缩放；放大后滚动或拖动滚动条移动页面）">100%</button>
+        <button class="ib" id="zoomIn" title="放大 Ctrl+=" data-ic="plus"></button>
+      </div>
+    </div>
+    <div class="film" id="film"></div>
+  </main>
+
+  <aside class="insp" id="insp"></aside>
+</div>
+<div class="toast" id="toast"></div>
+<div class="provtip" id="provTip" hidden></div>
+
+<script src="/grid.js"></script>
+<script>
+"use strict";
+const G = window.NLVGrid;
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+/* ---------- 图标（自绘线稿，24 栅格） ---------- */
+const IC = {
+  parts: '<rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><path d="M17 13.5v7M13.5 17h7"/>',
+  assets: '<path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H10l2 2h5.5A2.5 2.5 0 0 1 20 9.5v7a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z"/>',
+  tpl: '<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 9h17M12 9v10.5"/>',
+  frame: '<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><rect x="7" y="8.5" width="10" height="7" rx="1" stroke-dasharray="2 2"/>',
+  help: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h1M11 10h1M15 10h2M7 14h10"/>',
+  undo: '<path d="M9 7 4.5 11.5 9 16"/><path d="M5 11.5h9a5 5 0 0 1 0 10h-2"/>',
+  redo: '<path d="m15 7 4.5 4.5L15 16"/><path d="M19 11.5h-9a5 5 0 0 0 0 10h2"/>',
+  grid: '<rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M9.2 3.5v17M14.8 3.5v17M3.5 12h17"/>',
+  tidy: '<path d="M4 6h16M4 12h10M4 18h6"/><path d="m15 15 2.5 2.5L22 13"/>',
+  download: '<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/>',
+  title: '<path d="M5 6h14M12 6v13"/>',
+  text: '<path d="M5 6.5h14M5 10.5h14M5 14.5h14M5 18.5h9"/>',
+  bullets: '<path d="M9.5 7h10M9.5 12h10M9.5 17h10"/><rect x="4.5" y="6" width="2" height="2" rx=".5"/><rect x="4.5" y="11" width="2" height="2" rx=".5"/><rect x="4.5" y="16" width="2" height="2" rx=".5"/>',
+  stat: '<path d="M4 18.5h16"/><path d="M6.5 15V11M11 15V7M15.5 15v-5.5"/><path d="m16 5 3 0 0 3"/>',
+  step: '<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M8 9.5l1.5-1v7M13 15.5h4"/>',
+  quote: '<path d="M6 17c-1-1-1.5-2.3-1.5-4 0-3 2-5.5 5-6.5l.5 1.3c-2 .9-3 2.5-3 4H10v5.2zM14 17c-1-1-1.5-2.3-1.5-4 0-3 2-5.5 5-6.5l.5 1.3c-2 .9-3 2.5-3 4H18v5.2z"/>',
+  chart: '<rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><path d="M8 16.5v-4M12 16.5v-8M16 16.5v-6"/>',
+  figure: '<circle cx="6.5" cy="7" r="2.2"/><circle cx="17.5" cy="7" r="2.2"/><circle cx="12" cy="17.5" r="2.2"/><path d="M8.7 7h6.6M7.6 9 11 15.6M16.4 9 13 15.6"/>',
+  note: '<path d="M5 9h14M5 13h9"/><path d="M5 17h5" stroke-dasharray="1.5 2"/>',
+  copy: '<rect x="8.5" y="8.5" width="11" height="11" rx="2"/><path d="M15.5 8.5V6a1.5 1.5 0 0 0-1.5-1.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5"/>',
+  trash: '<path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 12.5h9l1-12.5"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  minus: '<path d="M5 12h14"/>',
+  page: '<rect x="3.5" y="5.5" width="17" height="13" rx="2"/>',
+  upload: '<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 19.5h14"/>',
+  conclusion: '<path d="M6 5v14" stroke-width="2.6"/><path d="M10 9h9M10 14h6"/>',
+  more: '<circle cx="6" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18" cy="12" r="1.4"/>',
+  tl: '<path d="M3.5 12h17"/><circle cx="6.5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="17.5" cy="12" r="1.6"/><path d="M6.5 10.4V6.5h4M12 13.6v3.9h5M17.5 10.4V7"/>',
+  vs: '<rect x="3.5" y="5" width="6" height="14" rx="1.5"/><rect x="14.5" y="5" width="6" height="14" rx="1.5"/><path d="M9.5 9.5h5M9.5 14.5h5"/>',
+  table: '<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M3.5 14.5h17M9 9.5v10"/>',
+  redraw: '<path d="M4.5 18.5c3-1 4-4.5 7-4.5s3.5 3 8 1.5"/><path d="M15.5 4.5l4 4-7 7h-4v-4z"/>',
+  tools: '<path d="M14.5 5.5a4 4 0 0 0-5 5L4 16v4h4l5.5-5.5a4 4 0 0 0 5-5l-2.5 2.5-2.5-.5-.5-2.5z"/>',
+  brand: '<rect x="3.5" y="6.5" width="17" height="13" rx="2"/><path d="M9 6.5V5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 5v1.5M3.5 12h17"/>',
+  ai: '<path d="M12 3.5l1.8 4.7 4.7 1.8-4.7 1.8L12 16.5l-1.8-4.7L5.5 10l4.7-1.8z"/><path d="M18.5 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
+  statute: '<path d="M12 4v15M5 7h14M7.5 7 5 13a2.5 2.5 0 0 0 5 0zM16.5 7 14 13a2.5 2.5 0 0 0 5 0zM8.5 19.5h7"/>',
+  holding: '<path d="m13.5 4.5 6 6M11 7l6 6M12.2 5.8l-4.4 4.4M15.8 9.4l-4.4 4.4M10 12l-5.5 5.5M4 20.5h9"/>',
+  case: '<path d="M4 7.5A1.5 1.5 0 0 1 5.5 6H10l1.5 1.5h7A1.5 1.5 0 0 1 20 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5z"/><path d="M8 13h8M8 16.5h5"/>',
+  issue: '<circle cx="12" cy="12" r="8.5"/><path d="M9.8 9.5a2.3 2.3 0 1 1 3.2 2.1c-.6.3-1 .8-1 1.5v.4M12 16.6v.4"/>',
+  risk: '<path d="M12 4.5 20.5 19h-17z"/><path d="M12 10v4M12 16.5v.4"/>',
+  evidence: '<path d="M8 4.5h8M6.5 6.5h11a1 1 0 0 1 1 1V19a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V7.5a1 1 0 0 1 1-1z"/><path d="M8.5 11h7M8.5 14h7M8.5 17h4"/>',
+  logo: '<rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="M8 15.5V9l4 4 4-4v6.5"/>',
+  profile: '<circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5"/>',
+  contact: '<path d="M6.5 4.5h3l1.5 4-2 1.2a10 10 0 0 0 5.3 5.3l1.2-2 4 1.5v3a1.5 1.5 0 0 1-1.6 1.5C10.6 18.5 5.5 13.4 5 6.1a1.5 1.5 0 0 1 1.5-1.6z"/>',
+};
+const icon = (k, extra = "") => `<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" ${extra}>${IC[k] || ""}</svg>`;
+document.querySelectorAll("[data-ic]").forEach((el) => (el.innerHTML = icon(el.dataset.ic) + el.innerHTML));
+
+/* ---------- 状态 ---------- */
+const S = {
+  deck: null, R: null, lib: null, cur: 0, sel: null, ver: {}, reps: {}, past: [], future: [],
+  tab: "pick", grid: false, scale: 1, drag: null, saving: false, dirty: false,
+  readMode: null, readFor: null, pick: [],     /* 读图：放编号（pin）/ 切片（crop）；pick = 切片时点选的元素 */
+};
+/* 说明：按「与图的关系」分两组——读图（说明这张图）、依据（这张图的法律依据）；整套课件才用的卡片在「更多」 */
+const PARTS = [
+  ["读图", ["conclusion", "bullets", "stat", "step", "title", "note"]],
+  ["依据", ["statute", "holding", "case", "issue", "risk", "evidence"]],
+];
+const MORE_PARTS = ["text", "quote", "logo", "profile", "contact"];
+/* 选图：按法律场景，而不是按模块名。点一下 = 新建一页并按这个场景排好；拖到页面上 = 只放一张图卡 */
+const SCENES = [
+  ["scene-timeline", "figure", "V2 时间轴大师", "案情经过", "V2 · 时效、履约、付款经过", "tl"],
+  ["scene-relation", "figure", "V3 法律关系图大师", "法律关系", "V3 · 谁与谁、什么关系", "figure"],
+  ["scene-confront", "figure", "V5 庭审对抗图大师", "双方攻防", "V5 · 主张、抗辩、审查", "vs"],
+  ["scene-chronicle", "figure", "V4 大事记表大师", "事件脉络", "V4 · 事实与出处", "table"],
+  ["scene-data", "chart", "V6 法律图表大师", "类案数据", "V6 · 占几成、判了多少", "chart"],
+  ["scene-redraw", "figure", "V1 诉讼可视化重画", "重画的图", "V1 · 手绘、截图、判决", "redraw"],
+];
+/* 选图：每张图卡都关联 V1–V6 的一个模块；空卡上可以把那个模块的图拖进来，或让 AI 用它生成 */
+const TOOLS = [
+  ["V2", "figure", "V2 时间轴大师", "案情时间轴", "案件经过、事件先后", "tl"],
+  ["V3", "figure", "V3 法律关系图大师", "法律关系图", "谁与谁、什么关系", "figure"],
+  ["V5", "figure", "V5 庭审对抗图大师", "争点对抗图", "主张、抗辩、审查", "vs"],
+  ["V4", "figure", "V4 大事记表大师", "大事记简表", "A4 简表，整页用", "table"],
+  ["V1", "figure", "V1 诉讼可视化重画", "重画的图", "手绘、截图重画", "redraw"],
+  ["V6", "chart", "V6 法律图表大师", "类案数据图", "占几成、判了多少", "chart"],
+];
+const toolOf = (m) => m.type === "chart" ? "V6" : (String(m.from || "").match(/V[1-6]/) || [""])[0];
+const PART_TIP = { conclusion: "这页要讲的一句话", title: "页标题", text: "一段话", bullets: "三五条", step: "01 02 03", quote: "照录原文", note: "来源、注释",
+  statute: "条文 + 出处", holding: "要旨 + 案号", case: "案号、法院、结果", issue: "焦点一、二、三", risk: "风险与提醒", evidence: "名称——证明目的",
+  logo: "律所 Logo", profile: "律所 / 律师介绍", contact: "地址电话邮箱",
+  stat: "一个数字", chart: "空图表卡", figure: "空图卡" };
+const FAMILY_ZH = { text: "正文与要点", stat: "大数字", step: "编号卡", law: "法条与要旨", case: "案例", issue: "争议焦点", risk: "风险提示" };
+
+const api = async (path, opt = {}) => {
+  const r = await fetch(path, opt);
+  const ct = r.headers.get("content-type") || "";
+  return ct.includes("json") ? r.json() : r.text();
+};
+/* ---------- 每页 SVG 的记忆：没变的页不再向本机服务要（原来改一个字，60 页的课件要重新拉 60 张缩略图） ----------
+   钥匙 = 第几页 + 页 id + 这一页的版本 + 整套的设置（风格、版面、页脚 Logo、名片版本）。哪一样变了钥匙就变；
+   页码随位置变，所以「第几页」也在钥匙里。只记在这次打开的页面里，刷新就清空。
+   只在「这里的课件已经存到本机服务」时才去取：改动还在路上就取，取到的是改之前的样子，却记在新钥匙下（实测撞到过）。
+   取到之前，缩略图先垫着这一页上一次的样子，不闪白。 */
+const SVGC = new Map(), SVGD = new Map(), SVGL = new Map();   /* 钥匙 → Promise；钥匙 → 图；页 id → 最近一次的图 */
+const gkey = () => [S.deck.style, JSON.stringify(S.deck.frame || null), S.deck.footer_logo ? 1 : 0, S.seen.brand || 0].join("|");
+function slideKey(i) { const s = S.deck.slides[i]; return `${i}|${s.id}|${S.ver[s.id] || 0}|${gkey()}`; }
+const synced = () => !S.dirty && !S.saving && JSON.stringify(S.deck) === S.synced;
+function slideSvg(i) {
+  const s = S.deck.slides[i], k = slideKey(i);
+  if (SVGC.has(k)) return SVGC.get(k);
+  if (!synced()) return Promise.resolve({ text: "", url: "" });                                  /* 存完再取（存完会再叫一次） */
+  const p = fetch(`/api/slide/${i}.svg?s=${encodeURIComponent(s.id)}&v=${S.ver[s.id] || 0}`).then(async (r) => {
+    const ct = r.headers.get("content-type") || "";
+    if (!r.ok || !ct.includes("svg")) { SVGC.delete(k); return { text: "", url: "" }; }       /* 出错不记，下次再要 */
+    const text = await r.text();
+    for (const k2 of [...SVGC.keys()]) if (k2 !== k && k2.split("|")[1] === s.id) { SVGC.delete(k2); SVGD.delete(k2); }
+    const url = URL.createObjectURL(new Blob([text], { type: "image/svg+xml" }));
+    const old = SVGL.get(s.id);
+    if (old) setTimeout(() => URL.revokeObjectURL(old), 15000);                                /* 还垫在别处的旧图过一会儿再放 */
+    SVGD.set(k, url); SVGL.set(s.id, url);
+    return { text, url };
+  }).catch(() => { SVGC.delete(k); return { text: "", url: "" }; });
+  SVGC.set(k, p);
+  return p;
+}
+function fillThumbs() {
+  document.querySelectorAll(".thumb img[data-k]").forEach((img) => {
+    const i = +img.closest(".thumb").dataset.i, k = img.dataset.k;
+    if (!S.deck.slides[i] || slideKey(i) !== k || img.dataset.loaded === k) return;
+    slideSvg(i).then((x) => { if (x.url && img.dataset.k === k) { img.src = x.url; img.dataset.loaded = k; } });
+  });
+}
+const slide = () => S.deck.slides[S.cur];
+const mods = () => slide().modules;
+const T = (type) => S.R.types[type];
+const toast = (msg, ms = 2400) => { const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove("on"), ms); };
+const status = (s) => ($("#status").textContent = s);
+
+/* ---------- 撤销 / 保存 ---------- */
+function commit(label) {
+  S.past.push(S.snap); if (S.past.length > 120) S.past.shift();
+  S.future = []; S.snap = JSON.stringify(S.deck);
+  S.ver[slide().id] = (S.ver[slide().id] || 0) + 1;
+  renderAll(); save(); if (label) status(label);
+}
+function undo() { if (!S.past.length) return; S.future.push(S.snap); S.snap = S.past.pop(); restore(); }
+function redo() { if (!S.future.length) return; S.past.push(S.snap); S.snap = S.future.pop(); restore(); }
+function restore() {
+  S.deck = JSON.parse(S.snap); S.cur = Math.min(S.cur, S.deck.slides.length - 1);
+  if (S.sel && !mods().some((m) => m.id === S.sel)) S.sel = null;
+  for (const s of S.deck.slides) S.ver[s.id] = (S.ver[s.id] || 0) + 1;
+  applyStyle(); renderAll(); save();
+}
+/* 两个窗口（或 AI）同时改：按页合并。只有别处改了的页用别处的，只有这里改了的页用这里的，两边都改了同一页以这里为准并提示。 */
+function mergeDeck(base, mine, theirs) {
+  const by = (d) => Object.fromEntries((d.slides || []).map((s) => [s.id, JSON.stringify(s)]));
+  const B_ = by(base), M = by(mine), T = by(theirs), both = [];
+  const out = JSON.parse(JSON.stringify(theirs));
+  for (const k of ["title", "style", "frame", "footer_logo"]) {
+    if (JSON.stringify(mine[k]) !== JSON.stringify(base[k])) { if (mine[k] === undefined) delete out[k]; else out[k] = mine[k]; }
+  }
+  const slides = [];
+  for (const s of theirs.slides) {
+    const id = s.id, mineChanged = M[id] !== B_[id], theirsChanged = T[id] !== B_[id];
+    if (!(id in M) && id in B_) { if (theirsChanged) slides.push(s); continue; }      /* 这里删了：别处没动就删 */
+    if (mineChanged && id in M) {
+      if (theirsChanged && M[id] !== T[id]) both.push(theirs.slides.indexOf(s) + 1);
+      slides.push(JSON.parse(M[id]));
+    } else slides.push(s);
+  }
+  mine.slides.forEach((s, i) => {                                                     /* 这里新加的页：插在它原来前一页的后面 */
+    if (s.id in B_ || s.id in T) return;
+    const prev = i ? mine.slides[i - 1].id : null, at = prev ? slides.findIndex((x) => x.id === prev) : -1;
+    slides.splice(at + 1, 0, JSON.parse(JSON.stringify(s)));
+  });
+  out.slides = slides;
+  return [out, both];
+}
+async function save() {
+  S.dirty = true;
+  if (S.saving) return;
+  S.saving = true;
+  let tries = 0;
+  while (S.dirty) {
+    S.dirty = false; status("保存中…");
+    const body = JSON.stringify(S.deck);
+    const r = await api("/api/deck?base=" + encodeURIComponent(S.seen.deck ?? ""), { method: "POST", body });
+    if (r.conflict && tries++ < 5) {                                                  /* 别处先存了：合并后再存，谁的改动都不丢 */
+      const [m, both] = mergeDeck(JSON.parse(S.synced || body), S.deck, r.deck);
+      S.deck = m; S.synced = JSON.stringify(r.deck); S.seen.deck = r.mtime; S.dirty = true;
+      S.cur = Math.min(S.cur, S.deck.slides.length - 1);
+      if (S.sel && !mods().some((x) => x.id === S.sel)) S.sel = null;
+      for (const s of S.deck.slides) S.ver[s.id] = (S.ver[s.id] || 0) + 1;
+      S.snap = JSON.stringify(S.deck); renderAll(); renderInspector();
+      toast(both.length ? `另一个窗口（或 AI）也改了第 ${both.join("、")} 页：这一页以本窗口为准，其余已合并` : "另一个窗口（或 AI）同时改了课件：已合并，两边的改动都在", 5000);
+      continue;
+    }
+    if (!r.ok) { status("未保存"); toast(r.error || "保存冲突：请刷新页面", 5000); break; }
+    S.synced = body;
+    S.seen.deck = r.mtime;
+    status("已自动保存");
+  }
+  S.saving = false;
+  refreshSlide();                 /* 存完才取画面：取到的一定是刚存下的样子 */
+  refreshReports();
+}
+
+/* ---------- 画面 ---------- */
+async function refreshSlide() {
+  const i = S.cur, k = slideKey(i);
+  const x = await slideSvg(i);
+  if (i !== S.cur || slideKey(i) !== k || !x.text) return;
+  $("#svgHost").innerHTML = x.text;
+  fillThumbs();
+  markDragging();
+}
+let repTimer = null;
+S.repKey = {};
+function refreshReports() {
+  clearTimeout(repTimer);
+  repTimer = setTimeout(async () => {
+    /* 只重查变了的页（钥匙同上）；变了一半以上就整套查。原来改一个字整套 60 页都要重拼一遍检查 */
+    const keys = S.deck.slides.map((s, i) => [s.id, slideKey(i)]);
+    const want = keys.filter(([id, k]) => S.repKey[id] !== k);
+    if (want.length) {
+      const full = want.length * 2 > keys.length;
+      const got = full ? await api("/api/report")
+        : (await api("/api/report?ids=" + want.map(([id]) => encodeURIComponent(id)).join(","))).by_id;
+      if (full ? !Array.isArray(got) : !got) return;
+      if (full) got.forEach((r, i) => { const id = keys[i]?.[0]; if (id) { S.reps[id] = r; S.repKey[id] = keys[i][1]; } });
+      else for (const [id, k] of want) if (got[id]) { S.reps[id] = got[id]; S.repKey[id] = k; }
+    }
+    renderOverlay(); renderFilm(); renderInspector(true);
+  }, 300);
+}
+/* 缩放：1 = 适应窗口（下限，再小没有意义）；上限是实际像素的 2 倍。放大后页面比窗口大，滚动（触控板双指、滚轮）就是平移。
+   学自案图的画布：适应窗口、缩放上下限、按住 Ctrl / ⌘ 滚轮以光标为中心缩放。笔记本 1366×768 上一页只有约 900 像素宽，
+   细调卡片时可以放大。 */
+S.zoom = 1;
+const ZOOM_MAX_PX = 2;
+function fit() {
+  const wrapEl = $("#stagewrap"), wrap = wrapEl.getBoundingClientRect();
+  const g = S.R.grid;
+  S.fitScale = Math.min((wrap.width - 8) / g.W, (wrap.height - 40) / g.H);
+  /* 右下角的缩放按钮不许压住页码：页面右边、下边都没有空当时（又宽又矮的窗口），下边多让出一条 */
+  if ((wrap.height - g.H * S.fitScale) / 2 < 40 && (wrap.width - g.W * S.fitScale) / 2 < 140)
+    S.fitScale = Math.min(S.fitScale, (wrap.height - 88) / g.H);
+  S.zoom = Math.max(1, Math.min(S.zoom, Math.max(1, ZOOM_MAX_PX / S.fitScale)));
+  S.scale = S.fitScale * S.zoom;
+  const st = $("#stage"); st.style.width = g.W * S.scale + "px"; st.style.height = g.H * S.scale + "px";
+  wrapEl.classList.toggle("zoomed", S.zoom > 1);
+  const zf = $("#zoomFit"); if (zf) zf.textContent = Math.round(S.scale * 100) + "%";
+  renderReserve(); renderGridlines(); renderOverlay();
+}
+function setZoom(z, cx, cy) {                     /* cx, cy：以这一点（屏幕坐标）为中心缩放；不给就以窗口中心 */
+  const wrapEl = $("#stagewrap"), wr = wrapEl.getBoundingClientRect();
+  if (cx === undefined) { cx = wr.left + wr.width / 2; cy = wr.top + wr.height / 2; }
+  const sr = $("#stage").getBoundingClientRect();
+  const px = (cx - sr.left) / S.scale, py = (cy - sr.top) / S.scale;          /* 光标下面是页面上的哪一点 */
+  S.zoom = z; fit();
+  const st = $("#stage");
+  wrapEl.scrollLeft = st.offsetLeft + px * S.scale - (cx - wr.left);
+  wrapEl.scrollTop = st.offsetTop + py * S.scale - (cy - wr.top);
+}
+const zoomStep = (dir, cx, cy) => setZoom(dir > 0 ? S.zoom * 1.25 : S.zoom / 1.25, cx, cy);
+function renderGridlines() {
+  const g = S.R.grid, k = S.scale, el = $("#gridlines");
+  let h = "";
+  for (let c = 0; c < g.COLS; c++) for (let r = 0; r < g.ROWS; r++) {
+    const [x, y, w, hh] = G.px(S.R, { x: c, y: r, w: 1, h: 1 });
+    h += `<i style="left:${x * k}px;top:${y * k}px;width:${w * k}px;height:${hh * k}px"></i>`;
+  }
+  el.innerHTML = h; el.classList.toggle("on", S.grid || !!S.drag);
+}
+const radiusCss = (rad) => rad.map((r) => r * S.scale + "px").join(" ");
+function styleR() { return S.R.styles[S.deck.style]; }
+
+function renderOverlay() {
+  if (!S.deck) return;
+  const k = S.scale, ms = mods(), fu = G.fusion(S.R, ms), rep = S.reps[slide().id] || { modules: {} };
+  const st = styleR();
+  let h = "";
+  for (const m of ms) {
+    const [x, y, w, hh] = G.cardRect(S.R, m, fu[m.id]);
+    const rad = G.corners(fu[m.id], st.R, st.r);
+    const info = rep.modules?.[m.id] || {};
+    const empty = isEmpty(m);
+    const dot = (info.problems || []).length && !empty ? '<span class="dot"></span>' : (info.warnings || []).length ? '<span class="dot warn"></span>' : "";
+    h += `<div class="mod${S.sel === m.id ? " sel" : ""}${m.locked ? " locked" : ""}" data-id="${esc(m.id)}" style="left:${x * k}px;top:${y * k}px;width:${w * k}px;height:${hh * k}px;border-radius:${radiusCss(rad)}">
+      <span class="chip">${icon(m.type, 'style="width:14px;height:14px"')}${esc(T(m.type).zh)} · ${m.w}×${m.h}</span>
+      ${empty && HINT[m.type] ? `<div class="hint">${icon(m.type === "figure" && toolOf(m) ? "figure" : m.type)}${m.type === "figure" && m.from ? esc(m.from) + "<br>" : ""}${HINT[m.type]}</div>` : ""}
+      ${aiBadge(m.id)}
+      ${dot}
+      ${["n", "e", "s", "w", "se"].map((d) => `<i class="h ${d}" data-h="${d}"></i>`).join("")}
+    </div>`;
+  }
+  h += anchorsOverlay(rep);
+  if (!ms.length) h += `<div class="emptypage"><b>这一页要讲什么？</b><span>点一个法律场景，图和说明一次排好。</span><div class="scns">` +
+    SCENES.map(([sc, , , zh, , ic]) => `<button class="scn" data-scene-fill="${sc}">${icon(ic)}<span>${esc(zh)}</span></button>`).join("") + `</div></div>`;
+  $("#overlay").innerHTML = h;
+  markDragging();
+}
+const HINT = { conclusion: "双击写这一页要讲的一句话", chart: "把 V6 图表拖进来，或让 AI 用 V6 生成", figure: "把图拖进来，或让 AI 生成", title: "双击写标题", text: "双击写一段话",
+  bullets: "双击写要点", stat: "双击写数字", step: "双击写这一条", quote: "双击贴原文与出处", note: "双击写注释",
+  statute: "双击贴条文原文与出处", holding: "双击贴要旨原文与案号", case: "双击写案号、法院、结果", issue: "双击写争议焦点",
+  risk: "双击写风险提示", evidence: "双击列证据", logo: "在「更多 → 律所名片」里上传 Logo", profile: "", contact: "" };
+function isEmpty(m) {
+  switch (m.type) {
+    case "chart": return !m.file && !m.spec;
+    case "figure": return !m.file && !m.data;
+    case "statute": return !String(m.law ?? "").trim() || !String(m.text ?? "").trim();
+    case "holding": return !String(m.text ?? "").trim();
+    case "case": return !String(m.case_no ?? "").trim();
+    case "issue": case "risk": return !String(m.heading ?? "").trim() && !String(m.text ?? "").trim();
+    case "evidence": return !(m.items || []).some((x) => String(x).trim());
+    case "logo": return !S.brand?.brand?.logo && !S.brand?.brand?.logo_on_dark;
+    case "profile": case "contact": return false;
+    case "bullets": return !(m.items || []).some((x) => String(x).trim());
+    case "stat": return !String(m.value ?? "").trim();
+    case "step": return !String(m.heading ?? "").trim() && !String(m.text ?? "").trim();
+    default: return !String(m.text ?? "").trim() && !String(m.kicker ?? "").trim();
+  }
+}
+function markDragging() {
+  document.querySelectorAll("#svgHost .hidebody").forEach((e) => e.classList.remove("hidebody"));
+  const d = S.drag;
+  if (!d || !d.id || d.kind === "asset") return;
+  const tag = `${slide().id}.${d.id}`;
+  document.querySelectorAll("#svgHost [data-mod]").forEach((e) => {
+    const v = e.getAttribute("data-mod");
+    if (v === tag || v.startsWith(tag + ".")) e.classList.add("hidebody");
+  });
+}
+
+/* ---------- 左面板 ---------- */
+function renderSide() {
+  const el = $("#side");
+  if (S.tab === "tools" || S.tab === "assets") S.tab = "pick";            /* 旧入口并进「选图」 */
+  if (S.tab === "frame" || S.tab === "custom") S.tab = "fit";             /* 风格与版面并进「适配」 */
+  document.querySelectorAll(".rbtn[data-tab]").forEach((b) => b.classList.toggle("on", b.dataset.tab === S.tab || (S.tab === "brand" && b.dataset.tab === "more")));
+  const tiles = (list) => `<div class="tiles">` + list.map((t) => `<div class="tile" data-part="${t}">${icon(t)}<span>${esc(T(t).zh)}</span><small>${PART_TIP[t] || ""}</small></div>`).join("") + `</div>`;
+  if (S.tab === "pick") {
+    const L = S.lib || { charts: [], builtin: [], figures: [] };
+    const card = (a, kind, sub, bad) => `<div class="asset${bad ? " bad" : ""}" data-asset="${kind}" data-key="${esc(a.file || a.name)}">
+      <span class="ic">${icon(kind)}</span><span><b>${esc(a.title || a.name)}</b><span>${esc(sub)}</span></span></div>`;
+    el.innerHTML = `<h3>选图</h3><div class="msg n">点场景：新建一页并排好。拖到页面上：只放一张图卡。</div>
+      <div class="sec">法律场景</div><div class="tiles">` +
+      SCENES.map(([sc, type, from, zh, tip, ic]) => `<div class="tile" data-part="${type}" data-from="${esc(from)}" data-label="${esc(zh)}" data-scene="${sc}">${icon(ic)}<span>${esc(zh)}</span><small>${esc(tip)}</small></div>`).join("") +
+      `</div><div class="sec">已有的图</div>
+      ${L.charts.map((c) => card(c, "chart", `V6 ${c.chart} · ${c.file}`)).join("")}
+      ${L.figures.map((f) => card(f, "figure", f.kind === "v5" ? `V5 对抗图数据 · ${f.parts} 个要件 · 按页面尺寸现出图` : `${f.style} · ${Math.round(f.w)}×${Math.round(f.h)}`, !["中性", S.deck.style].includes(f.style))).join("")}
+      ${!L.charts.length && !L.figures.length ? '<div class="msg n">还没有：V1–V6 出的图会出现在这里。</div>' : ""}
+      <div class="drop" id="drop">${icon("upload")}<br>把 V6 图表说明（.json）或 V1–V5 的图（.svg）拖到这里<br><span class="status">V2、V3 图旁边的 <b>-trace.json</b> 一起拖进来，鼠标停在图上就能看出处</span><br><label class="c" style="cursor:pointer;display:inline-flex;margin-top:8px">选文件<input type="file" id="dropFile" accept=".json,.svg" multiple hidden></label></div>
+
+      <div class="sec">V6 内置示例</div>${L.builtin.map((b) => card(b, "chart", `${b.chart} · V6 示例`)).join("")}`;
+    bindDrop();
+  } else if (S.tab === "tpl") {
+    el.innerHTML = `<h3>排法</h3><div class="msg n">点一个，这一页换成它；放不下的内容进「暂存」，不会丢。</div>
+      ${tplGroups(3, ["场景", "排法"])}` + parkedHtml();
+  } else if (S.tab === "parts") {
+    el.innerHTML = `<h3>说明</h3>` + PARTS.map(([name, list]) => `<div class="sec">${name}</div>` + tiles(list)).join("") +
+      `<div class="msg n" style="margin-top:12px">结论拖到图的上下方会吸过去。选中图，在右侧放编号、切片。</div>` + parkedHtml();
+  } else if (S.tab === "fit") {
+    el.innerHTML = `<div id="fitStyle"></div><div id="fitFrame" style="margin-top:18px"></div>`;
+    renderCustom($("#fitStyle")); renderFrame($("#fitFrame"));
+  } else if (S.tab === "export") {
+    const n = S.deck.slides.length;
+    const bad = S.deck.slides.map((s_, i) => [i, (S.reps[s_.id]?.problems || []).length, (S.reps[s_.id]?.warnings || []).length]).filter(([, p_, w_]) => p_ || w_);
+    el.innerHTML = `<h3>导出</h3><div class="msg n">在 PowerPoint 里整页复制，或框选图和卡片复制，粘进您的课件；颜色、字体不变样。</div>
+      <div class="chips"><button class="c" id="exOne">${icon("download", 'style="width:15px;height:15px"')}导出这一页</button><button class="c" id="exAll">${icon("download", 'style="width:15px;height:15px"')}导出全部 ${n} 页</button></div>
+      <label class="toggle"><span>按读图编号生成讲课动画（点一下，出编号、它指的元素和同号要点）</span><button class="sw${S.animate === false ? "" : " on"}" id="exAnim" aria-label="讲课动画"></button></label>
+      <label class="toggle"><span>把图里每个元素的出处写进演讲者备注（讲课时演示者视图里看得到，观众看不到；只有 V2 时间轴、V3 关系图和用逐件记录的 V6 图表有出处）</span><button class="sw${S.notes ? " on" : ""}" id="exNotes" aria-label="出处写进备注"></button></label>
+
+      <div class="sec">导出前检查</div>
+      ${bad.length ? bad.map(([i, p_, w_]) => `<div class="msg ${p_ ? "p" : "w"}" data-goto-page="${i}" style="cursor:pointer">第 ${i + 1} 页：${p_ ? p_ + " 处要改" : ""}${p_ && w_ ? "，" : ""}${w_ ? w_ + " 处请核" : ""}</div>`).join("") : '<div class="msg n">每一页都可以导出。</div>'}`;
+    $("#exOne").onclick = () => doExport($("#exOne"), true);
+    $("#exAnim").onclick = () => { S.animate = S.animate === false; renderSide(); };
+    $("#exNotes").onclick = () => { S.notes = !S.notes; renderSide(); };
+    $("#exAll").onclick = () => doExport($("#exAll"), false);
+    el.querySelectorAll("[data-goto-page]").forEach((x) => (x.onclick = () => { S.cur = +x.dataset.gotoPage; S.sel = null; renderAll(); renderInspector(); refreshSlide(); }));
+  } else if (S.tab === "brand") {
+    renderBrand(el);
+    el.insertAdjacentHTML("afterbegin", `<div class="chips" style="margin-bottom:6px"><button class="c" id="backMore">← 更多</button></div>`);
+    $("#backMore").onclick = () => { S.tab = "more"; renderSide(); };
+  } else {
+    el.innerHTML = `<h3>更多</h3><div class="msg n">做整套课件时用：封面、章节页、律所名片、介绍页，以及正文、金句。</div>
+      <div class="sec">AI 做整套</div><div class="aibox"><div class="row" style="margin-top:0">${AI_KINDS_MORE.map(([k, z], i) => `<button class="c${i === 0 ? " on" : ""}" data-morekind="${k}">${z}</button>`).join("")}</div>
+        <textarea id="moreAiPrompt" style="margin-top:8px" placeholder="说说您的想法（例：讲民间借贷的利率上限，五六页）"></textarea>
+        <div class="row"><button class="go" id="moreAiGo">${icon("ai", 'style="width:15px;height:15px;vertical-align:-3px"')} 交给 AI</button></div></div>
+      <div class="sec">律所名片</div><div class="chips"><button class="c" id="goBrand">${icon("brand", 'style="width:15px;height:15px"')}Logo、律所与律师介绍</button></div>
+      <div class="sec">更多卡片</div>${tiles(MORE_PARTS)}
+      ${tplGroups(3, ["整套课件"])}`;
+    $("#goBrand").onclick = () => { S.tab = "brand"; renderSide(); };
+    let mk = "cover";
+    el.querySelectorAll("[data-morekind]").forEach((b) => (b.onclick = () => {
+      el.querySelectorAll("[data-morekind]").forEach((x) => x.classList.remove("on")); b.classList.add("on"); mk = b.dataset.morekind; }));
+    $("#moreAiGo").onclick = () => sendAi(mk, null, null, $("#moreAiPrompt").value);
+  }
+}
+function tplGroups(cols, only) {
+  const groups = {};
+  for (const [k, t] of Object.entries(S.R.templates)) (groups[t.group || "排法"] ||= []).push([k, t]);
+  return (only || ["场景", "排法", "整套课件"]).filter((g) => groups[g]).map((g) => `<div class="sec">${g}</div><div class="tpls" style="grid-template-columns:repeat(${cols === 4 ? 4 : 2},1fr)">` +
+    groups[g].map(([k, t]) => `<div class="tpl" data-tpl="${k}">${miniHtml(t.mods)}${esc(t.zh)}</div>`).join("") + `</div>`).join("");
+}
+function miniHtml(ms) {
+  const g = S.R.grid;
+  return `<div class="mini">` + ms.map((m) => {
+    const [x, y, w, h] = G.px(S.R, m);
+    const tone = G.toneOf(S.R, m);
+    const cls = m.type === "chart" || m.type === "figure" ? m.type : m.type === "conclusion" ? "conclusion" : m.type === "logo" ? "accent" : tone === "bare" ? "bare" : tone === "accent" ? "accent" : "";
+    return `<i class="${cls}" style="left:${(x / g.W) * 100}%;top:${(y / g.H) * 100}%;width:${(w / g.W) * 100}%;height:${(h / g.H) * 100}%"></i>`;
+  }).join("") + `</div>`;
+}
+function parkedHtml() {
+  const p = slide().parked || [];
+  if (!p.length) return "";
+  return `<div class="sec">暂存 · ${p.length}</div><div class="parked">` +
+    p.map((m, i) => `<span class="c" data-park="${i}">${icon(m.type, 'style="width:15px;height:15px"')}${esc(T(m.type).zh)}${m.text ? "：" + esc(String(m.text).slice(0, 8)) : ""}</span>`).join("") +
+    `</div><div class="msg n">拖回页面，或在这里留着；暂存的不导出。</div>`;
+}
+function bindDrop() {
+  const d = $("#drop"); if (!d) return;
+  d.ondragover = (e) => { e.preventDefault(); d.classList.add("hot"); };
+  d.ondragleave = () => d.classList.remove("hot");
+  const send = async (files) => {
+    let side = false;
+    for (const f of files) {
+      const r = await api("/api/upload?name=" + encodeURIComponent(f.name), { method: "POST", body: await f.arrayBuffer() });
+      side = side || !!(r.ok && r.sidecar);
+      toast(!r.ok ? r.error : r.sidecar ? `已收下出处记录：${f.name}（鼠标停在对应的图上就能看）` : `已加进「已有的图」：${f.name}`, 4000);
+    }
+    if (side) {                                   /* 出处记录不改画面，但改了每页的检查结果（出处在里面）：重查一遍 */
+      for (const s_ of S.deck.slides) S.ver[s_.id] = (S.ver[s_.id] || 0) + 1;
+      refreshSlide(); refreshReports();
+    }
+    await loadLib();
+  };
+  d.ondrop = (e) => { e.preventDefault(); d.classList.remove("hot"); send(e.dataTransfer.files); };
+  const fi = $("#dropFile"); if (fi) fi.onchange = () => { send(fi.files); fi.value = ""; };   /* 不会拖、用触控板的也能传 */
+}
+async function loadLib() { S.lib = await api("/api/library"); if (S.tab === "pick") renderSide(); }
+function assetByKey(kind, key) {
+  const L = S.lib;
+  if (kind === "figure") return L.figures.find((f) => f.file === key);
+  return L.charts.find((c) => c.file === key) || L.builtin.find((b) => b.name === key);
+}
+
+/* ---------- 页面条 ---------- */
+function renderFilm() {
+  const el = $("#film");
+  el.innerHTML = S.deck.slides.map((s, i) => {
+    const bad = (S.reps[s.id]?.problems || []).length;
+    return `<div class="thumb${i === S.cur ? " on" : ""}" data-i="${i}" draggable="true">
+      <div class="pic"><img alt="" data-k="${esc(slideKey(i))}"${SVGD.has(slideKey(i)) ? ` src="${SVGD.get(slideKey(i))}" data-loaded="${esc(slideKey(i))}"` : SVGL.has(s.id) ? ` src="${SVGL.get(s.id)}"` : ""}></div>
+      <span class="no">${String(i + 1).padStart(2, "0")}</span>${bad ? '<span class="bad" title="这一页还没准备好"></span>' : ""}
+      ${(S.ai || []).some((r) => r.slide === s.id && ["pending", "working"].includes(r.status)) ? '<span class="aib">AI</span>' : ""}
+      <span class="tools"><button data-dup="${i}" title="复制这一页">${icon("copy")}</button><button data-del="${i}" title="删除这一页">${icon("trash")}</button></span>
+    </div>`;
+  }).join("") + `<button class="addpage" id="addPage" title="加一页">${icon("plus")}</button>`;
+  fillThumbs();
+}
+
+/* ---------- 属性面板 ---------- */
+const FIELDS = {
+  title: [["level", "级别", "seg", { page: "页标题", cover: "封面", section: "章节" }], ["kicker", "章节编号", "input"], ["text", "标题", "textarea"], ["sub", "副题", "input"]],
+  text: [["heading", "小标题", "input"], ["text", "正文", "textarea"]],
+  bullets: [["heading", "小标题", "input"], ["items", "要点（一行一条）", "lines"]],
+  stat: [["value", "数字", "input"], ["label", "说明", "input"], ["note", "小注", "input"], ["from", "出处图表（可选：本页图表卡 id 或 assets/x.json）", "input"]],
+  step: [["heading", "小标题", "input"], ["text", "一句话", "textarea"]],
+  quote: [["text", "原文（一字不改）", "textarea"], ["source", "出处（必填）", "input"]],
+  note: [["text", "注释", "input"]],
+  conclusion: [["text", "一句话结论（这一页要讲的那句话）", "textarea"]],
+  chart: [["spec", "V6 图表说明（JSON）", "spec"]],
+  figure: [["from", "来自哪个模块", "input"]],
+  statute: [["law", "法律名称（如：中华人民共和国民法典）", "input"], ["article", "条款（如：第六百八十条第一款）", "input"], ["text", "条文原文（照录官方文本）", "textarea"]],
+  holding: [["text", "裁判要旨原文", "textarea"], ["court", "法院", "input"], ["case_no", "案号", "input"]],
+  case: [["case_no", "案号（照判决书写）", "input"], ["court", "法院", "input"], ["cause", "案由", "input"], ["heading", "标题（可选，不写就用案由）", "input"], ["result", "裁判结果", "input"], ["point", "要点", "textarea"]],
+  issue: [["heading", "争议焦点", "input"], ["text", "说明", "textarea"]],
+  risk: [["heading", "风险", "input"], ["text", "提醒", "textarea"]],
+  evidence: [["heading", "小标题（可选）", "input"], ["items", "证据（一行一份：名称——证明目的）", "lines"]],
+  logo: [],
+  profile: [["who", "介绍谁", "who"]],
+  contact: [["who", "谁的联系方式", "who"]],
+};
+/* ---------- 读图：编号钩住图内元素、切片只取几件事（作者定的方向，2026-10-07） ---------- */
+function readInfo(m) { return (S.reps[slide().id]?.modules || {})[m.id] || {}; }
+function anchorsOverlay(rep) {
+  const m = mods().find((x) => x.id === S.sel);
+  if (!m || !S.readMode || S.readFor !== m.id) return "";
+  const info = (rep.modules || {})[m.id] || {}, k = S.scale, pins = m.pins || [];
+  return (info.anchors || []).map((a) => {
+    const n = pins.indexOf(a.key) + 1, pick = (S.readMode === "crop" && S.pick.includes(a.key)) || (S.readMode === "focus" && (m.focus || []).includes(a.key));
+    const [x, y, w, h] = a.box;
+    return `<div class="anc${n && S.readMode === "pin" ? " on" : ""}${pick ? " pick" : ""}" data-key="${esc(a.key)}" title="${esc(a.label || a.key)}"
+      style="left:${(x - 3) * k}px;top:${(y - 3) * k}px;width:${(w + 6) * k}px;height:${(h + 6) * k}px">${n && S.readMode === "pin" ? `<b>${n}</b>` : ""}</div>`;
+  }).join("");
+}
+/* ---------- 出处：图里每个元素出自哪里（只读原模块写好的出处：V2 图旁边的溯源索引、V6 逐件记录；不编） ---------- */
+function provSection(m) {
+  const info = readInfo(m), pv = info.prov;
+  if (!pv || !Object.keys(pv).length) return "";
+  const lab = Object.fromEntries((info.anchors || []).map((a) => [a.key, a.label || ""]));
+  const rows = Object.entries(pv).slice(0, 60).map(([k, p]) =>
+    `<div class="prov"><b>${esc(p.head || lab[k] || k)}</b>${p.src ? `<span>${esc(p.src)}</span>` : ""}${p.refs ? `<span>${esc(p.refs)}</span>` : ""}${p.quote ? `<q>${esc(p.quote)}</q>` : ""}</div>`).join("");
+  return `<div class="sec">出处</div><div class="msg n">鼠标停在图里的元素上也能看到。只读原模块写好的出处，不编。</div><div class="provlist">${rows}</div>`;
+}
+function provAt(e) {
+  if (S.drag) return null;
+  let el = e.target.closest && e.target.closest("#overlay .mod");
+  if (!el && e.target.closest && e.target.closest("#overlay .anc") && S.sel) el = document.querySelector(`#overlay .mod[data-id="${CSS.escape(S.sel)}"]`);
+  if (!el) return null;
+  const info = (S.reps[slide().id]?.modules || {})[el.dataset.id] || {};
+  if (!info.prov || !info.anchors) return null;
+  const [X, Y] = stagePoint(e);
+  let best = null;
+  for (const a of info.anchors) {
+    const p = info.prov[a.key];
+    if (!p || !a.box) continue;
+    const [x, y, w, h] = a.box;
+    if (X >= x - 3 && X <= x + w + 3 && Y >= y - 3 && Y <= y + h + 3 && (!best || w * h < best.area)) best = { p, area: w * h };
+  }
+  return best && best.p;
+}
+function showProv(e) {
+  const t = $("#provTip"), p = provAt(e);
+  if (!p) { t.hidden = true; return; }
+  t.innerHTML = `<b>${esc(p.head)}</b>${p.src ? `<span>${esc(p.src)}</span>` : ""}${p.refs ? `<span>${esc(p.refs)}</span>` : ""}${p.quote ? `<q>${esc(p.quote)}</q>` : ""}`;
+  t.hidden = false;
+  const r = t.getBoundingClientRect();
+  const x = Math.min(e.clientX + 16, innerWidth - r.width - 8), y = e.clientY + 18 + r.height > innerHeight - 8 ? e.clientY - r.height - 12 : e.clientY + 18;
+  t.style.left = Math.max(8, x) + "px"; t.style.top = Math.max(8, y) + "px";
+}
+function linkedBullets() { return mods().find((x) => x.type === "bullets" && x.numbered); }
+function onAnchor(key) {
+  const m = mods().find((x) => x.id === S.sel); if (!m) return;
+  if (S.readMode === "pin") {
+    const pins = (m.pins || []).slice(), i = pins.indexOf(key);
+    if (i >= 0) pins.splice(i, 1);                     /* 不动要点里的字：条数对不上时检查会提醒 */
+    else { if (pins.length >= 9) return toast("一张图最多 9 个编号", 3000); pins.push(key); }
+    if (pins.length) m.pins = pins; else delete m.pins;
+    commit(i >= 0 ? "已取消编号" : `已放编号 ${pins.length}`);
+  } else if (S.readMode === "focus") {
+    const f = (m.focus || []).slice(), i = f.indexOf(key);
+    if (i >= 0) f.splice(i, 1); else f.push(key);
+    if (f.length) m.focus = f; else delete m.focus;
+    commit(f.length ? `聚焦：亮 ${f.length} 个` : "已取消聚焦");
+  } else if (S.readMode === "crop") {
+    const i = S.pick.indexOf(key); if (i >= 0) S.pick.splice(i, 1); else S.pick.push(key);
+    renderOverlay();
+  }
+  renderInspector(); saveNow().then(refreshReports);
+}
+S.alts = {};
+function altKey(m) { return slide().id + ":" + m.id + ":" + JSON.stringify(m.spec || m.file || "") + ":" + m.w + "x" + m.h; }
+function altSection(m) {
+  const k = altKey(m), a = S.alts[k];
+  if (!a) {
+    S.alts[k] = "loading";
+    api("/api/chart/alts", { method: "POST", body: JSON.stringify({ slide: S.cur, module: m.id }) }).then((r) => {
+      S.alts[k] = r.ok ? r.alts : { error: r.error }; if (S.sel === m.id) renderInspector(true);
+    });
+  }
+  let h = `<div class="sec">换一种图</div>`;
+  if (!a || a === "loading") return h + `<div class="msg n">正在请 V6 试这份数据能画成哪几种……</div>`;
+  if (a.error) return h + `<div class="msg n">${esc(a.error)}</div>`;
+  const ok = a.filter((x) => x.ok), no = a.filter((x) => !x.ok);
+  h += `<div class="chips">` + ok.map((x) => `<button class="c${x.current ? " on" : ""}" data-alt="${x.chart}">${esc(x.zh)}</button>`).join("") + `</div>`;
+  if (no.length) h += `<div class="msg n" style="margin-top:6px">这份数据画不了：` +
+    no.map((x) => `<span title="${esc(x.why)}" style="text-decoration:underline dotted;cursor:help">${esc(x.zh)}</span>`).join("、") + `（鼠标停在上面看原因）</div>`;
+  return h;
+}
+function readSection(m) {
+  if (S.readFor !== m.id) { S.readMode = null; S.pick = []; S.readFor = m.id; }
+  const info = readInfo(m), ans = info.anchors || [], pins = m.pins || [];
+  const lab = Object.fromEntries(ans.map((a) => [a.key, a.label || a.key]));
+  let h = "";
+  if (m.type === "chart") h += altSection(m);            /* 换一种图：同一份数据，V6 自己试能换哪几种 */
+  h += `<div class="sec">读图</div>`;
+  if (m.data && info.parts) {                         /* V5 兼容层：一个要件一页 */
+    h += `<div class="msg n">V5 对抗图按这张卡的宽度现出图，字号原样。选一个要件，一页讲一个：</div><div class="chips">` +
+      `<button class="c${m.part == null ? " on" : ""}" data-part-i="-1">全部</button>` +
+      info.parts.map((l, i) => `<button class="c${m.part === i ? " on" : ""}" data-part-i="${i}" title="${esc(l)}">${esc(l.split(/[·　]/)[0] || "要件 " + (i + 1))}</button>`).join("") + `</div>`;
+  }
+  if (!ans.length) return h + `<div class="msg n">这张图里认不出单个元素（比如大事记简表没有标记），只能整张放。</div>`;
+  h += `<div class="msg n">认出 ${ans.length} 个元素。放编号：讲课时「先看①」有了落点${m.type === "figure" ? "；切片：只取几件事，同样的格子里放得更大" : ""}。</div>
+    <div class="chips"><button class="c${S.readMode === "pin" ? " on" : ""}" id="rdPin">放编号</button>${m.type === "figure" ? `<button class="c${S.readMode === "crop" ? " on" : ""}" id="rdCrop">${m.crop ? "重新切片" : "切片"}</button>` : ""}
+    <button class="c${S.readMode === "focus" ? " on" : ""}" id="rdFocus">聚焦</button>
+    ${m.crop && S.readMode !== "crop" ? `<button class="c" id="rdUncrop">取消切片</button>` : ""}${m.focus ? `<button class="c" id="rdUnfocus">取消聚焦</button>` : ""}</div>`;
+  if (S.readMode === "pin") h += `<div class="msg n">在图上点元素放编号，再点一次取消。</div>`;
+  if (S.readMode === "focus") h += `<div class="msg n">在图上点要讲的元素：点中的照常，其余调浅（整张图还在，听众知道它在全局的哪里）。再点一次取消。</div>`;
+  else if (m.focus) h += `<div class="msg n">已聚焦 ${m.focus.length} 个元素，其余调浅。</div>`;
+  if (S.readMode === "crop") h += `<div class="msg n">在图上点选要保留的元素（已选 ${S.pick.length} 个），再点「只取选中的」。</div>
+    <div class="chips"><button class="c" id="rdApply" ${S.pick.length ? "" : "disabled"}>只取选中的 ${S.pick.length} 个</button><button class="c" id="rdCancel">算了</button></div>`;
+  if (m.crop && S.readMode !== "crop") h += `<div class="msg n">已切片：只取 ${m.crop.length} 个元素那一块。</div>`;
+  if (pins.length) {
+    h += pins.map((k, i) => `<div class="pinrow"><span class="n">${i + 1}</span><span class="l" title="${esc(lab[k] || k)}">${esc(lab[k] || "（找不到了）")}</span>
+      <button data-pmv="${i}" data-d="-1" ${i ? "" : "disabled"}>↑</button><button data-pmv="${i}" data-d="1" ${i < pins.length - 1 ? "" : "disabled"}>↓</button><button data-pdel="${i}">×</button></div>`).join("");
+    const b = mods().find((x) => x.type === "bullets");
+    h += `<div class="chips">${!b ? `<button class="c" id="rdGen">生成读图要点</button>` : `<button class="c${b.numbered ? " on" : ""}" id="rdNum">要点按编号排</button>`}${pins.length > 1 ? `<button class="c" id="rdSplit" title="全图这页之后加 ${pins.length} 页：第 n 页只点亮编号 n，其余调浅">按编号拆成 ${pins.length} 页</button>` : ""}</div>`;
+  }
+  return h;
+}
+function bindRead(m) {
+  const on = (id, f) => { const b = $("#" + id); if (b) b.onclick = f; };
+  const redo = (label) => { commit(label); renderInspector(); renderOverlay(); saveNow().then(refreshReports); };
+  on("rdPin", () => { S.readMode = S.readMode === "pin" ? null : "pin"; renderInspector(); renderOverlay(); });
+  on("rdCrop", () => {
+    if (S.readMode === "crop") { S.readMode = null; renderInspector(); renderOverlay(); return; }
+    S.readMode = "crop"; S.pick = (m.crop || []).slice();
+    if (m.crop) { delete m.crop; redo("切片：重新选"); } else { renderInspector(); renderOverlay(); }   /* 在整张图上重选 */
+  });
+  on("rdCancel", () => { S.readMode = null; S.pick = []; renderInspector(); renderOverlay(); });
+  on("rdApply", () => { m.crop = S.pick.slice(); S.readMode = null; S.pick = []; redo(`切片：只取 ${m.crop.length} 个元素`); });
+  on("rdUncrop", () => { delete m.crop; redo("已取消切片"); });
+  on("rdFocus", () => { S.readMode = S.readMode === "focus" ? null : "focus"; renderInspector(); renderOverlay(); });
+  on("rdUnfocus", () => { delete m.focus; if (S.readMode === "focus") S.readMode = null; redo("已取消聚焦"); });
+  on("rdSplit", () => {                                  /* 一张图讲几步：每页点亮一个编号，翻页就是讲课顺序 */
+    const i = S.cur, src = S.deck.slides[i], pins = m.pins.slice();
+    const ids = new Set(S.deck.slides.map((s) => s.id)); let n = S.deck.slides.length + 1;
+    const pages = pins.map((k) => {
+      const c = JSON.parse(JSON.stringify(src)); while (ids.has("s" + n)) n++; c.id = "s" + n; ids.add(c.id);
+      const cm = c.modules.find((x) => x.id === m.id); cm.focus = [k]; return c;
+    });
+    S.deck.slides.splice(i + 1, 0, ...pages); S.cur = i + 1; S.readMode = null;   /* 这一页（全图）留着做开场 */
+    commit(`全图之后加了 ${pages.length} 页：每页只点亮一个编号`); renderAll(); refreshSlide(); renderInspector();
+  });
+  on("rdNum", () => { const b = mods().find((x) => x.type === "bullets"); if (b.numbered) delete b.numbered; else b.numbered = true; redo(b.numbered ? "要点按编号排" : "要点不按编号"); });
+  on("rdGen", () => {
+    const info = readInfo(m), lab = Object.fromEntries((info.anchors || []).map((a) => [a.key, a.label || a.key]));
+    const spot = G.place(S.R, mods(), "bullets", m.x + m.w, m.y);
+    if (!spot) return toast("这一页没有空位放要点卡：先把图缩小一点", 4000);
+    const [x, y, w, hh] = spot;
+    mods().push({ id: newId(), type: "bullets", x, y, w, h: hh, heading: "读图", numbered: true, items: (m.pins || []).map((k) => lab[k] || "") });
+    redo("已生成读图要点：按编号对好，改成您要讲的话");
+  });
+  document.querySelectorAll("[data-pmv]").forEach((b) => (b.onclick = () => {
+    const i = +b.dataset.pmv, j = i + +b.dataset.d, pins = m.pins.slice();
+    [pins[i], pins[j]] = [pins[j], pins[i]]; m.pins = pins;
+    const bl = linkedBullets();                          /* 要点跟着编号一起换顺序 */
+    if (bl && bl.items && Math.max(i, j) < bl.items.length) { const it = bl.items.slice(); [it[i], it[j]] = [it[j], it[i]]; bl.items = it; }
+    redo(`编号 ${i + 1} ↔ ${j + 1}`);
+  }));
+  document.querySelectorAll("[data-pdel]").forEach((b) => (b.onclick = () => onAnchor(m.pins[+b.dataset.pdel])));
+  document.querySelectorAll("[data-alt]").forEach((b) => (b.onclick = () => {
+    const a = S.alts[altKey(m)]; const x = Array.isArray(a) && a.find((y) => y.chart === b.dataset.alt);
+    if (!x || x.current) return;
+    m.spec = JSON.parse(JSON.stringify(x.spec)); delete m.file;          /* 说明复制进课件，原素材文件不变 */
+    S.ver[slide().id] = (S.ver[slide().id] || 0) + 1;
+    redo("换成" + x.zh + "（同一份数据）");
+  }));
+  document.querySelectorAll("[data-part-i]").forEach((b) => (b.onclick = () => {
+    const i = +b.dataset.partI; if (i < 0) delete m.part; else m.part = i;
+    delete m.crop; delete m.pins; redo(i < 0 ? "V5：全部要件" : `V5：只讲第 ${i + 1} 个要件`);
+  }));
+}
+function renderInspector(soft) {
+  const el = $("#insp");
+  if (soft && el.contains(document.activeElement) && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) {
+    renderMsgs(); return;                  /* 正在打字时不重画，只更新提示 */
+  }
+  const m = mods().find((x) => x.id === S.sel);
+  if (!m) { el.innerHTML = pageInspector(); bindInspector(null); return; }
+  const t = T(m.type), fu = G.fusion(S.R, mods())[m.id];
+  let h = `<div class="ihead">${icon(m.type)}<span>${esc(t.zh)}</span><span class="spacer"></span>
+    <button id="dupMod" title="复制 Ctrl+D">${icon("copy")}</button><button id="delMod" title="删除 Delete">${icon("trash")}</button></div>`;
+  h += `<div class="sec">内容</div>`;
+  for (const [k, label, kind, opts] of FIELDS[m.type] || []) {
+    if (kind === "seg") {
+      h += `<div class="field"><label>${label}</label><div class="chips">${Object.entries(opts).map(([v, z]) =>
+        `<button class="c${(m[k] || "page") === v ? " on" : ""}" data-set="${k}" data-v="${v}">${z}</button>`).join("")}</div></div>`;
+    } else if (kind === "who") {
+      const opts = [["firm", "律所"]].concat((S.brand?.brand?.lawyers || []).map((l) => ["lawyer:" + l.id, l.name]));
+      h += `<div class="field"><label>${label}</label><div class="chips">${opts.map(([v, z]) =>
+        `<button class="c${(m[k] || "firm") === v ? " on" : ""}" data-set="${k}" data-v="${v}">${esc(z)}</button>`).join("")}</div>
+        <div class="msg n">内容实时读自律所名片，在「更多 → 律所名片」里改。</div></div>`;
+    } else if (kind === "lines") {
+      h += `<div class="field"><label>${label}</label><textarea rows="5" data-k="${k}" data-kind="lines">${esc((m[k] || []).join("\n"))}</textarea></div>`;
+    } else if (kind === "spec") {
+      const src = m.file && !m.spec ? `<div class="msg n">引用素材 <b>${esc(m.file)}</b>。在这里改会把说明复制进课件，原文件不变。</div>` : "";
+      h += `<div class="field"><label>${label}</label>${src}<textarea class="code" id="specBox" spellcheck="false">${esc(m.spec ? JSON.stringify(m.spec, null, 1) : "")}</textarea>
+        <div class="chips" style="margin-top:6px"><button class="c" id="applySpec">应用</button>${m.file ? `<button class="c" id="loadSpec">载入素材原文</button>` : ""}</div></div>`;
+    } else {
+      const v = m[k] ?? "";
+      h += `<div class="field"><label>${label}</label>${kind === "textarea" ? `<textarea rows="3" data-k="${k}">${esc(v)}</textarea>` : `<input data-k="${k}" value="${esc(v)}">`}</div>`;
+    }
+  }
+  if (m.type === "figure") h += `<div class="msg n">${m.file ? "图：" + esc(m.file) : "从左边「选图 → 已有的图」点一张，或拖到这张卡上；也可以让 AI 生成。"}</div>`;
+  if ((m.type === "chart" || m.type === "figure") && !isEmpty(m)) h += readSection(m) + provSection(m);
+  h += aiBox(m);
+  h += `<div class="sec">外观</div><div class="chips">${Object.entries(S.R.tones).map(([v, z]) => {
+    const dis = (v === "accent" && S.R.no_accent.includes(m.type)) || m.bleed;
+    return `<button class="c${G.toneOf(S.R, m) === v ? " on" : ""}" data-tone="${v}" ${dis ? "disabled" : ""}>${z}</button>`;
+  }).join("")}</div>`;
+  if (t.family) {
+    h += `<label class="toggle"><span>与相邻的${FAMILY_ZH[t.family]}卡连成一组${fu.length ? `（现在连着 ${fu.length} 边）` : ""}</span><button class="sw${m.join === false ? "" : " on"}" id="joinSw" aria-label="连成一组"></button></label>`;
+  }
+  if (m.type === "chart" || m.type === "figure") {
+    const full = m.w === S.R.grid.COLS && m.h === S.R.grid.ROWS;
+    h += `<label class="toggle"><span>整页出血（只给占满整页的图）</span><button class="sw${m.bleed ? " on" : ""}" id="bleedSw" ${full ? "" : "disabled"} aria-label="整页出血"></button></label>`;
+  }
+  h += `<label class="toggle"><span>锁定（整理时不动、不能拖；别的卡片让位时也绕开它）</span><button class="sw${m.locked ? " on" : ""}" id="lockSw" aria-label="锁定"></button></label>`;
+  h += `<div class="sec">位置与大小（格）</div><div class="sz">
+    <span>栏</span>${stepper("x", m.x)}<span>宽</span>${stepper("w", m.w)}
+    <span>行</span>${stepper("y", m.y)}<span>高</span>${stepper("h", m.h)}</div>
+    <div class="msg n">最小 ${t.min[0]}×${t.min[1]}${t.maxh ? `，最多 ${t.maxh} 行高` : ""}。方向键挪一格，Shift + 方向键改大小。</div>`;
+  h += `<div class="sec">检查</div><div id="msgs"></div>`;
+  el.innerHTML = h; bindInspector(m); bindRead(m); renderMsgs();
+  const ls = $("#lockSw"); if (ls) ls.onclick = () => { if (m.locked) delete m.locked; else m.locked = true; commit(m.locked ? "已锁定" : "已解锁"); renderInspector(); };
+}
+const stepper = (k, v) => `<div class="step"><button data-step="${k}" data-d="-1">−</button><span>${v}</span><button data-step="${k}" data-d="1">+</button></div>`;
+function renderMsgs() {
+  const box = $("#msgs"); if (!box) return;
+  const rep = S.reps[slide().id];
+  const info = rep?.modules?.[S.sel] || {};
+  box.innerHTML = (info.problems || []).map((x) => `<div class="msg p">${esc(x)}</div>`).join("") +
+    (info.warnings || []).map((x) => `<div class="msg w">请核：${esc(x)}</div>`).join("") +
+    (info.notes || []).map((x) => `<div class="msg n">${esc(x)}</div>`).join("") || '<div class="msg n">没有问题。</div>';
+}
+function pageInspector() {
+  const rep = S.reps[slide().id] || {};
+  const ps = rep.problems || [], ws = rep.warnings || [];
+  return `<div class="ihead">${icon("page")}<span>第 ${S.cur + 1} 页</span><span class="spacer"></span></div>
+    <div class="sec">这一页</div>
+    <div class="msg n">${mods().length} 个模块。点页面上的卡片编辑它；从左边「选图」「说明」拖进来。</div>
+    <div class="chips"><button class="c" id="pTidy">${icon("tidy", 'style="width:16px;height:16px"')}整理这一页</button><button class="c" data-goto="tpl">换排法</button></div>
+    <div class="sec">检查</div>
+    ${ps.map((x) => `<div class="msg p">${esc(x)}</div>`).join("")}${ws.map((x) => `<div class="msg w">请核：${esc(x)}</div>`).join("")}
+    ${!ps.length && !ws.length ? '<div class="msg n">这一页可以导出。</div>' : ""}
+    <div class="sec">AI</div>${aiBox(null)}${reqList()}
+    <div class="sec">整套</div><div class="msg n">风格：${esc(S.deck.style)}（整套一种，颜色只用风格原色）<br>共 ${S.deck.slides.length} 页。</div>`;
+}
+function bindInspector(m) {
+  const el = $("#insp");
+  el.querySelectorAll("[data-goto]").forEach((b) => (b.onclick = () => { S.tab = b.dataset.goto; renderSide(); }));
+  const pt = $("#pTidy"); if (pt) pt.onclick = tidy;
+  el.querySelectorAll("[data-cancel]").forEach((b) => (b.onclick = async () => { await api("/api/ai/cancel?id=" + b.dataset.cancel, { method: "POST" }); pollNow(); }));
+  if (!m) { bindAiBox(null); return; }
+  let typing = null;
+  el.querySelectorAll("[data-k]").forEach((inp) => (inp.oninput = () => {
+    const k = inp.dataset.k;
+    if (inp.dataset.kind === "lines") m[k] = inp.value.split("\n").map((s) => s.trim()).filter(Boolean);
+    else if (inp.value === "" && k !== "text") delete m[k]; else m[k] = inp.value;
+    clearTimeout(typing); typing = setTimeout(() => commit("已改文字"), 350);
+  }));
+  el.querySelectorAll("[data-set]").forEach((b) => (b.onclick = () => { m[b.dataset.set] = b.dataset.v; if (b.dataset.v === "page") delete m.level; commit(); renderInspector(); }));
+  bindAiBox(m);
+  el.querySelectorAll("[data-tone]").forEach((b) => (b.onclick = () => {
+    if (b.dataset.tone === T(m.type).tone) delete m.tone; else m.tone = b.dataset.tone;
+    commit("外观：" + S.R.tones[b.dataset.tone]); renderInspector();
+  }));
+  el.querySelectorAll("[data-step]").forEach((b) => (b.onclick = () => nudge(m, b.dataset.step, +b.dataset.d)));
+  const js = $("#joinSw"); if (js) js.onclick = () => { if (m.join === false) delete m.join; else m.join = false; commit(m.join === false ? "已拆开" : "已连成一组"); renderInspector(); };
+  const bs = $("#bleedSw"); if (bs) bs.onclick = () => { if (m.bleed) delete m.bleed; else { m.bleed = true; delete m.tone; } commit(); renderInspector(); };
+  $("#dupMod").onclick = () => dupMod(m);
+  $("#delMod").onclick = () => delMod(m);
+  const ap = $("#applySpec"); if (ap) ap.onclick = () => {
+    try { m.spec = JSON.parse($("#specBox").value); delete m.file; commit("已应用图表说明"); renderInspector(); }
+    catch (e) { toast("JSON 写错了：" + e.message, 4000); }
+  };
+  const ls = $("#loadSpec"); if (ls) ls.onclick = async () => {
+    const r = await fetch("/api/asset?f=" + encodeURIComponent(m.file));
+    if (r.ok) $("#specBox").value = JSON.stringify(await r.json(), null, 1);
+  };
+}
+
+/* ---------- 编辑动作 ---------- */
+function free(c, skip) { return G.fits(S.R, c) && !mods().some((o) => o.id !== skip && G.overlaps(c, o)); }
+function nudge(m, k, d) {
+  const c = Object.assign({}, m, { [k]: m[k] + d });
+  if (m.bleed && (k === "w" || k === "h")) return;
+  if (!free(c, m.id)) { toast(k === "w" || k === "h" ? "这个方向没空间，或已到最小 / 最大尺寸" : "那边有别的模块，或到页边了"); return; }
+  m[k] = c[k]; commit(); renderInspector();
+}
+function newId(prefix = "m") {
+  const ids = new Set(mods().map((m) => m.id).concat((slide().parked || []).map((m) => m.id)));
+  let n = 1; while (ids.has(prefix + n)) n++; return prefix + n;
+}
+function addPart(type, at, extra = {}) {
+  const [x0, y0] = at || [0, 0];
+  const p = extra.w ? [extra.x, extra.y, extra.w, extra.h] : G.place(S.R, mods(), type, x0, y0);   /* 拖到的位置（已让开）优先 */
+  if (!p) { toast("这一页放不下了：先删掉或缩小一个模块"); return null; }
+  const m = Object.assign({ id: newId(), type, x: p[0], y: p[1], w: p[2], h: p[3] }, extra);
+  /* 新卡片一律空着放：不填占位字，免得「写一段话」这类字被导出去。空卡片里有提示，导出前会被拦下 */
+  mods().push(m); S.sel = m.id; commit("已放入：" + T(type).zh); renderInspector();
+  return m;
+}
+function dupMod(m) {
+  const p = G.place(S.R, mods(), m.type, m.x + m.w, m.y, m.w, m.h);
+  if (!p) return toast("这一页没空位复制了");
+  const c = JSON.parse(JSON.stringify(m)); Object.assign(c, { id: newId(), x: p[0], y: p[1], w: p[2], h: p[3] }); delete c.bleed;
+  mods().push(c); S.sel = c.id; commit("已复制"); renderInspector();
+}
+function delMod(m) {
+  slide().modules = mods().filter((x) => x.id !== m.id); S.sel = null; commit("已删除"); renderInspector();
+}
+async function tidy() {
+  const cur = JSON.stringify(mods());
+  if (S.tidyRef && S.tidyRef.slide === slide().id && S.tidyRef.after === cur) {   /* 再按一次：撤销刚才的整理 */
+    slide().modules = JSON.parse(S.tidyRef.before); S.tidyRef = null; commit("已撤销整理"); return;
+  }
+  const r = await api("/api/tidy", { method: "POST", body: JSON.stringify({ modules: mods() }) });
+  if (!r.ok) return toast(r.error, 4000);
+  if (!r.notes.length) return toast("这一页已经很整齐了");
+  slide().modules = r.modules; S.tidyRef = { slide: slide().id, before: cur, after: JSON.stringify(r.modules) };
+  commit("已整理"); toast(r.notes.slice(0, 3).join("；") + (r.notes.length > 3 ? "……" : "") + "。再按一次「整理」就撤销", 4500);
+}
+async function applyTemplate(name, newPage) {
+  const r = await api("/api/template", { method: "POST", body: JSON.stringify({ modules: newPage ? [] : mods(), name }) });
+  if (!r.ok) return toast(r.error, 4000);
+  if (newPage) {
+    const ids = new Set(S.deck.slides.map((s) => s.id)); let n = S.deck.slides.length + 1; while (ids.has("s" + n)) n++;
+    S.deck.slides.splice(S.cur + 1, 0, { id: "s" + n, modules: r.modules }); S.cur++;
+  } else {
+    slide().modules = r.modules;
+    if (r.left.length) slide().parked = (slide().parked || []).concat(r.left);
+  }
+  S.sel = null; commit("组合：" + S.R.templates[name].zh);
+  if (!newPage && r.left.length) toast(`${r.left.length} 个模块搬不下，放进了暂存`, 4000);
+  renderSide(); renderInspector();
+}
+
+/* ---------- 拖：卡片 / 已有的图 / 模块 / 改大小 ---------- */
+const MAG = 70;            /* 磁吸范围（页面像素）：进入这个距离，卡片开始被格子吸过去 */
+function stagePoint(e) {
+  const r = $("#stage").getBoundingClientRect();
+  return [(e.clientX - r.left) / S.scale, (e.clientY - r.top) / S.scale, e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom];
+}
+function startDrag(e, d) {
+  e.preventDefault();
+  S.drag = Object.assign({ x0: e.clientX, y0: e.clientY, moved: false }, d);
+  if (d.kind !== "resize") {
+    const lift = document.createElement("div"); lift.className = "lift"; lift.id = "lift";
+    lift.innerHTML = icon(d.type) + esc(d.label || T(d.type).zh);
+    document.body.appendChild(lift);
+  }
+  renderGridlines(); markDragging();
+  window.addEventListener("pointermove", onDrag); window.addEventListener("pointerup", endDrag, { once: true });
+}
+function candidate(d, X, Y, inside) {
+  /* 返回 {m（落点模块）, fillId（落进哪张图卡）, swap, bad} */
+  const g = S.R.grid, ms = mods();
+  if (!inside) return null;
+  if (d.kind === "asset") {
+    const hit = ms.find((m) => (m.type === "chart" || m.type === "figure") && (() => { const [x, y, w, h] = G.px(S.R, m); return X >= x && X <= x + w && Y >= y && Y <= y + h; })());
+    if (hit) return { fillId: hit.id, m: hit };
+  }
+  const w = d.w || T(d.type).default[0], h = d.h || T(d.type).default[1];
+  const [cx, cy] = G.cellAt(S.R, X - d.gx, Y - d.gy);
+  let c = G.clampTo(S.R, { id: d.id || "__new", type: d.type, tone: d.tone, join: d.join, x: cx, y: cy, w, h });
+  if (d.free) return ms.some((o) => o.id !== d.id && G.overlaps(c, o)) ? { m: c, bad: true } : { m: c, free: true };
+  if (d.type === "conclusion") {                    /* 结论吸附：只吸在图的正上方 / 正下方，与图同宽 */
+    const at = attachConclusion(ms, c, d.id);
+    if (at) return { m: at.m, attach: at.where };
+  }
+  if (d.join !== false) {
+    const rs = G.runSnap(S.R, ms, c, d.id, 2);
+    if (rs) return { m: rs, run: true };
+  }
+  const others = ms.filter((o) => o.id !== d.id);
+  const hits = others.filter((o) => G.overlaps(c, o));
+  if (!hits.length) return { m: c };
+  if (d.id && hits.length === 1 && hits[0].w === w && hits[0].h === h && hits[0].x === c.x && hits[0].y === c.y) {
+    return { m: c, swap: hits[0].id };          /* 同尺寸卡片对调位置 */
+  }
+  if (hits.length === 1) {                         /* 一分为二：落在一张卡片里面时，贴住它最近的一条边，和它整齐地分开 */
+    const o = hits[0];
+    const ov = Math.max(0, Math.min(c.x + c.w, o.x + o.w) - Math.max(c.x, o.x)) * Math.max(0, Math.min(c.y + c.h, o.y + o.h) - Math.max(c.y, o.y));
+    if (ov >= 0.4 * c.w * c.h && !(c.w === o.w && c.h === o.h)) {        /* 大半压在它上面 */
+      const opts = [
+        Object.assign({}, c, { y: o.y, x: o.x, w: o.w }), Object.assign({}, c, { y: o.y + o.h - c.h, x: o.x, w: o.w }),
+        Object.assign({}, c, { x: o.x, y: o.y, h: o.h }), Object.assign({}, c, { x: o.x + o.w - c.w, y: o.y, h: o.h }),
+      ].map((t) => ({ t, cost: Math.abs(t.x - c.x) + Math.abs(t.y - c.y) * 1.2 + Math.abs(t.w - c.w) * .5 + Math.abs(t.h - c.h) * .5 }))
+        .sort((a, b) => a.cost - b.cost);
+      for (const { t } of opts) {
+        const [tmw, tmh] = T(d.type).min;
+        if (t.w < tmw || t.h < tmh || (T(d.type).maxh && t.h > T(d.type).maxh)) continue;
+        const pp = pushPlan(others, t);
+        if (pp) return { m: t, push: pp, split: true };
+      }
+    }
+  }
+  const pushed = pushPlan(others, c);              /* 推挤：落在您指的地方，把挡着的卡片挤小或推开 */
+  if (pushed) return { m: c, push: pushed };
+  const p = d.id ? G.freeSpot(S.R, ms, w, h, cx, cy, d.id) : G.place(S.R, ms, d.type, cx, cy, w, h);
+  if (!p) return { m: c, bad: true };
+  return { m: Object.assign(c, { x: p[0], y: p[1], w: p[2] || w, h: p[3] || h }) };
+}
+/* 推挤让位：挡着的卡片先「让出被压住的那一边」（一分为二就是这样来的），让不了再推到最近的空位（必要时缩到最小尺寸）。
+   任何一张让不开就整体作罢，回到原来的「找最近空位」。返回 {id: 新的 x/y/w/h}。 */
+function pushPlan(others, c) {
+  const g = S.R.grid, plan = {}, hypo = others.map((o) => Object.assign({}, o));
+  const hits = hypo.filter((o) => G.overlaps(c, o));
+  if (!hits.length || hits.length > 3) return null;
+  for (const o of hits) {
+    if (o.locked) return null;
+    const [mw, mh] = T(o.type).min, opts = [];
+    if (c.x > o.x) opts.push({ x: o.x, y: o.y, w: c.x - o.x, h: o.h });                        /* 让出右边 */
+    if (c.x + c.w < o.x + o.w) opts.push({ x: c.x + c.w, y: o.y, w: o.x + o.w - c.x - c.w, h: o.h }); /* 让出左边 */
+    if (c.y > o.y) opts.push({ x: o.x, y: o.y, w: o.w, h: c.y - o.y });                        /* 让出下边 */
+    if (c.y + c.h < o.y + o.h) opts.push({ x: o.x, y: c.y + c.h, w: o.w, h: o.y + o.h - c.y - c.h }); /* 让出上边 */
+    const ok = (r) => r.w >= mw && r.h >= mh && (!T(o.type).maxh || r.h <= T(o.type).maxh) && !G.overlaps(r, c) &&
+      !hypo.some((q) => q !== o && G.overlaps(Object.assign({}, r), q));
+    let best = opts.filter(ok).sort((a, b) => b.w * b.h - a.w * a.h)[0];
+    if (!best) {
+      const rest = hypo.filter((q) => q !== o).concat([Object.assign({ id: "__c" }, c)]);
+      const p = G.place(S.R, rest, o.type, o.x, o.y, o.w, o.h);
+      if (!p) return null;
+      best = { x: p[0], y: p[1], w: p[2], h: p[3] };
+    }
+    Object.assign(o, best); plan[o.id] = best;
+  }
+  return plan;
+}
+function attachConclusion(ms, c, skip) {
+  const others = ms.filter((o) => o.id !== skip);
+  let best = null;
+  for (const g of others.filter((o) => o.type === "chart" || o.type === "figure")) {
+    if (g.w < T("conclusion").min[0] || c.x + c.w <= g.x || c.x >= g.x + g.w) continue;
+    for (const [where, y] of [["上方", g.y - c.h], ["下方", g.y + g.h]]) {
+      const t = { id: "__c", type: "conclusion", x: g.x, y, w: g.w, h: c.h };
+      if (Math.abs(c.y - y) > 1 || !G.fits(S.R, t) || others.some((o) => G.overlaps(t, o))) continue;
+      const dist = Math.abs(c.y - y) + Math.abs(c.x - g.x) * 0.1;
+      if (!best || dist < best.dist) best = { m: t, where, dist };
+    }
+  }
+  return best;
+}
+function drawGuides(c) {                         /* 参考线：与别的卡片左 / 右 / 上 / 下边对齐时亮一条 */
+  const ov = $("#overlay"), k = S.scale, g = S.R.grid, d = S.drag;
+  const [x, y, w, h] = G.px(S.R, c);
+  const xs = new Set(), ys = new Set();
+  for (const o of mods()) {
+    if (o.id === d.id) continue;
+    const [ox, oy, ow, oh] = G.px(S.R, o);
+    for (const v of [x, x + w]) if (Math.abs(v - ox) < .5 || Math.abs(v - ox - ow) < .5) xs.add(v);
+    for (const v of [y, y + h]) if (Math.abs(v - oy) < .5 || Math.abs(v - oy - oh) < .5) ys.add(v);
+  }
+  let html = "";
+  xs.forEach((v) => (html += `<div class="guide" style="left:${v * k - .75}px;top:0;width:1.5px;height:${g.H * k}px"></div>`));
+  ys.forEach((v) => (html += `<div class="guide" style="top:${v * k - .75}px;left:0;height:1.5px;width:${g.W * k}px"></div>`));
+  ov.insertAdjacentHTML("beforeend", html);
+}
+function onDrag(e) {
+  const d = S.drag; if (!d) return;
+  if (!d.moved && Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < 4) return;
+  d.moved = true;
+  const [X, Y, inside] = stagePoint(e);
+  const k = S.scale;
+  if (d.kind === "resize") return dragResize(d, X, Y);
+  d.free = e.ctrlKey || e.metaKey;                  /* 按住 Ctrl / ⌘：临时关掉吸附、推挤、连组（借 M3E），只按格子落 */
+  const cand = candidate(d, X, Y, inside);
+  d.cand = cand;
+  /* 抬起的卡片：跟手，靠近落点时被吸过去 */
+  const lift = $("#lift");
+  const w = (d.w || T(d.type).default[0]), h = (d.h || T(d.type).default[1]);
+  const [, , pw, ph] = G.px(S.R, { x: 0, y: 0, w, h });
+  let lx = X - d.gx, ly = Y - d.gy;
+  if (cand && cand.m && !cand.fillId) {
+    const [sx, sy] = G.px(S.R, cand.m);
+    const dist = Math.hypot(sx - lx, sy - ly);
+    const pull = dist < MAG ? Math.pow(1 - dist / MAG, 2) : 0;
+    lx += (sx - lx) * pull; ly += (sy - ly) * pull;
+  }
+  const r = $("#stage").getBoundingClientRect();
+  const scaleLift = d.kind === "asset" && !cand?.fillId ? 0.6 : 1;
+  Object.assign(lift.style, { left: r.left + lx * k + "px", top: r.top + ly * k + "px", width: pw * k * scaleLift + "px", height: ph * k * scaleLift + "px" });
+  if (!inside) Object.assign(lift.style, { left: e.clientX - 60 + "px", top: e.clientY - 24 + "px", width: "160px", height: "48px" });
+  drawGhost(cand);
+}
+function drawGhost(cand) {
+  const ov = $("#overlay");
+  ov.querySelectorAll(".ghost,.peer,.gchip,.guide").forEach((x) => x.remove());
+  if (!cand) return;
+  const k = S.scale, st = styleR(), d = S.drag;
+  if (cand.fillId) {
+    const m = cand.m, fu = G.fusion(S.R, mods());
+    const [x, y, w, h] = G.cardRect(S.R, m, fu[m.id]);
+    ov.insertAdjacentHTML("beforeend", `<div class="ghost fill" style="left:${x * k}px;top:${y * k}px;width:${w * k}px;height:${h * k}px;border-radius:${radiusCss(G.corners(fu[m.id], st.R, st.r))}"></div>
+      <div class="gchip" style="left:${(x + w / 2) * k}px;top:${y * k}px">放进这张卡</div>`);
+    return;
+  }
+  const c = Object.assign({}, cand.m, { id: "__ghost", type: d.type, tone: d.tone, join: d.join });
+  let hypo = mods().filter((o) => o.id !== d.id).map((o) => Object.assign({}, o));
+  if (cand.swap) { const o = hypo.find((q) => q.id === cand.swap); const src = mods().find((q) => q.id === d.id); o.x = src.x; o.y = src.y; }
+  if (cand.push) for (const [id, r] of Object.entries(cand.push)) Object.assign(hypo.find((q) => q.id === id), r);
+  hypo.push(c);
+  const fu = G.fusion(S.R, hypo);
+  const [x, y, w, h] = G.cardRect(S.R, c, fu[c.id]);
+  let html = `<div class="ghost${cand.bad ? " bad" : ""}" style="left:${x * k}px;top:${y * k}px;width:${w * k}px;height:${h * k}px;border-radius:${radiusCss(G.corners(fu[c.id], st.R, st.r))}"></div>`;
+  for (const o of hypo) {                       /* 连上的邻居、让开的卡片：预览它们的新样子 */
+    if (o === c || (!fu[o.id].length && !(cand.push && cand.push[o.id]))) continue;
+    const before = G.fusion(S.R, mods().filter((q) => q.id !== d.id))[o.id] || [];
+    if (before.join() === fu[o.id].join() && !cand.swap && !(cand.push && cand.push[o.id])) continue;
+    const [ox, oy, ow, oh] = G.cardRect(S.R, o, fu[o.id]);
+    html += `<div class="peer${cand.push && cand.push[o.id] ? " push" : ""}" style="left:${ox * k}px;top:${oy * k}px;width:${ow * k}px;height:${oh * k}px;border-radius:${radiusCss(G.corners(fu[o.id], st.R, st.r))}"></div>`;
+  }
+  const np = cand.push ? Object.keys(cand.push).length : 0;
+  const label = cand.bad ? "放不下" : cand.free ? `不吸附 · ${c.w} × ${c.h}` : cand.attach ? `吸在图${cand.attach} · 与图同宽` : cand.swap ? "对调位置" : cand.split ? `一分为二 · ${c.w} × ${c.h}` : np ? `让出位置 · ${np} 张卡片让开` : fu[c.id].length ? `连成一组 · ${c.w} × ${c.h}` : `${c.w} × ${c.h}`;
+  html += `<div class="gchip${cand.bad ? " bad" : ""}" style="left:${(x + w / 2) * k}px;top:${y * k}px">${label}</div>`;
+  ov.insertAdjacentHTML("beforeend", html);
+  if (!cand.bad) drawGuides(c);
+}
+/* 图的尺寸：按图自己的比例算这一格里最小的字有多大；「最贴合」= 再宽（或再高）字也不会变大、只多出空白的那一档 */
+function figInfo(m) { return m.type === "figure" ? ((S.reps[slide().id]?.modules || {})[m.id] || {}).fig : null; }
+function figFont(f, c) {
+  const [, , w, h] = G.px(S.R, c);
+  return f.min1 * Math.min((w - 2 * f.pad) / f.w, (h - 2 * f.pad) / f.h);
+}
+function figBest(f, c, axis) {
+  const g = S.R.grid, [mw, mh] = T("figure").min;
+  if (axis === "w") {
+    for (let w = mw; w <= g.COLS - c.x; w++) { const [, , pw] = G.px(S.R, { x: 0, y: 0, w, h: 1 }); const [, , , ph] = G.px(S.R, c);
+      if ((pw - 2 * f.pad) / f.w >= (ph - 2 * f.pad) / f.h) return w; }
+    return g.COLS - c.x;
+  }
+  for (let h = mh; h <= g.ROWS - c.y; h++) { const [, , , ph] = G.px(S.R, { x: 0, y: 0, w: 1, h }); const [, , pw] = G.px(S.R, c);
+    if ((ph - 2 * f.pad) / f.h >= (pw - 2 * f.pad) / f.w) return h; }
+  return g.ROWS - c.y;
+}
+function dragResize(d, X, Y) {
+  const m = mods().find((q) => q.id === d.id), g = S.R.grid, step = g.COL + g.GUT;
+  const dx = Math.round((X - d.sx) / step), dy = Math.round((Y - d.sy) / (g.ROW + g.GUT));
+  const o = d.orig, c = Object.assign({ type: m.type }, o);   /* 带上类型：检查最小尺寸要用 */
+  if (d.h.includes("e")) c.w = o.w + dx;
+  if (d.h.includes("s")) c.h = o.h + dy;
+  if (d.h.includes("w")) { c.x = o.x + dx; c.w = o.w - dx; }
+  if (d.h.includes("n")) { c.y = o.y + dy; c.h = o.h - dy; }
+  const f = figInfo(m);
+  let best = false;
+  if (f && c.w > 0 && c.h > 0) {                     /* 图：差一格就到最贴合的尺寸时，吸过去 */
+    const axis = /e|w/.test(d.h) && !/s|n/.test(d.h) ? "w" : /s|n/.test(d.h) && !/e|w/.test(d.h) ? "h" : "w";
+    const b = figBest(f, c, axis), cur = axis === "w" ? c.w : c.h;
+    if (Math.abs(cur - b) <= 1) {
+      const t = Object.assign({}, c);
+      if (axis === "w") { if (d.h.includes("w")) t.x = c.x + c.w - b; t.w = b; } else { if (d.h.includes("n")) t.y = c.y + c.h - b; t.h = b; }
+      if (free(t, m.id)) { Object.assign(c, t); best = true; }
+    } else best = cur === b;
+  }
+  if (free(c, m.id) && (c.w !== m.w || c.h !== m.h || c.x !== m.x || c.y !== m.y)) {
+    Object.assign(m, { x: c.x, y: c.y, w: c.w, h: c.h }); d.changed = true; renderOverlay();
+    const el = document.querySelector(`.mod[data-id="${CSS.escape(m.id)}"]`); if (el) el.classList.add("sel");
+  }
+  let msg = `${T(m.type).zh} ${m.w} × ${m.h}`;
+  if (f) {
+    const fs = figFont(f, m), low = fs < 11 - 1e-6;
+    msg += ` · 最小字 ${fs.toFixed(1)}px${low ? "（低于 11px，投影看不清）" : ""}${best && !low ? " · 最贴合" : ""}`;
+    const [x, y, w] = G.px(S.R, m), k = S.scale;
+    $("#overlay").querySelectorAll(".gchip.rs").forEach((x_) => x_.remove());
+    $("#overlay").insertAdjacentHTML("beforeend", `<div class="gchip rs${low ? " bad" : ""}" style="left:${(x + w / 2) * k}px;top:${y * k}px">${esc(msg.split(" · ").slice(1).join(" · "))}</div>`);
+  }
+  status(msg);
+}
+function endDrag(e) {
+  window.removeEventListener("pointermove", onDrag);
+  const d = S.drag; S.drag = null;
+  $("#lift")?.remove(); $("#overlay").querySelectorAll(".ghost,.peer,.gchip,.guide").forEach((x) => x.remove());
+  renderGridlines(); markDragging();
+  if (!d) return;
+  if (d.kind === "resize") { if (d.changed) { commit("已改大小"); renderInspector(); } return; }
+  if (!d.moved) {                                   /* 点一下 */
+    if (d.kind === "part" && d.scene) applyTemplate(d.scene, true);     /* 点场景：新建一页并按场景排好 */
+    else if (d.kind === "part") addPart(d.type, null, d.from ? { from: d.from } : {});
+    else if (d.kind === "asset") dropAsset(d, null);
+    else if (d.kind === "park") unpark(d, null);
+    else {
+      const now = Date.now(), again = S.lastTap && S.lastTap.id === d.id && now - S.lastTap.t < 400;
+      S.lastTap = { id: d.id, t: now };
+      S.sel = d.id; renderOverlay(); renderInspector();
+      if (again) editFirstField();                  /* 双击：直接去写字 */
+    }
+    return;
+  }
+  const cand = d.cand;
+  if (!cand || cand.bad) { if (cand?.bad) toast("放不下：这个尺寸找不到空位"); return; }
+  if (cand.push) for (const [id, r] of Object.entries(cand.push)) Object.assign(mods().find((q) => q.id === id), r);   /* 先让开 */
+  if (d.kind === "part") return addPart(d.type, [cand.m.x, cand.m.y], Object.assign({ x: cand.m.x, y: cand.m.y, w: cand.m.w, h: cand.m.h }, d.from ? { from: d.from } : {}));
+  if (d.kind === "asset") return dropAsset(d, cand);
+  if (d.kind === "park") return unpark(d, cand);
+  const m = mods().find((q) => q.id === d.id);
+  if (cand.swap) { const o = mods().find((q) => q.id === cand.swap); [o.x, o.y] = [m.x, m.y]; }
+  Object.assign(m, { x: cand.m.x, y: cand.m.y, w: cand.m.w, h: cand.m.h });
+  S.sel = m.id; commit(cand.swap ? "已对调" : cand.push ? "已挪动，旁边的卡片让开了" : "已挪动"); renderInspector();
+}
+function dropAsset(d, cand) {
+  const a = assetByKey(d.type, d.key); if (!a) return;
+  if (!cand) {                                         /* 点一下（没拖）：这一页有同类的空图卡就填进去，选中的那张优先 */
+    const empty = (m) => m.type === d.type && isEmpty(m);
+    const sel = mods().find((m) => m.id === S.sel && empty(m)), any = mods().find(empty);
+    if (sel || any) cand = { fillId: (sel || any).id };
+  }
+  const patch = d.type === "figure" && a.kind === "v5" ? { type: "figure", data: a.file, from: "V5 庭审对抗图大师", part: 0 } :
+    d.type === "figure" ? { type: "figure", file: a.file, from: a.from || "V1–V5" } : a.spec ? { type: "chart", spec: JSON.parse(JSON.stringify(a.spec)) } : { type: "chart", file: a.file };
+  if (d.type === "figure" && !["中性", S.deck.style].includes(a.style)) toast(`这张图是${a.style}，课件是${S.deck.style}：导出前请回原模块用${S.deck.style}重出`, 5000);
+  if (cand && cand.fillId) {
+    const m = mods().find((q) => q.id === cand.fillId);
+    const [mw, mh] = T(patch.type).min;
+    if (m.w < mw || m.h < mh) return toast(`这张卡太小：${T(patch.type).zh}最小 ${mw}×${mh}，先把卡片拉大`, 4000);
+    const keepFrom = m.from && !a.from && patch.type === "figure" && !patch.data ? m.from : null;   /* 场景卡原来写着来自哪个模块：留着 */
+    delete m.file; delete m.spec; delete m.from; delete m.data; delete m.part; delete m.crop; delete m.pins; Object.assign(m, patch);
+    if (keepFrom) m.from = keepFrom;
+    S.sel = m.id; commit("已放进图卡"); renderInspector(); return;
+  }
+  const at = cand ? [cand.m.x, cand.m.y] : null;
+  const extra = cand ? { x: cand.m.x, y: cand.m.y, w: cand.m.w, h: cand.m.h } : {};
+  addPart(patch.type, at, Object.assign(extra, patch));
+}
+function unpark(d, cand) {
+  const p = slide().parked[d.idx]; if (!p) return;
+  const pl = cand ? [cand.m.x, cand.m.y, cand.m.w, cand.m.h] : G.place(S.R, mods(), p.type, 0, 0, p.w, p.h);
+  if (!pl) return toast("页面上没空位了");
+  slide().parked.splice(d.idx, 1);
+  Object.assign(p, { x: pl[0], y: pl[1], w: pl[2], h: pl[3] }); if (!slide().parked.length) delete slide().parked;
+  if (mods().some((o) => o.id === p.id)) p.id = newId();
+  mods().push(p); S.sel = p.id; commit("已从暂存放回"); renderSide(); renderInspector();
+}
+
+/* ---------- 事件 ---------- */
+document.addEventListener("pointerdown", (e) => {
+  if (e.button !== 0) return;
+  const anc = e.target.closest(".anc");
+  if (anc) { e.preventDefault(); e.stopPropagation(); return onAnchor(anc.dataset.key); }
+  const h = e.target.closest(".h");
+  const modEl = e.target.closest(".mod");
+  if (h && modEl) {
+    const m = mods().find((q) => q.id === modEl.dataset.id); const [X, Y] = stagePoint(e);
+    return startDrag(e, { kind: "resize", id: m.id, h: h.dataset.h, sx: X, sy: Y, orig: { x: m.x, y: m.y, w: m.w, h: m.h } });
+  }
+  if (modEl) {
+    const m = mods().find((q) => q.id === modEl.dataset.id); const [X, Y] = stagePoint(e); const [x, y] = G.px(S.R, m);
+    if (m.bleed || m.locked) { S.sel = m.id; renderOverlay(); renderInspector(); if (m.locked) status("这张卡锁定了：在右侧解锁后才能拖"); return; }
+    return startDrag(e, { kind: "move", id: m.id, type: m.type, w: m.w, h: m.h, tone: m.tone, join: m.join, gx: X - x, gy: Y - y,
+      label: `${T(m.type).zh} · ${m.w}×${m.h}` });
+  }
+  const tile = e.target.closest(".tile");
+  if (tile) { const t = tile.dataset.part, [dw, dh] = T(t).default; const [pw, ph] = G.px(S.R, { x: 0, y: 0, w: dw, h: dh }).slice(2);
+    return startDrag(e, { kind: "part", type: t, gx: pw / 2, gy: ph / 2, from: tile.dataset.from, label: tile.dataset.label, scene: tile.dataset.scene }); }
+  const as = e.target.closest(".asset");
+  if (as) { const t = as.dataset.asset, [dw, dh] = T(t).default; const [pw, ph] = G.px(S.R, { x: 0, y: 0, w: dw, h: dh }).slice(2);
+    return startDrag(e, { kind: "asset", type: t, key: as.dataset.key, gx: pw / 2, gy: ph / 2, label: as.querySelector("b").textContent }); }
+  const pk = e.target.closest("[data-park]");
+  if (pk) { const p = slide().parked[+pk.dataset.park]; const [pw, ph] = G.px(S.R, p).slice(2);
+    return startDrag(e, { kind: "park", idx: +pk.dataset.park, type: p.type, w: p.w, h: p.h, gx: pw / 2, gy: ph / 2 }); }
+  if (e.target.closest("#stage") && S.sel) { S.sel = null; renderOverlay(); renderInspector(); }
+});
+document.addEventListener("click", (e) => {
+  const tb = e.target.closest(".rbtn[data-tab]");
+  if (tb) {                                          /* 再点一下当前入口：收起左栏，把地方让给画布 */
+    if (S.tab === tb.dataset.tab && !document.body.classList.contains("noside")) document.body.classList.add("noside");
+    else { document.body.classList.remove("noside"); S.tab = tb.dataset.tab; renderSide(); }
+    requestAnimationFrame(fit); return;
+  }
+  const tp = e.target.closest("[data-tpl]");
+  if (tp) { if (tp.closest(".pop")) { $(".pop")?.remove(); return applyTemplate(tp.dataset.tpl, true); } return applyTemplate(tp.dataset.tpl, false); }
+  const dup = e.target.closest("[data-dup]");
+  if (dup) { e.stopPropagation(); const i = +dup.dataset.dup; const c = JSON.parse(JSON.stringify(S.deck.slides[i]));
+    const ids = new Set(S.deck.slides.map((s) => s.id)); let n = S.deck.slides.length + 1; while (ids.has("s" + n)) n++; c.id = "s" + n;
+    S.deck.slides.splice(i + 1, 0, c); S.cur = i + 1; S.sel = null; commit("已复制这一页"); return renderInspector(); }
+  const del = e.target.closest("[data-del]");
+  if (del) { e.stopPropagation(); if (S.deck.slides.length === 1) return toast("至少留一页");
+    S.deck.slides.splice(+del.dataset.del, 1); S.cur = Math.min(S.cur, S.deck.slides.length - 1); S.sel = null; commit("已删除这一页"); return renderInspector(); }
+  const th = e.target.closest(".thumb");
+  if (th) { S.cur = +th.dataset.i; S.sel = null; renderAll(); refreshSlide(); renderInspector(); return; }
+  if (e.target.closest("#addPage")) return openTplPop(e.target.closest("#addPage"));
+  if (!e.target.closest(".pop")) $(".pop")?.remove();
+});
+function openTplPop(anchor) {
+  $(".pop")?.remove();
+  const r = anchor.getBoundingClientRect();
+  const p = document.createElement("div"); p.className = "pop";
+  p.style.width = "560px"; p.style.maxHeight = "70vh"; p.style.overflow = "auto";
+  p.innerHTML = `<div class="sec" style="margin-top:0">新页用哪个组合</div>${tplGroups(4)}`;
+  document.body.appendChild(p);
+  p.style.left = Math.max(10, Math.min(r.left, innerWidth - 570)) + "px"; p.style.top = Math.max(10, r.top - p.offsetHeight - 10) + "px";
+}
+/* 页面条拖动排序（HTML5 拖放，只在页面条里） */
+let dragPage = null;
+document.addEventListener("dragstart", (e) => { const t = e.target.closest?.(".thumb"); if (t) dragPage = +t.dataset.i; });
+document.addEventListener("dragover", (e) => { const t = e.target.closest?.(".thumb"); if (t && dragPage !== null) { e.preventDefault(); t.classList.add("dragover"); } });
+document.addEventListener("dragleave", (e) => e.target.closest?.(".thumb")?.classList.remove("dragover"));
+document.addEventListener("drop", (e) => {
+  const t = e.target.closest?.(".thumb"); if (!t || dragPage === null) return;
+  e.preventDefault(); const to = +t.dataset.i; const [s] = S.deck.slides.splice(dragPage, 1); S.deck.slides.splice(to, 0, s);
+  S.cur = to; dragPage = null; commit("已调整页序");
+});
+document.addEventListener("keydown", (e) => {
+  if (/INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  const mod = e.ctrlKey || e.metaKey;
+  if (mod && e.key.toLowerCase() === "z") { e.preventDefault(); return e.shiftKey ? redo() : undo(); }
+  if (mod && e.key.toLowerCase() === "y") { e.preventDefault(); return redo(); }
+  if (mod && (e.key === "=" || e.key === "+")) { e.preventDefault(); return zoomStep(1); }
+  if (mod && e.key === "-") { e.preventDefault(); return zoomStep(-1); }
+  if (mod && e.key === "0") { e.preventDefault(); return setZoom(1); }
+  if (e.key === "g" || e.key === "G") { S.grid = !S.grid; $("#gridBtn").classList.toggle("on", S.grid); return renderGridlines(); }
+  if (e.key === "PageDown" || (e.key === "ArrowDown" && !S.sel)) { S.cur = Math.min(S.cur + 1, S.deck.slides.length - 1); S.sel = null; renderAll(); refreshSlide(); return renderInspector(); }
+  if (e.key === "PageUp" || (e.key === "ArrowUp" && !S.sel)) { S.cur = Math.max(S.cur - 1, 0); S.sel = null; renderAll(); refreshSlide(); return renderInspector(); }
+  const m = mods().find((q) => q.id === S.sel); if (!m) return;
+  if (mod && e.key.toLowerCase() === "d") { e.preventDefault(); return dupMod(m); }
+  if (e.key === "Delete" || e.key === "Backspace") { e.preventDefault(); return delMod(m); }
+  if (e.key === "Escape") { S.sel = null; renderOverlay(); return renderInspector(); }
+  const dirs = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+  if (dirs) { e.preventDefault();
+    if (e.shiftKey) { if (dirs[0]) nudge(m, "w", dirs[0]); else nudge(m, "h", dirs[1]); }
+    else { if (dirs[0]) nudge(m, "x", dirs[0]); else nudge(m, "y", dirs[1]); } }
+});
+$("#undoBtn").onclick = undo; $("#redoBtn").onclick = redo; $("#tidyBtn").onclick = tidy;
+$("#overlay").addEventListener("mousemove", showProv);
+$("#overlay").addEventListener("mouseleave", () => ($("#provTip").hidden = true));
+$("#overlay").addEventListener("pointerdown", () => ($("#provTip").hidden = true), true);
+$("#zoomIn").onclick = () => zoomStep(1); $("#zoomOut").onclick = () => zoomStep(-1); $("#zoomFit").onclick = () => setZoom(1);
+$("#stagewrap").addEventListener("wheel", (e) => {   /* 按住 Ctrl / ⌘（触控板捏合也是这个）滚轮：以光标为中心缩放；不按就是滚动平移 */
+  if (!(e.ctrlKey || e.metaKey)) return;
+  e.preventDefault();
+  setZoom(S.zoom * Math.pow(1.0018, -e.deltaY), e.clientX, e.clientY);
+}, { passive: false });
+document.addEventListener("click", (e) => {        /* 空页上点场景：这一页就按场景排好 */
+  const b = e.target.closest("[data-scene-fill]"); if (b) applyTemplate(b.dataset.sceneFill, false);
+});
+$("#gridBtn").onclick = () => { S.grid = !S.grid; $("#gridBtn").classList.toggle("on", S.grid); renderGridlines(); };
+$("#helpBtn").onclick = () => toast("拖：吸到格子（按住 Ctrl / ⌘ 不吸附、不推挤）· 方向键：挪一格 · Shift+方向键：改大小 · Ctrl+D：复制 · Delete：删除 · Ctrl+Z / Ctrl+Shift+Z：撤销 / 重做 · G：网格 · PageUp/PageDown：翻页 · Ctrl+= / Ctrl+- / Ctrl+0：放大 / 缩小 / 适应窗口（Ctrl+滚轮也可）", 8000);
+$("#deckTitle").onchange = (e) => { S.deck.title = e.target.value.trim() || "未命名课件"; commit("已改标题"); };
+async function doExport(btn, one) {
+  btn.disabled = true; status("导出中…");
+  await saveNow();
+  const r = await api("/api/export?animate=" + (S.animate === false ? 0 : 1) + (S.notes ? "&notes=1" : "") + (one ? "&page=" + S.cur : ""), { method: "POST" });
+  btn.disabled = false;
+  if (!r.ok) { status("未导出"); S.sel = null; renderInspector(); $("#insp").insertAdjacentHTML("afterbegin", r.error.split("\n").map((l) => `<div class="msg p">${esc(l)}</div>`).join("")); return toast("有页面没准备好，见右侧", 4000); }
+  status((one ? `已导出第 ${S.cur + 1} 页` : `已导出 ${r.slides} 页`) + (r.clicks ? ` · 讲课动画 ${r.clicks} 步` : ""));
+  toast(r.warnings.length ? `已导出。${r.warnings.length} 处请核，见右侧检查` : "已导出。在 PowerPoint 里整页复制，或框选图复制，粘进您的课件即可", 5000);
+  location.href = "/api/download?f=" + encodeURIComponent(r.file);
+}
+$("#exportBtn").onclick = () => doExport($("#exportBtn"), false);
+async function saveNow() { while (S.saving) await new Promise((r) => setTimeout(r, 60)); }
+const FIRM_VARS = ["--acc", "--accC", "--onAccC"];
+const CUSTOM = "自定义";
+function useStyle(name) {
+  S.deck.style = name; for (const s of S.deck.slides) S.ver[s.id] = (S.ver[s.id] || 0) + 1;
+  applyStyle(); commit("风格：" + name); renderSide(); saveNow().then(refreshSlide);
+}
+function applyStyle() {
+  const st = S.R.styles[S.deck.style] || {};
+  /* 作者定的：编辑器界面一直是奇川风（不随课件风格换皮） */
+  document.body.dataset.style = "奇川风";           /* 编辑器界面始终奇川风；歸藏风、自定义只用在课件页面上 */
+  FIRM_VARS.forEach((v) => document.body.style.removeProperty(v));
+  $("#styleSeg").innerHTML = ["奇川风", "歸藏风", CUSTOM].map((s) => `<button class="ib${s === S.deck.style ? " on" : ""}" data-st="${s}"${s === CUSTOM ? ' title="上传模板或截图，或选一个主色"' : ""}>${s}</button>`).join("");
+  $("#styleSeg").querySelectorAll("[data-st]").forEach((b) => (b.onclick = () => {
+    if (b.dataset.st === CUSTOM) { S.tab = "fit"; renderSide(); if (!S.R.styles[CUSTOM]) return; }
+    if (S.deck.style === b.dataset.st) return;
+    useStyle(b.dataset.st);
+  }));
+  $("#deckTitle").value = S.deck.title || "";
+}
+function syncGrid() {                       /* 版面：铺满全屏 / 预留位置 → 网格几何（与 grid.py 的 geom 同算法） */
+  if (!S.R.gridBase) S.R.gridBase = S.R.grid;
+  S.R.grid = G.geom(S.R.gridBase, S.deck.frame);
+}
+function renderReserve() {
+  const fr = S.deck.frame, el = $("#reserve"), k = S.scale, g = S.R.grid, bd = $("#backdrop");
+  const on = fr && fr.mode === "reserve";
+  bd.hidden = !(on && fr.backdrop && fr.show_backdrop !== false);
+  if (!bd.hidden && !bd.dataset.v) { bd.dataset.v = "1"; bd.src = "/api/frame/backdrop?t=" + Date.now(); }
+  if (!on) { el.innerHTML = ""; return; }
+  const [x, y, w, h] = g.BLEED;
+  el.innerHTML = `<i style="left:0;top:0;right:0;height:${y * k}px"></i><i style="left:0;bottom:0;right:0;height:${(g.H - y - h) * k}px"></i>
+    <i style="left:0;top:${y * k}px;width:${x * k}px;height:${h * k}px"></i><i style="right:0;top:${y * k}px;width:${(g.W - x - w) * k}px;height:${h * k}px"></i>
+    <b style="left:${x * k}px;top:${y * k}px;width:${w * k}px;height:${h * k}px"></b>`;
+}
+function renderAll() { syncGrid(); renderReserve(); renderGridlines(); renderOverlay(); renderFilm(); $("#undoBtn").disabled = !S.past.length; $("#redoBtn").disabled = !S.future.length; }
+window.addEventListener("resize", fit);
+function editFirstField() { const f = $("#insp [data-k]") || $("#specBox"); if (f) { f.focus(); f.select?.(); } }
+
+/* ---------- AI：请求交给对话里的 AI ---------- */
+const AI_KINDS_PAGE = [["page", "重做这一页"], ["new-page", "后面加一页"]];      /* 做封面、出整套在「更多」里 */
+const AI_KINDS_MORE = [["cover", "做封面"], ["deck", "按想法出几页"]];
+function aiBadge(id) {
+  const r = (S.ai || []).find((x) => x.slide === slide().id && x.module === id && ["pending", "working"].includes(x.status));
+  return r ? `<div class="ai-wait">${icon("ai", 'style="width:16px;height:16px"')}${r.status === "working" ? "AI 正在做…" : "等 AI…"}</div>` : "";
+}
+function aiBox(m) {
+  if (m) {
+    const tool = toolOf(m);
+    const graphic = m.type === "chart" || m.type === "figure";
+    const label = graphic ? `让 AI 用 ${tool || "V1–V5"} 生成` : isEmpty(m) ? "让 AI 写这张卡" : "让 AI 再来一版";
+    const ph = graphic ? "材料在哪、要画什么（例：用起诉状和判决书画案情时间轴）" : "想要什么样的（例：改成三条、口语一点；或：按《民法典》第 680 条写）";
+    return `<div class="sec">AI</div><div class="aibox"><textarea id="aiPrompt" placeholder="${ph}"></textarea>
+      ${graphic && !tool ? `<div class="row">${["V1", "V2", "V3", "V4", "V5"].map((v) => `<button class="c" data-aitool="${v}">${v}</button>`).join("")}</div>` : ""}
+      <div class="row"><span class="msg n" style="margin:0;padding:0;background:none">交给对话里的 AI</span><button class="go" id="aiGo" data-kind="${graphic ? "tool" : "module"}" data-tool="${esc(tool)}">${icon("ai", 'style="width:15px;height:15px;vertical-align:-3px"')} ${label}</button></div></div>`;
+  }
+  return `<div class="aibox"><div class="row" style="margin-top:0">${AI_KINDS_PAGE.map(([k, z], i) => `<button class="c${i === 0 ? " on" : ""}" data-aikind="${k}">${z}</button>`).join("")}</div>
+    <textarea id="aiPrompt" style="margin-top:8px" placeholder="这一页要讲什么、材料在哪（例：用判决书画案情时间轴，配一句结论和两条法条）"></textarea>
+    <div class="row"><button class="go" id="aiGo" data-kind="page">${icon("ai", 'style="width:15px;height:15px;vertical-align:-3px"')} 交给 AI</button></div></div>`;
+}
+function bindAiBox(m) {
+  const go = $("#aiGo"); if (!go) return;
+  let kind = go.dataset.kind, tool = go.dataset.tool || null;
+  document.querySelectorAll("[data-aikind]").forEach((b) => (b.onclick = () => {
+    document.querySelectorAll("[data-aikind]").forEach((x) => x.classList.remove("on")); b.classList.add("on"); kind = b.dataset.aikind; }));
+  document.querySelectorAll("[data-aitool]").forEach((b) => (b.onclick = () => {
+    document.querySelectorAll("[data-aitool]").forEach((x) => x.classList.remove("on")); b.classList.add("on"); tool = b.dataset.aitool; }));
+  go.onclick = () => sendAi(kind, m ? m.id : null, tool, $("#aiPrompt").value);
+}
+async function sendAi(kind, module, tool, prompt) {
+  if (kind === "tool" && !tool) return toast("先选用 V1–V5 里的哪一个");
+  await saveNow();
+  const r = await api("/api/ai", { method: "POST", body: JSON.stringify({ kind, slide: slide().id, module, tool, prompt }) });
+  if (!r.ok) return toast(r.error, 4000);
+  toast("已交给 AI。回到对话里说「处理课件请求」；AI 若正在等，会自动开始。做好后这里自动刷新。", 6500);
+  pollNow();
+}
+function reqList() {
+  const rs = (S.ai || []).filter((r) => r.slide === slide().id || r.kind === "deck").slice(-6).reverse();
+  if (!rs.length) return "";
+  const ZH = { pending: "等 AI", working: "正在做", done: "做好了", failed: "没做成", cancelled: "已取消" };
+  return rs.map((r) => `<div class="req"><span><b>${esc((S.aiKinds || {})[r.kind] || r.kind)}</b>${r.tool ? " · " + r.tool : ""}<br>${esc(r.prompt || "（没写想法）")}${r.note ? `<br><span style="color:var(--ink2)">${esc(r.note)}</span>` : ""}</span>
+    <span class="st ${r.status}">${ZH[r.status] || r.status}</span>${["pending", "working"].includes(r.status) ? `<button class="c" data-cancel="${r.id}" style="height:24px">取消</button>` : ""}</div>`).join("");
+}
+$("#aiBtn").onclick = () => { S.sel = null; renderOverlay(); renderInspector(); setTimeout(() => $("#aiPrompt")?.focus(), 50); };
+
+/* ---------- 轮询：AI 改了课件、名片变了，编辑器自动刷新（可撤销） ---------- */
+let pollT = null;
+async function poll() {
+  clearTimeout(pollT);
+  try {
+    if (!S.saving && !S.drag) {
+      const v = await api("/api/version");
+      if (v.ai !== S.seen.ai) {
+        S.seen.ai = v.ai; const r = await api("/api/ai"); S.ai = r.requests; S.aiKinds = r.kinds;
+        renderOverlay(); renderFilm(); renderInspector(true);
+      }
+      if (v.brand !== S.seen.brand) {
+        S.seen.brand = v.brand; await loadBrand(); for (const s of S.deck.slides) S.ver[s.id] = (S.ver[s.id] || 0) + 1;
+        refreshSlide(); renderFilm(); refreshReports();
+      }
+      if (v.deck !== S.seen.deck && !S.dirty) {
+        S.seen.deck = v.deck;
+        const st = await api("/api/state");
+        if (st.mtime !== undefined) S.seen.deck = st.mtime;
+        if (JSON.stringify(st.deck) !== JSON.stringify(S.deck)) {
+          S.past.push(S.snap); S.future = []; S.deck = st.deck; S.snap = JSON.stringify(S.deck); S.synced = S.snap;
+          S.cur = Math.min(S.cur, S.deck.slides.length - 1);
+          if (S.sel && !mods().some((m) => m.id === S.sel)) S.sel = null;
+          for (const s of S.deck.slides) S.ver[s.id] = (S.ver[s.id] || 0) + 1;
+          applyStyle(); renderAll(); refreshSlide(); refreshReports(); renderInspector();
+          toast("课件更新了（AI 或别处改的）。不满意可以撤销。", 4000);
+        }
+      }
+    }
+  } catch (e) { /* 服务器暂时没响应：下一轮再试 */ }
+  pollT = setTimeout(poll, 1500);
+}
+function pollNow() { poll(); }
+
+/* ---------- 律所名片 ---------- */
+async function loadBrand() { S.brand = await api("/api/brand"); if (S.tab === "brand" && !$("#side").contains(document.activeElement)) renderSide(); }
+function renderBrand(el) {
+  const b = (S.brand && S.brand.brand) || { firm: {}, lawyers: [] }, f = b.firm || {};
+  const fld = (path, label, val, ta) => `<div class="field"><label>${label}</label>${ta ? `<textarea rows="${ta}" data-b="${path}">${esc(val)}</textarea>` : `<input data-b="${path}" value="${esc(val)}">`}</div>`;
+  const lines = (a) => (a || []).join("\n");
+  el.innerHTML = `<h3>律所名片</h3><div class="msg n">录一次，以后每套课件都能用：介绍页、联系方式、页脚 Logo 都实时读这里。<br>存在：<span style="word-break:break-all">${esc(S.brand?.dir || "")}</span></div>
+    <div class="sec">Logo</div>
+    <div class="brandlogo" id="logoDrop">${b.logo ? `<img alt="Logo" src="/api/brand/logo?v=${S.seen.brand}">` : `<span class="status">浅底用的 Logo：把 PNG / JPG / SVG 拖到这里</span>`}</div>
+    <div class="brandlogo" id="logoDropDark" style="background:${S.brand?.style?.colors?.cover_bg || "var(--acc)"}">${b.logo_on_dark ? `<img alt="深底 Logo" src="/api/brand/logo?variant=dark&v=${S.seen.brand}">` : `<span class="status" style="color:#fff">深底用的白字版（可选）：拖到这里</span>`}</div>
+    <div class="chips"><label class="c" style="cursor:pointer">${icon("upload", 'style="width:15px;height:15px"')}浅底 Logo<input type="file" id="logoFile" accept=".png,.jpg,.jpeg,.svg" hidden></label>
+      <label class="c" style="cursor:pointer">${icon("upload", 'style="width:15px;height:15px"')}深底 Logo<input type="file" id="logoFileDark" accept=".png,.jpg,.jpeg,.svg" hidden></label>
+      <button class="c${b.footer_logo ? " on" : ""}" id="footerLogo">每页页脚放 Logo</button></div>
+    <div class="msg n">封面、章节页是深底时自动换白字版。SVG 会转成可编辑形状；PNG / JPG 作为图片放进 PPTX（唯一允许的图片），在 PowerPoint 里能直接替换。</div>
+    <div class="sec">律所</div>
+    ${fld("firm.name", "名称", f.name)}${fld("firm.intro", "介绍", f.intro, 4)}${fld("firm.areas", "业务领域（一行一项）", lines(f.areas), 3)}
+    ${fld("firm.address", "地址", f.address)}${fld("firm.phone", "电话", f.phone)}${fld("firm.email", "邮箱", f.email)}${fld("firm.website", "网址", f.website)}
+    <div class="sec">律师</div>
+    ${(b.lawyers || []).map((l, i) => `<details class="lawyer"${i === (S.openLawyer ?? -1) ? " open" : ""}><summary>${esc(l.name || "未命名")} · ${esc(l.title || "")}</summary>
+      ${fld(`lawyers.${i}.name`, "姓名", l.name)}${fld(`lawyers.${i}.title`, "职务", l.title)}${fld(`lawyers.${i}.intro`, "介绍", l.intro, 4)}
+      ${fld(`lawyers.${i}.areas`, "专长（一行一项）", lines(l.areas), 3)}${fld(`lawyers.${i}.cases`, "代表业绩（一行一项）", lines(l.cases), 4)}
+      <div class="chips"><button class="c" data-intro="lawyer" data-lawyer="${esc(l.id)}">${icon("profile", 'style="width:15px;height:15px"')}生成简介页</button><button class="c" data-dellawyer="${i}">删除</button></div></details>`).join("")}
+    <button class="c" id="addLawyer">${icon("plus", 'style="width:15px;height:15px"')}加一位律师</button>
+    <div class="sec">一键生成</div>
+    <div class="chips"><button class="c" data-intro="firm">${icon("brand", 'style="width:15px;height:15px"')}律所介绍页</button><button class="c" data-intro="closing">结束页（谢谢 + 联系方式）</button></div>
+    <div class="msg n">生成后在「AI 生成」里说一句，可以让 AI 润色介绍、按场合改写。</div>
+    <div class="sec">律所卡片</div><div class="tiles">${["logo", "profile", "contact"].map((t) => `<div class="tile" data-part="${t}">${icon(t)}<span>${esc(T(t).zh)}</span><small>${PART_TIP[t]}</small></div>`).join("")}</div>`;
+  let timer = null;
+  el.querySelectorAll("[data-b]").forEach((inp) => (inp.oninput = () => {
+    const path = inp.dataset.b.split("."), key = path[path.length - 1];
+    let o = b; for (const p of path.slice(0, -1)) o = o[p] ??= {};
+    o[key] = ["areas", "cases"].includes(key) ? inp.value.split("\n").map((x) => x.trim()).filter(Boolean) : inp.value;
+    clearTimeout(timer); timer = setTimeout(() => saveBrand(b), 500);
+  }));
+  el.querySelectorAll("details.lawyer").forEach((d, i) => (d.ontoggle = () => { if (d.open) S.openLawyer = i; }));
+  $("#addLawyer").onclick = () => { b.lawyers = b.lawyers || []; let n = b.lawyers.length + 1; while (b.lawyers.some((l) => l.id === "l" + n)) n++;
+    b.lawyers.push({ id: "l" + n, name: "新律师", title: "律师" }); S.openLawyer = b.lawyers.length - 1; saveBrand(b, true); };
+  el.querySelectorAll("[data-dellawyer]").forEach((x) => (x.onclick = () => { b.lawyers.splice(+x.dataset.dellawyer, 1); saveBrand(b, true); }));
+  $("#footerLogo").onclick = () => { b.footer_logo = !b.footer_logo; saveBrand(b, true); };
+  const up = async (file, dark) => {
+    const r = await api("/api/brand/logo?name=" + encodeURIComponent(file.name) + (dark ? "&variant=dark" : ""), { method: "POST", body: await file.arrayBuffer() });
+    toast(r.ok ? "Logo 已更新" : r.error, 3000); await loadBrand(); renderSide(); pollNow();
+  };
+  $("#logoFile").onchange = (e) => e.target.files[0] && up(e.target.files[0], false);
+  $("#logoFileDark").onchange = (e) => e.target.files[0] && up(e.target.files[0], true);
+  for (const [id, dark] of [["#logoDrop", false], ["#logoDropDark", true]]) {
+    const ld = $(id);
+    ld.ondragover = (e) => { e.preventDefault(); ld.style.outline = "2px dashed var(--acc)"; };
+    ld.ondragleave = () => (ld.style.outline = "");
+    ld.ondrop = (e) => { e.preventDefault(); ld.style.outline = ""; e.dataTransfer.files[0] && up(e.dataTransfer.files[0], dark); };
+  }
+  el.querySelectorAll("[data-intro]").forEach((x) => (x.onclick = () => introPage(x.dataset.intro, x.dataset.lawyer)));
+}
+/* ---------- 自定义风格：上传模板或截图，或选一个主色 ---------- */
+function renderCustom(el) {
+  const st = S.brand?.style, err = S.brand?.style_error, has = !!S.R.styles[CUSTOM];
+  const sw = (c, z) => `<span title="${z} ${c}" style="display:inline-block;width:26px;height:26px;border-radius:6px;background:${c};border:1px solid var(--line)"></span>`;
+  let h = `<h3>风格</h3><div class="chips" style="margin:6px 0 4px">${["奇川风", "歸藏风", CUSTOM].map((x) => `<button class="c${S.deck.style === x ? " on" : ""}" data-fitst="${x}">${x}</button>`).join("")}</div>
+    <div class="sec">自定义</div><div class="msg n">让图表页跟上您课件的颜色：传模板或截图，或选一个主色。</div>`;
+  if (err) h += `<div class="msg p">${esc(err)}</div>`;
+  if (st && has) {
+    const c = st.colors, using = S.deck.style === CUSTOM;
+    h += `<div class="sec">现在的自定义</div><div class="aibox"><div style="display:flex;align-items:center;gap:8px"><small style="color:var(--ink2);white-space:nowrap">来自${esc(/\.pptx$/i.test(st.source || "") ? "模板" : st.source || "")}</small><span class="spacer"></span>
+      ${sw(c.accent, "主色")}${sw(c.accent_dark, "主色·深")}${sw(c.ink, "正文")}${sw(c.card, "卡片")}${sw(c.outline, "描边")}</div>
+      <div class="row">${using ? '<span class="c on">这套课件正在用</span>' : `<button class="c" id="useCustom">用在这套课件</button>`}
+      ${S.brand.has_report && /\.pptx$/i.test(st.source || "") ? `<a class="c" href="/api/brand/template-report" target="_blank" rel="noopener">模板读取报告</a>` : ""}
+      <button class="c" id="offCustom">停用</button></div></div>`;
+  }
+  h += `<div class="sec">上传模板或截图</div>
+    <div class="drop" id="cuDrop">${icon("upload")}<br>把 .pptx 模板或 .png / .jpg 截图拖到这里<br><label class="c" style="cursor:pointer;display:inline-flex;margin-top:8px">选文件<input type="file" id="cuFile" accept=".pptx,.png,.jpg,.jpeg" hidden></label></div>
+    <label class="toggle"><span>同时按它预留 Logo、页眉页脚的位置</span><button class="sw on" id="cuFrame" aria-label="同时预留位置"></button></label>
+    <div class="sec">或者选一个主色</div>
+    <div style="display:flex;gap:8px;align-items:center"><input type="color" id="cuColor" value="${esc(st?.colors?.accent || "#0F5C6E")}" style="flex:none;width:40px;height:34px;border:0;background:none;padding:0;cursor:pointer" aria-label="选主色">
+      <div class="field" style="margin:0;flex:1;min-width:0"><input id="cuHex" value="${esc(st?.colors?.accent || "#0F5C6E")}" aria-label="主色"></div><button class="c" id="cuMake" style="flex:none;white-space:nowrap">生成</button></div>
+    <div class="msg n" style="margin-top:8px">模板不留存；截图只垫在编辑器里，不导出。</div>`;
+  el.innerHTML = h;
+  el.querySelectorAll("[data-fitst]").forEach((b) => (b.onclick = () => {
+    const x = b.dataset.fitst;
+    if (x === CUSTOM && !S.R.styles[CUSTOM]) return toast("还没有自定义风格：在下面传模板、截图，或选一个主色", 4000);
+    if (S.deck.style !== x) useStyle(x);
+  }));
+  const fsw = $("#cuFrame"); fsw.onclick = () => fsw.classList.toggle("on");
+  const done = async (r) => {
+    if (!r.ok) { status("没做成"); return toast(r.error, 6000); }
+    await reloadRules(); await loadBrand();
+    toast((r.notes || []).length ? r.notes.join("；") : `主色 ${r.colors.accent}`, 6000);
+    if (r.frame && fsw.classList.contains("on")) { $("#backdrop").dataset.v = ""; S.deck.frame = Object.assign({}, r.frame, { show_backdrop: !!r.frame.backdrop }); }
+    useStyle(CUSTOM); fit(); status("已用上自定义风格");
+  };
+  const send = async (file) => {
+    if (!file) return;
+    status("正在读…"); toast("正在读：大模板要十几秒", 3000);
+    done(await api("/api/custom?name=" + encodeURIComponent(file.name), { method: "POST", body: await file.arrayBuffer() }));
+  };
+  $("#cuFile").onchange = (e) => send(e.target.files[0]);
+  const dz = $("#cuDrop");
+  dz.ondragover = (e) => { e.preventDefault(); dz.style.outline = "2px dashed var(--acc)"; };
+  dz.ondragleave = () => (dz.style.outline = "");
+  dz.ondrop = (e) => { e.preventDefault(); dz.style.outline = ""; send(e.dataTransfer.files[0]); };
+  $("#cuColor").oninput = (e) => ($("#cuHex").value = e.target.value.toUpperCase());
+  $("#cuHex").onchange = (e) => { if (/^#[0-9a-f]{6}$/i.test(e.target.value)) $("#cuColor").value = e.target.value; };
+  $("#cuMake").onclick = async () => done(await api("/api/custom/color", { method: "POST", body: JSON.stringify({ color: $("#cuHex").value.trim() }) }));
+  const use = $("#useCustom"); if (use) use.onclick = () => useStyle(CUSTOM);
+  const off = $("#offCustom");
+  if (off) off.onclick = async () => {
+    const r = await api("/api/brand/style/disable", { method: "POST" });
+    if (!r.ok) return toast(r.error, 4000);
+    await reloadRules(); const stt = await api("/api/state"); S.past.push(S.snap); S.deck = stt.deck; S.snap = JSON.stringify(S.deck);
+    for (const s of S.deck.slides) S.ver[s.id] = (S.ver[s.id] || 0) + 1;
+    applyStyle(); renderAll(); refreshSlide(); await loadBrand(); renderSide(); toast("已停用自定义风格，换回奇川风（文件改名留着，没有删）", 4000);
+  };
+}
+/* ---------- 版面：铺满全屏 / 预留位置 ---------- */
+const FRAME_DEFAULT = { top: 104, right: 48, bottom: 72, left: 48 };
+function frameGeom(fr) { return G.geom(S.R.gridBase || S.R.grid, fr); }
+function frameOk(fr) {
+  const g = frameGeom(fr), b = S.R.gridBase || S.R.grid;
+  if (["top", "right", "bottom", "left"].some((k) => !(Number(fr[k]) >= 0))) return "四边留白要是不小于 0 的数";
+  if (g.COL < b.MIN_COL || g.ROW < b.MIN_ROW) return `预留得太多，内容区只剩 ${Math.round(g.BLEED[2])}×${Math.round(g.BLEED[3])}：卡片里的字排不下`;
+  return "";
+}
+function setFrame(fr, label) {
+  const bad = fr.mode === "reserve" ? frameOk(fr) : "";
+  if (bad) { toast(bad, 5000); renderSide(); return false; }
+  S.deck.frame = fr;
+  for (const s of S.deck.slides) S.ver[s.id] = (S.ver[s.id] || 0) + 1;
+  commit(label); fit(); renderSide(); saveNow().then(refreshSlide);
+  return true;
+}
+function renderFrame(el) {
+  const fr = S.deck.frame || { mode: "full" }, on = fr.mode === "reserve";
+  const v = Object.assign({}, FRAME_DEFAULT, fr), g = frameGeom(on ? fr : null);
+  const num = (k, zh) => `<div class="field"><label>${zh}</label><input type="number" min="0" max="400" step="1" data-inset="${k}" value="${Math.round(v[k])}"></div>`;
+  el.innerHTML = `<h3>版面</h3>
+    <div class="msg n">选「预留位置」，给您模板的 Logo、页眉页脚让出地方。</div>
+    <div class="chips"><button class="c${on ? "" : " on"}" id="frFull">铺满全屏</button><button class="c${on ? " on" : ""}" id="frRes">预留位置</button></div>
+    ${on ? `<div class="sec">四边留白（整页 1280×720）</div>
+      <div class="insets">${num("top", "上")}${num("right", "右")}${num("bottom", "下")}${num("left", "左")}</div>
+      <div class="msg n" style="margin-top:8px">内容区 ${Math.round(g.BLEED[2])}×${Math.round(g.BLEED[3])}，每格 ${Math.round(g.COL)}×${Math.round(g.ROW)}；仍是 12 栏 × 6 行，磁吸、连组、拉大拉小照旧。</div>
+      ${fr.source ? `<div class="msg n">由${esc(fr.source)}算出${(fr.notes || []).length ? "：" + fr.notes.map(esc).join("；") : ""}。不对就直接改上面的数字。</div>` : ""}
+      ${fr.backdrop ? `<label class="toggle"><span>把截图垫在页面下面看效果</span><button class="sw${fr.show_backdrop !== false ? " on" : ""}" id="frShow" aria-label="垫截图"></button></label>` : ""}` : ""}
+    <div class="sec">自动算留白</div>
+    <div class="msg n">传模板，或截一张模板的空白页（只有 Logo、页眉页脚）。</div>
+    <div class="chips"><label class="c" style="cursor:pointer">${icon("upload", 'style="width:15px;height:15px"')}上传模板或截图<input type="file" id="frFile" accept=".pptx,.png,.jpg,.jpeg" hidden></label></div>`;
+  $("#frFull").onclick = () => { if (on) setFrame(Object.assign({}, fr, { mode: "full" }), "版面：铺满全屏"); };
+  $("#frRes").onclick = () => { if (!on) setFrame(Object.assign({}, FRAME_DEFAULT, fr, { mode: "reserve" }), "版面：预留位置"); };
+  el.querySelectorAll("[data-inset]").forEach((inp) => inp.onchange = () => {
+    const n = Object.assign({}, fr, { [inp.dataset.inset]: Math.max(0, Math.round(Number(inp.value) || 0)), source: fr.source ? fr.source + "，手动改过" : "手动", notes: [] });
+    if (fr.source && fr.source.includes("手动改过")) n.source = fr.source;
+    setFrame(n, "已改留白");
+  });
+  const sh = $("#frShow");
+  if (sh) sh.onclick = () => { S.deck.frame = Object.assign({}, fr, { show_backdrop: !sh.classList.contains("on") }); commit("截图：" + (sh.classList.contains("on") ? "不垫" : "垫上")); renderSide(); };
+  $("#frFile").onchange = async (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    status("正在算留白…");
+    const r = await api("/api/frame/read?name=" + encodeURIComponent(file.name), { method: "POST", body: await file.arrayBuffer() });
+    if (!r.ok) { status("没算成"); return toast(r.error, 6000); }
+    $("#backdrop").dataset.v = ""; const old = S.deck.frame || {};
+    const nf = Object.assign({}, r.frame, { show_backdrop: true });
+    if (!r.frame.backdrop && old.backdrop && file.name.toLowerCase().endsWith(".pptx")) nf.backdrop = false;
+    if (setFrame(nf, `已按${r.frame.source}预留位置`))
+      toast(`上 ${nf.top} · 右 ${nf.right} · 下 ${nf.bottom} · 左 ${nf.left}${(nf.notes || []).length ? "。" + nf.notes.join("；") : ""}`, 6500);
+  };
+}
+async function reloadRules() { const st = await api("/api/state"); S.R = st.rules; syncGrid(); applyStyle(); }
+async function saveBrand(b, rerender) {
+  const r = await api("/api/brand", { method: "POST", body: JSON.stringify(b) });
+  if (!r.ok) return toast(r.error, 4000);
+  status("名片已保存"); await loadBrand(); if (rerender) renderSide(); pollNow();
+}
+async function introPage(kind, lawyer) {
+  await saveNow();
+  const r = await api("/api/brand/intro", { method: "POST", body: JSON.stringify({ kind, lawyer }) });
+  if (!r.ok) return toast(r.error, 4000);
+  const ids = new Set(S.deck.slides.map((s) => s.id)); let n = S.deck.slides.length + 1; while (ids.has("s" + n)) n++;
+  const at = kind === "closing" ? S.deck.slides.length : S.cur + 1;
+  S.deck.slides.splice(at, 0, { id: "s" + n, modules: r.modules }); S.cur = at; S.sel = null;
+  commit("已生成：" + r.note); renderInspector(); refreshSlide();
+}
+
+(async function boot() {
+  const st = await api("/api/state");
+  S.deck = st.deck; S.R = st.rules; S.snap = JSON.stringify(S.deck); S.synced = S.snap;
+  S.seen = await api("/api/version"); S.brand = await api("/api/brand");
+  if (st.mtime !== undefined) S.seen.deck = st.mtime;                                /* 版本以读课件那一刻为准 */
+  const q = await api("/api/ai"); S.ai = q.requests; S.aiKinds = q.kinds;
+  syncGrid(); applyStyle(); renderSide(); fit(); renderAll(); renderInspector();
+  await refreshSlide(); refreshReports(); loadLib();
+  status("就绪 · 自动保存"); poll();
+  window.__ready = true;
+})();
+</script>
+</body>
+</html>

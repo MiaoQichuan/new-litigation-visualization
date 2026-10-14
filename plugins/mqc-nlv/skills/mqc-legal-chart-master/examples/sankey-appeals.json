@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "chart": "sankey",
+  "title": "上诉案件 20% 获改判",
+  "scope": "示例：某中级人民法院辖区 2025 年一审民事案件",
+  "unit": "件",
+  "n": 1000,
+  "source": "示例数据，非真实统计",
+  "emphasis": "revised",
+  "data": {
+    "nodes": [
+      {
+        "id": "first",
+        "label": "一审",
+        "stage": 0
+      },
+      {
+        "id": "accept",
+        "label": "服判息诉",
+        "stage": 1
+      },
+      {
+        "id": "appeal",
+        "label": "上诉",
+        "stage": 1
+      },
+      {
+        "id": "upheld",
+        "label": "维持原判",
+        "stage": 2
+      },
+      {
+        "id": "revised",
+        "label": "改判",
+        "stage": 2
+      },
+      {
+        "id": "remand",
+        "label": "发回重审",
+        "stage": 2
+      }
+    ],
+    "links": [
+      {
+        "from": "first",
+        "to": "accept",
+        "value": 720
+      },
+      {
+        "from": "first",
+        "to": "appeal",
+        "value": 280
+      },
+      {
+        "from": "appeal",
+        "to": "upheld",
+        "value": 196
+      },
+      {
+        "from": "appeal",
+        "to": "revised",
+        "value": 56
+      },
+      {
+        "from": "appeal",
+        "to": "remand",
+        "value": 28
+      }
+    ]
+  }
+}

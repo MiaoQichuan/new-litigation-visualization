@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "chart": "ribbon",
+  "title": "55% 的资金流入王某",
+  "scope": "示例：某合同诈骗案涉案账户 2024 年 37 笔转账汇总",
+  "unit": "万元",
+  "n": 37,
+  "source": "示例数据，非真实统计",
+  "emphasis": "wang",
+  "data": {
+    "sources": [
+      {
+        "id": "jia",
+        "label": "甲公司"
+      },
+      {
+        "id": "yi",
+        "label": "乙公司"
+      },
+      {
+        "id": "zhang",
+        "label": "张某"
+      },
+      {
+        "id": "li",
+        "label": "李某"
+      }
+    ],
+    "targets": [
+      {
+        "id": "bing",
+        "label": "丙公司"
+      },
+      {
+        "id": "ding",
+        "label": "丁公司"
+      },
+      {
+        "id": "wang",
+        "label": "王某"
+      },
+      {
+        "id": "zhao",
+        "label": "赵某"
+      },
+      {
+        "id": "other",
+        "label": "其他账户"
+      }
+    ],
+    "links": [
+      {
+        "from": "jia",
+        "to": "bing",
+        "value": 120
+      },
+      {
+        "from": "jia",
+        "to": "wang",
+        "value": 180
+      },
+      {
+        "from": "yi",
+        "to": "ding",
+        "value": 90
+      },
+      {
+        "from": "yi",
+        "to": "wang",
+        "value": 120
+      },
+      {
+        "from": "zhang",
+        "to": "wang",
+        "value": 80
+      },
+      {
+        "from": "zhang",
+        "to": "zhao",
+        "value": 40
+      },
+      {
+        "from": "li",
+        "to": "bing",
+        "value": 50
+      },
+      {
+        "from": "li",
+        "to": "wang",
+        "value": 60
+      },
+      {
+        "from": "li",
+        "to": "other",
+        "value": 60
+      }
+    ]
+  }
+}

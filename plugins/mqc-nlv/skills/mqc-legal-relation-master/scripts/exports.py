@@ -63,7 +63,7 @@ def _normalized(svg_path):
     每个拐角歪成一条斜线，虚线全成实线。V1 本身不动。
     """
     import tempfile, svg_geom
-    src = open(svg_path, encoding="utf-8").read()
+    src = open(svg_path, encoding="utf-8-sig").read()
     fd, tmp = tempfile.mkstemp(suffix=".svg")
     os.close(fd)
     open(tmp, "w", encoding="utf-8").write(svg_geom.normalize(src))
@@ -91,7 +91,7 @@ def to_drawio(svg_path, out_path, style="奇川风"):
                         "旧版按 nodes / edges / layout 生成的 drawio 会丢掉走线，已停用")
     import svg_geom
     from xml.sax.saxutils import escape, quoteattr
-    g = svg_geom.read(open(svg_path, encoding="utf-8").read())
+    g = svg_geom.read(open(svg_path, encoding="utf-8-sig").read())
     cells, nid = [], 2
 
     def fc(c, default):
@@ -206,7 +206,7 @@ def export_all(svg_path, base, nodes=None, edges=None, layout=None,
     if not isinstance(style, str) or style not in STYLE_MODE:
         raise ValueError(f"风格只能是奇川风 / 白描 / 歸藏风其中一种，收到：{style!r}")
     if style != "奇川风":
-        src = re.sub(r"<defs>.*?</defs>", "", open(svg_path, encoding="utf-8").read(), flags=re.S)
+        src = re.sub(r"<defs>.*?</defs>", "", open(svg_path, encoding="utf-8-sig").read(), flags=re.S)
         if 'data-emph="1"' in src or "#991B1B" in src.upper():
             raise ValueError(f"{style}不提供强调选项，但这张 SVG 带着强调标记或深红。"
                              "强调只在选奇川风时由使用者指定：白描或歸藏风出图时不要传入任何强调")

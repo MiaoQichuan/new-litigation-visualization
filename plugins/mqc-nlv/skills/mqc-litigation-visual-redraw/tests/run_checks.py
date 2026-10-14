@@ -1457,7 +1457,7 @@ def _():
     import tempfile
     import textwrap
     d = tempfile.mkdtemp()
-    with open(os.path.join(d, "sitecustomize.py"), "w") as f:
+    with open(os.path.join(d, "sitecustomize.py"), "w", encoding="utf-8") as f:
         f.write(textwrap.dedent("""
             import shutil, os.path
             MISSING = {"fc-list","fc-cache","soffice","libreoffice","pdftoppm",
@@ -1483,7 +1483,7 @@ def _():
     for name, args, want in cases:
         args = [os.path.join(root, args[0])] + args[1:]
         r = _sp.run([sys.executable] + args, capture_output=True, text=True,
-                    env=env, timeout=600)
+                    env=env, timeout=600, encoding="utf-8")
         blob = r.stdout + r.stderr
         assert "Traceback" not in blob, \
             f"{name} ends on a traceback on a bare box:\n{blob[-320:]}"
@@ -1502,7 +1502,7 @@ def _():
     import tempfile
     import textwrap
     d = tempfile.mkdtemp()
-    with open(os.path.join(d, "sitecustomize.py"), "w") as f:
+    with open(os.path.join(d, "sitecustomize.py"), "w", encoding="utf-8") as f:
         f.write(textwrap.dedent("""
             import shutil
             _w = shutil.which
@@ -1511,7 +1511,7 @@ def _():
     env = dict(os.environ)
     env["PYTHONPATH"] = d + os.pathsep + env.get("PYTHONPATH", "")
     r = _sp.run([sys.executable, os.path.join(HERE, "..", "scripts", "doctor.py")],
-                capture_output=True, text=True, env=env, timeout=180)
+                capture_output=True, text=True, env=env, timeout=180, encoding="utf-8")
     out = r.stdout + r.stderr
     assert "Traceback" not in out, f"doctor crashed without fc-list:\n{out[-400:]}"
     assert "UnboundLocalError" not in out, "a variable is defined on only one branch"
@@ -1600,7 +1600,7 @@ def _():
         '<svg xmlns="http://www.w3.org/2000/svg"><foreignObject width="9" height="9">'
         '<div xmlns="http://www.w3.org/1999/xhtml">甲公司</div></foreignObject></svg>')
     r = subprocess.run([sys.executable, os.path.join(HERE, "..", "scripts", "source_check.py"), f],
-                       capture_output=True, text=True)
+                       capture_output=True, text=True, encoding="utf-8")
     assert r.returncode == 0, "Mermaid 式 SVG（文字在 foreignObject 里）被当成位图拦下"
     rsrc = open(os.path.join(HERE, "..", "scripts", "render.py"), encoding="utf-8").read()
     assert 'm.get("edges")' in rsrc.split("def _print_checklist")[1][:2500], "核对清单没扫连线上的深红"
@@ -1876,8 +1876,8 @@ def _():
         '<svg xmlns="http://www.w3.org/2000/svg"><text x="1" y="1">甲</text></svg>')
     png = os.path.join(d, "b.png")
     open(png, "wb").write(b"\x89PNG\r\n\x1a\n" + b"\0" * 32)
-    r_ok = subprocess.run([sys.executable, sc, svg], capture_output=True, text=True)
-    r_bad = subprocess.run([sys.executable, sc, png], capture_output=True, text=True)
+    r_ok = subprocess.run([sys.executable, sc, svg], capture_output=True, text=True, encoding="utf-8")
+    r_bad = subprocess.run([sys.executable, sc, png], capture_output=True, text=True, encoding="utf-8")
     assert r_ok.returncode == 0, "矢量源被无故拦下"
     assert r_bad.returncode == 3, f"位图源没有拦住（退出码 {r_bad.returncode}）"
     for kw in ("token", "继续", "SVG"):
@@ -3102,7 +3102,7 @@ def _long_text():
     import re as _re, json as _json, subprocess, sys, pathlib, tempfile
     import render as _render
     root = pathlib.Path(__file__).resolve().parent.parent
-    m = _json.loads((root / "examples" / "comparison-table.json").read_text())
+    m = _json.loads((root / "examples" / "comparison-table.json").read_text(encoding="utf-8"))
     m["title_text"] = "关于某某市某某区某某工程建设项目施工合同纠纷一案二审判决与再审裁定裁判要旨逐项对比分析表"
     mod = _render.choose(m)
     svg, w, h = mod.render(m)
@@ -3115,12 +3115,46 @@ def _long_text():
     with tempfile.NamedTemporaryFile("w", suffix=".svg", delete=False) as f:
         f.write(fitted); p = f.name
     r = subprocess.run([sys.executable, str(root / "scripts" / "lint.py"), p],
-                       capture_output=True, text=True, timeout=60)
+                       capture_output=True, text=True, timeout=60, encoding="utf-8")
     assert "overflows canvas" not in r.stdout, f"still overflowing: {r.stdout}"
     # a short title is left completely alone
-    m2 = _json.loads((root / "examples" / "comparison-table.json").read_text())
+    m2 = _json.loads((root / "examples" / "comparison-table.json").read_text(encoding="utf-8"))
     s2, _, _ = _render.choose(m2).render(m2)
     assert _render.fit_title(s2) == s2, "fit_title touched a title that already fits"
+
+
+# ---- schema agrees with the code ----------------------------------------
+@check("schema · the JSON schema accepts every layout the code renders, and every example")
+def _():
+    """The schema file is enforced whenever `jsonschema` happens to be installed.
+    It once lacked `comparison_table`, so on such a machine the shipped example —
+    and every A-vs-B table a user asked for — was refused with "not one of [...]",
+    while machines without jsonschema rendered it fine. The two validators must
+    agree, so this compares them directly (no jsonschema needed for part 1)."""
+    import inspect
+    from common import validate_map
+    schema = json.load(open(os.path.join(HERE, "..", "schemas", "semantic-map.schema.json"),
+                            encoding="utf-8"))
+    enum = set(schema["properties"]["layout"]["enum"])
+    code = set(re.findall(r'"([a-z_]+)"', inspect.getsource(validate_map).split("_schema_errors")[0]))
+    handled = {l for l in code if l in enum or l.endswith(("_timeline", "_gantt", "_flow",
+                                                             "_relation", "_tree", "_table"))}
+    missing = sorted(handled - enum)
+    assert not missing, f"layouts the code renders but the schema rejects: {missing}"
+    try:
+        import jsonschema
+    except ImportError:
+        return
+    v = jsonschema.Draft202012Validator(schema)
+    bad = []
+    for f in sorted(os.listdir(EXAMPLES)):
+        if f.endswith(".json"):
+            for e in v.iter_errors(json.load(open(os.path.join(EXAMPLES, f), encoding="utf-8"))):
+                bad.append(f"{f}: {'/'.join(map(str, e.absolute_path))}: {e.message[:80]}")
+    for f in ("edge_relation_dense.json",):
+        for e in v.iter_errors(load(f)):
+            bad.append(f"{f}: {'/'.join(map(str, e.absolute_path))}: {e.message[:80]}")
+    assert not bad, "schema rejects shipped input:\n  " + "\n  ".join(bad[:6])
 
 
 # ---- environment doctor --------------------------------------------------
@@ -3129,7 +3163,7 @@ def _doctor():
     import subprocess, sys, pathlib
     root = pathlib.Path(__file__).resolve().parent.parent
     r = subprocess.run([sys.executable, str(root / "scripts" / "doctor.py")],
-                       capture_output=True, text=True, timeout=60)
+                       capture_output=True, text=True, timeout=60, encoding="utf-8")
     out = r.stdout
     for needle in ("Python", "graphviz", "PNG rasteriser", "IBM Plex Mono", "Result:"):
         assert needle in out, f"doctor.py never reported {needle!r}"

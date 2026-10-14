@@ -1,0 +1,24 @@
+{
+ "schema_version": 1,
+ "chart": "bar",
+ "title": "支持率提高20%",
+ "scope": "虚构甲律所 2021—2025 年业务样本",
+ "unit": "件",
+ "n": 200,
+ "source": "本测试集虚构数据，非真实案件统计",
+ "emphasis": "this",
+ "data": {
+  "items": [
+   {
+    "id": "last",
+    "label": "去年",
+    "value": 40
+   },
+   {
+    "id": "this",
+    "label": "今年",
+    "value": 60
+   }
+  ]
+ }
+}

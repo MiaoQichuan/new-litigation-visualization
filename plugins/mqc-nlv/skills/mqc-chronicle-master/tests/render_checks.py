@@ -33,7 +33,7 @@ def ck(no, cond, msg):
 def render(case):
     out = os.path.join(tempfile.mkdtemp(), "ri.json")
     r = subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "to_render.py"), case, out],
-                       capture_output=True, text=True)
+                       capture_output=True, text=True, encoding="utf-8")
     if r.returncode:
         print(r.stdout + r.stderr)
         raise SystemExit(1)

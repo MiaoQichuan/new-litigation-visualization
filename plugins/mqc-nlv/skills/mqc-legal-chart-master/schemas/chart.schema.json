@@ -1,0 +1,678 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "法律图表大师 · 图表说明",
+  "description": "这份 schema 是给人读的说明；真正执行校验的是 scripts/spec.py（它还核对 n、标题数字与桑基守恒）。 本 schema 只管结构层；数值对账、标题数字、语义约束由 scripts/spec.py 核，两边由测试保持同步。",
+  "type": "object",
+  "required": [
+    "chart",
+    "title",
+    "scope",
+    "source"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "chart": {
+      "enum": [
+        "bar",
+        "hbar",
+        "waffle",
+        "rose",
+        "dumbbell",
+        "strip",
+        "sankey",
+        "ribbon",
+        "waterfall"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "description": "结论式标题；其中的阿拉伯数字必须能由数据推出"
+    },
+    "scope": {
+      "type": "string",
+      "description": "样本口径：哪个法院、什么案件、什么时间段"
+    },
+    "n": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "样本量；给了 dataset 时可以不写，由脚本逐行数出"
+    },
+    "unit": {
+      "type": "string",
+      "description": "单位，例如 件、万元、天、份判决"
+    },
+    "source": {
+      "type": "string",
+      "description": "出处"
+    },
+    "emphasis": {
+      "type": [
+        "string",
+        "integer",
+        "null"
+      ],
+      "description": "唯一一处重音指向的 id"
+    },
+    "style": {
+      "enum": [
+        "奇川风",
+        "歸藏风"
+      ]
+    },
+    "accent": {
+      "description": "已停用（0.9.3）：V6 只用风格原色，奇川风 #991B1B、歸藏风 #002FA7。写了会被拒并说明原因。",
+      "not": {}
+    },
+    "canvas": {
+      "oneOf": [
+        {
+          "enum": [
+            "slide",
+            "slide-half",
+            "a4-landscape",
+            "square",
+            "portrait",
+            "wide-cover",
+            "full",
+            "two-thirds",
+            "half",
+            "wide"
+          ]
+        },
+        {
+          "type": "string",
+          "pattern": "^\\d+x\\d+$"
+        },
+        {
+          "type": "object",
+          "required": [
+            "w",
+            "h"
+          ],
+          "properties": {
+            "w": {
+              "type": "number"
+            },
+            "h": {
+              "type": "number"
+            }
+          }
+        }
+      ]
+    },
+    "order": {
+      "enum": [
+        "desc",
+        "given"
+      ],
+      "description": "横条的排序"
+    },
+    "note": {
+      "type": "string",
+      "description": "给人看的备注，不上图"
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label"
+            ],
+            "properties": {
+              "id": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "label": {
+                "type": "string",
+                "description": "类目名，照录材料"
+              },
+              "value": {
+                "type": "number",
+                "minimum": 0
+              },
+              "from": {
+                "type": "number",
+                "minimum": 0,
+                "description": "哑铃：左端的值"
+              },
+              "to": {
+                "type": "number",
+                "minimum": 0,
+                "description": "哑铃：右端的值"
+              }
+            },
+            "description": "竖柱 / 横条 / 百点方阵 / 玫瑰写 value；哑铃写 from 与 to"
+          }
+        },
+        "measure": {
+          "enum": [
+            "count",
+            "percent"
+          ],
+          "description": "百点方阵必填"
+        },
+        "from_label": {
+          "type": "string"
+        },
+        "to_label": {
+          "type": "string"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label",
+              "values"
+            ],
+            "properties": {
+              "id": {},
+              "label": {
+                "type": "string"
+              },
+              "values": {
+                "type": "array",
+                "items": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        },
+        "threshold": {
+          "type": "object",
+          "required": [
+            "value",
+            "label"
+          ],
+          "properties": {
+            "value": {
+              "type": "number"
+            },
+            "label": {
+              "type": "string"
+            }
+          }
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label",
+              "stage"
+            ],
+            "properties": {
+              "id": {},
+              "label": {
+                "type": "string"
+              },
+              "stage": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 3
+              }
+            }
+          }
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "from",
+              "to",
+              "value"
+            ],
+            "properties": {
+              "from": {},
+              "to": {},
+              "value": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            }
+          }
+        },
+        "sources": {
+          "type": "array",
+          "description": "汇入图的来源",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label"
+            ]
+          }
+        },
+        "targets": {
+          "type": "array",
+          "description": "汇入图的去处",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label"
+            ]
+          }
+        },
+        "start": {
+          "type": "object",
+          "required": [
+            "label",
+            "value"
+          ],
+          "properties": {
+            "label": {
+              "type": "string"
+            },
+            "value": {
+              "type": "number"
+            }
+          },
+          "description": "逐级加减：起点"
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "description": "逐级加减：每一级，加为正、减为负，不能为 0",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label",
+              "value"
+            ],
+            "properties": {
+              "id": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "label": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "end": {
+          "type": "object",
+          "required": [
+            "label",
+            "value"
+          ],
+          "properties": {
+            "label": {
+              "type": "string"
+            },
+            "value": {
+              "type": "number"
+            }
+          },
+          "description": "逐级加减：终点，等于起点加减各级之和"
+        }
+      },
+      "description": "给了 dataset + view 时，items / groups / nodes / links / sources / targets 由脚本算，不要手写"
+    },
+    "annotations": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "description": "批注，最多两条；只用于 bar / hbar / dumbbell / waterfall。数字须由数据推得",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "target",
+          "text"
+        ],
+        "properties": {
+          "target": {
+            "type": [
+              "string",
+              "integer"
+            ]
+          },
+          "text": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 40
+          }
+        }
+      }
+    },
+    "dataset": {
+      "type": "object",
+      "description": "逐件记录（0.9.8）：一件一行，照录材料；由 view 算成 data，并逐格溯源",
+      "required": [
+        "rows"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "rows": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object"
+          }
+        },
+        "ref": {
+          "type": "string",
+          "description": "溯源时用哪一列指认一行，例如「案号」"
+        }
+      }
+    },
+    "view": {
+      "type": "object",
+      "description": "怎么看 dataset：分组、汇总、筛选、排序（见 scripts/pivot.py）",
+      "additionalProperties": false,
+      "properties": {
+        "group_by": {
+          "type": "string"
+        },
+        "measure": {
+          "oneOf": [
+            {
+              "const": "count"
+            },
+            {
+              "type": "object",
+              "required": [
+                "sum"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "sum": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "filter": {
+          "type": "object"
+        },
+        "sort": {
+          "oneOf": [
+            {
+              "enum": [
+                "desc",
+                "asc",
+                "label",
+                "given"
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": [
+                  "string",
+                  "number"
+                ]
+              }
+            }
+          ]
+        },
+        "top": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "other": {
+          "type": "string"
+        },
+        "missing": {
+          "enum": [
+            "drop",
+            "bucket"
+          ]
+        },
+        "values": {
+          "type": "string",
+          "description": "逐件分布：每件的值在哪一列"
+        },
+        "stages": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 4,
+          "items": {
+            "type": "string"
+          },
+          "description": "桑基：各段的列名，按先后"
+        },
+        "from": {
+          "type": "string",
+          "description": "汇入图：来源列"
+        },
+        "to": {
+          "type": "string",
+          "description": "汇入图：去处列"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "dataset"
+        ]
+      },
+      "then": {
+        "required": [
+          "view"
+        ]
+      },
+      "else": {
+        "required": [
+          "n",
+          "data"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chart": {
+            "enum": [
+              "bar",
+              "hbar",
+              "waffle",
+              "rose"
+            ]
+          }
+        },
+        "required": [
+          "chart"
+        ],
+        "not": {
+          "required": [
+            "dataset"
+          ]
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "required": [
+              "items"
+            ],
+            "properties": {
+              "items": {
+                "items": {
+                  "required": [
+                    "value"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chart": {
+            "const": "dumbbell"
+          }
+        },
+        "required": [
+          "chart"
+        ],
+        "not": {
+          "required": [
+            "dataset"
+          ]
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "required": [
+              "items",
+              "from_label",
+              "to_label"
+            ],
+            "properties": {
+              "items": {
+                "items": {
+                  "required": [
+                    "from",
+                    "to"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chart": {
+            "const": "waterfall"
+          }
+        },
+        "required": [
+          "chart"
+        ],
+        "not": {
+          "required": [
+            "dataset"
+          ]
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "required": [
+              "start",
+              "steps",
+              "end"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chart": {
+            "const": "strip"
+          }
+        },
+        "required": [
+          "chart"
+        ],
+        "not": {
+          "required": [
+            "dataset"
+          ]
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "required": [
+              "groups"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chart": {
+            "const": "sankey"
+          }
+        },
+        "required": [
+          "chart"
+        ],
+        "not": {
+          "required": [
+            "dataset"
+          ]
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "required": [
+              "nodes",
+              "links"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chart": {
+            "const": "ribbon"
+          }
+        },
+        "required": [
+          "chart"
+        ],
+        "not": {
+          "required": [
+            "dataset"
+          ]
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "required": [
+              "sources",
+              "targets",
+              "links"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

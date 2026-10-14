@@ -29,7 +29,7 @@ def _svg_text_runs(path):
     真实运行记录：Mermaid 导出的关系图把 56 段文字全放在 foreignObject 里，
     一个 <text> 都没有，于是被误判成位图、退出码 3 拦下；而那份 SVG 的文字
     其实是真文字，逐字可抄。"""
-    s = open(path, encoding="utf-8", errors="replace").read()
+    s = open(path, encoding="utf-8-sig", errors="replace").read()
     n = len(re.findall(r"<text\b", s))
     for fo in re.findall(r"<foreignObject\b[\s\S]*?</foreignObject>", s):
         if re.sub(r"<[^>]+>", "", fo).strip():
@@ -116,6 +116,14 @@ def main(argv):
 
 
 if __name__ == "__main__":
+    if {"-h", "--help"} & set(__import__("sys").argv[1:]):   # 只打印用法、什么都不做（原来会把 --help 当成文件名）
+        getattr(__import__("sys").stdout, "reconfigure", lambda **k: None)(encoding="utf-8")
+        print((__doc__ or "").strip() or "用法见本模块的 SKILL.md")
+        raise SystemExit(0)
+    try:                                   # 常见输入错误（路径、JSON、编码）说人话，不甩堆栈
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
     import sys as _sys
     for _stream in (_sys.stdout, _sys.stderr):
         try:

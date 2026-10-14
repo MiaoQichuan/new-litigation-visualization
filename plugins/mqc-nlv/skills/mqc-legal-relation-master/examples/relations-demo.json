@@ -1,0 +1,136 @@
+{
+  "slug": "demo",
+  "title": "建设工程施工合同纠纷 · 法律关系图（虚构示例）",
+  "sources": [
+    "示例判决书（虚构）"
+  ],
+  "nodes": [
+    {
+      "id": "OWNER",
+      "name": "发包人",
+      "note": "建设单位",
+      "kind": "主体"
+    },
+    {
+      "id": "GC",
+      "name": "总承包人",
+      "note": "施工总承包",
+      "kind": "主体"
+    },
+    {
+      "id": "SUB",
+      "name": "分包人",
+      "note": "专业分包",
+      "kind": "主体"
+    },
+    {
+      "id": "ACTUAL",
+      "name": "实际施工人",
+      "note": "原告",
+      "kind": "主体"
+    },
+    {
+      "id": "SUPER",
+      "name": "监理单位",
+      "note": "受托监理",
+      "kind": "主体"
+    },
+    {
+      "id": "C1",
+      "name": "建设工程施工合同",
+      "note": "2021.3 签订",
+      "kind": "客体"
+    },
+    {
+      "id": "C2",
+      "name": "专业分包合同",
+      "note": "2021.9 签订",
+      "kind": "客体"
+    },
+    {
+      "id": "PROJ",
+      "name": "涉案工程",
+      "note": "A 地块 1 号楼",
+      "kind": "客体"
+    },
+    {
+      "id": "PRICE",
+      "name": "工程价款",
+      "note": "诉讼标的 3200 万元",
+      "kind": "客体"
+    }
+  ],
+  "edges": [
+    {
+      "from": "OWNER",
+      "to": "C1",
+      "label": "签订",
+      "line": "实线"
+    },
+    {
+      "from": "GC",
+      "to": "C1",
+      "label": "签订",
+      "line": "实线"
+    },
+    {
+      "from": "C1",
+      "to": "PROJ",
+      "label": "承建标的",
+      "line": "虚线"
+    },
+    {
+      "from": "GC",
+      "to": "C2",
+      "label": "签订",
+      "line": "实线"
+    },
+    {
+      "from": "SUB",
+      "to": "C2",
+      "label": "签订",
+      "line": "实线"
+    },
+    {
+      "from": "C2",
+      "to": "PROJ",
+      "label": "分包范围",
+      "line": "虚线"
+    },
+    {
+      "from": "ACTUAL",
+      "to": "PROJ",
+      "label": "实际施工",
+      "line": "实线"
+    },
+    {
+      "from": "SUPER",
+      "to": "PROJ",
+      "label": "受托监理",
+      "line": "实线"
+    },
+    {
+      "from": "PROJ",
+      "to": "PRICE",
+      "label": "已完工程量对应",
+      "line": "虚线"
+    },
+    {
+      "from": "ACTUAL",
+      "to": "PRICE",
+      "label": "本案诉请 折价补偿",
+      "line": "实线",
+      "source": "示例判决书（虚构）"
+    },
+    {
+      "from": "OWNER",
+      "to": "PRICE",
+      "label": "欠付范围内担责",
+      "line": "实线",
+      "source": "示例判决书（虚构）"
+    }
+  ],
+  "unsure": [
+    "材料未载明专业分包是否经发包人同意，未入图，请与原件核对"
+  ]
+}

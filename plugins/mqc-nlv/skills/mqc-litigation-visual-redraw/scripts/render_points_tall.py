@@ -56,5 +56,5 @@ def render(m):
     """与其余渲染器同签名：返回 (svg 文本, 宽, 高)。"""
     tmp = os.path.join(tempfile.mkdtemp(), "tall.svg")
     w, h = _VC.render(_adapt(m), tmp)[:2]
-    svg = open(tmp, encoding="utf-8").read()
+    svg = open(tmp, encoding="utf-8-sig").read()
     return svg, w, h

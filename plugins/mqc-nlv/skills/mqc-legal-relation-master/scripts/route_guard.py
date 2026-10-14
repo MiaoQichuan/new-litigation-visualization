@@ -3,7 +3,7 @@
 import re, sys, math
 STUB = 22
 import os as _os, tempfile as _tf
-s = open(sys.argv[1] if len(sys.argv) > 1 else _os.path.join(_tf.gettempdir(), "skel.svg"), encoding="utf-8").read()
+s = open(sys.argv[1] if len(sys.argv) > 1 else _os.path.join(_tf.gettempdir(), "skel.svg"), encoding="utf-8-sig").read()
 # 只把主体的矩形当障碍。标签的白底衬也是 rect，但它是用来遮断线的，
 # 不该被判成节点——否则每一处底衬都会报成一次穿越。
 # 只有主体的矩形算障碍。标签白底也是 rect，把它当主体会凭空报出一堆穿越，

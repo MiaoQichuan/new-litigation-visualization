@@ -21,7 +21,7 @@ def table():
     if _SMALL is None:
         p = os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets"),
                          "idx_small.json")
-        _SMALL = json.load(open(p, encoding="utf-8")) if os.path.exists(p) else {}
+        _SMALL = json.load(open(p, encoding="utf-8-sig")) if os.path.exists(p) else {}
     return _SMALL
 
 

@@ -12,6 +12,10 @@ final.png
 final.pdf
 *__png.pdf
 /out/
+# 在模块目录里照 README 跑示例（make.py -o out/…）留下的产物
+plugins/mqc-nlv/skills/*/out/
+# 法律图表大师 pack_standalone.py 默认把单独安装包写在 dist/（发版附件，不入库）
+plugins/mqc-nlv/skills/*/dist/
 /output/
 /renders/
 /scratch/
@@ -35,6 +39,12 @@ skeleton.json
 items.json
 *-trace.json
 *-溯源索引.docx
+# 法律图表大师的逐格溯源（<名>.trace.json）：列着案号、编号，同样是办案材料，不入库
+*.trace.json
+
+# 法律课件大师：几方同时写课件时的锁文件与暂存文件（在用户的课件文件夹里，不入库）
+.nlv-lock
+*.nlv-new
 
 # ---- 系统 / 编辑器 ----
 .DS_Store
@@ -42,3 +52,6 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+
+# 打包时 macOS 带进来的元数据
+__MACOSX/

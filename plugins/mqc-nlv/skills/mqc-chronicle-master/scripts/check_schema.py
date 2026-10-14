@@ -3,7 +3,7 @@
 """底稿结构校验。不引 jsonschema，自己走必填、枚举、正则与 additionalProperties。"""
 import json, re, sys, os
 HERE=os.path.dirname(os.path.abspath(__file__))
-S=json.load(open(os.path.join(os.path.dirname(HERE),"schemas","casefile.schema.json"),encoding="utf-8"))
+S=json.load(open(os.path.join(os.path.dirname(HERE),"schemas","casefile.schema.json"),encoding="utf-8-sig"))
 
 def walk(node, sch, path, errs):
     if "const" in sch and node!=sch["const"]: errs.append(f"{path}: 应为 {sch['const']}，实为 {node!r}")
@@ -33,6 +33,14 @@ def check(cf):
     errs=[]; walk(cf,S,"$",errs); return errs
 
 if __name__=="__main__":
+    if {"-h", "--help"} & set(__import__("sys").argv[1:]):   # 只打印用法、什么都不做（原来会把 --help 当成文件名）
+        getattr(__import__("sys").stdout, "reconfigure", lambda **k: None)(encoding="utf-8")
+        print((__doc__ or "").strip() or "用法见本模块的 SKILL.md")
+        raise SystemExit(0)
+    try:                                   # 常见输入错误（路径、JSON、编码）说人话，不甩堆栈
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
     # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是
     # 乱码。真实运行记录里，时间轴大师就因此让模型摸索了一轮编码。写法与其余 skill 一致。
     for _stream in (sys.stdout, sys.stderr):
@@ -40,7 +48,7 @@ if __name__=="__main__":
             _stream.reconfigure(encoding="utf-8")
         except Exception:
             pass
-    cf=json.load(open(sys.argv[1],encoding="utf-8"))
+    cf=json.load(open(sys.argv[1],encoding="utf-8-sig"))
     e=check(cf)
     print(f"结构校验 {sys.argv[1]}")
     for x in e: print("  FAIL",x)

@@ -1,0 +1,47 @@
+{
+ "topic": "名为买卖、实为借贷的认定",
+ "scope": "测试用虚构判决 · 2021–2024 年",
+ "fields": [
+  {
+   "key": "view",
+   "label": "法院定性",
+   "options": [
+    "认定为借贷",
+    "认定为买卖"
+   ]
+  },
+  {
+   "key": "buyback",
+   "label": "有无回购约定",
+   "options": [
+    "有",
+    "无",
+    "未提及"
+   ],
+   "no_quote_for": [
+    "未提及"
+   ]
+  },
+  {
+   "key": "outcome",
+   "label": "支持程度",
+   "options": [
+    "全部支持",
+    "部分支持",
+    "驳回诉讼请求"
+   ]
+  },
+  {
+   "key": "claim",
+   "label": "诉请金额",
+   "type": "amount",
+   "unit": "万元"
+  },
+  {
+   "key": "award",
+   "label": "判决支付金额",
+   "type": "amount",
+   "unit": "万元"
+  }
+ ]
+}

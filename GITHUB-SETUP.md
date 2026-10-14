@@ -66,12 +66,14 @@ Settings → General → Social preview → 上传
 ## 发布前自查
 
 ```bash
-# 五个模块的回归都要绿
+# 七个模块的回归都要绿
 python3 plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/tests/run_checks.py
 python3 plugins/mqc-nlv/skills/mqc-timeline-master/tests/run_checks.py
 python3 plugins/mqc-nlv/skills/mqc-chronicle-master/tests/run_checks.py
 python3 plugins/mqc-nlv/skills/mqc-trial-confrontation-master/tests/run_checks.py
 python3 plugins/mqc-nlv/skills/mqc-legal-relation-master/tests/make_checks.py
+python3 plugins/mqc-nlv/skills/mqc-legal-chart-master/tests/release_gate.py
+python3 plugins/mqc-nlv/skills/mqc-legal-courseware-master/tests/run_checks.py
 
 # 脱敏：仓库里不许有真实案件的当事人、案号、账号
 python3 plugins/mqc-nlv/skills/mqc-timeline-master/tests/check_anonymised.py
@@ -97,3 +99,22 @@ python3 plugins/mqc-nlv/skills/mqc-timeline-master/tests/check_anonymised.py
 | 03 时间轴 | `mqc-timeline-master/assets/longform/03-the-figure.png` |
 
 三张长图（01 / 02 / 03）同时提供 SVG，需要放大细看或二次编辑时用那一份。
+
+## 社区与安全设置（开源当天做一次）
+
+仓库里已备好 GitHub「Community Standards」要的全部文件：`README.md`、`LICENSE`（MIT）、
+`CONTRIBUTING.md`、`CODE_OF_CONDUCT.md`、`SECURITY.md`、`CITATION.cff`、
+`.github/ISSUE_TEMPLATE/`（问题、建议两种表单）、`.github/PULL_REQUEST_TEMPLATE.md`。
+推上去之后，在网页上再点几处：
+
+1. **Settings → General → Visibility**：改成 Public。
+2. **Settings → Code security**：打开 *Private vulnerability reporting*（SECURITY.md 指向它）、
+   *Dependabot alerts*、*Secret scanning*（公开仓库免费）。
+3. **Settings → General → Features**：Issues 打开；Discussions 可选。
+4. **Insights → Community Standards**：应当全部打勾，有缺项就照提示补。
+5. **Settings → Branches**：给 `main` 加保护规则，要求 `checks` 通过才能合并。
+6. **Releases**：打一个 tag（`v2.4.0`，与 `plugin.json` 的版本一致；上一版公开的是 v2.3.0）并写发布说明。
+
+**仓库里不该出现的东西**（推送前 `git status` 看一眼）：`__pycache__/`、`.DS_Store`、`__MACOSX/`、
+真实案件材料、律所模板与 Logo、任何本机路径。`.gitignore` 已覆盖前两项。
+

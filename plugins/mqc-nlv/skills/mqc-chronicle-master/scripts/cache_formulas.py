@@ -4,6 +4,14 @@
 并把宋体那条也合并掉，富文本与字体表都保不住。"""
 import zipfile, shutil, re, sys
 if __name__ == "__main__":
+    if {"-h", "--help"} & set(__import__("sys").argv[1:]):   # 只打印用法、什么都不做（原来会把 --help 当成文件名）
+        getattr(__import__("sys").stdout, "reconfigure", lambda **k: None)(encoding="utf-8")
+        print((__doc__ or "").strip() or "用法见本模块的 SKILL.md")
+        raise SystemExit(0)
+    try:                                   # 常见输入错误（路径、JSON、编码）说人话，不甩堆栈
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
     # Windows 中文控制台默认 GBK：这个脚本由 pipeline 以子进程方式调用，
     # 不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的仍是乱码。
     import sys as _sys
@@ -23,9 +31,10 @@ def fix(xml):
         if not mo: return m.group(0)
         off = int(mo.group(1))
         row = int(re.search(r'\d+', ref).group(0))
-        return m.group(0).replace("<v></v>", f"<v>{row-off}</v>")
-    # openpyxl 写出的形态是 <f>…</f><v></v>，把空的 v 填上
-    return re.sub(r'<c r="([A-Z]+\d+)"[^>]*><f>([^<]*)</f><v></v></c>', rep, xml)
+        return re.sub(r"<v\s*/>|<v></v>", f"<v>{row-off}</v>", m.group(0))
+    # openpyxl 写出的形态：装了 lxml 是 <f>…</f><v></v>，没装是 <f>…</f><v />（0.9.8 自检：
+    # 原来只认前一种，只装 openpyxl 的电脑上序号列没有缓存值，手机与网盘预览里是空的）。两种都填上
+    return re.sub(r'<c r="([A-Z]+\d+)"[^>]*><f>([^<]*)</f>(?:<v></v>|<v\s*/>)</c>', rep, xml)
 with zipfile.ZipFile(tmp,"w",zipfile.ZIP_DEFLATED) as zo:
     for it in zin.infolist():
         b=zin.read(it.filename)

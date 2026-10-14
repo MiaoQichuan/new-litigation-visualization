@@ -1,0 +1,30 @@
+{
+ "schema_version": 1,
+ "chart": "waffle",
+ "title": "驳回率41%",
+ "scope": "虚构甲律所 2021—2025 年业务样本",
+ "unit": "份判决",
+ "n": 100,
+ "source": "本测试集虚构数据，非真实案件统计",
+ "emphasis": "reject",
+ "data": {
+  "measure": "count",
+  "items": [
+   {
+    "id": "full",
+    "label": "全额支持",
+    "value": 41
+   },
+   {
+    "id": "part",
+    "label": "部分支持",
+    "value": 33
+   },
+   {
+    "id": "reject",
+    "label": "驳回",
+    "value": 26
+   }
+  ]
+ }
+}

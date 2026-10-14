@@ -25,15 +25,15 @@ def ck(no, cond, msg):
 def run(ri):
     out = tempfile.mkdtemp()
     svgs = B.build(ri, out)
-    D = json.load(open(ri, encoding="utf-8"))
+    D = json.load(open(ri, encoding="utf-8-sig"))
     rows = D.get("rows") or []
-    blob = "".join(open(p, encoding="utf-8").read() for p in svgs)
+    blob = "".join(open(p, encoding="utf-8-sig").read() for p in svgs)
     txt = re.sub(r"<[^>]+>", "", blob)
 
     ck("M1", sum(w for _, w in B.COLS) == B.AVAIL,
        f"列宽之和等于可用宽（{sum(w for _, w in B.COLS)} / {B.AVAIL}）")
-    ck("M4", all('width="210mm"' in open(p, encoding="utf-8").read() and
-                 'height="297mm"' in open(p, encoding="utf-8").read() for p in svgs),
+    ck("M4", all('width="210mm"' in open(p, encoding="utf-8-sig").read() and
+                 'height="297mm"' in open(p, encoding="utf-8-sig").read() for p in svgs),
        "每页都是 A4 竖版 210×297mm")
     ck("M5", blob.count(f'rx="{B.RX}"') == len(svgs),
        f"每页一个圆角外框（{blob.count(chr(114)+chr(120)+chr(61))} 处 rx）")
@@ -98,7 +98,7 @@ def run(ri):
     ck("T3", not hit, f"呈报件上不出现省略号与内部痕迹（命中 {hit}）")
 
     ck("P1", all(f"第 {i} 页 / 共 {len(svgs)} 页" in
-                 re.sub(r"<[^>]+>", "", open(svgs[i-1], encoding="utf-8").read())
+                 re.sub(r"<[^>]+>", "", open(svgs[i-1], encoding="utf-8-sig").read())
                  for i in range(1, len(svgs) + 1)),
        f"每页都标了页码（共 {len(svgs)} 页）")
     return svgs
@@ -114,7 +114,7 @@ def main():
     run(ri)
 
     # 改坏验证：标题不折行，撑长它必然越出版心，M3 必须拦下
-    d = json.load(open(ri, encoding="utf-8"))
+    d = json.load(open(ri, encoding="utf-8-sig"))
     d["case"]["title"] = d["case"].get("title", "") + "（" + "超长案件名称" * 8 + "）"
     p = os.path.join(tempfile.mkdtemp(), "bad.json")
     json.dump(d, open(p, "w", encoding="utf-8"), ensure_ascii=False)
@@ -154,10 +154,10 @@ def main():
        f"超长单句不截在列举中间（得到「{_bl[-12:]}」）")
     import json as _json_s
     _vb = _json_s.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
-                                         "references", "verbs.json"), encoding="utf-8"))["verbs"]
+                                         "references", "verbs.json"), encoding="utf-8-sig"))["verbs"]
     ck("S3", "担任" in _vb and "提审" in _vb, "动词封闭表含「担任」「提审」")
     _eb = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts",
-                            "export_brief.py"), encoding="utf-8").read()
+                            "export_brief.py"), encoding="utf-8-sig").read()
     ck("S4", "WINDIR" in _eb and "(ImportError, OSError)" in _eb,
        "Windows 上查字族不依赖 fc-list，缺 cairo 本体不崩")
 

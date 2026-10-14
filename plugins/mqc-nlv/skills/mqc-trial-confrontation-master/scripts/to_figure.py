@@ -70,6 +70,14 @@ def convert(M):
                            if sc.get("not_obtained") else "")}
 
 if __name__=="__main__":
+    if {"-h", "--help"} & set(__import__("sys").argv[1:]):   # 只打印用法、什么都不做（原来会把 --help 当成文件名）
+        getattr(__import__("sys").stdout, "reconfigure", lambda **k: None)(encoding="utf-8")
+        print((__doc__ or "").strip() or "用法见本模块的 SKILL.md")
+        raise SystemExit(0)
+    try:                                   # 常见输入错误（路径、JSON、编码）说人话，不甩堆栈
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
     # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是
     # 乱码。真实运行记录里，时间轴大师就因此让模型摸索了一轮编码。写法与其余 skill 一致。
     for _stream in (sys.stdout, sys.stderr):
@@ -77,7 +85,7 @@ if __name__=="__main__":
             _stream.reconfigure(encoding="utf-8")
         except Exception:
             pass
-    M=json.load(open(sys.argv[1],encoding="utf-8"))
+    M=json.load(open(sys.argv[1],encoding="utf-8-sig"))
     F=convert(M)
     json.dump(F, open(sys.argv[2],"w",encoding="utf-8"), ensure_ascii=False, indent=1)
     print(f'  图输入：{sys.argv[2]}（{len(F["parts"])} 个对抗部分，'

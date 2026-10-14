@@ -19,6 +19,12 @@ choice.json 就是 ask.py resolve 打印的那一行，风格与重点只认它�
 """
 import sys, os, json, math, hashlib, argparse, shutil, subprocess, time
 
+def _py(script):
+    """给用户看的下一步命令：用脚本的真实路径，在哪个目录里照抄都能跑（0.9.8：SKILL.md 要求在用户的工作目录里运行）。"""
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), script)
+    return f'python3 "{p}"' if " " in p else f"python3 {p}"
+
+
 try:
     sys.stdout.reconfigure(encoding="utf-8")
     sys.stderr.reconfigure(encoding="utf-8")
@@ -177,7 +183,7 @@ def load(path):
     edges：[[from, to, 关系名]] 或 [{from, to, label, line?: 实线/虚线, source?}]
     """
     try:
-        cf = json.load(open(path, encoding="utf-8"))
+        cf = json.load(open(path, encoding="utf-8-sig"))
     except Exception as e:
         die(f"relations.json 读不了：{e}")
     errs = []
@@ -247,7 +253,7 @@ def load_choice(path, nodes, edges):
     if not path:
         return dict(style="奇川风", emphasis=dict(nodes=[], edges=[]), label="无（使用者未指定）")
     try:
-        c = json.load(open(path, encoding="utf-8"))
+        c = json.load(open(path, encoding="utf-8-sig"))
     except Exception as e:
         die(f"choice.json 读不了：{e}")
     st = c.get("style")
@@ -338,13 +344,15 @@ def node_lines(n, NW):
 
 
 # ------------------------------------------------------------------ 布局
-def layout_key(nodes, edges, tall):
-    raw = json.dumps([[n["id"] for n in nodes], [[e["from"], e["to"]] for e in edges], tall],
-                     ensure_ascii=False)
+def layout_key(nodes, edges, tall, shape="auto"):
+    k = [[n["id"] for n in nodes], [[e["from"], e["to"]] for e in edges], tall]
+    if shape != "auto":
+        k.append(shape)          # 默认不加：原有的缓存照旧复用
+    raw = json.dumps(k, ensure_ascii=False)
     return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:12]
 
 
-def get_layout(nodes, edges, out, relayout):
+def get_layout(nodes, edges, out, relayout, shape="auto"):
     from lookup import run
     from mini_render import render as mini
     need_tall = any(len(a) + len(b) > 2 for a, b in (node_lines(n, 140) for n in nodes))
@@ -356,10 +364,10 @@ def get_layout(nodes, edges, out, relayout):
               "实测：同一结构下高模块比矮模块慢 0 到 30%（不是此前说的三到四倍，那次是网格不同"
               "造成的错觉）；真正影响耗时的是规模——6 主体约 0.1 秒，9 主体约 5 秒。"
               "备注写短能少占一行，有时会换到更省的网格")
-    key = layout_key(nodes, edges, need_tall)
+    key = layout_key(nodes, edges, need_tall, shape)
     cache = os.path.join(out, "layout.json")
     if not relayout and os.path.exists(cache):
-        c = json.load(open(cache, encoding="utf-8"))
+        c = json.load(open(cache, encoding="utf-8-sig"))
         if c.get("key") == key:
             print("  布局：复用缓存（主体与关系未变）")
             return c
@@ -370,7 +378,7 @@ def get_layout(nodes, edges, out, relayout):
     solver_nodes = [dict(id=n["id"], name=n["name"], group=n["kind"]) for n in nodes]
     try:
         sc, grid, a, pos, rects, pp, sk, d = run(solver_nodes, E, render=mini,
-                                                  force_tall=need_tall)
+                                                  force_tall=need_tall, shape=shape)
     except ValueError as e:
         die(str(e), 3)
     c = dict(key=key, grid=list(grid), score=list(sc), rects={k: list(v) for k, v in rects.items()},
@@ -403,7 +411,7 @@ def render_svg(cf, nodes, edges, hot_n, hot_e, L, path):
             problems.append(f"「{n['name']}」的名称与备注共 {len(rows)} 行，模块装不下；"
                             "名称照录不能删，请把备注改短或移入出处索引")
         _emph_attr = ' data-emph="1"' if hot else ""   # 先算好：Python 3.11 不许 f-string 表达式里带反斜杠
-        O.append(f'<g data-role="node"{_emph_attr}>')
+        O.append(f'<g data-role="node" data-ref="{esc(n["id"]).replace(chr(34), "&quot;")}"{_emph_attr}>')   # data-ref：出处记录里的同一个主体（课件大师悬停看出处）
         if hot:
             O.append(f'<rect data-kind="node" x="{x}" y="{y}" width="{NW}" height="{NH}" rx="12" fill="{RED}"/>')
         else:
@@ -426,7 +434,7 @@ def render_svg(cf, nodes, edges, hot_n, hot_e, L, path):
         q[-1] = (q[-1][0] - dx / Ln * ARROW, q[-1][1] - dy / Ln * ARROW)
         hot = i in hot_e
         ds = ' stroke-dasharray="4 3"' if e.get("line") == "虚线" else ""
-        O.append(f'<path data-kind="edge" d="{rounded(q)}" fill="none" '
+        O.append(f'<path data-kind="edge" data-ref="{esc(e["from"] + "→" + e["to"]).replace(chr(34), "&quot;")}" d="{rounded(q)}" fill="none" '
                  f'stroke="{RED if hot else LINE}" stroke-width="{SW_EMPH if hot else SW}"{ds} '
                  f'marker-end="url(#{"ar" if hot else "a"})"/>')
     labels = [e["label"] for e in edges]
@@ -511,6 +519,19 @@ def provenance(cf, nodes, edges, path):
     open(path, "w", encoding="utf-8").write("\n".join(out) + "\n")
 
 
+def trace_json(nodes, edges, path):
+    """出处索引的机读版（与时间轴大师的 -trace.json 同一种写法）：图上每个主体、每条关系的出处。
+    放在图旁边；把图放进法律课件大师时一起放进去，鼠标停在图上就看得到出处、也能写进演讲者备注。
+    只写图上画了的（未入图的仍只在出处索引里）；出处照录 relations.json 的 source，不补、不编。"""
+    name = {n["id"]: n["name"] for n in nodes}
+    rows = [{"no": n["id"], "head": n["name"] + (f"（{n['note']}）" if n.get("note") else ""),
+             "file": "", "locator": n.get("source") or "", "quote": ""} for n in nodes]
+    rows += [{"no": f"{e['from']}→{e['to']}", "head": f"{name.get(e['from'], e['from'])} → {name.get(e['to'], e['to'])}：{e['label']}",
+              "file": "", "locator": e.get("source") or "", "quote": ""} for e in edges]
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
+        json.dump({"title": "出处索引", "rows": rows}, f, ensure_ascii=False, indent=1)
+
+
 # ------------------------------------------------------------------ 主流程
 def main():
     ap = argparse.ArgumentParser()
@@ -523,6 +544,8 @@ def main():
     ap.add_argument("--name", default=None, help="产物文件名前缀（英文数字），默认取 slug 或 relation")
     ap.add_argument("--formats", default=None,
                     help="要出哪几种：svg,png,pptx,vsdx,drawio 或 all；不给就看 choice.json，都没有 = svg,pptx")
+    ap.add_argument("--shape", choices=("auto", "wide"), default="auto",
+                    help="auto：按读法排（多为竖版，插进 A4 Word 竖着读）；wide：横版，放进 16:9 课件页或投影用")
     a = ap.parse_args()
 
     if a.check:
@@ -564,13 +587,13 @@ def main():
         globals()["_TALL_WARNED"] = True
     if len(edges) > 12 and not cf.get("over12") and len(nodes) <= 9:
         print(f"\n  关系 {len(edges)} 条，超过 12 条。先跑第〇轮：")
-        print(f"  python scripts/ask.py trim {a.relations}")
+        print(f"  {_py('ask.py')} trim {a.relations}")
         sys.exit(4)
     if len(nodes) > 9 and not cf.get("over9"):
         # 超过 9 个模块，布局难度与耗时成倍上升（15 个模块在 Windows 上
         # 实测半小时以上）。先走第〇轮让使用者定留哪几个，再出图。
         print(f"\n  模块 {len(nodes)} 个，超过 9 个。先跑第〇轮：")
-        print(f"  python scripts/ask.py trim {a.relations}")
+        print(f"  {_py('ask.py')} trim {a.relations}")
         sys.exit(4)
     if a.plan_only:
         return
@@ -582,7 +605,7 @@ def main():
         check_env()
         die("运行环境不全，见上")
     os.makedirs(a.out, exist_ok=True)
-    L = get_layout(nodes, edges, a.out, a.relayout)
+    L = get_layout(nodes, edges, a.out, a.relayout, a.shape)
 
     import styles, exports, guard_lib, delivery
     st = choice["style"]
@@ -591,7 +614,7 @@ def main():
     hot_n, hot_e = set(choice["emphasis"]["nodes"]), set(choice["emphasis"]["edges"])
     master = base + "-master.svg"
     problems = render_svg(cf, nodes, edges, hot_n, hot_e, L, master)
-    svg = open(master, encoding="utf-8").read()
+    svg = open(master, encoding="utf-8-sig").read()
     svg = styles.guizang(svg, "graphviz_relation") if st == "歸藏风" else styles.ALL[st](svg)
     open(base + ".svg", "w", encoding="utf-8").write(svg)
     try:
@@ -634,6 +657,7 @@ def main():
     open(base + "-checks.txt", "w", encoding="utf-8").write("\n".join(lines) + "\n")
     open(base + "-delivery.txt", "w", encoding="utf-8").write(text + "\n")
     provenance(cf, nodes, edges, os.path.join(a.out, f"{slug}-provenance.md"))
+    trace_json(nodes, edges, base + "-trace.json")
     print()
     print(text)
     print(f"\n产物目录：{os.path.abspath(a.out)}")
@@ -658,4 +682,8 @@ def main():
 
 
 if __name__ == "__main__":
+    try:                                   # 常见输入错误（路径、JSON、编码）说人话，不甩堆栈
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
     main()

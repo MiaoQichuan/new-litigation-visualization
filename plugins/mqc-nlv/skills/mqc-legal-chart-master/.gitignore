@@ -1,0 +1,5 @@
+out/
+__pycache__/
+*.pyc
+layout.json
+.DS_Store

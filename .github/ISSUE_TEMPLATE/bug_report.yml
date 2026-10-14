@@ -1,0 +1,51 @@
+name: 报告问题 · Bug report
+description: 出图不对、导出失败、检查误报等
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **请不要上传真实案件材料。** 当事人、案号、账号、身份证号、手机号一律用虚构或脱敏后的内容复现。
+        Please do not attach real case files — reproduce with fictional or anonymised material.
+  - type: dropdown
+    id: module
+    attributes:
+      label: 哪个模块
+      options:
+        - V1 诉讼可视化重画
+        - V2 时间轴大师
+        - V3 法律关系图大师
+        - V4 大事记表大师
+        - V5 庭审对抗图大师
+        - V6 法律图表大师
+        - V7 法律课件大师
+        - 不确定 / 整个插件
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: 发生了什么，期望是什么
+      placeholder: 例如：时间轴上两张卡片重叠了；期望自动错开。
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: 怎么复现
+      description: 用的命令或对 agent 说的话、输入文件（脱敏后）、出错信息。能附上出错的图更好。
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: 环境
+      description: 建议贴上 `python3 plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/scripts/doctor.py` 的输出。
+      placeholder: 操作系统、Python 版本、用的 agent（Claude Code / DeepSeek Harness / 其他）
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: 确认
+      options:
+        - label: 我附上的材料不含真实当事人信息
+          required: true

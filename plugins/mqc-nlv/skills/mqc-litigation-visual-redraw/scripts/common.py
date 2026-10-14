@@ -12,7 +12,7 @@ from datetime import date
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _TOKENS_PATH = os.path.join(_HERE, "..", "assets", "style-tokens.json")
 
-with open(_TOKENS_PATH, encoding="utf-8") as _f:
+with open(_TOKENS_PATH, encoding="utf-8-sig") as _f:
     TOKENS = json.load(_f)
 
 C = TOKENS["colors"]
@@ -207,7 +207,7 @@ def load_map(path):
     nothing it can fix, so it retries the same call.
     """
     try:
-        with open(path, encoding="utf-8") as f:
+        with open(path, encoding="utf-8-sig") as f:
             return json.load(f)
     except FileNotFoundError:
         raise RuntimeError(f'no semantic map at "{path}" — check the path') from None
@@ -218,7 +218,7 @@ def load_map(path):
     except json.JSONDecodeError as e:
         line = ""
         try:
-            src = open(path, encoding="utf-8", errors="replace").read().splitlines()
+            src = open(path, encoding="utf-8-sig", errors="replace").read().splitlines()
             if 0 < e.lineno <= len(src):
                 line = f'\n    line {e.lineno}: {src[e.lineno - 1].strip()[:90]}'
         except OSError:
@@ -313,6 +313,10 @@ def validate_map(m):
     sv = m.get("schema_version")
     if sv is None:
         warns.append('missing "schema_version" (expected 1)')
+    elif isinstance(sv, int) and not isinstance(sv, bool) and sv > SCHEMA_VERSION:
+        # a file from a NEWER version of this skill: say so, instead of an error that reads like a broken file
+        errs.append(f'schema_version {sv} was written by a newer version of this skill (this one reads up to '
+                    f'{SCHEMA_VERSION}): update the plugin to the latest version, then try again')
     elif sv != SCHEMA_VERSION:
         errs.append(f'unsupported schema_version {sv!r} (this build expects {SCHEMA_VERSION})')
     for k in m:
@@ -402,7 +406,7 @@ def _schema_errors(m, errs):
     if not os.path.exists(path):
         return
     try:
-        with open(path, encoding="utf-8") as f:
+        with open(path, encoding="utf-8-sig") as f:
             schema = json.load(f)
         v = jsonschema.Draft202012Validator(schema)
         for e in sorted(v.iter_errors(m), key=lambda e: list(e.path)):

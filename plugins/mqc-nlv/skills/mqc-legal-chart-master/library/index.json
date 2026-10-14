@@ -1,0 +1,6130 @@
+{
+ "version": 1,
+ "count": 410,
+ "form_usage": {
+  "waffle": 28,
+  "timeline": 27,
+  "waterfall": 23,
+  "matrix": 21,
+  "flow": 20,
+  "relation": 17,
+  "hbar": 16,
+  "journey": 16,
+  "stack": 15,
+  "ribbon": 14,
+  "countdown": 13,
+  "icons": 12,
+  "interval": 11,
+  "board": 10,
+  "table": 10,
+  "stepcurve": 10,
+  "bubbles": 8,
+  "lines": 7,
+  "iceberg": 7,
+  "quote": 6,
+  "puzzle": 6,
+  "treemap": 6,
+  "gauge": 6,
+  "cardwall": 5,
+  "slope": 5,
+  "fishbone": 5,
+  "quadrant": 4,
+  "dandelion": 4,
+  "dumbbell": 4,
+  "funnel": 4,
+  "venn": 4,
+  "number": 3,
+  "planactual": 3,
+  "tree": 3,
+  "textdiff": 3,
+  "balance": 3,
+  "metro": 3,
+  "yearring": 3,
+  "scatter": 3,
+  "pyramid": 3,
+  "swimlane": 3,
+  "lifecycle": 3,
+  "layers": 3,
+  "paired": 3,
+  "strip": 2,
+  "breakpoint": 2,
+  "spectrum": 2,
+  "dialog": 2,
+  "docmark": 2,
+  "annotext": 2,
+  "radar": 2,
+  "parallel": 2,
+  "bar": 2,
+  "calendar": 2,
+  "confront": 1,
+  "gantt": 1,
+  "map": 1,
+  "sankey": 1,
+  "pierce": 1,
+  "tornado": 1,
+  "rose": 1
+ },
+ "recipes": [
+  {
+   "id": "GEN-01",
+   "area": "GEN",
+   "form": "number",
+   "intent": "count",
+   "scenes": [
+    "case",
+    "client",
+    "research",
+    "public"
+   ],
+   "name": "一页一个关键数",
+   "question": "这页只想让人记住哪一个数？",
+   "example": "「判赔 6,800 万元」配口径与来源，整页只放这一个数。",
+   "guard": "数字须能由数据推得",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-02",
+   "area": "GEN",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "case",
+    "client",
+    "trial"
+   ],
+   "name": "案件经过",
+   "question": "这个案子是怎么一步步走到今天的？",
+   "example": "起诉状与判决书里的事实，按日期排成时间轴。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-03",
+   "area": "GEN",
+   "form": "relation",
+   "intent": "structure",
+   "scenes": [
+    "case",
+    "trial",
+    "client"
+   ],
+   "name": "主体关系",
+   "question": "谁与谁、就什么、成立什么关系？",
+   "example": "发包人、总包、分包、实际施工人之间的合同关系。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-04",
+   "area": "GEN",
+   "form": "confront",
+   "intent": "contest",
+   "scenes": [
+    "trial",
+    "case"
+   ],
+   "name": "攻防对抗",
+   "question": "谁主张什么、对方怎么抗辩、法院审查什么？",
+   "example": "原告请求权基础、被告抗辩、法院逐项审查。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-05",
+   "area": "GEN",
+   "form": "flow",
+   "intent": "rule",
+   "scenes": [
+    "newlaw",
+    "skill",
+    "public"
+   ],
+   "name": "程序路径",
+   "question": "这类案件要走哪几步？",
+   "example": "立案 → 保全 → 一审 → 二审 → 执行。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-06",
+   "area": "GEN",
+   "form": "gantt",
+   "intent": "rule",
+   "scenes": [
+    "case",
+    "newlaw",
+    "client"
+   ],
+   "name": "期间与时效",
+   "question": "诉讼时效、保证期间、除斥期间各从哪天起算、到哪天届满？",
+   "example": "保证期间与诉讼时效并排的期间图。",
+   "guard": "起止日由脚本按规则计算",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-07",
+   "area": "GEN",
+   "form": "board",
+   "intent": "progress",
+   "scenes": [
+    "client",
+    "firm"
+   ],
+   "name": "多案进展看板",
+   "question": "名下几个案件，各自到了哪一步、下一个节点是什么？",
+   "example": "客户名下 12 个案件，每案当前阶段与下一节点日期。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-08",
+   "area": "GEN",
+   "form": "planactual",
+   "intent": "progress",
+   "scenes": [
+    "client",
+    "case"
+   ],
+   "name": "程序时长：预期与实际",
+   "question": "当初预计多久，实际用了多久，慢在哪一段？",
+   "example": "一审、二审、执行各段的预期天数与实际天数。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-09",
+   "area": "GEN",
+   "form": "strip",
+   "intent": "spread",
+   "scenes": [
+    "research",
+    "client"
+   ],
+   "name": "审理周期分布",
+   "question": "这类案子一般审多久？",
+   "example": "某类案件 300 件的审理天数与审限线。",
+   "guard": "样本口径必填",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-10",
+   "area": "GEN",
+   "form": "waterfall",
+   "intent": "compute",
+   "scenes": [
+    "case",
+    "client"
+   ],
+   "name": "诉讼成本构成",
+   "question": "这场官司一共要花多少钱？",
+   "example": "受理费、保全费、鉴定费、律师费、执行费逐项累加。",
+   "guard": "各项合计须等于总额",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-11",
+   "area": "GEN",
+   "form": "interval",
+   "intent": "compare",
+   "scenes": [
+    "client",
+    "case"
+   ],
+   "name": "方案区间对照",
+   "question": "几种处理方案各自的金额区间？",
+   "example": "和解报价区间与类案判赔区间并排。",
+   "guard": "执业规范：不得画成结果承诺；须注明来源为类案",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-12",
+   "area": "GEN",
+   "form": "matrix",
+   "intent": "contest",
+   "scenes": [
+    "trial",
+    "case"
+   ],
+   "name": "证据与待证事实对照",
+   "question": "每个待证事实靠哪几份证据撑着？",
+   "example": "证据 × 要件点阵：实心直接证明、空心间接证明、空列为缺口。",
+   "guard": "证明力由律师标注，不由模型判断",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-13",
+   "area": "GEN",
+   "form": "hbar",
+   "intent": "count",
+   "scenes": [
+    "trial"
+   ],
+   "name": "证据清单统计",
+   "question": "证据按类型、来源各有多少份？",
+   "example": "书证、电子数据、证人证言、鉴定意见的份数。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-14",
+   "area": "GEN",
+   "form": "ribbon",
+   "intent": "flow",
+   "scenes": [
+    "trial",
+    "case"
+   ],
+   "name": "证据汇入事实",
+   "question": "几份证据分别支撑哪几项事实？",
+   "example": "12 份证据汇入 5 项待证事实，带宽为证据份数。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-15",
+   "area": "GEN",
+   "form": "tree",
+   "intent": "rule",
+   "scenes": [
+    "trial",
+    "skill"
+   ],
+   "name": "请求权基础检索",
+   "question": "从哪条请求权基础出发、要件逐层拆到哪？",
+   "example": "违约损害赔偿请求权 → 合同成立 → 违约行为 → 损失 → 因果关系。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-16",
+   "area": "GEN",
+   "form": "table",
+   "intent": "compare",
+   "scenes": [
+    "trial",
+    "newlaw"
+   ],
+   "name": "双方观点对照",
+   "question": "同一争点上，我方与对方各怎么说？",
+   "example": "争点逐行，左右两栏各列观点与依据。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-17",
+   "area": "GEN",
+   "form": "textdiff",
+   "intent": "text",
+   "scenes": [
+    "newlaw",
+    "research"
+   ],
+   "name": "条文新旧对照",
+   "question": "这一条改了什么？",
+   "example": "新旧条文逐句对照，增删改处标出。",
+   "guard": "差异由脚本逐字比出",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-18",
+   "area": "GEN",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "newlaw",
+    "research"
+   ],
+   "name": "立法沿革",
+   "question": "这项制度怎么演变到今天？",
+   "example": "历次立法、司法解释、指导案例的时间轴。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-19",
+   "area": "GEN",
+   "form": "breakpoint",
+   "intent": "trend",
+   "scenes": [
+    "newlaw",
+    "research"
+   ],
+   "name": "规则节点前后",
+   "question": "新规施行前后，某个指标变了没有？",
+   "example": "新司法解释施行前后，按季度的支持率。",
+   "guard": "图上固定写「前后对比，不表示因果」",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-20",
+   "area": "GEN",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research",
+    "paper"
+   ],
+   "name": "裁判观点分歧",
+   "question": "在这个问题上，法院怎么看、各占多少？",
+   "example": "286 份判决中，两种观点各占多少，代表案号标出。",
+   "guard": "每个点须追得回案号",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-21",
+   "area": "GEN",
+   "form": "matrix",
+   "intent": "factor",
+   "scenes": [
+    "research",
+    "paper",
+    "client"
+   ],
+   "name": "要素与结果",
+   "question": "哪些事实因素和结果相关？",
+   "example": "有无书面合同、有无转账凭证 × 支持/驳回，旁边算支持率。",
+   "guard": "固定写「相关不等于因果」",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-22",
+   "area": "GEN",
+   "form": "interval",
+   "intent": "factor",
+   "scenes": [
+    "paper",
+    "research"
+   ],
+   "name": "影响因素森林图",
+   "question": "控制其他变量后，每个因素作用多大？",
+   "example": "回归系数与 95% 置信区间。",
+   "guard": "数值须来自用户的统计输出",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-23",
+   "area": "GEN",
+   "form": "waterfall",
+   "intent": "count",
+   "scenes": [
+    "paper",
+    "research"
+   ],
+   "name": "样本筛选流程",
+   "question": "这批样本是怎么筛出来的？",
+   "example": "检索 1,204 份 → 去重 → 剔除程序性裁定 → 纳入 286 份。",
+   "guard": "逐步加减须平衡",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-24",
+   "area": "GEN",
+   "form": "hbar",
+   "intent": "spread",
+   "scenes": [
+    "research",
+    "paper"
+   ],
+   "name": "地域差异排序",
+   "question": "各地法院尺度差多少？",
+   "example": "31 个省份支持率排序点，附样本量，样本过少标灰。",
+   "guard": "样本量过小须标注",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-25",
+   "area": "GEN",
+   "form": "map",
+   "intent": "spread",
+   "scenes": [
+    "research",
+    "public"
+   ],
+   "name": "省级地图",
+   "question": "各省分布在地图上什么样？",
+   "example": "按省着色。",
+   "guard": "审图合规风险；默认改用地域差异排序",
+   "status": "caution"
+  },
+  {
+   "id": "GEN-26",
+   "area": "GEN",
+   "form": "stack",
+   "intent": "compose",
+   "scenes": [
+    "research",
+    "paper"
+   ],
+   "name": "法院层级与结果",
+   "question": "基层、中院、高院的裁判有没有差异？",
+   "example": "四级法院 × 结果构成的 100% 堆叠。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-27",
+   "area": "GEN",
+   "form": "hbar",
+   "intent": "count",
+   "scenes": [
+    "research",
+    "paper",
+    "newlaw"
+   ],
+   "name": "高频引用法条",
+   "question": "法院最常引用哪几条？",
+   "example": "引用次数前 15 的条文。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-28",
+   "area": "GEN",
+   "form": "lines",
+   "intent": "trend",
+   "scenes": [
+    "research",
+    "paper",
+    "firm"
+   ],
+   "name": "多类案件量趋势",
+   "question": "几类案件的数量这几年怎么走？",
+   "example": "三类案件 2015–2025 年收案量。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-29",
+   "area": "GEN",
+   "form": "spectrum",
+   "intent": "contest",
+   "scenes": [
+    "paper",
+    "newlaw"
+   ],
+   "name": "学说观点光谱",
+   "question": "学者与法院分别站在哪？",
+   "example": "从「严格」到「宽松」的轴上各观点的位置。",
+   "guard": "位置须注明依据，否则改按阵营计数",
+   "status": "caution"
+  },
+  {
+   "id": "GEN-30",
+   "area": "GEN",
+   "form": "flow",
+   "intent": "rule",
+   "scenes": [
+    "skill",
+    "public"
+   ],
+   "name": "实务操作清单",
+   "question": "做这件事要几步、每步注意什么？",
+   "example": "起诉前的十步检查。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-31",
+   "area": "GEN",
+   "form": "number",
+   "intent": "risk",
+   "scenes": [
+    "client"
+   ],
+   "name": "风险提示一页",
+   "question": "这个案子最大的风险是什么？",
+   "example": "一句话风险 + 一个关键数 + 依据。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-32",
+   "area": "GEN",
+   "form": "quote",
+   "intent": "text",
+   "scenes": [
+    "case",
+    "media",
+    "teach",
+    "moot"
+   ],
+   "name": "裁判要旨金句卡",
+   "question": "这个案子法院最有分量的那句话是什么？",
+   "example": "判决书说理部分的原句，单独排成一页。",
+   "guard": "原文照录，注明案号与页码",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-33",
+   "area": "GEN",
+   "form": "cardwall",
+   "intent": "compare",
+   "scenes": [
+    "case",
+    "report",
+    "media"
+   ],
+   "name": "典型案例卡片墙",
+   "question": "十个典型案例，一页看完各自的要点？",
+   "example": "每张卡：案号、争点、结果、一句要旨。",
+   "guard": "案号必填",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-34",
+   "area": "GEN",
+   "form": "puzzle",
+   "intent": "rule",
+   "scenes": [
+    "teach",
+    "trial",
+    "public"
+   ],
+   "name": "构成要件拼图",
+   "question": "这个请求成立需要哪几块，缺了哪块？",
+   "example": "违约责任四要件拼图，缺「损失」那一块。",
+   "guard": "要件来自法条或司法解释",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-35",
+   "area": "GEN",
+   "form": "balance",
+   "intent": "contest",
+   "scenes": [
+    "teach",
+    "moot",
+    "public"
+   ],
+   "name": "天平：双方论据",
+   "question": "哪一边的证据或论据更多？",
+   "example": "支持与反对的证据份数，天平倾角由份数差算出。",
+   "guard": "倾角只由数量算，不由判断定",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-36",
+   "area": "GEN",
+   "form": "journey",
+   "intent": "narrate",
+   "scenes": [
+    "client",
+    "public",
+    "media"
+   ],
+   "name": "当事人诉讼旅程",
+   "question": "一个普通人打官司要经历什么、等多久？",
+   "example": "立案、调解、开庭、判决、上诉、执行，每段时长。",
+   "guard": "时长须有来源",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-37",
+   "area": "GEN",
+   "form": "iceberg",
+   "intent": "compose",
+   "scenes": [
+    "client",
+    "training",
+    "board"
+   ],
+   "name": "看得见与看不见的成本",
+   "question": "诉讼费只是冰山一角，水下还有什么？",
+   "example": "水上：诉讼费；水下：律师费、时间、商誉、机会成本。",
+   "guard": "比例按金额算；不可量化的项只列不画比例",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-38",
+   "area": "GEN",
+   "form": "countdown",
+   "intent": "risk",
+   "scenes": [
+    "client",
+    "training"
+   ],
+   "name": "期限倒计时",
+   "question": "还剩几天？",
+   "example": "诉讼时效、上诉期、举证期限的剩余天数。",
+   "guard": "期限由脚本计算",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-39",
+   "area": "GEN",
+   "form": "metro",
+   "intent": "rule",
+   "scenes": [
+    "teach",
+    "public",
+    "skill"
+   ],
+   "name": "程序线路图",
+   "question": "民事、刑事、行政程序怎么换乘？",
+   "example": "三条线路，刑民交叉处设换乘站。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-40",
+   "area": "GEN",
+   "form": "dialog",
+   "intent": "text",
+   "scenes": [
+    "case",
+    "teach",
+    "moot"
+   ],
+   "name": "庭审问答摘录",
+   "question": "庭审里那几问几答怎么定了胜负？",
+   "example": "笔录原文的问答，关键一句高亮。",
+   "guard": "笔录原文照录",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-41",
+   "area": "GEN",
+   "form": "docmark",
+   "intent": "text",
+   "scenes": [
+    "case",
+    "teach"
+   ],
+   "name": "判决主文拆解",
+   "question": "判决主文每一项对应什么？",
+   "example": "主文版式上逐项高亮，旁注对应的计算或依据。",
+   "guard": "原文照录",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-42",
+   "area": "GEN",
+   "form": "annotext",
+   "intent": "text",
+   "scenes": [
+    "skill",
+    "training",
+    "teach"
+   ],
+   "name": "合同条款批注",
+   "question": "这一条哪里有坑？",
+   "example": "条款原文上划线批注风险与修改建议。",
+   "guard": "原文照录",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-43",
+   "area": "GEN",
+   "form": "yearring",
+   "intent": "count",
+   "scenes": [
+    "report",
+    "firm",
+    "media"
+   ],
+   "name": "年度回顾环",
+   "question": "这一年发生了什么？",
+   "example": "十二个月排成一圈，每月的案件、新规、大事。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-44",
+   "area": "GEN",
+   "form": "scatter",
+   "intent": "factor",
+   "scenes": [
+    "research",
+    "paper"
+   ],
+   "name": "标的额与审理天数",
+   "question": "案子越大审得越久吗？",
+   "example": "每件一个点，横轴标的额、纵轴审理天数。",
+   "guard": "固定写「相关不等于因果」",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-45",
+   "area": "GEN",
+   "form": "slope",
+   "intent": "trend",
+   "scenes": [
+    "research",
+    "report"
+   ],
+   "name": "两年对比斜率图",
+   "question": "两年之间哪些指标升、哪些降？",
+   "example": "几类案件支持率在两年间的变化。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-46",
+   "area": "GEN",
+   "form": "treemap",
+   "intent": "compose",
+   "scenes": [
+    "report",
+    "research"
+   ],
+   "name": "案由构成树图",
+   "question": "几百类案由，大的小的一眼看出？",
+   "example": "二级案由嵌在一级案由里，面积为件数。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-47",
+   "area": "GEN",
+   "form": "bubbles",
+   "intent": "compare",
+   "scenes": [
+    "media",
+    "public"
+   ],
+   "name": "案件规模气泡",
+   "question": "哪类案子最多？",
+   "example": "每类案件一个气泡。",
+   "guard": "面积按数值开方",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-48",
+   "area": "GEN",
+   "form": "icons",
+   "intent": "count",
+   "scenes": [
+    "public",
+    "media",
+    "teach"
+   ],
+   "name": "一百个人里",
+   "question": "一百个原告里有几个胜诉？",
+   "example": "100 个小人，按结果着色。",
+   "guard": "须注明样本与口径",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-49",
+   "area": "GEN",
+   "form": "gauge",
+   "intent": "progress",
+   "scenes": [
+    "client",
+    "board"
+   ],
+   "name": "进度环",
+   "question": "任务完成到几成？",
+   "example": "已完成比例。",
+   "guard": "比例由脚本算",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-50",
+   "area": "GEN",
+   "form": "radar",
+   "intent": "compare",
+   "scenes": [
+    "moot",
+    "teach"
+   ],
+   "name": "多维评价雷达",
+   "question": "几个方案在几个维度上各怎么样？",
+   "example": "方案 × 维度评分。",
+   "guard": "评分依据须写明，否则不出",
+   "status": "caution"
+  },
+  {
+   "id": "GEN-51",
+   "area": "GEN",
+   "form": "quadrant",
+   "intent": "risk",
+   "scenes": [
+    "board",
+    "client"
+   ],
+   "name": "案件四象限",
+   "question": "哪些案子值得投入？",
+   "example": "案件价值 × 胜诉把握。",
+   "guard": "坐标须有可数依据；执业规范：不承诺结果",
+   "status": "caution"
+  },
+  {
+   "id": "GEN-52",
+   "area": "GEN",
+   "form": "dandelion",
+   "intent": "compose",
+   "scenes": [
+    "teach",
+    "media"
+   ],
+   "name": "一个规则的几条分支",
+   "question": "一个制度分出几种情形？",
+   "example": "根是一条规则，每根茎是一种情形，茎长为案件数。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-53",
+   "area": "GEN",
+   "form": "parallel",
+   "intent": "compare",
+   "scenes": [
+    "research",
+    "paper"
+   ],
+   "name": "多案多维对比",
+   "question": "几个案子在几项指标上怎么比？",
+   "example": "标的、周期、判赔率、上诉与否。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "CON-01",
+   "area": "CON",
+   "form": "waterfall",
+   "intent": "compute",
+   "scenes": [
+    "case",
+    "client",
+    "trial"
+   ],
+   "name": "违约损失计算",
+   "question": "违约损失是怎么算出来的？",
+   "example": "合同价款 − 已付 − 可得利益扣减 + 违约金 = 主张金额。",
+   "guard": "逐级平衡；末级等于诉请或判决主文",
+   "status": "ready"
+  },
+  {
+   "id": "CON-02",
+   "area": "CON",
+   "form": "dumbbell",
+   "intent": "compare",
+   "scenes": [
+    "case",
+    "research"
+   ],
+   "name": "约定违约金与判决调整",
+   "question": "约定的违约金被调成了多少？",
+   "example": "六案约定违约金与判决支持额对照。",
+   "guard": "调整比例由脚本算",
+   "status": "ready"
+  },
+  {
+   "id": "CON-03",
+   "area": "CON",
+   "form": "stepcurve",
+   "intent": "compute",
+   "scenes": [
+    "case",
+    "newlaw"
+   ],
+   "name": "违约金过高的调整线",
+   "question": "超过损失多少才算「过分高于」？",
+   "example": "以实际损失为横轴，可支持违约金上限的分段线。",
+   "guard": "阈值须注明出处",
+   "status": "todo"
+  },
+  {
+   "id": "CON-04",
+   "area": "CON",
+   "form": "stack",
+   "intent": "compute",
+   "scenes": [
+    "case",
+    "client"
+   ],
+   "name": "利息分段计算",
+   "question": "利息为什么是这个数？",
+   "example": "按付款节点与利率变化分段，每段天数、利率、利息。",
+   "guard": "分段合计须等于总利息",
+   "status": "todo"
+  },
+  {
+   "id": "CON-05",
+   "area": "CON",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "履约往来时间轴",
+   "question": "合同签了以后双方都做了什么？",
+   "example": "发货、验收、催款函、解除通知的时间轴。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CON-06",
+   "area": "CON",
+   "form": "table",
+   "intent": "compare",
+   "scenes": [
+    "skill",
+    "newlaw"
+   ],
+   "name": "合同条款版本对照",
+   "question": "这一条各稿怎么改的？",
+   "example": "陈述保证条款第一稿到终稿。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CON-07",
+   "area": "CON",
+   "form": "matrix",
+   "intent": "risk",
+   "scenes": [
+    "skill",
+    "deal"
+   ],
+   "name": "合同审查风险矩阵",
+   "question": "风险集中在哪类条款、有多严重？",
+   "example": "条款类别 × 严重程度，点大小为问题条数。",
+   "guard": "按条数计，不打主观分",
+   "status": "todo"
+  },
+  {
+   "id": "CON-08",
+   "area": "CON",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research"
+   ],
+   "name": "解除纠纷裁判结果",
+   "question": "合同解除纠纷里，解除被认定有效的有多少？",
+   "example": "200 份判决中解除有效 / 无效 / 部分。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CON-09",
+   "area": "CON",
+   "form": "flow",
+   "intent": "rule",
+   "scenes": [
+    "newlaw",
+    "skill"
+   ],
+   "name": "合同解除路径",
+   "question": "约定解除、法定解除、司法解除各怎么走？",
+   "example": "解除权来源 → 通知 → 异议 → 效力认定。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CON-10",
+   "area": "CON",
+   "form": "ribbon",
+   "intent": "flow",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "货款资金往来",
+   "question": "几笔货款从谁付到谁？",
+   "example": "三家关联公司之间的货款往来汇总。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CON-11",
+   "area": "CON",
+   "form": "puzzle",
+   "intent": "rule",
+   "scenes": [
+    "teach",
+    "trial"
+   ],
+   "name": "合同成立要件拼图",
+   "question": "合同到底成立了没有？",
+   "example": "要约、承诺、意思表示一致、形式要件。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "CON-12",
+   "area": "CON",
+   "form": "balance",
+   "intent": "contest",
+   "scenes": [
+    "moot",
+    "teach"
+   ],
+   "name": "解除权是否成立",
+   "question": "支持解除与反对解除的事实各有几项？",
+   "example": "天平倾角由项数算出。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "CON-13",
+   "area": "CON",
+   "form": "cardwall",
+   "intent": "compare",
+   "scenes": [
+    "report",
+    "teach"
+   ],
+   "name": "合同纠纷十大典型案例",
+   "question": "今年最值得讲的十个合同案例。",
+   "example": "十张案例卡。",
+   "guard": "案号必填",
+   "status": "todo"
+  },
+  {
+   "id": "CON-14",
+   "area": "CON",
+   "form": "countdown",
+   "intent": "risk",
+   "scenes": [
+    "client"
+   ],
+   "name": "解除异议期倒计时",
+   "question": "对方的解除通知，还剩几天可以提异议？",
+   "example": "异议期间剩余天数。",
+   "guard": "期限由脚本计算",
+   "status": "todo"
+  },
+  {
+   "id": "CON-15",
+   "area": "CON",
+   "form": "iceberg",
+   "intent": "risk",
+   "scenes": [
+    "training",
+    "board"
+   ],
+   "name": "合同风险冰山",
+   "question": "审合同时看见的和没看见的风险。",
+   "example": "水上：价款条款；水下：管辖、责任上限、解除。",
+   "guard": "只列不画比例，除非有数量",
+   "status": "todo"
+  },
+  {
+   "id": "FIN-01",
+   "area": "FIN",
+   "form": "waterfall",
+   "intent": "compute",
+   "scenes": [
+    "case",
+    "client"
+   ],
+   "name": "借贷本息计算",
+   "question": "判决本息怎么算的？",
+   "example": "借款本金 − 预扣利息 + 期内利息 + 逾期利息 = 判决金额。",
+   "guard": "预扣利息须从本金扣除",
+   "status": "ready"
+  },
+  {
+   "id": "FIN-02",
+   "area": "FIN",
+   "form": "stepcurve",
+   "intent": "rule",
+   "scenes": [
+    "newlaw",
+    "public"
+   ],
+   "name": "民间借贷利率保护线",
+   "question": "不同时期的利率保护上限是多少？",
+   "example": "按时间段的利率上限分段线。",
+   "guard": "上限数值须注明依据与适用时间",
+   "status": "todo"
+  },
+  {
+   "id": "FIN-03",
+   "area": "FIN",
+   "form": "stack",
+   "intent": "compute",
+   "scenes": [
+    "case"
+   ],
+   "name": "逾期利息分段",
+   "question": "逾期利息按什么利率、分几段算？",
+   "example": "按 LPR 调整节点分段。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "FIN-04",
+   "area": "FIN",
+   "form": "ribbon",
+   "intent": "flow",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "借款资金流向",
+   "question": "出借款项最终流到哪里？",
+   "example": "出借人账户 → 借款人 → 关联方 → 实际用款人。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "FIN-05",
+   "area": "FIN",
+   "form": "sankey",
+   "intent": "flow",
+   "scenes": [
+    "case",
+    "client"
+   ],
+   "name": "金融批量案件结果",
+   "question": "几百件批量诉讼最后都去了哪？",
+   "example": "起诉 → 调解 / 判决 → 执行到位 / 终本。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "FIN-06",
+   "area": "FIN",
+   "form": "stack",
+   "intent": "progress",
+   "scenes": [
+    "client"
+   ],
+   "name": "批量案件月度进度",
+   "question": "批量案件每月各在哪个阶段？",
+   "example": "480 件信用卡纠纷按月的立案、审理、结案、执行构成。",
+   "guard": "每月合计守恒",
+   "status": "todo"
+  },
+  {
+   "id": "FIN-07",
+   "area": "FIN",
+   "form": "interval",
+   "intent": "risk",
+   "scenes": [
+    "client",
+    "deal"
+   ],
+   "name": "担保覆盖率",
+   "question": "担保物够不够覆盖债权？",
+   "example": "债权 5 亿，抵押 3.2 亿、质押 0.8 亿，覆盖率 80%。",
+   "guard": "覆盖率由脚本算",
+   "status": "todo"
+  },
+  {
+   "id": "FIN-08",
+   "area": "FIN",
+   "form": "relation",
+   "intent": "structure",
+   "scenes": [
+    "case",
+    "deal"
+   ],
+   "name": "增信结构",
+   "question": "谁为谁提供了什么担保？",
+   "example": "保证、抵押、质押、差额补足的多方结构。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "FIN-09",
+   "area": "FIN",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research"
+   ],
+   "name": "差额补足性质认定",
+   "question": "法院把差额补足认定成什么？",
+   "example": "保证 / 债务加入 / 独立合同的件数。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "FIN-10",
+   "area": "FIN",
+   "form": "bar",
+   "intent": "count",
+   "scenes": [
+    "research",
+    "firm"
+   ],
+   "name": "金融借款收案趋势",
+   "question": "这类案子这些年多了还是少了？",
+   "example": "年度收案量。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "FIN-11",
+   "area": "FIN",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "case",
+    "client"
+   ],
+   "name": "贷后催收与时效",
+   "question": "每次催收是否中断了时效？",
+   "example": "催收记录与时效重新起算点。",
+   "guard": "中断节点须对应证据",
+   "status": "ready"
+  },
+  {
+   "id": "FIN-12",
+   "area": "FIN",
+   "form": "icons",
+   "intent": "count",
+   "scenes": [
+    "media",
+    "public"
+   ],
+   "name": "非法集资受害人",
+   "question": "一个集资案涉及多少人？",
+   "example": "每个图标代表 100 名投资人。",
+   "guard": "单位须写明",
+   "status": "todo"
+  },
+  {
+   "id": "FIN-13",
+   "area": "FIN",
+   "form": "journey",
+   "intent": "narrate",
+   "scenes": [
+    "client",
+    "public"
+   ],
+   "name": "一笔贷款的违约之路",
+   "question": "从放款到起诉，一笔贷款怎么一步步违约？",
+   "example": "放款、逾期、催收、起诉、执行。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "FIN-14",
+   "area": "FIN",
+   "form": "scatter",
+   "intent": "factor",
+   "scenes": [
+    "research"
+   ],
+   "name": "利率与支持率",
+   "question": "约定利率越高，越不被支持吗？",
+   "example": "每件一个点，横轴约定利率、纵轴支持比例。",
+   "guard": "相关不等于因果",
+   "status": "todo"
+  },
+  {
+   "id": "FIN-15",
+   "area": "FIN",
+   "form": "countdown",
+   "intent": "risk",
+   "scenes": [
+    "client"
+   ],
+   "name": "保证期间倒计时",
+   "question": "保证期间还剩几天？",
+   "example": "剩余天数。",
+   "guard": "期限由脚本计算",
+   "status": "todo"
+  },
+  {
+   "id": "FIN-16",
+   "area": "FIN",
+   "form": "quote",
+   "intent": "text",
+   "scenes": [
+    "teach",
+    "media"
+   ],
+   "name": "借贷案件裁判要旨",
+   "question": "关于砍头息，法院原话怎么说？",
+   "example": "裁判原句。",
+   "guard": "原文照录，注明案号",
+   "status": "todo"
+  },
+  {
+   "id": "COR-01",
+   "area": "COR",
+   "form": "pierce",
+   "intent": "structure",
+   "scenes": [
+    "case",
+    "deal",
+    "newlaw"
+   ],
+   "name": "股权穿透与实际控制",
+   "question": "实际控制人间接持有多少？",
+   "example": "60% × 51% × 80% = 24.5%。",
+   "guard": "乘积由脚本算并核对",
+   "status": "todo"
+  },
+  {
+   "id": "COR-02",
+   "area": "COR",
+   "form": "relation",
+   "intent": "structure",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "股东与公司关系",
+   "question": "股东、董事、公司、关联方之间怎么连？",
+   "example": "显名股东、隐名股东与代持协议。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "COR-03",
+   "area": "COR",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "case"
+   ],
+   "name": "股东会决议过程",
+   "question": "这份决议是怎么作出的？",
+   "example": "通知、召开、表决、签字的时间与瑕疵点。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "COR-04",
+   "area": "COR",
+   "form": "table",
+   "intent": "rule",
+   "scenes": [
+    "newlaw",
+    "skill"
+   ],
+   "name": "新旧公司法对照",
+   "question": "公司法修订后这一制度变了什么？",
+   "example": "出资期限、董事责任等条文对照。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "COR-05",
+   "area": "COR",
+   "form": "textdiff",
+   "intent": "text",
+   "scenes": [
+    "newlaw"
+   ],
+   "name": "章程条款修订对照",
+   "question": "章程改了哪些字？",
+   "example": "修订前后章程逐条比对。",
+   "guard": "差异由脚本逐字比出",
+   "status": "todo"
+  },
+  {
+   "id": "COR-06",
+   "area": "COR",
+   "form": "stack",
+   "intent": "compose",
+   "scenes": [
+    "deal",
+    "case"
+   ],
+   "name": "股权结构变动",
+   "question": "每次增资、转让之后，各股东持股多少？",
+   "example": "历次变更后的持股堆叠条。",
+   "guard": "每列合计 100%",
+   "status": "todo"
+  },
+  {
+   "id": "COR-07",
+   "area": "COR",
+   "form": "matrix",
+   "intent": "count",
+   "scenes": [
+    "research"
+   ],
+   "name": "股东知情权诉讼支持范围",
+   "question": "法院支持查阅哪些材料？",
+   "example": "材料类型 × 支持 / 不支持件数。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "COR-08",
+   "area": "COR",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research"
+   ],
+   "name": "公司决议效力结果",
+   "question": "决议被认定有效、可撤销、无效、不成立各多少？",
+   "example": "300 份判决结果。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "COR-09",
+   "area": "COR",
+   "form": "flow",
+   "intent": "rule",
+   "scenes": [
+    "skill",
+    "newlaw"
+   ],
+   "name": "股东出资责任追究路径",
+   "question": "追究未出资股东责任要几步？",
+   "example": "催缴 → 失权 → 加速到期 → 执行追加。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "COR-10",
+   "area": "COR",
+   "form": "ribbon",
+   "intent": "flow",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "抽逃出资资金去向",
+   "question": "增资款进账后去了哪？",
+   "example": "公司账户 → 股东 → 关联方。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "COR-11",
+   "area": "COR",
+   "form": "dandelion",
+   "intent": "structure",
+   "scenes": [
+    "teach",
+    "media"
+   ],
+   "name": "某集团业务版图",
+   "question": "某集团下面有几条业务线？",
+   "example": "根是集团，茎是业务板块，茎长为营收。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "COR-12",
+   "area": "COR",
+   "form": "puzzle",
+   "intent": "rule",
+   "scenes": [
+    "teach",
+    "trial"
+   ],
+   "name": "人格否认要件拼图",
+   "question": "法人人格否认需要哪几块？",
+   "example": "人格混同、过度支配、资本显著不足。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "COR-13",
+   "area": "COR",
+   "form": "yearring",
+   "intent": "narrate",
+   "scenes": [
+    "board"
+   ],
+   "name": "公司年度治理回顾",
+   "question": "这一年开了几次会、做了哪些决议？",
+   "example": "十二个月的会议与决议。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "COR-14",
+   "area": "COR",
+   "form": "slope",
+   "intent": "compare",
+   "scenes": [
+    "board"
+   ],
+   "name": "股东持股变化",
+   "question": "两次增资前后，各股东的位次变化。",
+   "example": "斜率图。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "MNA-01",
+   "area": "MNA",
+   "form": "relation",
+   "intent": "structure",
+   "scenes": [
+    "deal",
+    "case"
+   ],
+   "name": "交易前后结构对照",
+   "question": "重组之后，谁持有谁、哪条线变了？",
+   "example": "分拆上市前后股权与资产结构并排。",
+   "guard": "前后两图共用同一布局",
+   "status": "ready"
+  },
+  {
+   "id": "MNA-02",
+   "area": "MNA",
+   "form": "timeline",
+   "intent": "progress",
+   "scenes": [
+    "deal",
+    "client"
+   ],
+   "name": "交易时间表",
+   "question": "签约到交割还剩哪些步骤？",
+   "example": "签约 → 申报 → 审批 → 交割。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "MNA-03",
+   "area": "MNA",
+   "form": "board",
+   "intent": "progress",
+   "scenes": [
+    "deal",
+    "client"
+   ],
+   "name": "先决条件清单",
+   "question": "先决条件满足了几项？",
+   "example": "每项 CP 的负责人、状态、截止日。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "MNA-04",
+   "area": "MNA",
+   "form": "stack",
+   "intent": "compute",
+   "scenes": [
+    "deal"
+   ],
+   "name": "对价支付结构",
+   "question": "这笔钱分几次、凭什么付？",
+   "example": "首付、托管、业绩达标后分期释放。",
+   "guard": "各段合计等于总对价",
+   "status": "todo"
+  },
+  {
+   "id": "MNA-05",
+   "area": "MNA",
+   "form": "stepcurve",
+   "intent": "compute",
+   "scenes": [
+    "deal",
+    "case",
+    "newlaw"
+   ],
+   "name": "业绩补偿情景曲线",
+   "question": "业绩差多少，要补多少？",
+   "example": "实际利润为横轴，补偿金额分段线，标触发点与封顶点。",
+   "guard": "按合同公式计算",
+   "status": "todo"
+  },
+  {
+   "id": "MNA-06",
+   "area": "MNA",
+   "form": "stack",
+   "intent": "compose",
+   "scenes": [
+    "deal",
+    "skill"
+   ],
+   "name": "多轮融资股权稀释",
+   "question": "每一轮之后创始人还剩多少？",
+   "example": "天使、A、B、C 轮后持股堆叠。",
+   "guard": "每列合计 100%",
+   "status": "todo"
+  },
+  {
+   "id": "MNA-07",
+   "area": "MNA",
+   "form": "matrix",
+   "intent": "risk",
+   "scenes": [
+    "deal",
+    "client"
+   ],
+   "name": "尽调问题分布",
+   "question": "问题集中在哪个领域、多严重？",
+   "example": "法律领域 × 严重程度，点大小为问题数。",
+   "guard": "按条数计",
+   "status": "todo"
+  },
+  {
+   "id": "MNA-08",
+   "area": "MNA",
+   "form": "waterfall",
+   "intent": "compute",
+   "scenes": [
+    "deal"
+   ],
+   "name": "估值调整与交易价格",
+   "question": "企业价值怎么推到股权价格？",
+   "example": "企业价值 − 净负债 ± 营运资金调整 = 股权对价。",
+   "guard": "逐级平衡",
+   "status": "ready"
+  },
+  {
+   "id": "MNA-09",
+   "area": "MNA",
+   "form": "table",
+   "intent": "compare",
+   "scenes": [
+    "deal"
+   ],
+   "name": "投资方案比较",
+   "question": "几家投资人的方案差在哪？",
+   "example": "报价、付款、条件、承诺逐项对照。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "MNA-10",
+   "area": "MNA",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research"
+   ],
+   "name": "对赌纠纷裁判结果",
+   "question": "对赌条款被支持履行的比例？",
+   "example": "与目标公司对赌、与股东对赌的支持情况。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "MNA-11",
+   "area": "MNA",
+   "form": "flow",
+   "intent": "rule",
+   "scenes": [
+    "deal",
+    "newlaw"
+   ],
+   "name": "审批与申报路径",
+   "question": "要过几个部门、关键路径多长？",
+   "example": "发改、商务、外汇、经营者集中并行与串行。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "MNA-12",
+   "area": "MNA",
+   "form": "tree",
+   "intent": "structure",
+   "scenes": [
+    "deal"
+   ],
+   "name": "SPV 与基金架构",
+   "question": "资金经过几层载体？",
+   "example": "GP、LP、SPV、目标公司。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "MNA-13",
+   "area": "MNA",
+   "form": "journey",
+   "intent": "progress",
+   "scenes": [
+    "deal",
+    "client",
+    "pitch"
+   ],
+   "name": "并购交易旅程",
+   "question": "一笔并购从接触到整合经历了什么？",
+   "example": "接触、尽调、谈判、签约、审批、交割、整合。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "MNA-14",
+   "area": "MNA",
+   "form": "iceberg",
+   "intent": "risk",
+   "scenes": [
+    "deal",
+    "board"
+   ],
+   "name": "尽调发现的冰山",
+   "question": "账面问题之下还有什么？",
+   "example": "水上：已披露问题；水下：未决诉讼、税务、合规。",
+   "guard": "按问题数算比例",
+   "status": "todo"
+  },
+  {
+   "id": "MNA-15",
+   "area": "MNA",
+   "form": "treemap",
+   "intent": "compose",
+   "scenes": [
+    "deal"
+   ],
+   "name": "交易对价构成",
+   "question": "对价由哪几块组成？",
+   "example": "现金、股份、或有对价、承债。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "MNA-16",
+   "area": "MNA",
+   "form": "gauge",
+   "intent": "progress",
+   "scenes": [
+    "deal",
+    "board"
+   ],
+   "name": "交割条件满足度",
+   "question": "先决条件满足了几成？",
+   "example": "满足比例。",
+   "guard": "比例由脚本算",
+   "status": "todo"
+  },
+  {
+   "id": "MNA-17",
+   "area": "MNA",
+   "form": "cardwall",
+   "intent": "compare",
+   "scenes": [
+    "pitch",
+    "firm"
+   ],
+   "name": "代表交易卡片墙",
+   "question": "团队做过哪些代表交易？",
+   "example": "每张卡：交易类型、规模、角色。",
+   "guard": "须经客户同意披露",
+   "status": "todo"
+  },
+  {
+   "id": "BKR-01",
+   "area": "BKR",
+   "form": "waterfall",
+   "intent": "compute",
+   "scenes": [
+    "deal",
+    "case",
+    "client"
+   ],
+   "name": "清偿顺位分配",
+   "question": "可分配财产按顺位分下去，普通债权还剩多少？",
+   "example": "财产按法定顺位逐级分配，算出普通债权清偿率。",
+   "guard": "顺位按法律规定；逐级平衡",
+   "status": "ready"
+  },
+  {
+   "id": "BKR-02",
+   "area": "BKR",
+   "form": "interval",
+   "intent": "compare",
+   "scenes": [
+    "deal",
+    "client"
+   ],
+   "name": "重整与清算清偿率",
+   "question": "重整比清算多拿回多少？",
+   "example": "按债权类别，模拟清算与重整清偿率并排。",
+   "guard": "数值来自评估与偿债能力分析报告",
+   "status": "todo"
+  },
+  {
+   "id": "BKR-03",
+   "area": "BKR",
+   "form": "stack",
+   "intent": "compose",
+   "scenes": [
+    "deal",
+    "client"
+   ],
+   "name": "债权申报与确认",
+   "question": "申报多少、确认多少、暂缓多少？",
+   "example": "按债权类别的申报、确认、暂缓确认。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "BKR-04",
+   "area": "BKR",
+   "form": "board",
+   "intent": "progress",
+   "scenes": [
+    "client",
+    "deal"
+   ],
+   "name": "重整程序进度",
+   "question": "重整走到哪一步？",
+   "example": "受理、债权申报、债权人会议、计划表决、批准、执行。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "BKR-05",
+   "area": "BKR",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "deal"
+   ],
+   "name": "表决结果",
+   "question": "各表决组通过了没有？",
+   "example": "各组人数与金额两项是否过半、过三分之二。",
+   "guard": "通过标准按法律规定计算",
+   "status": "ready"
+  },
+  {
+   "id": "BKR-06",
+   "area": "BKR",
+   "form": "ribbon",
+   "intent": "flow",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "破产撤销权资金流",
+   "question": "临界期内的钱流向了谁？",
+   "example": "债务人账户 → 关联方 → 个别清偿。",
+   "guard": "期间起止由受理日计算",
+   "status": "ready"
+  },
+  {
+   "id": "BKR-07",
+   "area": "BKR",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "case"
+   ],
+   "name": "临界期内交易",
+   "question": "哪些交易落在撤销期内？",
+   "example": "受理前一年、六个月的期间与交易点。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "BKR-08",
+   "area": "BKR",
+   "form": "table",
+   "intent": "compare",
+   "scenes": [
+    "deal"
+   ],
+   "name": "重整投资人报价",
+   "question": "几家投资人报价与条件差在哪？",
+   "example": "报价、付款节奏、职工安置、经营承诺。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "BKR-09",
+   "area": "BKR",
+   "form": "hbar",
+   "intent": "count",
+   "scenes": [
+    "deal"
+   ],
+   "name": "债权人结构",
+   "question": "哪类债权人占多数？",
+   "example": "按债权类型或金额段的债权人数与金额。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "BKR-10",
+   "area": "BKR",
+   "form": "waterfall",
+   "intent": "compute",
+   "scenes": [
+    "deal",
+    "client"
+   ],
+   "name": "不良资产处置回收",
+   "question": "不良包的回收是怎么算的？",
+   "example": "账面本息 − 折价 − 处置费用 = 净回收。",
+   "guard": "逐级平衡",
+   "status": "ready"
+  },
+  {
+   "id": "BKR-11",
+   "area": "BKR",
+   "form": "icons",
+   "intent": "count",
+   "scenes": [
+    "media",
+    "public"
+   ],
+   "name": "受影响职工",
+   "question": "重整涉及多少职工安置？",
+   "example": "每个图标代表 10 名职工。",
+   "guard": "单位须写明",
+   "status": "todo"
+  },
+  {
+   "id": "BKR-12",
+   "area": "BKR",
+   "form": "journey",
+   "intent": "narrate",
+   "scenes": [
+    "client",
+    "public"
+   ],
+   "name": "一个债权人的破产旅程",
+   "question": "债权人从申报到拿到钱要经历什么？",
+   "example": "申报、核查、会议、表决、分配。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "BKR-13",
+   "area": "BKR",
+   "form": "treemap",
+   "intent": "compose",
+   "scenes": [
+    "deal"
+   ],
+   "name": "债务人资产构成",
+   "question": "可变现资产都在哪？",
+   "example": "房产、设备、应收、股权，面积为评估值。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "BKR-14",
+   "area": "BKR",
+   "form": "slope",
+   "intent": "compare",
+   "scenes": [
+    "deal",
+    "client"
+   ],
+   "name": "清算与重整清偿率斜率",
+   "question": "每类债权从清算到重整升了多少？",
+   "example": "斜率图。",
+   "guard": "数值来自报告",
+   "status": "todo"
+  },
+  {
+   "id": "BKR-15",
+   "area": "BKR",
+   "form": "countdown",
+   "intent": "risk",
+   "scenes": [
+    "client"
+   ],
+   "name": "债权申报期倒计时",
+   "question": "申报期还剩几天？",
+   "example": "剩余天数。",
+   "guard": "期限由脚本计算",
+   "status": "todo"
+  },
+  {
+   "id": "CST-01",
+   "area": "CST",
+   "form": "planactual",
+   "intent": "compare",
+   "scenes": [
+    "case",
+    "trial",
+    "client"
+   ],
+   "name": "工期延误分析",
+   "question": "计划工期与实际工期差在哪，责任归谁？",
+   "example": "计划与实际两行，每段延误按发包方、承包方、不可抗力着色。",
+   "guard": "归责由律师标注",
+   "status": "todo"
+  },
+  {
+   "id": "CST-02",
+   "area": "CST",
+   "form": "waterfall",
+   "intent": "compute",
+   "scenes": [
+    "case",
+    "trial",
+    "client"
+   ],
+   "name": "工程款结算",
+   "question": "工程款怎么从合同价算到欠款？",
+   "example": "合同价 ± 变更签证 − 已付 − 质保金 = 欠付。",
+   "guard": "逐级平衡",
+   "status": "ready"
+  },
+  {
+   "id": "CST-03",
+   "area": "CST",
+   "form": "dumbbell",
+   "intent": "compare",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "三方造价口径",
+   "question": "送审价、审定价、鉴定价各是多少？",
+   "example": "分项工程的三套造价并排。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CST-04",
+   "area": "CST",
+   "form": "tornado",
+   "intent": "risk",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "造价鉴定敏感项",
+   "question": "哪个计价争议对总价影响最大？",
+   "example": "各争议项按影响金额从大到小排列。",
+   "guard": "数值来自鉴定意见",
+   "status": "todo"
+  },
+  {
+   "id": "CST-05",
+   "area": "CST",
+   "form": "relation",
+   "intent": "structure",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "转包与实际施工人",
+   "question": "层层转包、挂靠之后，谁对谁负责？",
+   "example": "发包人、总包、分包、实际施工人。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CST-06",
+   "area": "CST",
+   "form": "ribbon",
+   "intent": "flow",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "工程款流向",
+   "question": "工程款进账后流到了哪？",
+   "example": "项目账户 → 分包 → 材料商 → 实际施工人。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CST-07",
+   "area": "CST",
+   "form": "stack",
+   "intent": "compute",
+   "scenes": [
+    "case"
+   ],
+   "name": "逾期付款利息分段",
+   "question": "欠付工程款利息怎么算？",
+   "example": "按应付节点与利率分段。",
+   "guard": "分段合计等于总利息",
+   "status": "todo"
+  },
+  {
+   "id": "CST-08",
+   "area": "CST",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research"
+   ],
+   "name": "实际施工人突破合同相对性",
+   "question": "法院支持实际施工人直接起诉发包人的比例？",
+   "example": "300 份判决结果。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CST-09",
+   "area": "CST",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "工程签证与索赔时间轴",
+   "question": "签证、索赔、回复的时点是否在约定期限内？",
+   "example": "索赔事件与逾期失权节点。",
+   "guard": "期限由脚本计算",
+   "status": "ready"
+  },
+  {
+   "id": "CST-10",
+   "area": "CST",
+   "form": "matrix",
+   "intent": "risk",
+   "scenes": [
+    "deal",
+    "skill"
+   ],
+   "name": "房地产项目合规清单",
+   "question": "开发各阶段要拿哪些证照、拿到了没有？",
+   "example": "开发阶段 × 证照，已取得与缺失。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "CST-11",
+   "area": "CST",
+   "form": "board",
+   "intent": "progress",
+   "scenes": [
+    "client",
+    "deal"
+   ],
+   "name": "项目报建进度",
+   "question": "报建手续各办到哪？",
+   "example": "立项、规划、施工许可、预售、竣工验收。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "CST-12",
+   "area": "CST",
+   "form": "journey",
+   "intent": "narrate",
+   "scenes": [
+    "client",
+    "training"
+   ],
+   "name": "一个工程款案件的旅程",
+   "question": "从完工到拿到工程款经历了什么？",
+   "example": "结算、审计、催款、起诉、鉴定、执行。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "CST-13",
+   "area": "CST",
+   "form": "iceberg",
+   "intent": "risk",
+   "scenes": [
+    "training",
+    "deal"
+   ],
+   "name": "工程合同隐藏风险",
+   "question": "签合同时看不到的风险。",
+   "example": "水上：价款；水下：签证、索赔时效、优先受偿权。",
+   "guard": "只列不画比例",
+   "status": "todo"
+  },
+  {
+   "id": "CST-14",
+   "area": "CST",
+   "form": "treemap",
+   "intent": "compose",
+   "scenes": [
+    "case"
+   ],
+   "name": "工程造价构成",
+   "question": "造价由哪些分部分项组成？",
+   "example": "分部 × 分项面积图。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "CST-15",
+   "area": "CST",
+   "form": "countdown",
+   "intent": "risk",
+   "scenes": [
+    "client"
+   ],
+   "name": "优先受偿权行使期限",
+   "question": "建设工程价款优先受偿权还剩几天？",
+   "example": "剩余天数。",
+   "guard": "期限由脚本计算",
+   "status": "todo"
+  },
+  {
+   "id": "IP-01",
+   "area": "IP",
+   "form": "matrix",
+   "intent": "contest",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "专利技术特征比对",
+   "question": "被诉产品落入权利要求了吗？",
+   "example": "权利要求逐特征 × 被诉产品，标相同、等同、不同。",
+   "guard": "权利要求原文照录",
+   "status": "todo"
+  },
+  {
+   "id": "IP-02",
+   "area": "IP",
+   "form": "waterfall",
+   "intent": "compute",
+   "scenes": [
+    "case",
+    "client"
+   ],
+   "name": "侵权获利计算",
+   "question": "赔偿额是怎么推出来的？",
+   "example": "销售额 × 利润率 × 贡献率 = 获利。",
+   "guard": "乘法链逐级核对",
+   "status": "ready"
+  },
+  {
+   "id": "IP-03",
+   "area": "IP",
+   "form": "dumbbell",
+   "intent": "compare",
+   "scenes": [
+    "research",
+    "case"
+   ],
+   "name": "诉请与判赔",
+   "question": "知产案件判赔通常是诉请的几成？",
+   "example": "一批案件诉请额与判赔额，附判赔率。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "IP-04",
+   "area": "IP",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research"
+   ],
+   "name": "赔偿计算方式",
+   "question": "法院用哪种方式确定赔偿？",
+   "example": "实际损失、侵权获利、许可费倍数、法定赔偿的件数。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "IP-05",
+   "area": "IP",
+   "form": "table",
+   "intent": "compare",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "商标近似比对",
+   "question": "两个商标在音、形、义上像不像？",
+   "example": "逐项对照与判断依据。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "IP-06",
+   "area": "IP",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "case"
+   ],
+   "name": "专利生命周期与无效",
+   "question": "申请、授权、无效、诉讼交织的时间轴。",
+   "example": "专利与无效、侵权诉讼两条泳道。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "IP-07",
+   "area": "IP",
+   "form": "relation",
+   "intent": "structure",
+   "scenes": [
+    "case",
+    "deal"
+   ],
+   "name": "许可与权利链",
+   "question": "权利从谁到谁、许可范围多大？",
+   "example": "权利人、独占被许可人、分许可。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "IP-08",
+   "area": "IP",
+   "form": "hbar",
+   "intent": "count",
+   "scenes": [
+    "research",
+    "paper"
+   ],
+   "name": "侵权行为类型",
+   "question": "哪类侵权最多？",
+   "example": "制造、销售、许诺销售、进口的件数。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "IP-09",
+   "area": "IP",
+   "form": "lines",
+   "intent": "trend",
+   "scenes": [
+    "research",
+    "paper",
+    "firm"
+   ],
+   "name": "知产案件趋势",
+   "question": "各类知产案件数量怎么走？",
+   "example": "专利、商标、著作权历年收案。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "IP-10",
+   "area": "IP",
+   "form": "matrix",
+   "intent": "contest",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "商业秘密秘点比对",
+   "question": "被告技术用了哪些秘点？",
+   "example": "秘点 × 被告技术，相同、实质相同、不同。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "IP-11",
+   "area": "IP",
+   "form": "bubbles",
+   "intent": "compare",
+   "scenes": [
+    "research",
+    "media"
+   ],
+   "name": "商标侵权赔偿规模",
+   "question": "哪些行业判赔最高？",
+   "example": "每个行业一个气泡。",
+   "guard": "面积按数值开方",
+   "status": "todo"
+  },
+  {
+   "id": "IP-12",
+   "area": "IP",
+   "form": "quote",
+   "intent": "text",
+   "scenes": [
+    "teach",
+    "media"
+   ],
+   "name": "知产案件裁判金句",
+   "question": "法院对创新保护的说理原句。",
+   "example": "原文。",
+   "guard": "原文照录，注明案号",
+   "status": "todo"
+  },
+  {
+   "id": "IP-13",
+   "area": "IP",
+   "form": "puzzle",
+   "intent": "rule",
+   "scenes": [
+    "teach",
+    "trial"
+   ],
+   "name": "商业秘密构成拼图",
+   "question": "秘密性、价值性、保密措施齐了吗？",
+   "example": "三块拼图。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "IP-14",
+   "area": "IP",
+   "form": "slope",
+   "intent": "trend",
+   "scenes": [
+    "research",
+    "report"
+   ],
+   "name": "判赔额两年对比",
+   "question": "各类知产案件判赔额的变化。",
+   "example": "斜率图。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "IP-15",
+   "area": "IP",
+   "form": "dandelion",
+   "intent": "structure",
+   "scenes": [
+    "teach",
+    "deal"
+   ],
+   "name": "一项专利的家族",
+   "question": "一项核心专利在多少个国家布局？",
+   "example": "根是优先权，茎是各国申请。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "SEC-01",
+   "area": "SEC",
+   "form": "breakpoint",
+   "intent": "trend",
+   "scenes": [
+    "case",
+    "research"
+   ],
+   "name": "揭露日前后股价",
+   "question": "揭露日前后股价怎么走？",
+   "example": "实施日、揭露日、基准日三条竖线与股价、指数走势。",
+   "guard": "日期按规定计算；价格来自行情数据",
+   "status": "todo"
+  },
+  {
+   "id": "SEC-02",
+   "area": "SEC",
+   "form": "waterfall",
+   "intent": "compute",
+   "scenes": [
+    "case",
+    "client"
+   ],
+   "name": "投资差额损失",
+   "question": "投资者损失怎么算的？",
+   "example": "买入均价 − 基准价 × 股数 − 系统风险扣除 = 损失。",
+   "guard": "逐级平衡",
+   "status": "ready"
+  },
+  {
+   "id": "SEC-03",
+   "area": "SEC",
+   "form": "strip",
+   "intent": "spread",
+   "scenes": [
+    "case",
+    "research"
+   ],
+   "name": "投资者损失分布",
+   "question": "上千名投资者的损失落在哪？",
+   "example": "每名投资者一个点，标中位数。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "SEC-04",
+   "area": "SEC",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research"
+   ],
+   "name": "系统风险扣除比例",
+   "question": "法院一般扣多少系统风险？",
+   "example": "一批判决的扣除比例分段。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "SEC-05",
+   "area": "SEC",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "case"
+   ],
+   "name": "信息披露时间轴",
+   "question": "虚假陈述从实施到揭露的过程。",
+   "example": "定期报告、临时公告、立案调查、处罚决定。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "SEC-06",
+   "area": "SEC",
+   "form": "relation",
+   "intent": "structure",
+   "scenes": [
+    "case"
+   ],
+   "name": "中介机构责任",
+   "question": "谁对投资者承担什么责任？",
+   "example": "发行人、董监高、保荐、审计、律所。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "SEC-07",
+   "area": "SEC",
+   "form": "interval",
+   "intent": "compare",
+   "scenes": [
+    "research"
+   ],
+   "name": "中介机构责任比例",
+   "question": "中介机构一般被判承担多大比例？",
+   "example": "各类中介的责任比例区间。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "SEC-08",
+   "area": "SEC",
+   "form": "ribbon",
+   "intent": "flow",
+   "scenes": [
+    "case"
+   ],
+   "name": "操纵市场资金账户",
+   "question": "几十个账户的资金怎么归集？",
+   "example": "资金来源账户汇入交易账户。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "SEC-09",
+   "area": "SEC",
+   "form": "calendar",
+   "intent": "spread",
+   "scenes": [
+    "case"
+   ],
+   "name": "异常交易日历",
+   "question": "异常交易集中在哪些天？",
+   "example": "按日的交易量热力。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "SEC-10",
+   "area": "SEC",
+   "form": "icons",
+   "intent": "count",
+   "scenes": [
+    "media",
+    "public"
+   ],
+   "name": "索赔投资者人数",
+   "question": "多少投资者参加了特别代表人诉讼？",
+   "example": "每个图标代表 1,000 名投资者。",
+   "guard": "单位须写明",
+   "status": "todo"
+  },
+  {
+   "id": "SEC-11",
+   "area": "SEC",
+   "form": "scatter",
+   "intent": "factor",
+   "scenes": [
+    "research"
+   ],
+   "name": "损失与持股时间",
+   "question": "持股越久损失越大吗？",
+   "example": "每名投资者一个点。",
+   "guard": "相关不等于因果",
+   "status": "todo"
+  },
+  {
+   "id": "SEC-12",
+   "area": "SEC",
+   "form": "journey",
+   "intent": "narrate",
+   "scenes": [
+    "public",
+    "media"
+   ],
+   "name": "投资者维权之路",
+   "question": "普通投资者怎么索赔？",
+   "example": "登记、诉讼、判决、执行。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "SEC-13",
+   "area": "SEC",
+   "form": "countdown",
+   "intent": "risk",
+   "scenes": [
+    "client"
+   ],
+   "name": "诉讼时效倒计时",
+   "question": "从揭露日起还剩多久？",
+   "example": "剩余天数。",
+   "guard": "期限由脚本计算",
+   "status": "todo"
+  },
+  {
+   "id": "LAB-01",
+   "area": "LAB",
+   "form": "calendar",
+   "intent": "count",
+   "scenes": [
+    "case",
+    "client"
+   ],
+   "name": "加班事实日历",
+   "question": "哪些天加班、加了多久？",
+   "example": "考勤记录按日着色，节假日单独标出。",
+   "guard": "天数与时长由脚本统计",
+   "status": "todo"
+  },
+  {
+   "id": "LAB-02",
+   "area": "LAB",
+   "form": "waterfall",
+   "intent": "compute",
+   "scenes": [
+    "case",
+    "client"
+   ],
+   "name": "劳动争议金额计算",
+   "question": "加班费、经济补偿、赔偿金各算多少？",
+   "example": "工资基数 × 月数 + 加班费 + 未休年假工资。",
+   "guard": "计算基数与依据须注明",
+   "status": "ready"
+  },
+  {
+   "id": "LAB-03",
+   "area": "LAB",
+   "form": "stepcurve",
+   "intent": "rule",
+   "scenes": [
+    "newlaw",
+    "public"
+   ],
+   "name": "经济补偿年限计算",
+   "question": "工作年限对应几个月补偿？",
+   "example": "按工作年限的分段线，标出半年进位与封顶。",
+   "guard": "规则须注明依据",
+   "status": "todo"
+  },
+  {
+   "id": "LAB-04",
+   "area": "LAB",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research"
+   ],
+   "name": "违法解除认定结果",
+   "question": "用人单位解除被认定违法的比例？",
+   "example": "一批判决结果。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "LAB-05",
+   "area": "LAB",
+   "form": "hbar",
+   "intent": "count",
+   "scenes": [
+    "research",
+    "client"
+   ],
+   "name": "解除理由分布",
+   "question": "单位最常用哪种理由解除？",
+   "example": "严重违纪、不胜任、客观情况变化的件数。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "LAB-06",
+   "area": "LAB",
+   "form": "flow",
+   "intent": "rule",
+   "scenes": [
+    "skill",
+    "public"
+   ],
+   "name": "劳动争议程序",
+   "question": "仲裁前置、诉讼、执行怎么走？",
+   "example": "调解 → 仲裁 → 诉讼。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "LAB-07",
+   "area": "LAB",
+   "form": "matrix",
+   "intent": "risk",
+   "scenes": [
+    "skill",
+    "client"
+   ],
+   "name": "用工合规体检",
+   "question": "各类用工风险在哪个环节？",
+   "example": "入职、在职、离职 × 风险类别。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "LAB-08",
+   "area": "LAB",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "case"
+   ],
+   "name": "竞业限制履行",
+   "question": "离职后的竞业限制义务与补偿支付。",
+   "example": "离职、补偿发放、违约行为、诉讼。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "LAB-09",
+   "area": "LAB",
+   "form": "dumbbell",
+   "intent": "compare",
+   "scenes": [
+    "research"
+   ],
+   "name": "竞业违约金调整",
+   "question": "约定违约金与判决支持额。",
+   "example": "一批案件对照。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "LAB-10",
+   "area": "LAB",
+   "form": "icons",
+   "intent": "count",
+   "scenes": [
+    "training",
+    "media"
+   ],
+   "name": "一百名员工里",
+   "question": "一百名员工里有几人签了竞业协议？",
+   "example": "100 个小人。",
+   "guard": "须注明样本",
+   "status": "todo"
+  },
+  {
+   "id": "LAB-11",
+   "area": "LAB",
+   "form": "journey",
+   "intent": "narrate",
+   "scenes": [
+    "public",
+    "training"
+   ],
+   "name": "一个劳动者的维权之路",
+   "question": "被辞退之后能怎么做？",
+   "example": "协商、仲裁、一审、二审。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "LAB-12",
+   "area": "LAB",
+   "form": "puzzle",
+   "intent": "rule",
+   "scenes": [
+    "teach",
+    "training"
+   ],
+   "name": "事实劳动关系拼图",
+   "question": "没签合同，算不算劳动关系？",
+   "example": "主体资格、管理关系、报酬、业务组成部分。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "LAB-13",
+   "area": "LAB",
+   "form": "countdown",
+   "intent": "risk",
+   "scenes": [
+    "client",
+    "public"
+   ],
+   "name": "仲裁时效倒计时",
+   "question": "离职后还剩几天能申请仲裁？",
+   "example": "剩余天数。",
+   "guard": "期限由脚本计算",
+   "status": "todo"
+  },
+  {
+   "id": "LAB-14",
+   "area": "LAB",
+   "form": "quadrant",
+   "intent": "risk",
+   "scenes": [
+    "training",
+    "board"
+   ],
+   "name": "用工风险四象限",
+   "question": "哪些风险发生多、代价大？",
+   "example": "按发生次数与金额分四格。",
+   "guard": "坐标用可数数据",
+   "status": "caution"
+  },
+  {
+   "id": "FAM-01",
+   "area": "FAM",
+   "form": "waterfall",
+   "intent": "compute",
+   "scenes": [
+    "case",
+    "client"
+   ],
+   "name": "夫妻共同财产分割",
+   "question": "共同财产怎么分出来的？",
+   "example": "房产、存款、股权、债务逐项加减后各得多少。",
+   "guard": "逐级平衡",
+   "status": "ready"
+  },
+  {
+   "id": "FAM-02",
+   "area": "FAM",
+   "form": "relation",
+   "intent": "structure",
+   "scenes": [
+    "case",
+    "client"
+   ],
+   "name": "继承人与遗产关系",
+   "question": "谁是继承人、谁继承什么？",
+   "example": "亲属关系与遗产分配。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "FAM-03",
+   "area": "FAM",
+   "form": "tree",
+   "intent": "rule",
+   "scenes": [
+    "newlaw",
+    "public"
+   ],
+   "name": "法定继承顺序",
+   "question": "第一顺序、第二顺序、代位继承怎么排？",
+   "example": "继承顺序树。",
+   "guard": "按法律规定",
+   "status": "ready"
+  },
+  {
+   "id": "FAM-04",
+   "area": "FAM",
+   "form": "stack",
+   "intent": "compose",
+   "scenes": [
+    "client"
+   ],
+   "name": "家族财富结构",
+   "question": "家族资产分布在哪些载体？",
+   "example": "个人持有、公司持股、信托、保险。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "FAM-05",
+   "area": "FAM",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "case"
+   ],
+   "name": "婚姻存续期间财产变动",
+   "question": "婚前、婚后财产的时间分界。",
+   "example": "婚前购房、婚后还贷、加名、离婚。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "FAM-06",
+   "area": "FAM",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research"
+   ],
+   "name": "抚养权归属结果",
+   "question": "抚养权判归父亲、母亲的比例。",
+   "example": "一批判决结果。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "FAM-07",
+   "area": "FAM",
+   "form": "ribbon",
+   "intent": "flow",
+   "scenes": [
+    "case"
+   ],
+   "name": "转移财产资金流",
+   "question": "离婚前财产转去了哪？",
+   "example": "夫妻一方账户 → 亲属 → 关联公司。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "FAM-08",
+   "area": "FAM",
+   "form": "interval",
+   "intent": "compare",
+   "scenes": [
+    "research"
+   ],
+   "name": "离婚损害赔偿数额",
+   "question": "精神损害赔偿一般判多少？",
+   "example": "判赔区间与中位数。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "FAM-09",
+   "area": "FAM",
+   "form": "journey",
+   "intent": "narrate",
+   "scenes": [
+    "public",
+    "client"
+   ],
+   "name": "离婚诉讼旅程",
+   "question": "离婚诉讼要走几步？",
+   "example": "起诉、调解、判决、再次起诉。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "FAM-10",
+   "area": "FAM",
+   "form": "dandelion",
+   "intent": "structure",
+   "scenes": [
+    "client",
+    "public"
+   ],
+   "name": "遗产分配蒲公英",
+   "question": "一份遗产分给了几个人？",
+   "example": "根是遗产，茎是继承人，茎长为份额。",
+   "guard": "份额合计须等于遗产",
+   "status": "todo"
+  },
+  {
+   "id": "FAM-11",
+   "area": "FAM",
+   "form": "iceberg",
+   "intent": "risk",
+   "scenes": [
+    "client"
+   ],
+   "name": "家族财富隐藏风险",
+   "question": "看得见的资产与看不见的风险。",
+   "example": "水上：房产存款；水下：代持、婚姻、税务。",
+   "guard": "只列不画比例",
+   "status": "todo"
+  },
+  {
+   "id": "FAM-12",
+   "area": "FAM",
+   "form": "icons",
+   "intent": "count",
+   "scenes": [
+    "research",
+    "media"
+   ],
+   "name": "抚养权一百个家庭",
+   "question": "一百个离婚家庭里，孩子跟谁？",
+   "example": "100 个小人。",
+   "guard": "须注明样本",
+   "status": "todo"
+  },
+  {
+   "id": "CRM-01",
+   "area": "CRM",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "案发经过",
+   "question": "犯罪事实与侦查经过。",
+   "example": "行为时间与立案、强制措施、起诉。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CRM-02",
+   "area": "CRM",
+   "form": "ribbon",
+   "intent": "flow",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "涉案资金流向",
+   "question": "非法集资款最终流到哪？",
+   "example": "投资人 → 归集账户 → 关联公司 → 个人。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CRM-03",
+   "area": "CRM",
+   "form": "relation",
+   "intent": "structure",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "共同犯罪关系",
+   "question": "谁在犯罪中起什么作用？",
+   "example": "主犯、从犯、帮助犯的关系。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CRM-04",
+   "area": "CRM",
+   "form": "stepcurve",
+   "intent": "rule",
+   "scenes": [
+    "newlaw",
+    "public"
+   ],
+   "name": "数额与量刑档次",
+   "question": "数额多大对应哪个量刑档？",
+   "example": "数额为横轴的量刑幅度分段。",
+   "guard": "档次标准须注明依据",
+   "status": "todo"
+  },
+  {
+   "id": "CRM-05",
+   "area": "CRM",
+   "form": "interval",
+   "intent": "compare",
+   "scenes": [
+    "research",
+    "case"
+   ],
+   "name": "量刑分布",
+   "question": "同类案件一般判多久？",
+   "example": "一批判决的刑期区间与中位数。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "CRM-06",
+   "area": "CRM",
+   "form": "matrix",
+   "intent": "factor",
+   "scenes": [
+    "research",
+    "paper"
+   ],
+   "name": "量刑情节与刑期",
+   "question": "自首、退赃、认罪认罚与刑期的关系。",
+   "example": "情节 × 刑期段。",
+   "guard": "相关不等于因果",
+   "status": "todo"
+  },
+  {
+   "id": "CRM-07",
+   "area": "CRM",
+   "form": "waterfall",
+   "intent": "compute",
+   "scenes": [
+    "case"
+   ],
+   "name": "犯罪数额认定",
+   "question": "指控数额怎么减到认定数额？",
+   "example": "指控 − 不能认定 − 已退还 = 认定数额。",
+   "guard": "逐级平衡",
+   "status": "ready"
+  },
+  {
+   "id": "CRM-08",
+   "area": "CRM",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research"
+   ],
+   "name": "辩护意见采纳",
+   "question": "辩护意见被采纳的比例。",
+   "example": "一批判决的采纳情况。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CRM-09",
+   "area": "CRM",
+   "form": "flow",
+   "intent": "rule",
+   "scenes": [
+    "skill",
+    "public"
+   ],
+   "name": "刑事诉讼程序",
+   "question": "从立案到执行的路径。",
+   "example": "侦查 → 审查起诉 → 审判 → 执行。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CRM-10",
+   "area": "CRM",
+   "form": "table",
+   "intent": "compare",
+   "scenes": [
+    "trial"
+   ],
+   "name": "控辩双方证据对照",
+   "question": "指控证据与辩方意见逐项对照。",
+   "example": "证据、证明对象、辩方质证意见。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CRM-11",
+   "area": "CRM",
+   "form": "icons",
+   "intent": "count",
+   "scenes": [
+    "media",
+    "public"
+   ],
+   "name": "被害人人数",
+   "question": "一个电诈案涉及多少被害人？",
+   "example": "每个图标代表 100 名被害人。",
+   "guard": "单位须写明",
+   "status": "todo"
+  },
+  {
+   "id": "CRM-12",
+   "area": "CRM",
+   "form": "dialog",
+   "intent": "text",
+   "scenes": [
+    "trial",
+    "case"
+   ],
+   "name": "讯问笔录对照",
+   "question": "两次讯问的供述哪里矛盾？",
+   "example": "两份笔录问答并排，矛盾处高亮。",
+   "guard": "笔录原文照录",
+   "status": "todo"
+  },
+  {
+   "id": "CRM-13",
+   "area": "CRM",
+   "form": "journey",
+   "intent": "narrate",
+   "scenes": [
+    "public",
+    "client"
+   ],
+   "name": "一个刑事案件的旅程",
+   "question": "从被抓到判决要经历什么？",
+   "example": "刑拘、逮捕、审查起诉、审判，每段期限。",
+   "guard": "期限按规定",
+   "status": "todo"
+  },
+  {
+   "id": "CRM-14",
+   "area": "CRM",
+   "form": "countdown",
+   "intent": "risk",
+   "scenes": [
+    "client"
+   ],
+   "name": "羁押期限倒计时",
+   "question": "侦查羁押期限还剩几天？",
+   "example": "剩余天数。",
+   "guard": "期限由脚本计算",
+   "status": "todo"
+  },
+  {
+   "id": "CRM-15",
+   "area": "CRM",
+   "form": "balance",
+   "intent": "contest",
+   "scenes": [
+    "moot",
+    "trial"
+   ],
+   "name": "罪与非罪的天平",
+   "question": "有罪证据与无罪辩点各几项？",
+   "example": "天平倾角由项数算出。",
+   "guard": "倾角只由数量算",
+   "status": "todo"
+  },
+  {
+   "id": "ADM-01",
+   "area": "ADM",
+   "form": "flow",
+   "intent": "rule",
+   "scenes": [
+    "skill",
+    "newlaw"
+   ],
+   "name": "行政处罚程序",
+   "question": "告知、陈述申辩、听证、决定的路径。",
+   "example": "处罚程序流程。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "ADM-02",
+   "area": "ADM",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research"
+   ],
+   "name": "行政诉讼结果",
+   "question": "行政机关败诉的比例。",
+   "example": "驳回、撤销、确认违法、责令履行。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "ADM-03",
+   "area": "ADM",
+   "form": "hbar",
+   "intent": "count",
+   "scenes": [
+    "research",
+    "client"
+   ],
+   "name": "处罚事由分布",
+   "question": "监管最常因什么处罚？",
+   "example": "处罚事由件数。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "ADM-04",
+   "area": "ADM",
+   "form": "stepcurve",
+   "intent": "rule",
+   "scenes": [
+    "newlaw",
+    "client"
+   ],
+   "name": "罚款裁量基准",
+   "question": "违法情节对应多少罚款？",
+   "example": "裁量基准分段线。",
+   "guard": "基准须注明出处",
+   "status": "todo"
+  },
+  {
+   "id": "ADM-05",
+   "area": "ADM",
+   "form": "board",
+   "intent": "progress",
+   "scenes": [
+    "client"
+   ],
+   "name": "行政复议与诉讼进度",
+   "question": "复议、诉讼各到哪一步？",
+   "example": "多个行政案件的阶段看板。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "ADM-06",
+   "area": "ADM",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "case"
+   ],
+   "name": "征收拆迁程序",
+   "question": "征收决定、补偿、强拆的时点与合法性。",
+   "example": "程序节点与期限。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "ADM-07",
+   "area": "ADM",
+   "form": "journey",
+   "intent": "narrate",
+   "scenes": [
+    "public",
+    "client"
+   ],
+   "name": "一次行政处罚的旅程",
+   "question": "从立案到处罚决定，企业经历了什么？",
+   "example": "立案、调查、告知、听证、决定、复议。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "ADM-08",
+   "area": "ADM",
+   "form": "countdown",
+   "intent": "risk",
+   "scenes": [
+    "client"
+   ],
+   "name": "复议与起诉期限倒计时",
+   "question": "还剩几天能申请复议或起诉？",
+   "example": "剩余天数。",
+   "guard": "期限由脚本计算",
+   "status": "todo"
+  },
+  {
+   "id": "ADM-09",
+   "area": "ADM",
+   "form": "bubbles",
+   "intent": "compare",
+   "scenes": [
+    "report",
+    "gov"
+   ],
+   "name": "各部门处罚规模",
+   "question": "哪个部门罚得最多？",
+   "example": "每个部门一个气泡。",
+   "guard": "面积按数值开方",
+   "status": "todo"
+  },
+  {
+   "id": "DAT-01",
+   "area": "DAT",
+   "form": "ribbon",
+   "intent": "flow",
+   "scenes": [
+    "deal",
+    "skill",
+    "client"
+   ],
+   "name": "个人信息流向",
+   "question": "数据从哪收、存到哪、给了谁？",
+   "example": "App → 境内服务器 → 境外总部 → 第三方服务商。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "DAT-02",
+   "area": "DAT",
+   "form": "matrix",
+   "intent": "rule",
+   "scenes": [
+    "skill",
+    "newlaw",
+    "deal"
+   ],
+   "name": "跨境法域规则对照",
+   "question": "同一件事各国怎么规定？",
+   "example": "中国、欧盟、美国、新加坡 × 是否需评估、是否需同意。",
+   "guard": "格子只放有/无/附条件，原文进注释",
+   "status": "todo"
+  },
+  {
+   "id": "DAT-03",
+   "area": "DAT",
+   "form": "matrix",
+   "intent": "risk",
+   "scenes": [
+    "deal",
+    "client"
+   ],
+   "name": "数据合规差距",
+   "question": "各项义务完成了没有？",
+   "example": "义务清单 × 业务线，已满足、部分、未满足。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "DAT-04",
+   "area": "DAT",
+   "form": "flow",
+   "intent": "rule",
+   "scenes": [
+    "newlaw",
+    "skill"
+   ],
+   "name": "数据出境路径选择",
+   "question": "安全评估、标准合同、认证该走哪条？",
+   "example": "按数据量与类型的判断流程。",
+   "guard": "门槛须注明依据",
+   "status": "ready"
+  },
+  {
+   "id": "DAT-05",
+   "area": "DAT",
+   "form": "hbar",
+   "intent": "count",
+   "scenes": [
+    "research"
+   ],
+   "name": "数据合规处罚事由",
+   "question": "监管最常处罚什么？",
+   "example": "处罚事由件数。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "DAT-06",
+   "area": "DAT",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "newlaw"
+   ],
+   "name": "数据法规沿革",
+   "question": "这几年出了哪些规定？",
+   "example": "法律、行政法规、部门规章、标准。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "DAT-07",
+   "area": "DAT",
+   "form": "board",
+   "intent": "progress",
+   "scenes": [
+    "deal",
+    "client"
+   ],
+   "name": "合规整改进度",
+   "question": "整改项各完成到哪？",
+   "example": "整改项看板。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "DAT-08",
+   "area": "DAT",
+   "form": "iceberg",
+   "intent": "risk",
+   "scenes": [
+    "training",
+    "board"
+   ],
+   "name": "数据合规冰山",
+   "question": "看得见的隐私政策下面还有什么？",
+   "example": "水上：隐私政策；水下：SDK、数据出境、员工数据。",
+   "guard": "只列不画比例",
+   "status": "todo"
+  },
+  {
+   "id": "DAT-09",
+   "area": "DAT",
+   "form": "journey",
+   "intent": "narrate",
+   "scenes": [
+    "training",
+    "public"
+   ],
+   "name": "一条个人信息的一生",
+   "question": "一条手机号从收集到删除经历了什么？",
+   "example": "收集、存储、使用、共享、出境、删除。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "DAT-10",
+   "area": "DAT",
+   "form": "gauge",
+   "intent": "progress",
+   "scenes": [
+    "board",
+    "deal"
+   ],
+   "name": "合规整改完成度",
+   "question": "整改项完成了几成？",
+   "example": "完成比例。",
+   "guard": "比例由脚本算",
+   "status": "todo"
+  },
+  {
+   "id": "DAT-11",
+   "area": "DAT",
+   "form": "countdown",
+   "intent": "risk",
+   "scenes": [
+    "client",
+    "deal"
+   ],
+   "name": "评估申报截止倒计时",
+   "question": "数据出境评估申报还剩几天？",
+   "example": "剩余天数。",
+   "guard": "期限由脚本计算",
+   "status": "todo"
+  },
+  {
+   "id": "ANT-01",
+   "area": "ANT",
+   "form": "stack",
+   "intent": "compose",
+   "scenes": [
+    "deal"
+   ],
+   "name": "市场份额与集中度",
+   "question": "合并后市场份额与 HHI 怎么变？",
+   "example": "交易前后各竞争者份额，HHI 由脚本算。",
+   "guard": "HHI 由脚本计算",
+   "status": "todo"
+  },
+  {
+   "id": "ANT-02",
+   "area": "ANT",
+   "form": "stepcurve",
+   "intent": "rule",
+   "scenes": [
+    "newlaw",
+    "deal"
+   ],
+   "name": "经营者集中申报标准",
+   "question": "营业额多少要申报？",
+   "example": "申报门槛分段示意。",
+   "guard": "门槛须注明依据与适用时间",
+   "status": "todo"
+  },
+  {
+   "id": "ANT-03",
+   "area": "ANT",
+   "form": "flow",
+   "intent": "rule",
+   "scenes": [
+    "deal",
+    "skill"
+   ],
+   "name": "集中审查程序",
+   "question": "初步审查、进一步审查、附条件批准。",
+   "example": "审查流程与法定时限。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "ANT-04",
+   "area": "ANT",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research"
+   ],
+   "name": "垄断协议诉讼结果",
+   "question": "原告胜诉的比例。",
+   "example": "一批判决结果。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "ANT-05",
+   "area": "ANT",
+   "form": "table",
+   "intent": "compare",
+   "scenes": [
+    "case"
+   ],
+   "name": "不正当竞争行为对照",
+   "question": "行为属于哪一类不正当竞争？",
+   "example": "混淆、虚假宣传、商业诋毁逐项对照。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "ANT-06",
+   "area": "ANT",
+   "form": "bubbles",
+   "intent": "compare",
+   "scenes": [
+    "report",
+    "research"
+   ],
+   "name": "反垄断罚款规模",
+   "question": "各案罚款多大？",
+   "example": "每案一个气泡。",
+   "guard": "面积按数值开方",
+   "status": "todo"
+  },
+  {
+   "id": "ANT-07",
+   "area": "ANT",
+   "form": "slope",
+   "intent": "compare",
+   "scenes": [
+    "deal"
+   ],
+   "name": "交易前后排名",
+   "question": "合并后谁成了第一？",
+   "example": "斜率图。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "CBX-01",
+   "area": "CBX",
+   "form": "matrix",
+   "intent": "rule",
+   "scenes": [
+    "deal",
+    "skill"
+   ],
+   "name": "各国规则对照",
+   "question": "各法域在这件事上怎么规定？",
+   "example": "国家 × 规则要点。",
+   "guard": "格子只放有/无/附条件",
+   "status": "todo"
+  },
+  {
+   "id": "CBX-02",
+   "area": "CBX",
+   "form": "flow",
+   "intent": "rule",
+   "scenes": [
+    "skill"
+   ],
+   "name": "国际仲裁程序",
+   "question": "从仲裁通知到裁决执行怎么走？",
+   "example": "仲裁程序与承认执行。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CBX-03",
+   "area": "CBX",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "case"
+   ],
+   "name": "跨境争议时间轴",
+   "question": "多法域程序交织的时间轴。",
+   "example": "仲裁、诉讼、保全在不同国家并行。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CBX-04",
+   "area": "CBX",
+   "form": "interval",
+   "intent": "compare",
+   "scenes": [
+    "research"
+   ],
+   "name": "仲裁周期与费用",
+   "question": "各仲裁机构一般多久、多少钱？",
+   "example": "周期与费用区间。",
+   "guard": "数据来源须注明",
+   "status": "todo"
+  },
+  {
+   "id": "CBX-05",
+   "area": "CBX",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research"
+   ],
+   "name": "外国裁决承认执行结果",
+   "question": "承认与拒绝的比例。",
+   "example": "一批裁定结果。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CBX-06",
+   "area": "CBX",
+   "form": "relation",
+   "intent": "structure",
+   "scenes": [
+    "deal"
+   ],
+   "name": "跨境投资架构",
+   "question": "红筹、VIE 架构怎么搭？",
+   "example": "境外上市主体、WFOE、境内某运营公司。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CBX-07",
+   "area": "CBX",
+   "form": "waterfall",
+   "intent": "compute",
+   "scenes": [
+    "deal"
+   ],
+   "name": "跨境税负测算",
+   "question": "一笔分红到境外要扣多少税？",
+   "example": "分红 − 预提所得税 − 其他税费 = 到手。",
+   "guard": "税率须注明依据",
+   "status": "ready"
+  },
+  {
+   "id": "CBX-08",
+   "area": "CBX",
+   "form": "metro",
+   "intent": "rule",
+   "scenes": [
+    "teach",
+    "skill"
+   ],
+   "name": "跨境争议解决线路图",
+   "question": "诉讼、仲裁、调解、承认执行怎么换乘？",
+   "example": "多条线路与换乘站。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "CBX-09",
+   "area": "CBX",
+   "form": "countdown",
+   "intent": "risk",
+   "scenes": [
+    "client"
+   ],
+   "name": "仲裁程序期限",
+   "question": "答辩、选定仲裁员还剩几天？",
+   "example": "剩余天数。",
+   "guard": "期限由脚本计算",
+   "status": "todo"
+  },
+  {
+   "id": "TAX-01",
+   "area": "TAX",
+   "form": "waterfall",
+   "intent": "compute",
+   "scenes": [
+    "case",
+    "client"
+   ],
+   "name": "补税与滞纳金计算",
+   "question": "补税、滞纳金、罚款各多少？",
+   "example": "应纳税额 − 已缴 + 滞纳金 + 罚款。",
+   "guard": "逐级平衡",
+   "status": "ready"
+  },
+  {
+   "id": "TAX-02",
+   "area": "TAX",
+   "form": "stepcurve",
+   "intent": "rule",
+   "scenes": [
+    "newlaw",
+    "public"
+   ],
+   "name": "累进税率",
+   "question": "收入对应的税率与速算扣除。",
+   "example": "个税累进分段线。",
+   "guard": "税率须注明依据与适用年度",
+   "status": "todo"
+  },
+  {
+   "id": "TAX-03",
+   "area": "TAX",
+   "form": "ribbon",
+   "intent": "flow",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "虚开发票链条",
+   "question": "票流、资金流、货物流对不对得上？",
+   "example": "三流对照汇入。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "TAX-04",
+   "area": "TAX",
+   "form": "flow",
+   "intent": "rule",
+   "scenes": [
+    "skill"
+   ],
+   "name": "稽查应对路径",
+   "question": "从检查通知到处理决定怎么走？",
+   "example": "稽查程序。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "TAX-05",
+   "area": "TAX",
+   "form": "hbar",
+   "intent": "count",
+   "scenes": [
+    "research"
+   ],
+   "name": "税务处罚事由",
+   "question": "最常见的稽查问题。",
+   "example": "事由件数。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "TAX-06",
+   "area": "TAX",
+   "form": "iceberg",
+   "intent": "risk",
+   "scenes": [
+    "training",
+    "board"
+   ],
+   "name": "税务风险冰山",
+   "question": "账面税负之下还有什么？",
+   "example": "水上：已申报税款；水下：关联交易、发票、个税代扣。",
+   "guard": "只列不画比例",
+   "status": "todo"
+  },
+  {
+   "id": "TAX-07",
+   "area": "TAX",
+   "form": "countdown",
+   "intent": "risk",
+   "scenes": [
+    "client"
+   ],
+   "name": "申报与缴款期限",
+   "question": "还剩几天？",
+   "example": "剩余天数。",
+   "guard": "期限由脚本计算",
+   "status": "todo"
+  },
+  {
+   "id": "INS-01",
+   "area": "INS",
+   "form": "waterfall",
+   "intent": "compute",
+   "scenes": [
+    "case",
+    "client"
+   ],
+   "name": "保险理赔计算",
+   "question": "理赔金额怎么算？",
+   "example": "保险金额 − 免赔额 − 比例赔付 = 赔付额。",
+   "guard": "逐级平衡",
+   "status": "ready"
+  },
+  {
+   "id": "INS-02",
+   "area": "INS",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research"
+   ],
+   "name": "拒赔理由认定",
+   "question": "法院支持拒赔的比例与理由。",
+   "example": "一批判决结果。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "INS-03",
+   "area": "INS",
+   "form": "relation",
+   "intent": "structure",
+   "scenes": [
+    "case"
+   ],
+   "name": "海上运输各方关系",
+   "question": "托运人、承运人、实际承运人、收货人。",
+   "example": "提单关系。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "INS-04",
+   "area": "INS",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "case"
+   ],
+   "name": "货损事故时间轴",
+   "question": "装船、航行、卸货、发现货损。",
+   "example": "事故经过。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "INS-05",
+   "area": "INS",
+   "form": "table",
+   "intent": "compare",
+   "scenes": [
+    "case"
+   ],
+   "name": "保险条款与事故对照",
+   "question": "事故是否落入保险责任、有无除外？",
+   "example": "条款逐项对照。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "INS-06",
+   "area": "INS",
+   "form": "journey",
+   "intent": "narrate",
+   "scenes": [
+    "public",
+    "client"
+   ],
+   "name": "一次理赔的旅程",
+   "question": "从出险到拿到赔款经历了什么？",
+   "example": "报案、查勘、定损、核赔、赔付。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "INS-07",
+   "area": "INS",
+   "form": "puzzle",
+   "intent": "rule",
+   "scenes": [
+    "teach"
+   ],
+   "name": "保险责任构成拼图",
+   "question": "保险事故、损失、因果、未落入除外。",
+   "example": "四块拼图。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "ENV-01",
+   "area": "ENV",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "case"
+   ],
+   "name": "污染事件经过",
+   "question": "排放、发现、处罚、诉讼。",
+   "example": "环境事件时间轴。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "ENV-02",
+   "area": "ENV",
+   "form": "waterfall",
+   "intent": "compute",
+   "scenes": [
+    "case"
+   ],
+   "name": "生态损害赔偿",
+   "question": "修复费用、服务功能损失怎么算？",
+   "example": "各项费用逐项累加。",
+   "guard": "数值来自鉴定评估",
+   "status": "ready"
+  },
+  {
+   "id": "ENV-03",
+   "area": "ENV",
+   "form": "hbar",
+   "intent": "count",
+   "scenes": [
+    "research"
+   ],
+   "name": "环保处罚事由",
+   "question": "最常见的环保违法类型。",
+   "example": "事由件数。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "ENV-04",
+   "area": "ENV",
+   "form": "board",
+   "intent": "progress",
+   "scenes": [
+    "deal",
+    "client"
+   ],
+   "name": "能源项目审批进度",
+   "question": "核准、环评、用地、并网各到哪？",
+   "example": "项目审批看板。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "ENV-05",
+   "area": "ENV",
+   "form": "matrix",
+   "intent": "risk",
+   "scenes": [
+    "deal"
+   ],
+   "name": "项目合规清单",
+   "question": "各阶段手续是否齐全。",
+   "example": "阶段 × 手续。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "ENV-06",
+   "area": "ENV",
+   "form": "icons",
+   "intent": "count",
+   "scenes": [
+    "media",
+    "public"
+   ],
+   "name": "受影响居民",
+   "question": "一次污染影响多少户？",
+   "example": "每个图标代表 10 户。",
+   "guard": "单位须写明",
+   "status": "todo"
+  },
+  {
+   "id": "ENV-07",
+   "area": "ENV",
+   "form": "treemap",
+   "intent": "compose",
+   "scenes": [
+    "case",
+    "report"
+   ],
+   "name": "生态损害费用构成",
+   "question": "修复费用分在哪几块？",
+   "example": "面积为金额。",
+   "guard": "数值来自鉴定评估",
+   "status": "todo"
+  },
+  {
+   "id": "LAI-01",
+   "area": "LAI",
+   "form": "planactual",
+   "intent": "compare",
+   "scenes": [
+    "ai",
+    "skill"
+   ],
+   "name": "人工与 AI 工作流对照",
+   "question": "AI 替代了哪几步、省了多少时间？",
+   "example": "合同审查人工 6 步 4 小时，AI 辅助 4 步 1.2 小时。",
+   "guard": "时长来自实测记录",
+   "status": "todo"
+  },
+  {
+   "id": "LAI-02",
+   "area": "LAI",
+   "form": "hbar",
+   "intent": "count",
+   "scenes": [
+    "ai",
+    "paper"
+   ],
+   "name": "任务准确率评测",
+   "question": "各类任务上准不准？",
+   "example": "案由识别、要素抽取、法条推荐的准确率。",
+   "guard": "评测集与口径必填",
+   "status": "ready"
+  },
+  {
+   "id": "LAI-03",
+   "area": "LAI",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "ai",
+    "paper"
+   ],
+   "name": "引证核验结果",
+   "question": "AI 给的引用有多少是真的？",
+   "example": "120 条引用：真实准确、真实但引错、不存在。",
+   "guard": "逐条可追溯",
+   "status": "ready"
+  },
+  {
+   "id": "LAI-04",
+   "area": "LAI",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "ai"
+   ],
+   "name": "错误类型构成",
+   "question": "错在哪？",
+   "example": "100 条错误的类型构成。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "LAI-05",
+   "area": "LAI",
+   "form": "matrix",
+   "intent": "compare",
+   "scenes": [
+    "ai",
+    "skill"
+   ],
+   "name": "工具能力矩阵",
+   "question": "几款工具各能做什么？",
+   "example": "工具 × 功能，有、无、部分。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "LAI-06",
+   "area": "LAI",
+   "form": "flow",
+   "intent": "structure",
+   "scenes": [
+    "ai",
+    "skill"
+   ],
+   "name": "AI 处理管线",
+   "question": "这套系统怎么运转？",
+   "example": "读材料 → 抽要素 → 检索 → 生成 → 人工复核。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "LAI-07",
+   "area": "LAI",
+   "form": "interval",
+   "intent": "compare",
+   "scenes": [
+    "ai"
+   ],
+   "name": "效率前后对比",
+   "question": "用了之后快了多少？",
+   "example": "每类任务耗时的前后区间。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "LAI-08",
+   "area": "LAI",
+   "form": "spectrum",
+   "intent": "risk",
+   "scenes": [
+    "ai"
+   ],
+   "name": "人机分工边界",
+   "question": "哪些环节交给 AI、哪些必须人来？",
+   "example": "环节在全自动到人工主导轴上的位置。",
+   "guard": "位置须注明依据",
+   "status": "caution"
+  },
+  {
+   "id": "LAI-09",
+   "area": "LAI",
+   "form": "lines",
+   "intent": "trend",
+   "scenes": [
+    "ai",
+    "paper"
+   ],
+   "name": "模型能力演进",
+   "question": "几代模型在法律任务上的表现。",
+   "example": "多个基准的得分随时间。",
+   "guard": "基准来源必填",
+   "status": "todo"
+  },
+  {
+   "id": "LAI-10",
+   "area": "LAI",
+   "form": "number",
+   "intent": "count",
+   "scenes": [
+    "ai",
+    "public"
+   ],
+   "name": "一页一个关键数",
+   "question": "这次分享只想让人记住哪个数？",
+   "example": "「审查时间缩短 70%」配口径。",
+   "guard": "数字须能由数据推得",
+   "status": "todo"
+  },
+  {
+   "id": "LAI-11",
+   "area": "LAI",
+   "form": "journey",
+   "intent": "narrate",
+   "scenes": [
+    "ai",
+    "training"
+   ],
+   "name": "一份合同交给 AI 之后",
+   "question": "AI 审查一份合同经过哪些步骤？",
+   "example": "上传、解析、比对、生成意见、人工复核。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "LAI-12",
+   "area": "LAI",
+   "form": "radar",
+   "intent": "compare",
+   "scenes": [
+    "ai"
+   ],
+   "name": "几款工具能力雷达",
+   "question": "几款工具在几个维度上各怎么样？",
+   "example": "工具 × 维度。",
+   "guard": "评分依据须写明",
+   "status": "caution"
+  },
+  {
+   "id": "LAI-13",
+   "area": "LAI",
+   "form": "icons",
+   "intent": "count",
+   "scenes": [
+    "ai",
+    "media"
+   ],
+   "name": "一百条引用里",
+   "question": "一百条 AI 引用里有几条是真的？",
+   "example": "100 个图标，按核验结果着色。",
+   "guard": "逐条可追溯",
+   "status": "todo"
+  },
+  {
+   "id": "LAI-14",
+   "area": "LAI",
+   "form": "cardwall",
+   "intent": "compare",
+   "scenes": [
+    "ai",
+    "pitch"
+   ],
+   "name": "应用场景卡片墙",
+   "question": "法律 AI 能用在哪些场景？",
+   "example": "每张卡一个场景与效果。",
+   "guard": "效果数据须有来源",
+   "status": "todo"
+  },
+  {
+   "id": "LAI-15",
+   "area": "LAI",
+   "form": "quadrant",
+   "intent": "risk",
+   "scenes": [
+    "ai",
+    "board"
+   ],
+   "name": "AI 应用价值风险象限",
+   "question": "哪些场景值得先上？",
+   "example": "价值 × 风险，每个场景一个点。",
+   "guard": "坐标须有可数依据",
+   "status": "caution"
+  },
+  {
+   "id": "FIRM-01",
+   "area": "FIRM",
+   "form": "rose",
+   "intent": "compose",
+   "scenes": [
+    "firm"
+   ],
+   "name": "业务领域构成",
+   "question": "我们主要做什么？",
+   "example": "各业务领域收入或案件数构成。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "FIRM-02",
+   "area": "FIRM",
+   "form": "bar",
+   "intent": "count",
+   "scenes": [
+    "firm"
+   ],
+   "name": "收案与标的趋势",
+   "question": "业务在增长吗？",
+   "example": "近五年收案量。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "FIRM-03",
+   "area": "FIRM",
+   "form": "lines",
+   "intent": "trend",
+   "scenes": [
+    "firm"
+   ],
+   "name": "多指标趋势",
+   "question": "收案、标的额、收入一起看。",
+   "example": "三条线。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "FIRM-04",
+   "area": "FIRM",
+   "form": "hbar",
+   "intent": "count",
+   "scenes": [
+    "firm"
+   ],
+   "name": "客户行业分布",
+   "question": "客户来自哪些行业？",
+   "example": "行业横条。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "FIRM-05",
+   "area": "FIRM",
+   "form": "stack",
+   "intent": "compose",
+   "scenes": [
+    "firm"
+   ],
+   "name": "团队工时分布",
+   "question": "时间花在哪？",
+   "example": "各类事务工时堆叠。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "FIRM-06",
+   "area": "FIRM",
+   "form": "board",
+   "intent": "progress",
+   "scenes": [
+    "firm",
+    "client"
+   ],
+   "name": "重点项目看板",
+   "question": "重点项目各到哪一步？",
+   "example": "项目阶段看板。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "FIRM-07",
+   "area": "FIRM",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "firm"
+   ],
+   "name": "案件结果总览",
+   "question": "结案案件的结果构成。",
+   "example": "全部或部分支持、调解、驳回。",
+   "guard": "执业规范：不以胜诉率宣传",
+   "status": "ready"
+  },
+  {
+   "id": "FIRM-08",
+   "area": "FIRM",
+   "form": "relation",
+   "intent": "structure",
+   "scenes": [
+    "firm"
+   ],
+   "name": "团队与合作网络",
+   "question": "团队、合作律所、专家的关系。",
+   "example": "合作网络。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "FIRM-09",
+   "area": "FIRM",
+   "form": "yearring",
+   "intent": "count",
+   "scenes": [
+    "firm",
+    "report"
+   ],
+   "name": "律所年度回顾环",
+   "question": "这一年团队做了什么？",
+   "example": "十二个月的案件、交易、文章、活动。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "FIRM-10",
+   "area": "FIRM",
+   "form": "cardwall",
+   "intent": "compare",
+   "scenes": [
+    "firm",
+    "pitch"
+   ],
+   "name": "团队成员卡片墙",
+   "question": "团队里谁擅长什么？",
+   "example": "每张卡一位律师。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "FIRM-11",
+   "area": "FIRM",
+   "form": "treemap",
+   "intent": "compose",
+   "scenes": [
+    "firm"
+   ],
+   "name": "收入构成树图",
+   "question": "收入来自哪些业务、哪些客户？",
+   "example": "两层面积图。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "FIRM-12",
+   "area": "FIRM",
+   "form": "gauge",
+   "intent": "progress",
+   "scenes": [
+    "firm"
+   ],
+   "name": "年度目标完成度",
+   "question": "今年目标完成了几成？",
+   "example": "完成比例。",
+   "guard": "比例由脚本算",
+   "status": "todo"
+  },
+  {
+   "id": "FIRM-13",
+   "area": "FIRM",
+   "form": "bubbles",
+   "intent": "compare",
+   "scenes": [
+    "firm",
+    "pitch"
+   ],
+   "name": "客户规模气泡",
+   "question": "大客户有哪些？",
+   "example": "每个客户一个气泡。",
+   "guard": "须经客户同意披露",
+   "status": "todo"
+  },
+  {
+   "id": "EXE-01",
+   "area": "EXE",
+   "form": "waterfall",
+   "intent": "compute",
+   "scenes": [
+    "case",
+    "client"
+   ],
+   "name": "执行回款拆解",
+   "question": "判决金额最后实际收回多少，差在哪？",
+   "example": "判决金额 − 无财产可供执行 − 和解让步 − 执行费 = 实际到账。",
+   "guard": "逐级平衡",
+   "status": "ready"
+  },
+  {
+   "id": "EXE-02",
+   "area": "EXE",
+   "form": "lines",
+   "intent": "progress",
+   "scenes": [
+    "client",
+    "case"
+   ],
+   "name": "执行回款累计曲线",
+   "question": "钱是按什么节奏回来的？",
+   "example": "按月累计回款，标出查封、拍卖、和解节点。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "EXE-03",
+   "area": "EXE",
+   "form": "board",
+   "intent": "progress",
+   "scenes": [
+    "client",
+    "firm"
+   ],
+   "name": "执行案件看板",
+   "question": "几十个执行案件各卡在哪个环节？",
+   "example": "查控、评估、拍卖、终本、恢复执行。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "EXE-04",
+   "area": "EXE",
+   "form": "interval",
+   "intent": "risk",
+   "scenes": [
+    "client",
+    "case"
+   ],
+   "name": "查封资产覆盖率",
+   "question": "查封的资产够不够还债？",
+   "example": "房产、股权、存款评估值与债权额对照。",
+   "guard": "覆盖率由脚本算",
+   "status": "todo"
+  },
+  {
+   "id": "EXE-05",
+   "area": "EXE",
+   "form": "waterfall",
+   "intent": "count",
+   "scenes": [
+    "research",
+    "client"
+   ],
+   "name": "执行到位漏斗",
+   "question": "立案执行的案子，最后有多少全额到位？",
+   "example": "立案 → 查到财产 → 处置 → 部分到位 → 全额到位。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "EXE-06",
+   "area": "EXE",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "case"
+   ],
+   "name": "拍卖流拍降价过程",
+   "question": "一拍、二拍、变卖各降了多少？",
+   "example": "起拍价、流拍、降价、成交的时间轴。",
+   "guard": "降价比例由脚本算",
+   "status": "ready"
+  },
+  {
+   "id": "EXE-07",
+   "area": "EXE",
+   "form": "relation",
+   "intent": "structure",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "追加被执行人",
+   "question": "还能追加谁来承担责任？",
+   "example": "未出资股东、一人公司股东、抽逃出资人。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "EXE-08",
+   "area": "EXE",
+   "form": "metro",
+   "intent": "rule",
+   "scenes": [
+    "skill",
+    "teach"
+   ],
+   "name": "执行程序线路图",
+   "question": "执行异议、复议、执行异议之诉怎么换乘？",
+   "example": "执行实施、执行审查、诉讼三条线路及换乘站。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "EXE-09",
+   "area": "EXE",
+   "form": "countdown",
+   "intent": "risk",
+   "scenes": [
+    "client"
+   ],
+   "name": "申请执行时效倒计时",
+   "question": "还剩几天就过申请执行期间？",
+   "example": "判决生效日起算的剩余天数。",
+   "guard": "期限由脚本计算",
+   "status": "todo"
+  },
+  {
+   "id": "EXE-10",
+   "area": "EXE",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research"
+   ],
+   "name": "终本案件构成",
+   "question": "终本的案子里，后来恢复执行的有多少？",
+   "example": "一批终本案件的后续情况。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "PIN-01",
+   "area": "PIN",
+   "form": "waterfall",
+   "intent": "compute",
+   "scenes": [
+    "case",
+    "client"
+   ],
+   "name": "人身损害赔偿计算",
+   "question": "赔偿总额怎么由各项加起来？",
+   "example": "医疗费、误工费、护理费、残疾赔偿金、精神抚慰金逐项累加。",
+   "guard": "计算标准须注明地区与年度",
+   "status": "ready"
+  },
+  {
+   "id": "PIN-02",
+   "area": "PIN",
+   "form": "stepcurve",
+   "intent": "rule",
+   "scenes": [
+    "newlaw",
+    "public"
+   ],
+   "name": "伤残等级与赔偿系数",
+   "question": "伤残几级对应赔多少？",
+   "example": "十级到一级的赔偿系数阶梯。",
+   "guard": "系数须注明依据",
+   "status": "todo"
+  },
+  {
+   "id": "PIN-03",
+   "area": "PIN",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research"
+   ],
+   "name": "交通事故责任划分",
+   "question": "同类事故里各方责任比例怎么分？",
+   "example": "主次同等全部责任的件数。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "PIN-04",
+   "area": "PIN",
+   "form": "relation",
+   "intent": "structure",
+   "scenes": [
+    "case"
+   ],
+   "name": "多方责任主体",
+   "question": "驾驶人、车主、某保险公司、用人单位各负什么责任？",
+   "example": "多方关系与责任来源。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "PIN-05",
+   "area": "PIN",
+   "form": "icons",
+   "intent": "count",
+   "scenes": [
+    "public",
+    "media"
+   ],
+   "name": "事故受害人数",
+   "question": "一场事故影响了多少人？",
+   "example": "每个图标一名受害人，按伤情分色。",
+   "guard": "人数须有来源",
+   "status": "todo"
+  },
+  {
+   "id": "PIN-06",
+   "area": "PIN",
+   "form": "interval",
+   "intent": "compare",
+   "scenes": [
+    "research"
+   ],
+   "name": "精神损害抚慰金区间",
+   "question": "同类伤情一般判多少？",
+   "example": "按伤残等级的判赔区间。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "PIN-07",
+   "area": "PIN",
+   "form": "journey",
+   "intent": "narrate",
+   "scenes": [
+    "client",
+    "public"
+   ],
+   "name": "一个人身损害案件的旅程",
+   "question": "从受伤到拿到赔偿要经历什么？",
+   "example": "就医、鉴定、协商、起诉、执行，每段时长。",
+   "guard": "时长须有来源",
+   "status": "todo"
+  },
+  {
+   "id": "MED-01",
+   "area": "MED",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "诊疗经过",
+   "question": "病人从入院到出院发生了什么？",
+   "example": "入院、检查、手术、并发症、转院、死亡的时间轴。",
+   "guard": "时间来自病历",
+   "status": "ready"
+  },
+  {
+   "id": "MED-02",
+   "area": "MED",
+   "form": "docmark",
+   "intent": "text",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "病历关键记录",
+   "question": "病历里哪几句话决定了过错？",
+   "example": "病程记录原文上高亮关键句。",
+   "guard": "原文照录",
+   "status": "todo"
+  },
+  {
+   "id": "MED-03",
+   "area": "MED",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research"
+   ],
+   "name": "医疗过错参与度",
+   "question": "鉴定意见认定的原因力大小分布。",
+   "example": "主要、次要、轻微、无因果。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "MED-04",
+   "area": "MED",
+   "form": "matrix",
+   "intent": "contest",
+   "scenes": [
+    "trial"
+   ],
+   "name": "诊疗规范对照",
+   "question": "每个环节是否符合诊疗规范？",
+   "example": "诊疗环节 × 规范要求，符合、不符合、无法判断。",
+   "guard": "规范来源须注明",
+   "status": "todo"
+  },
+  {
+   "id": "MED-05",
+   "area": "MED",
+   "form": "hbar",
+   "intent": "count",
+   "scenes": [
+    "research"
+   ],
+   "name": "医疗纠纷科室分布",
+   "question": "哪些科室纠纷最多？",
+   "example": "科室横条。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "MED-06",
+   "area": "MED",
+   "form": "flow",
+   "intent": "rule",
+   "scenes": [
+    "skill",
+    "training"
+   ],
+   "name": "医药合规审查流程",
+   "question": "学术推广活动怎么审才合规？",
+   "example": "立项、审批、执行、核销四步。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "MED-07",
+   "area": "MED",
+   "form": "ribbon",
+   "intent": "flow",
+   "scenes": [
+    "case"
+   ],
+   "name": "医药回扣资金流",
+   "question": "推广费最后流到了哪？",
+   "example": "某药企 → 某推广公司 → 个人。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CSM-01",
+   "area": "CSM",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research",
+    "report"
+   ],
+   "name": "消费欺诈认定结果",
+   "question": "主张三倍赔偿得到支持的比例？",
+   "example": "一批判决结果。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CSM-02",
+   "area": "CSM",
+   "form": "waterfall",
+   "intent": "compute",
+   "scenes": [
+    "case",
+    "public"
+   ],
+   "name": "惩罚性赔偿计算",
+   "question": "退一赔三怎么算？",
+   "example": "价款 + 价款 × 3（不足 500 元按 500 元）。",
+   "guard": "规则须注明依据",
+   "status": "ready"
+  },
+  {
+   "id": "CSM-03",
+   "area": "CSM",
+   "form": "hbar",
+   "intent": "count",
+   "scenes": [
+    "report",
+    "gov"
+   ],
+   "name": "投诉类型分布",
+   "question": "消费者最常投诉什么？",
+   "example": "投诉类型横条。",
+   "guard": "数据来源必填",
+   "status": "ready"
+  },
+  {
+   "id": "CSM-04",
+   "area": "CSM",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "case"
+   ],
+   "name": "产品召回过程",
+   "question": "缺陷发现到召回完成的过程。",
+   "example": "发现、报告、召回、整改。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CSM-05",
+   "area": "CSM",
+   "form": "icons",
+   "intent": "count",
+   "scenes": [
+    "media",
+    "public"
+   ],
+   "name": "受影响消费者",
+   "question": "一次召回涉及多少车主？",
+   "example": "每个图标代表 1 万名车主。",
+   "guard": "图标所代表的单位须写明",
+   "status": "todo"
+  },
+  {
+   "id": "CSM-06",
+   "area": "CSM",
+   "form": "journey",
+   "intent": "narrate",
+   "scenes": [
+    "public",
+    "media"
+   ],
+   "name": "预付卡维权路径",
+   "question": "老板跑路后消费者能怎么办？",
+   "example": "协商、投诉、诉讼、刑事报案。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "CSM-07",
+   "area": "CSM",
+   "form": "quote",
+   "intent": "text",
+   "scenes": [
+    "public",
+    "media"
+   ],
+   "name": "典型案例裁判要旨",
+   "question": "这类案件法院怎么说的？",
+   "example": "指导性案例或典型案例的裁判要旨原句。",
+   "guard": "原文照录，注明案号",
+   "status": "todo"
+  },
+  {
+   "id": "PLT-01",
+   "area": "PLT",
+   "form": "flow",
+   "intent": "rule",
+   "scenes": [
+    "newlaw",
+    "training"
+   ],
+   "name": "平台责任认定路径",
+   "question": "通知删除、知道应当知道怎么判？",
+   "example": "权利人通知 → 平台处理 → 责任认定。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "PLT-02",
+   "area": "PLT",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research"
+   ],
+   "name": "平台被判担责比例",
+   "question": "平台作为共同被告时担责的比例。",
+   "example": "一批判决结果。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "PLT-03",
+   "area": "PLT",
+   "form": "hbar",
+   "intent": "count",
+   "scenes": [
+    "research",
+    "report"
+   ],
+   "name": "网络交易纠纷类型",
+   "question": "直播带货纠纷都在吵什么？",
+   "example": "纠纷类型横条。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "PLT-04",
+   "area": "PLT",
+   "form": "relation",
+   "intent": "structure",
+   "scenes": [
+    "case",
+    "training"
+   ],
+   "name": "直播带货主体关系",
+   "question": "主播、MCN、商家、平台各是什么角色？",
+   "example": "多方合同与责任。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "PLT-05",
+   "area": "PLT",
+   "form": "bubbles",
+   "intent": "compare",
+   "scenes": [
+    "report",
+    "media"
+   ],
+   "name": "平台处罚规模",
+   "question": "各平台被罚多少？",
+   "example": "每个气泡一个平台，面积为罚款金额。",
+   "guard": "面积按数值开方",
+   "status": "todo"
+  },
+  {
+   "id": "PLT-06",
+   "area": "PLT",
+   "form": "annotext",
+   "intent": "text",
+   "scenes": [
+    "training",
+    "skill"
+   ],
+   "name": "平台规则条款批注",
+   "question": "这份用户协议哪些条款有风险？",
+   "example": "协议原文上划线批注。",
+   "guard": "原文照录",
+   "status": "todo"
+  },
+  {
+   "id": "PLT-07",
+   "area": "PLT",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "newlaw"
+   ],
+   "name": "平台监管规则沿革",
+   "question": "电商、直播、算法规则这几年怎么来的？",
+   "example": "规则发布时间轴。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "FTC-01",
+   "area": "FTC",
+   "form": "ribbon",
+   "intent": "flow",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "虚拟货币资金流",
+   "question": "资金如何通过地址与交易所流转？",
+   "example": "钱包地址 → 交易所 → 场外商户 → 银行卡。",
+   "guard": "地址照录",
+   "status": "ready"
+  },
+  {
+   "id": "FTC-02",
+   "area": "FTC",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "newlaw",
+    "public"
+   ],
+   "name": "虚拟资产监管时间轴",
+   "question": "这些年监管态度怎么变？",
+   "example": "通知、公告、司法解释的时间轴。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "FTC-03",
+   "area": "FTC",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research"
+   ],
+   "name": "虚拟货币合同效力认定",
+   "question": "法院认定合同有效、无效的比例。",
+   "example": "一批判决结果。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "FTC-04",
+   "area": "FTC",
+   "form": "flow",
+   "intent": "rule",
+   "scenes": [
+    "skill",
+    "training"
+   ],
+   "name": "支付牌照合规路径",
+   "question": "没有牌照能做哪些业务？",
+   "example": "业务类型判断流程。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "FTC-05",
+   "area": "FTC",
+   "form": "stack",
+   "intent": "compose",
+   "scenes": [
+    "case"
+   ],
+   "name": "网贷平台资金池构成",
+   "question": "出借人资金去了哪几类用途？",
+   "example": "按用途的资金构成。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "FTC-06",
+   "area": "FTC",
+   "form": "quadrant",
+   "intent": "risk",
+   "scenes": [
+    "deal",
+    "board"
+   ],
+   "name": "金融科技业务风险象限",
+   "question": "各业务线监管强度与合规成熟度。",
+   "example": "每条业务线一个点。",
+   "guard": "坐标须有可数依据",
+   "status": "caution"
+  },
+  {
+   "id": "SOE-01",
+   "area": "SOE",
+   "form": "flow",
+   "intent": "rule",
+   "scenes": [
+    "deal",
+    "board"
+   ],
+   "name": "国有资产转让程序",
+   "question": "国有股权转让要走哪几步？",
+   "example": "审批、评估、进场交易、公示。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "SOE-02",
+   "area": "SOE",
+   "form": "stack",
+   "intent": "compose",
+   "scenes": [
+    "deal",
+    "board"
+   ],
+   "name": "混改前后股权结构",
+   "question": "混改引入了谁、国资还占多少？",
+   "example": "混改前后股权堆叠。",
+   "guard": "每列合计 100%",
+   "status": "todo"
+  },
+  {
+   "id": "SOE-03",
+   "area": "SOE",
+   "form": "matrix",
+   "intent": "risk",
+   "scenes": [
+    "board",
+    "training"
+   ],
+   "name": "国企合规管理体系",
+   "question": "各业务环节的合规制度建好了没有？",
+   "example": "环节 × 制度，已建、在建、缺失。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "SOE-04",
+   "area": "SOE",
+   "form": "gauge",
+   "intent": "progress",
+   "scenes": [
+    "board",
+    "gov"
+   ],
+   "name": "合规整改完成度",
+   "question": "整改任务完成了多少？",
+   "example": "完成比例进度环。",
+   "guard": "比例由脚本算",
+   "status": "todo"
+  },
+  {
+   "id": "SOE-05",
+   "area": "SOE",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "newlaw",
+    "gov"
+   ],
+   "name": "国企改革政策沿革",
+   "question": "这一轮改革的政策脉络。",
+   "example": "政策文件时间轴。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "SOE-06",
+   "area": "SOE",
+   "form": "board",
+   "intent": "progress",
+   "scenes": [
+    "board",
+    "gov"
+   ],
+   "name": "重点任务督办看板",
+   "question": "几十项任务各到哪一步？",
+   "example": "任务阶段看板。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "ESG-01",
+   "area": "ESG",
+   "form": "matrix",
+   "intent": "risk",
+   "scenes": [
+    "board",
+    "report"
+   ],
+   "name": "ESG 议题实质性矩阵",
+   "question": "哪些议题对企业和利益相关方都重要？",
+   "example": "议题落在两个维度的格子里。",
+   "guard": "评分来源须注明",
+   "status": "todo"
+  },
+  {
+   "id": "ESG-02",
+   "area": "ESG",
+   "form": "stack",
+   "intent": "compose",
+   "scenes": [
+    "report"
+   ],
+   "name": "碳排放构成",
+   "question": "排放来自哪几个范围？",
+   "example": "范围一、二、三排放堆叠。",
+   "guard": "数据来源与口径必填",
+   "status": "todo"
+  },
+  {
+   "id": "ESG-03",
+   "area": "ESG",
+   "form": "lines",
+   "intent": "trend",
+   "scenes": [
+    "report",
+    "board"
+   ],
+   "name": "ESG 指标趋势",
+   "question": "几项指标这几年怎么变？",
+   "example": "排放、用水、安全事故多条线。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "ESG-04",
+   "area": "ESG",
+   "form": "ribbon",
+   "intent": "flow",
+   "scenes": [
+    "deal",
+    "training"
+   ],
+   "name": "供应链尽责路径",
+   "question": "原材料从哪来、经过谁？",
+   "example": "矿山 → 冶炼 → 零部件 → 整机。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "ESG-05",
+   "area": "ESG",
+   "form": "gauge",
+   "intent": "progress",
+   "scenes": [
+    "board"
+   ],
+   "name": "披露指标覆盖率",
+   "question": "披露要求满足了多少？",
+   "example": "覆盖比例。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "ESG-06",
+   "area": "ESG",
+   "form": "table",
+   "intent": "rule",
+   "scenes": [
+    "newlaw",
+    "report"
+   ],
+   "name": "各地披露规则对照",
+   "question": "各交易所的 ESG 披露要求差在哪？",
+   "example": "规则逐项对照。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "PIL-01",
+   "area": "PIL",
+   "form": "hbar",
+   "intent": "count",
+   "scenes": [
+    "report",
+    "gov"
+   ],
+   "name": "公益诉讼领域分布",
+   "question": "检察公益诉讼都在管什么？",
+   "example": "生态环境、食品药品、国有财产等件数。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "PIL-02",
+   "area": "PIL",
+   "form": "waterfall",
+   "intent": "compute",
+   "scenes": [
+    "case"
+   ],
+   "name": "生态修复费用构成",
+   "question": "修复费用怎么算出来？",
+   "example": "各项费用逐项累加。",
+   "guard": "数值来自鉴定评估",
+   "status": "ready"
+  },
+  {
+   "id": "PIL-03",
+   "area": "PIL",
+   "form": "flow",
+   "intent": "rule",
+   "scenes": [
+    "teach",
+    "newlaw"
+   ],
+   "name": "公益诉讼诉前程序",
+   "question": "检察建议、公告、起诉怎么衔接？",
+   "example": "诉前程序流程。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "PIL-04",
+   "area": "PIL",
+   "form": "lines",
+   "intent": "trend",
+   "scenes": [
+    "report",
+    "research"
+   ],
+   "name": "公益诉讼案件量趋势",
+   "question": "这几年案件量怎么走？",
+   "example": "年度件数。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "PIL-05",
+   "area": "PIL",
+   "form": "icons",
+   "intent": "count",
+   "scenes": [
+    "media",
+    "public"
+   ],
+   "name": "受益人群",
+   "question": "一起公益诉讼惠及多少人？",
+   "example": "每个图标代表若干居民。",
+   "guard": "单位须写明",
+   "status": "todo"
+  },
+  {
+   "id": "CUL-01",
+   "area": "CUL",
+   "form": "relation",
+   "intent": "structure",
+   "scenes": [
+    "case",
+    "deal"
+   ],
+   "name": "影视项目权利链",
+   "question": "剧本、导演、演员、出品方之间的权利怎么流转？",
+   "example": "改编权、摄制权、发行权链条。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CUL-02",
+   "area": "CUL",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "case"
+   ],
+   "name": "名誉侵权传播过程",
+   "question": "一条不实信息怎么扩散开的？",
+   "example": "发布、转发、热搜、删除的时间轴。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CUL-03",
+   "area": "CUL",
+   "form": "bubbles",
+   "intent": "compare",
+   "scenes": [
+    "research",
+    "media"
+   ],
+   "name": "侵权内容平台分布",
+   "question": "侵权内容出现在哪些平台、各多少？",
+   "example": "每个平台一个气泡。",
+   "guard": "面积按数值开方",
+   "status": "todo"
+  },
+  {
+   "id": "CUL-04",
+   "area": "CUL",
+   "form": "matrix",
+   "intent": "contest",
+   "scenes": [
+    "case"
+   ],
+   "name": "作品实质性相似比对",
+   "question": "两部作品哪些情节相似？",
+   "example": "情节单元 × 两部作品，相同、相似、不同。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "CUL-05",
+   "area": "CUL",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research"
+   ],
+   "name": "体育仲裁结果",
+   "question": "体育纠纷裁决结果构成。",
+   "example": "一批裁决结果。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "CUL-06",
+   "area": "CUL",
+   "form": "quote",
+   "intent": "text",
+   "scenes": [
+    "media",
+    "public"
+   ],
+   "name": "肖像权案件金句",
+   "question": "法院对公众人物肖像的说理。",
+   "example": "裁判文书原句。",
+   "guard": "原文照录，注明案号",
+   "status": "todo"
+  },
+  {
+   "id": "AGR-01",
+   "area": "AGR",
+   "form": "flow",
+   "intent": "rule",
+   "scenes": [
+    "teach",
+    "public"
+   ],
+   "name": "土地征收程序",
+   "question": "征收要走哪几步，哪一步可以救济？",
+   "example": "批准、公告、补偿、安置、救济。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "AGR-02",
+   "area": "AGR",
+   "form": "waterfall",
+   "intent": "compute",
+   "scenes": [
+    "case",
+    "client"
+   ],
+   "name": "征收补偿计算",
+   "question": "补偿款由哪几项构成？",
+   "example": "土地补偿、安置补助、地上附着物、青苗补偿。",
+   "guard": "标准须注明地区与年度",
+   "status": "ready"
+  },
+  {
+   "id": "AGR-03",
+   "area": "AGR",
+   "form": "relation",
+   "intent": "structure",
+   "scenes": [
+    "case"
+   ],
+   "name": "集体经济组织成员资格",
+   "question": "谁算成员、凭什么？",
+   "example": "户籍、承包地、生活保障的关系。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "AGR-04",
+   "area": "AGR",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research"
+   ],
+   "name": "宅基地买卖合同效力",
+   "question": "法院认定有效、无效的比例。",
+   "example": "一批判决结果。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "AGR-05",
+   "area": "AGR",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "case"
+   ],
+   "name": "土地承包经营权流转",
+   "question": "承包、流转、纠纷的时间轴。",
+   "example": "关键节点。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "PRO-01",
+   "area": "PRO",
+   "form": "flow",
+   "intent": "rule",
+   "scenes": [
+    "training",
+    "teach"
+   ],
+   "name": "利益冲突审查",
+   "question": "新案子要怎么查冲突？",
+   "example": "检索、识别、披露、豁免。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "PRO-02",
+   "area": "PRO",
+   "form": "waffle",
+   "intent": "compose",
+   "scenes": [
+    "research",
+    "training"
+   ],
+   "name": "律师受处分事由",
+   "question": "律师最常因什么被处分？",
+   "example": "一批处分决定的事由。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "PRO-03",
+   "area": "PRO",
+   "form": "stepcurve",
+   "intent": "compute",
+   "scenes": [
+    "client",
+    "training"
+   ],
+   "name": "律师费计费阶梯",
+   "question": "按标的额分段计费怎么算？",
+   "example": "分段费率阶梯。",
+   "guard": "费率须注明依据",
+   "status": "todo"
+  },
+  {
+   "id": "PRO-04",
+   "area": "PRO",
+   "form": "quote",
+   "intent": "text",
+   "scenes": [
+    "training",
+    "teach"
+   ],
+   "name": "执业规范条文卡",
+   "question": "执业规范怎么说？",
+   "example": "规范原文。",
+   "guard": "原文照录",
+   "status": "todo"
+  },
+  {
+   "id": "PRO-05",
+   "area": "PRO",
+   "form": "matrix",
+   "intent": "risk",
+   "scenes": [
+    "training",
+    "firm"
+   ],
+   "name": "执业风险自查",
+   "question": "各环节风险点查了没有？",
+   "example": "环节 × 风险点。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "PRO-06",
+   "area": "PRO",
+   "form": "journey",
+   "intent": "narrate",
+   "scenes": [
+    "training",
+    "teach"
+   ],
+   "name": "一个案子的律师工作旅程",
+   "question": "从接案到结案律师要做什么？",
+   "example": "接案、立案、庭前、庭审、执行、归档。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "GOV-01",
+   "area": "GOV",
+   "form": "timeline",
+   "intent": "narrate",
+   "scenes": [
+    "newlaw",
+    "gov"
+   ],
+   "name": "一部法律的立法过程",
+   "question": "从立项到通过经历了什么？",
+   "example": "起草、审议、征求意见、表决的时间轴。",
+   "guard": "",
+   "status": "ready"
+  },
+  {
+   "id": "GOV-02",
+   "area": "GOV",
+   "form": "bubbles",
+   "intent": "count",
+   "scenes": [
+    "newlaw",
+    "report"
+   ],
+   "name": "征求意见分布",
+   "question": "公众意见集中在哪些条文？",
+   "example": "每个气泡一条条文，面积为意见数。",
+   "guard": "面积按数值开方",
+   "status": "todo"
+  },
+  {
+   "id": "GOV-03",
+   "area": "GOV",
+   "form": "textdiff",
+   "intent": "text",
+   "scenes": [
+    "newlaw",
+    "gov"
+   ],
+   "name": "草案各稿对照",
+   "question": "一审稿、二审稿、通过稿改了什么？",
+   "example": "逐条逐字比对。",
+   "guard": "差异由脚本比出",
+   "status": "todo"
+  },
+  {
+   "id": "GOV-04",
+   "area": "GOV",
+   "form": "matrix",
+   "intent": "risk",
+   "scenes": [
+    "gov"
+   ],
+   "name": "规范性文件审查",
+   "question": "哪些文件存在合法性问题？",
+   "example": "文件 × 审查要点。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "GOV-05",
+   "area": "GOV",
+   "form": "parallel",
+   "intent": "compare",
+   "scenes": [
+    "report",
+    "gov"
+   ],
+   "name": "法治政府评估",
+   "question": "各地在几项指标上的表现。",
+   "example": "多地多指标平行坐标。",
+   "guard": "指标来源须注明",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-54",
+   "area": "GEN",
+   "form": "fishbone",
+   "intent": "factor",
+   "scenes": [
+    "case",
+    "firm",
+    "training"
+   ],
+   "name": "败诉原因复盘",
+   "question": "这个案子输在哪几类原因上？",
+   "example": "证据、程序、法律适用、策略四根大骨，每根下列判决书里的原句。",
+   "guard": "每条原因须附判决原句",
+   "status": "todo"
+  },
+  {
+   "id": "CST-16",
+   "area": "CST",
+   "form": "fishbone",
+   "intent": "factor",
+   "scenes": [
+    "case",
+    "training"
+   ],
+   "name": "工程款纠纷败诉原因",
+   "question": "施工方为什么没拿到工程款？",
+   "example": "签证缺失、结算未确认、工期延误、质量争议。",
+   "guard": "每条原因须附判决原句",
+   "status": "todo"
+  },
+  {
+   "id": "PIN-08",
+   "area": "PIN",
+   "form": "fishbone",
+   "intent": "factor",
+   "scenes": [
+    "case",
+    "public"
+   ],
+   "name": "事故责任成因",
+   "question": "一起事故的责任由哪几方面原因构成？",
+   "example": "驾驶人、车辆、道路、管理四类。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "MED-08",
+   "area": "MED",
+   "form": "fishbone",
+   "intent": "factor",
+   "scenes": [
+    "training",
+    "case"
+   ],
+   "name": "医疗损害成因",
+   "question": "医疗损害由哪几类过错导致？",
+   "example": "告知、诊疗、护理、管理。",
+   "guard": "原因取自鉴定意见原文",
+   "status": "todo"
+  },
+  {
+   "id": "DAT-12",
+   "area": "DAT",
+   "form": "fishbone",
+   "intent": "factor",
+   "scenes": [
+    "training",
+    "board"
+   ],
+   "name": "数据泄露事件复盘",
+   "question": "这起数据泄露是哪几道环节失守？",
+   "example": "权限、加密、第三方、员工操作。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-55",
+   "area": "GEN",
+   "form": "pyramid",
+   "intent": "structure",
+   "scenes": [
+    "teach",
+    "public",
+    "newlaw"
+   ],
+   "name": "法律位阶",
+   "question": "宪法、法律、行政法规、地方性法规、规章怎么排？",
+   "example": "五层金字塔，自上而下。",
+   "guard": "层宽不代表数量，图例须写明",
+   "status": "todo"
+  },
+  {
+   "id": "CRM-16",
+   "area": "CRM",
+   "form": "pyramid",
+   "intent": "structure",
+   "scenes": [
+    "teach",
+    "trial"
+   ],
+   "name": "证明标准层级",
+   "question": "刑事、民事、行政的证明标准各在哪一层？",
+   "example": "排除合理怀疑、高度盖然性、优势证据。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-56",
+   "area": "GEN",
+   "form": "pyramid",
+   "intent": "rule",
+   "scenes": [
+    "teach",
+    "skill"
+   ],
+   "name": "请求权检索次序",
+   "question": "请求权基础按什么次序检索？",
+   "example": "契约、类契约、无因管理、物权、侵权、不当得利。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "CRM-17",
+   "area": "CRM",
+   "form": "funnel",
+   "intent": "count",
+   "scenes": [
+    "research",
+    "gov",
+    "report"
+   ],
+   "name": "刑事案件逐级筛减",
+   "question": "多少线索最后进了判决？",
+   "example": "线索、立案、移送起诉、起诉、有罪判决逐级件数。",
+   "guard": "层宽由件数算出；口径须逐级写明",
+   "status": "todo"
+  },
+  {
+   "id": "LAB-15",
+   "area": "LAB",
+   "form": "funnel",
+   "intent": "count",
+   "scenes": [
+    "research",
+    "firm"
+   ],
+   "name": "劳动仲裁到诉讼",
+   "question": "多少仲裁案件走到了二审？",
+   "example": "申请仲裁、裁决、起诉、上诉逐级件数。",
+   "guard": "层宽由件数算出",
+   "status": "todo"
+  },
+  {
+   "id": "FIRM-14",
+   "area": "FIRM",
+   "form": "funnel",
+   "intent": "count",
+   "scenes": [
+    "firm",
+    "pitch"
+   ],
+   "name": "案源转化",
+   "question": "咨询多少、签约多少、结案多少？",
+   "example": "律所年度案源漏斗。",
+   "guard": "层宽由件数算出",
+   "status": "todo"
+  },
+  {
+   "id": "IP-16",
+   "area": "IP",
+   "form": "funnel",
+   "intent": "count",
+   "scenes": [
+    "research",
+    "report"
+   ],
+   "name": "专利无效逐级结果",
+   "question": "无效请求有多少走到全部无效？",
+   "example": "请求、受理、审查、全部无效、部分无效。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-57",
+   "area": "GEN",
+   "form": "venn",
+   "intent": "structure",
+   "scenes": [
+    "teach",
+    "skill"
+   ],
+   "name": "请求权竞合",
+   "question": "违约与侵权在哪里重叠？",
+   "example": "两个圆，交叠处是可择一主张的情形。",
+   "guard": "无数据时只画关系，不画面积",
+   "status": "caution"
+  },
+  {
+   "id": "CRM-18",
+   "area": "CRM",
+   "form": "venn",
+   "intent": "structure",
+   "scenes": [
+    "teach",
+    "trial"
+   ],
+   "name": "想象竞合与法条竞合",
+   "question": "一个行为同时符合几个罪名？",
+   "example": "两到三个构成要件集合的交叠。",
+   "guard": "",
+   "status": "caution"
+  },
+  {
+   "id": "DAT-13",
+   "area": "DAT",
+   "form": "venn",
+   "intent": "structure",
+   "scenes": [
+    "training",
+    "newlaw"
+   ],
+   "name": "个保法、数安法、网安法的交叠",
+   "question": "三部法各管什么、哪里重叠？",
+   "example": "三个圆，交叠处列共同义务。",
+   "guard": "",
+   "status": "caution"
+  },
+  {
+   "id": "GEN-58",
+   "area": "GEN",
+   "form": "venn",
+   "intent": "count",
+   "scenes": [
+    "research"
+   ],
+   "name": "类案中的事由交叠",
+   "question": "多少案件同时主张了几项事由？",
+   "example": "主张违约、主张侵权、两者都主张的件数。",
+   "guard": "面积由件数算出",
+   "status": "caution"
+  },
+  {
+   "id": "MNA-18",
+   "area": "MNA",
+   "form": "swimlane",
+   "intent": "rule",
+   "scenes": [
+    "deal",
+    "board"
+   ],
+   "name": "并购交割泳道",
+   "question": "买方、卖方、监管、托管行各在哪一步做什么？",
+   "example": "四条泳道，交割前提条件逐项满足。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "BKR-16",
+   "area": "BKR",
+   "form": "swimlane",
+   "intent": "rule",
+   "scenes": [
+    "teach",
+    "client"
+   ],
+   "name": "破产程序各方动作",
+   "question": "管理人、债权人、法院、债务人各做什么？",
+   "example": "申请、受理、债权申报、债权人会议、重整计划表决。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "DAT-14",
+   "area": "DAT",
+   "form": "swimlane",
+   "intent": "rule",
+   "scenes": [
+    "training"
+   ],
+   "name": "个人信息出境流程",
+   "question": "业务、法务、安全、监管各在哪一步？",
+   "example": "评估、备案、合同、出境。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "CON-16",
+   "area": "CON",
+   "form": "lifecycle",
+   "intent": "progress",
+   "scenes": [
+    "training",
+    "client"
+   ],
+   "name": "合同全生命周期",
+   "question": "一份合同从起草到归档经历哪些阶段？",
+   "example": "起草、审批、签署、履行、变更、终止、归档。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "DAT-15",
+   "area": "DAT",
+   "form": "lifecycle",
+   "intent": "progress",
+   "scenes": [
+    "training",
+    "newlaw"
+   ],
+   "name": "个人信息处理全周期",
+   "question": "收集、存储、使用、加工、传输、提供、公开、删除。",
+   "example": "八个环节排成一圈，每环标义务条文。",
+   "guard": "条文照录",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-59",
+   "area": "GEN",
+   "form": "lifecycle",
+   "intent": "progress",
+   "scenes": [
+    "teach",
+    "client"
+   ],
+   "name": "案件状态流转",
+   "question": "一个案件从立案到归档会在哪些状态之间流转？",
+   "example": "立案、审理、中止、恢复、结案、执行。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "COR-15",
+   "area": "COR",
+   "form": "layers",
+   "intent": "risk",
+   "scenes": [
+    "training",
+    "board"
+   ],
+   "name": "合规三道防线",
+   "question": "业务、合规、审计三道防线各拦住什么？",
+   "example": "三层同心或三道横墙，标每层拦截的风险。",
+   "guard": "拦截数量有数时须由数据算出",
+   "status": "todo"
+  },
+  {
+   "id": "FIN-17",
+   "area": "FIN",
+   "form": "layers",
+   "intent": "risk",
+   "scenes": [
+    "deal",
+    "client"
+   ],
+   "name": "担保层次",
+   "question": "主债务之外有几层增信，各覆盖多少？",
+   "example": "保证、抵押、质押、回购。",
+   "guard": "覆盖金额须由数据算出",
+   "status": "todo"
+  },
+  {
+   "id": "DAT-16",
+   "area": "DAT",
+   "form": "layers",
+   "intent": "risk",
+   "scenes": [
+    "training"
+   ],
+   "name": "数据安全纵深防护",
+   "question": "边界、身份、加密、审计几层各防什么？",
+   "example": "四层纵深。",
+   "guard": "",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-60",
+   "area": "GEN",
+   "form": "paired",
+   "intent": "contest",
+   "scenes": [
+    "case",
+    "research",
+    "moot"
+   ],
+   "name": "一审二审推理对照",
+   "question": "同一组事实，一审与二审推理在哪一步分岔？",
+   "example": "两列推理链并排，分岔点用重音。",
+   "guard": "推理原句照录判决书",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-61",
+   "area": "GEN",
+   "form": "paired",
+   "intent": "contest",
+   "scenes": [
+    "paper",
+    "teach"
+   ],
+   "name": "多数意见与少数意见",
+   "question": "合议庭多数与少数意见的推理差在哪？",
+   "example": "两列并排。",
+   "guard": "照录原文",
+   "status": "todo"
+  },
+  {
+   "id": "GEN-62",
+   "area": "GEN",
+   "form": "paired",
+   "intent": "contest",
+   "scenes": [
+    "paper",
+    "teach"
+   ],
+   "name": "两种学说对照",
+   "question": "同一问题两种学说的推理路径。",
+   "example": "形式说与实质说并排。",
+   "guard": "观点须注明出处",
+   "status": "todo"
+  }
+ ]
+}

@@ -16,6 +16,21 @@ import shutil
 import subprocess
 import sys
 
+def _tests_cmd():
+    """本模块的回归命令（时间轴模式下是时间轴大师的），同样写成真实路径。"""
+    here = os.path.dirname(os.path.abspath(__file__))
+    tl = os.path.normpath(os.path.join(here, "..", "..", "mqc-timeline-master", "tests", "run_checks.py"))
+    own = os.path.normpath(os.path.join(here, "..", "tests", "run_checks.py"))
+    p = tl if (("--for" in sys.argv and "timeline" in sys.argv) and os.path.exists(tl)) else own
+    return f'python3 "{p}"' if " " in p else f"python3 {p}"
+
+
+def _py(script):
+    """给用户看的下一步命令：用脚本的真实路径，在哪个目录里照抄都能跑（0.9.8：SKILL.md 要求在用户的工作目录里运行）。"""
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), script)
+    return f'python3 "{p}"' if " " in p else f"python3 {p}"
+
+
 OK, WARN, BAD = "  ok  ", " warn ", " MISS "
 
 
@@ -49,7 +64,8 @@ def _fonts():
     if _has("fc-list"):
         try:
             out = subprocess.run(["fc-list", "--format", "%{family}\n"],
-                                 capture_output=True, text=True, timeout=20)
+                                 capture_output=True, text=True, timeout=20,
+                                 encoding="utf-8", errors="replace")   # fc-list 输出 UTF-8
             if out.stdout.strip():
                 return out.stdout
         except Exception:
@@ -115,7 +131,7 @@ def install_plex_mono():
     os.makedirs(dest, exist_ok=True)
     work = tempfile.mkdtemp(prefix="plex-")
     r = subprocess.run(["npm", "pack", "@fontsource/ibm-plex-mono"],
-                       cwd=work, capture_output=True, text=True)
+                       cwd=work, capture_output=True, text=True, encoding="utf-8", errors="replace")
     if r.returncode != 0:
         print("could not fetch the font package (network?):", r.stderr.strip()[:200])
         return 1
@@ -275,7 +291,8 @@ def main():
                                           "to install IBM Plex Mono"))
 
     # --- report -----------------------------------------------------------
-    print("\nmqc-litigation-visual-redraw · environment check\n")
+    print("\nmqc-timeline-master · 环境自检（共享内核）\n" if _timeline
+          else "\nmqc-litigation-visual-redraw · environment check\n")
     for state, name, note in rows:
         print(f"[{state}] {name:<34} {note}")
     print()
@@ -284,8 +301,17 @@ def main():
         return 1
     warns = sum(1 for s, _, _ in rows if s == WARN)
     print(f"Result: ready to render{f' ({warns} optional item(s) degraded)' if warns else ''}.\n")
-    print("Next:  python3 scripts/render.py examples/flowchart.json /tmp/out")
-    print("       python3 tests/run_checks.py\n")
+    if _timeline:                       # 下一步给时间轴大师自己的命令：在那个目录里，V1 的 render.py 不存在
+        _pl = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "mqc-timeline-master",
+                                            "scripts", "pipeline.py"))
+        if not os.path.exists(_pl):                 # 单目录分发包：pipeline.py 与本文件同目录
+            _pl = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pipeline.py")
+        print(f'Next:  python3 "{_pl}" next' if " " in _pl else f"Next:  python3 {_pl} next")
+        print(f"       {_tests_cmd()}\n")
+        return 0
+    _ex = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "examples", "flowchart.json"))
+    print(f"Next:  {_py('render.py')} {_ex} out/flowchart")
+    print(f"       {_tests_cmd()}\n")
     return 0
 
 
@@ -300,6 +326,14 @@ def _quiet_broken_pipe():
         pass
 
 if __name__ == "__main__":
+    if {"-h", "--help"} & set(__import__("sys").argv[1:]):   # 只打印用法、什么都不做（原来会把 --help 当成文件名）
+        getattr(__import__("sys").stdout, "reconfigure", lambda **k: None)(encoding="utf-8")
+        print((__doc__ or "").strip() or "用法见本模块的 SKILL.md")
+        raise SystemExit(0)
+    try:                                   # 常见输入错误（路径、JSON、编码）说人话，不甩堆栈
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
     # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是乱码，
     # 自检里的「↳」这类字符还会直接让程序崩溃。写法与关系图大师 make.py 一致。
     for _stream in (sys.stdout, sys.stderr):

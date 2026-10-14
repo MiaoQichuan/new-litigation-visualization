@@ -5,13 +5,16 @@
 import re, sys, math
 
 def parse(path):
-    s=open(path,encoding="utf-8").read()
+    s=open(path,encoding="utf-8-sig").read()
     rects=[(float(a),float(b),float(w),float(h),float(r or 0)) for a,b,w,h,r in re.findall(
         r'<rect x="([\d.-]+)" y="([\d.-]+)" width="([\d.-]+)" height="([\d.-]+)" rx="([\d.-]+)"', s)]
     lines=[tuple(map(float,m)) for m in re.findall(
         r'<line x1="([\d.-]+)" y1="([\d.-]+)" x2="([\d.-]+)" y2="([\d.-]+)"', s)]
     paths=re.findall(r'<path d="([^"]+)"([^>]*)/>', s)
-    W,H=map(float,re.search(r'width="([\d.]+)" height="([\d.]+)"',s).groups())
+    _wh=re.search(r'width="([\d.]+)" height="([\d.]+)"',s)
+    if not _wh:                                # 给的不是本模块出的 SVG：说清楚，不甩 AttributeError
+        raise RuntimeError(f"{path} 不是对抗图的 SVG（找不到 width / height）：请给 render_main.py 出的那张图")
+    W,H=map(float,_wh.groups())
     return s,rects,lines,paths,W,H
 
 RED="#991B1B"      # 与 render_main 同一个值；对不上这条判据会静默算出 0
@@ -106,6 +109,14 @@ def check(path):
     return 1 if errs else 0
 
 if __name__=="__main__":
+    if {"-h", "--help"} & set(__import__("sys").argv[1:]):   # 只打印用法、什么都不做（原来会把 --help 当成文件名）
+        getattr(__import__("sys").stdout, "reconfigure", lambda **k: None)(encoding="utf-8")
+        print((__doc__ or "").strip() or "用法见本模块的 SKILL.md")
+        raise SystemExit(0)
+    try:                                   # 常见输入错误（路径、JSON、编码）说人话，不甩堆栈
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
     # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是
     # 乱码。真实运行记录里，时间轴大师就因此让模型摸索了一轮编码。写法与其余 skill 一致。
     for _stream in (sys.stdout, sys.stderr):
