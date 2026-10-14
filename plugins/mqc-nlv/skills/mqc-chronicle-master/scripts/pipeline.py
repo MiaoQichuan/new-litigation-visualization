@@ -44,7 +44,7 @@ def _find_node():
 
 def _rows_markdown(render_input, out_md):
     """Word 交付版的同内容 Markdown 表：列与 Word 同名同序，逐行照抄，不另行加工。"""
-    d = json.load(open(render_input, encoding="utf-8"))
+    d = json.load(open(render_input, encoding="utf-8-sig"))
     esc = lambda x: str("" if x is None else x).replace("|", "｜").replace("\n", " ")
     note = lambda r: "；".join(str(x) for x in (r.get("note_parts") or []) if x)
     out = [f"# {d['case']['title']}　{d['case'].get('subtitle', '')}".rstrip(), "",
@@ -92,7 +92,7 @@ def parse_formats(ans):
 
 def main(casefile, sources=None, outdir="out", formats=None):
     os.makedirs(outdir, exist_ok=True)
-    cf = json.load(open(casefile, encoding="utf-8"))
+    cf = json.load(open(casefile, encoding="utf-8-sig"))
     want = set(parse_formats(formats) if isinstance(formats, str) or formats is None
                else formats)
     print("交付物：" + "、".join(n for k, n, _ in FORMAT_MENU if k in want)
@@ -116,7 +116,7 @@ def main(casefile, sources=None, outdir="out", formats=None):
     step(3, "校验")
     sys.path.insert(0, HERE)
     from check_facts import check
-    src = json.load(open(sources, encoding="utf-8")) if sources else None
+    src = json.load(open(sources, encoding="utf-8-sig")) if sources else None
     if not src: print("    未提供源文本，B3 子序列核验跳过（扫描件须先出转写稿）")
     r = check(cf, src)
     if r.dump(): return 1
@@ -174,6 +174,14 @@ def main(casefile, sources=None, outdir="out", formats=None):
     return 0
 
 if __name__ == "__main__":
+    if {"-h", "--help"} & set(__import__("sys").argv[1:]):   # 只打印用法、什么都不做（原来会把 --help 当成文件名）
+        getattr(__import__("sys").stdout, "reconfigure", lambda **k: None)(encoding="utf-8")
+        print((__doc__ or "").strip() or "用法见本模块的 SKILL.md")
+        raise SystemExit(0)
+    try:                                   # 常见输入错误（路径、JSON、编码）说人话，不甩堆栈
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
     # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是
     # 乱码。真实运行记录里，时间轴大师就因此让模型摸索了一轮编码。写法与其余 skill 一致。
     for _stream in (sys.stdout, sys.stderr):

@@ -24,7 +24,8 @@
 
 ## 快速开始
 
-模型只写一份 `relations.json`（写法见 `references/relations-guide.md`），其余交给脚本：
+模型只写一份 `relations.json`（写法见 `references/relations-guide.md`；`examples/` 里有从最小到完整的四份，
+每份只多一个要点，见 `examples/README.md`，可以直接拿来跑一遍），其余交给脚本：
 
 ```
 python scripts/make.py --check                                   查环境
@@ -58,6 +59,6 @@ SKILL.md        怎么用
 scripts/        布局、端口、走线、标签、判据、风格、导出
 assets/         离线索引（图索引 143 条 + 度序列 391 条 + 结构 60 条）
 references/     规范与研究记录，含若干负面结论
-examples/       建设工程案的三风格样张
+examples/       四份 relations.json 示例（从最小到完整，见 examples/README.md）与三风格样张
 tests/          一条命令出图、导出物判据与布局回归的自检
 ```

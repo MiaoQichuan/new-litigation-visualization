@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "chart": "waffle",
+  "title": "四成诉请获全额支持",
+  "scope": "示例：100 份民间借贷一审判决",
+  "unit": "份判决",
+  "n": 100,
+  "source": "示例数据，非真实统计",
+  "emphasis": "full",
+  "data": {
+    "measure": "count",
+    "items": [
+      {
+        "id": "full",
+        "label": "全额支持",
+        "value": 41
+      },
+      {
+        "id": "part",
+        "label": "部分支持",
+        "value": 33
+      },
+      {
+        "id": "reject",
+        "label": "驳回",
+        "value": 26
+      }
+    ]
+  }
+}

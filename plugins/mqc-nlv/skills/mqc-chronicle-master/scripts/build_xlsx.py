@@ -2,6 +2,17 @@
 """Excel 母表：AI 只填前六列，加黑/删减/摘录留给律师。
 xlsx 的 <font> 没有 Word 那样的 eastAsia 槽，一个 font 只能一个字体名，
 所以用单元格富文本按字符集拆 run：中文走宋体，英文数字走 Times New Roman。"""
+
+# 放在第三方依赖的 import 之前：没装 openpyxl / Pillow / numpy 的机器上 --help 也要能看用法
+if __name__ == "__main__" and {"-h", "--help"} & set(__import__("sys").argv[1:]):   # 只打印用法、什么都不做（原来会把 --help 当成文件名）
+    getattr(__import__("sys").stdout, "reconfigure", lambda **k: None)(encoding="utf-8")
+    print((__doc__ or "").strip() or "用法见本模块的 SKILL.md")
+    raise SystemExit(0)
+if __name__ == "__main__":                  # 出错边界也装在第三方 import 之前：没装 openpyxl / Pillow 时说缺什么、怎么装
+    try:
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
 import json, re
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
@@ -37,6 +48,10 @@ def rich(t, sz=10.5, bold=False):
 
 import sys
 if __name__ == "__main__":
+    try:                                   # 常见输入错误（路径、JSON、编码）说人话，不甩堆栈
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
     # Windows 中文控制台默认 GBK：这个脚本由 pipeline 以子进程方式调用，
     # 不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的仍是乱码。
     import sys as _sys
@@ -47,7 +62,7 @@ if __name__ == "__main__":
             pass
 IN=sys.argv[1] if len(sys.argv)>1 else "渲染输入.json"
 OUT=sys.argv[2] if len(sys.argv)>2 else "案件大事记母表.xlsx"
-D=json.load(open(IN,encoding="utf-8"))
+D=json.load(open(IN,encoding="utf-8-sig"))
 wb=Workbook(); ws=wb.active; ws.title="大事记母表"
 
 COLS=[("序号",6),("日期",12),("主体",14),("事项",26),("主要内容",52),

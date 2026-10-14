@@ -6,6 +6,17 @@
 字体：仅列头用方正小标宋；其余中文宋体、英文数字 Times New Roman；中文标点并入中文侧。
 不过 LibreOffice（它会就地重写工作簿并替换未装字体）。
 """
+
+# 放在第三方依赖的 import 之前：没装 openpyxl / Pillow / numpy 的机器上 --help 也要能看用法
+if __name__ == "__main__" and {"-h", "--help"} & set(__import__("sys").argv[1:]):   # 只打印用法、什么都不做（原来会把 --help 当成文件名）
+    getattr(__import__("sys").stdout, "reconfigure", lambda **k: None)(encoding="utf-8")
+    print((__doc__ or "").strip() or "用法见本模块的 SKILL.md")
+    raise SystemExit(0)
+if __name__ == "__main__":                  # 出错边界也装在第三方 import 之前：没装 openpyxl / Pillow 时说缺什么、怎么装
+    try:
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
 import json, sys
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
@@ -93,7 +104,7 @@ def put(ws,r,c,v,*,sz=10.5,bold=False,fill=None,halign="left",color=None,note=No
     return cell
 
 def build(src,dst):
-    D=json.load(open(src,encoding="utf-8"))
+    D=json.load(open(src,encoding="utf-8-sig"))
     # 一张表，全部行可见：不折叠、不冻结。层级只用四档字号加线：
     # 大标题 16、分节标题 12、争点板块行 11、正文一律 10.5。
     # 拆成两张表是偷懒；把说明区折叠起来更糟，那是把内容藏起来回避冻结的丑，
@@ -267,6 +278,10 @@ def _preserve_space(path):
     zin.close(); shutil.move(tmp,path)
 
 if __name__=="__main__":
+    try:                                   # 常见输入错误（路径、JSON、编码）说人话，不甩堆栈
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
     # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是
     # 乱码。真实运行记录里，时间轴大师就因此让模型摸索了一轮编码。写法与其余 skill 一致。
     for _stream in (sys.stdout, sys.stderr):

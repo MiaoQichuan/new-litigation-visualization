@@ -20,12 +20,12 @@ PPR = ('<w:pPrDefault><w:pPr><w:autoSpaceDE w:val="0"/><w:autoSpaceDN w:val="0"/
 def postprocess(src, dst, sz=23):
     tmp = tempfile.mkdtemp()
     with zipfile.ZipFile(src) as z: z.extractall(tmp)
-    p = os.path.join(tmp, "word", "styles.xml"); s = open(p, encoding="utf-8").read()
+    p = os.path.join(tmp, "word", "styles.xml"); s = open(p, encoding="utf-8-sig").read()
     if "<w:rPrDefault/>" not in s or "<w:pPrDefault/>" not in s:
         raise RuntimeError("styles.xml 的 docDefaults 不是预期形态，拒绝盲改")
     s = s.replace("<w:rPrDefault/>", RPR.format(sz=sz), 1).replace("<w:pPrDefault/>", PPR, 1)
     open(p, "w", encoding="utf-8").write(s)
-    p = os.path.join(tmp, "word", "document.xml"); d = open(p, encoding="utf-8").read()
+    p = os.path.join(tmp, "word", "document.xml"); d = open(p, encoding="utf-8-sig").read()
     n_before = len(re.findall(r'<w:rFonts[^>]*?/>', d))
     d = re.sub(r'<w:rFonts[^>]*?/>',
                lambda m: m.group(0) if 'w:hint=' in m.group(0) else m.group(0)[:-2] + ' w:hint="eastAsia"/>', d)
@@ -52,6 +52,14 @@ def verify(path):
     return errs
 
 if __name__ == "__main__":
+    if {"-h", "--help"} & set(__import__("sys").argv[1:]):   # 只打印用法、什么都不做（原来会把 --help 当成文件名）
+        getattr(__import__("sys").stdout, "reconfigure", lambda **k: None)(encoding="utf-8")
+        print((__doc__ or "").strip() or "用法见本模块的 SKILL.md")
+        raise SystemExit(0)
+    try:                                   # 常见输入错误（路径、JSON、编码）说人话，不甩堆栈
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
     # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是
     # 乱码。真实运行记录里，时间轴大师就因此让模型摸索了一轮编码。写法与其余 skill 一致。
     for _stream in (sys.stdout, sys.stderr):

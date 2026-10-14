@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "如果您在文章、课程或研究中用到本项目，请按下面的信息引用。If you use this software, please cite it as below."
+type: software
+title: "新诉讼可视化 · New Litigation Visualization"
+abstract: "Litigation visualisation skills for lawyers: deterministic, A4-first figures, charts, tables and lecture pages built from case materials and legal data."
+authors:
+  - family-names: "Miao"
+    given-names: "Qichuan"
+    alias: "缪奇川"
+    email: "miaoqichuan@hotmail.com"
+version: "2.4.0"
+license: MIT
+repository-code: "https://github.com/MiaoQichuan/new-litigation-visualization"
+url: "https://github.com/MiaoQichuan/new-litigation-visualization"
+keywords:
+  - litigation
+  - legal-tech
+  - visualization
+  - timeline
+  - agent-skills

@@ -1,0 +1,839 @@
+{
+ "areas": [
+  {
+   "code": "GEN",
+   "name": "通用",
+   "desc": "不分领域、各类课件都会用到的页"
+  },
+  {
+   "code": "CON",
+   "name": "合同与商事",
+   "desc": "买卖、租赁、服务、借款以外的商事合同纠纷与交易"
+  },
+  {
+   "code": "FIN",
+   "name": "金融借贷与担保",
+   "desc": "银行与民间借贷、融资租赁、保理、担保与增信"
+  },
+  {
+   "code": "COR",
+   "name": "公司治理与股权",
+   "desc": "股东权利、公司决议、股权转让、实际控制人"
+  },
+  {
+   "code": "MNA",
+   "name": "并购与投融资",
+   "desc": "并购重组、私募投资、对赌、IPO"
+  },
+  {
+   "code": "BKR",
+   "name": "破产重整与不良资产",
+   "desc": "重整、清算、债权申报、不良资产处置"
+  },
+  {
+   "code": "CST",
+   "name": "建设工程与房地产",
+   "desc": "施工合同、工期与造价、房地产开发与销售"
+  },
+  {
+   "code": "IP",
+   "name": "知识产权",
+   "desc": "专利、商标、著作权、商业秘密"
+  },
+  {
+   "code": "SEC",
+   "name": "证券与资本市场",
+   "desc": "虚假陈述、内幕交易、操纵市场、信息披露"
+  },
+  {
+   "code": "LAB",
+   "name": "劳动与人事",
+   "desc": "劳动合同、工资加班、工伤、竞业限制"
+  },
+  {
+   "code": "FAM",
+   "name": "婚姻家事与继承",
+   "desc": "离婚财产、抚养、继承、家族财富"
+  },
+  {
+   "code": "CRM",
+   "name": "刑事",
+   "desc": "经济犯罪、职务犯罪、刑事辩护"
+  },
+  {
+   "code": "ADM",
+   "name": "行政与监管",
+   "desc": "行政处罚、行政诉讼、政府合规"
+  },
+  {
+   "code": "DAT",
+   "name": "数据与网络合规",
+   "desc": "个人信息、数据出境、平台治理"
+  },
+  {
+   "code": "ANT",
+   "name": "竞争法",
+   "desc": "反垄断申报与诉讼、不正当竞争"
+  },
+  {
+   "code": "CBX",
+   "name": "涉外与跨境",
+   "desc": "跨境交易、国际仲裁、域外法查明与执行"
+  },
+  {
+   "code": "TAX",
+   "name": "税务",
+   "desc": "税务稽查、税收筹划、涉税争议"
+  },
+  {
+   "code": "INS",
+   "name": "保险与海商",
+   "desc": "保险理赔、海上货物运输、船舶"
+  },
+  {
+   "code": "ENV",
+   "name": "能源环境与资源",
+   "desc": "环境侵权、环保处罚、能源项目"
+  },
+  {
+   "code": "LAI",
+   "name": "法律 AI 与法律科技",
+   "desc": "工具、评测、工作流、风险"
+  },
+  {
+   "code": "FIRM",
+   "name": "律所与团队",
+   "desc": "业务、团队、管理与品牌"
+  },
+  {
+   "code": "EXE",
+   "name": "执行与保全",
+   "desc": "财产保全、强制执行、终本与恢复执行"
+  },
+  {
+   "code": "PIN",
+   "name": "人身损害与交通事故",
+   "desc": "交通事故、医疗损害以外的人身伤害赔偿"
+  },
+  {
+   "code": "MED",
+   "name": "医疗纠纷与医药合规",
+   "desc": "医疗损害、药品器械、医药反腐"
+  },
+  {
+   "code": "CSM",
+   "name": "消费者与产品责任",
+   "desc": "消费欺诈、产品缺陷、召回、预付卡"
+  },
+  {
+   "code": "PLT",
+   "name": "平台与电商",
+   "desc": "平台规则、网络交易、直播带货、算法"
+  },
+  {
+   "code": "FTC",
+   "name": "金融科技与虚拟资产",
+   "desc": "支付、网贷、虚拟货币、数字藏品"
+  },
+  {
+   "code": "SOE",
+   "name": "国资国企",
+   "desc": "国企改革、国资监管、混改、合规管理"
+  },
+  {
+   "code": "ESG",
+   "name": "ESG 与可持续",
+   "desc": "环境社会治理信息披露、供应链尽责"
+  },
+  {
+   "code": "PIL",
+   "name": "公益诉讼",
+   "desc": "检察公益诉讼、环境与消费公益诉讼"
+  },
+  {
+   "code": "CUL",
+   "name": "文娱体育与传媒",
+   "desc": "影视、音乐、游戏、体育、肖像与名誉"
+  },
+  {
+   "code": "AGR",
+   "name": "农村土地与征收",
+   "desc": "土地承包、宅基地、集体经济组织、征收补偿"
+  },
+  {
+   "code": "PRO",
+   "name": "律师执业与职业伦理",
+   "desc": "执业规范、利益冲突、律师费、职业风险"
+  },
+  {
+   "code": "GOV",
+   "name": "立法与法治政府",
+   "desc": "立法过程、规范性文件审查、法治评估"
+  }
+ ],
+ "scenes": [
+  {
+   "code": "case",
+   "name": "案例复盘",
+   "desc": "讲一个具体案子：怎么回事、怎么赢的"
+  },
+  {
+   "code": "research",
+   "name": "类案研究",
+   "desc": "讲一批案子：法院一般怎么判"
+  },
+  {
+   "code": "newlaw",
+   "name": "新法解读",
+   "desc": "讲一条规则：改了什么、怎么适用"
+  },
+  {
+   "code": "skill",
+   "name": "实务技能",
+   "desc": "讲一套方法：步骤与要点"
+  },
+  {
+   "code": "client",
+   "name": "客户汇报",
+   "desc": "向当事人或客户汇报案件、项目"
+  },
+  {
+   "code": "trial",
+   "name": "庭前准备",
+   "desc": "律师团队内部，开庭前把案子看清楚"
+  },
+  {
+   "code": "deal",
+   "name": "交易汇报",
+   "desc": "非诉项目的方案、进度、风险汇报"
+  },
+  {
+   "code": "paper",
+   "name": "学术研究",
+   "desc": "论文、课题、研究报告"
+  },
+  {
+   "code": "firm",
+   "name": "律所汇报",
+   "desc": "律所或团队的内部与对外汇报"
+  },
+  {
+   "code": "ai",
+   "name": "法律 AI 分享",
+   "desc": "工具演示、评测、经验分享"
+  },
+  {
+   "code": "public",
+   "name": "普法与公众",
+   "desc": "面向公众的讲座、公众号、短视频"
+  },
+  {
+   "code": "teach",
+   "name": "法学课堂",
+   "desc": "高校法学课堂、法考与职业培训"
+  },
+  {
+   "code": "training",
+   "name": "企业合规培训",
+   "desc": "给企业员工、管理层讲合规"
+  },
+  {
+   "code": "board",
+   "name": "董事会汇报",
+   "desc": "向董事会、股东会、管理层汇报法律事项"
+  },
+  {
+   "code": "report",
+   "name": "白皮书与年报",
+   "desc": "年度报告、行业白皮书、研究报告"
+  },
+  {
+   "code": "media",
+   "name": "公众号与短视频",
+   "desc": "长图、封面、短视频画面"
+  },
+  {
+   "code": "moot",
+   "name": "案例大赛与模拟法庭",
+   "desc": "比赛陈述、模拟法庭"
+  },
+  {
+   "code": "gov",
+   "name": "政府与监管汇报",
+   "desc": "向政府部门、监管机构汇报"
+  },
+  {
+   "code": "pitch",
+   "name": "投标与路演",
+   "desc": "法律服务投标、律所或法律科技路演"
+  }
+ ],
+ "intents": [
+  {
+   "code": "narrate",
+   "name": "发生了什么"
+  },
+  {
+   "code": "structure",
+   "name": "谁与谁、怎么搭"
+  },
+  {
+   "code": "contest",
+   "name": "争什么"
+  },
+  {
+   "code": "rule",
+   "name": "规则怎么走"
+  },
+  {
+   "code": "count",
+   "name": "有多少"
+  },
+  {
+   "code": "compose",
+   "name": "由什么构成"
+  },
+  {
+   "code": "compare",
+   "name": "差多少"
+  },
+  {
+   "code": "compute",
+   "name": "钱怎么算"
+  },
+  {
+   "code": "flow",
+   "name": "流向哪里"
+  },
+  {
+   "code": "spread",
+   "name": "分布如何"
+  },
+  {
+   "code": "trend",
+   "name": "怎么变化"
+  },
+  {
+   "code": "factor",
+   "name": "什么决定结果"
+  },
+  {
+   "code": "progress",
+   "name": "进行到哪"
+  },
+  {
+   "code": "risk",
+   "name": "风险在哪"
+  },
+  {
+   "code": "text",
+   "name": "条文与文本"
+  }
+ ],
+ "forms": [
+  {
+   "code": "bar",
+   "name": "竖柱",
+   "module": "V6",
+   "status": "ready",
+   "desc": "少数类目比大小，类目名短",
+   "tone": "steady"
+  },
+  {
+   "code": "hbar",
+   "name": "横条",
+   "module": "V6",
+   "status": "ready",
+   "desc": "排名，类目名长",
+   "tone": "steady"
+  },
+  {
+   "code": "waffle",
+   "name": "百点方阵",
+   "module": "V6",
+   "status": "ready",
+   "desc": "构成，1 点 = 1 件",
+   "tone": "lively"
+  },
+  {
+   "code": "rose",
+   "name": "南丁格尔玫瑰",
+   "module": "V6",
+   "status": "ready",
+   "desc": "构成，讲课的展示页",
+   "tone": "lively"
+  },
+  {
+   "code": "dumbbell",
+   "name": "哑铃",
+   "module": "V6",
+   "status": "ready",
+   "desc": "同一项的两个值",
+   "tone": "steady"
+  },
+  {
+   "code": "strip",
+   "name": "逐件分布",
+   "module": "V6",
+   "status": "ready",
+   "desc": "一件一个值，看离群与阈值",
+   "tone": "steady"
+  },
+  {
+   "code": "sankey",
+   "name": "桑基",
+   "module": "V6",
+   "status": "ready",
+   "desc": "多段去向",
+   "tone": "steady"
+  },
+  {
+   "code": "ribbon",
+   "name": "汇入图",
+   "module": "V6",
+   "status": "ready",
+   "desc": "几个来源汇入几个去处",
+   "tone": "lively"
+  },
+  {
+   "code": "timeline",
+   "name": "时间轴",
+   "module": "V2",
+   "status": "ready",
+   "desc": "事件先后",
+   "tone": "steady"
+  },
+  {
+   "code": "gantt",
+   "name": "期间图",
+   "module": "V2",
+   "status": "ready",
+   "desc": "期间与时效",
+   "tone": "steady"
+  },
+  {
+   "code": "relation",
+   "name": "法律关系图",
+   "module": "V3",
+   "status": "ready",
+   "desc": "主体与客体的关系网",
+   "tone": "steady"
+  },
+  {
+   "code": "flow",
+   "name": "流程图",
+   "module": "V1",
+   "status": "ready",
+   "desc": "程序与判断步骤",
+   "tone": "steady"
+  },
+  {
+   "code": "tree",
+   "name": "层级树",
+   "module": "V1",
+   "status": "ready",
+   "desc": "层级、决策树",
+   "tone": "steady"
+  },
+  {
+   "code": "table",
+   "name": "对比表",
+   "module": "V1",
+   "status": "ready",
+   "desc": "两栏或多栏对照",
+   "tone": "steady"
+  },
+  {
+   "code": "chronicle",
+   "name": "大事记表",
+   "module": "V4",
+   "status": "ready",
+   "desc": "事实底稿与大事记",
+   "tone": "steady"
+  },
+  {
+   "code": "confront",
+   "name": "对抗图",
+   "module": "V5",
+   "status": "ready",
+   "desc": "请求、抗辩、法院审查",
+   "tone": "steady"
+  },
+  {
+   "code": "waterfall",
+   "name": "逐级加减",
+   "module": "V6",
+   "status": "ready",
+   "desc": "从一个数一级级加减到另一个数；样本筛选也用它",
+   "tone": "steady"
+  },
+  {
+   "code": "stack",
+   "name": "堆叠条",
+   "module": "V6",
+   "status": "todo",
+   "desc": "构成随类别或时间变化；含 100% 堆叠",
+   "tone": "steady"
+  },
+  {
+   "code": "lines",
+   "name": "多系列折线",
+   "module": "V6",
+   "status": "todo",
+   "desc": "几条序列的走势",
+   "tone": "steady"
+  },
+  {
+   "code": "matrix",
+   "name": "点阵矩阵",
+   "module": "V6",
+   "status": "todo",
+   "desc": "两个维度交叉，点大小或实空表示强弱",
+   "tone": "steady"
+  },
+  {
+   "code": "tornado",
+   "name": "龙卷风",
+   "module": "V6",
+   "status": "todo",
+   "desc": "哪个参数影响最大",
+   "tone": "steady"
+  },
+  {
+   "code": "interval",
+   "name": "区间",
+   "module": "V6",
+   "status": "todo",
+   "desc": "区间、置信区间、范围对照（含森林图、区间胶囊）",
+   "tone": "steady"
+  },
+  {
+   "code": "stepcurve",
+   "name": "分段曲线",
+   "module": "V6",
+   "status": "todo",
+   "desc": "按公式算出的分段函数：补偿、税率、赔偿标准",
+   "tone": "steady"
+  },
+  {
+   "code": "breakpoint",
+   "name": "节点前后",
+   "module": "V6",
+   "status": "todo",
+   "desc": "某个规则节点前后的序列对比",
+   "tone": "steady"
+  },
+  {
+   "code": "textdiff",
+   "name": "条文对照",
+   "module": "V6",
+   "status": "todo",
+   "desc": "新旧条文逐字比对，差异由脚本算",
+   "tone": "steady"
+  },
+  {
+   "code": "planactual",
+   "name": "计划与实际",
+   "module": "V6",
+   "status": "todo",
+   "desc": "计划期间与实际期间并排，差额归因",
+   "tone": "steady"
+  },
+  {
+   "code": "board",
+   "name": "进度看板",
+   "module": "V6",
+   "status": "todo",
+   "desc": "多个事项各在哪一阶段",
+   "tone": "steady"
+  },
+  {
+   "code": "pierce",
+   "name": "穿透树",
+   "module": "V6",
+   "status": "todo",
+   "desc": "多层持股或资金逐层相乘、相加",
+   "tone": "steady"
+  },
+  {
+   "code": "calendar",
+   "name": "日历热力",
+   "module": "V6",
+   "status": "todo",
+   "desc": "按天的记录：加班、交易、通话",
+   "tone": "lively"
+  },
+  {
+   "code": "number",
+   "name": "关键数字",
+   "module": "V6",
+   "status": "todo",
+   "desc": "一页只讲一个数，配口径与来源",
+   "tone": "lively"
+  },
+  {
+   "code": "spectrum",
+   "name": "光谱",
+   "module": "V6",
+   "status": "caution",
+   "desc": "位置主观，须注明依据",
+   "tone": "lively"
+  },
+  {
+   "code": "map",
+   "name": "地图",
+   "module": "V6",
+   "status": "caution",
+   "desc": "涉及审图合规；默认改用排序点图",
+   "tone": "lively"
+  },
+  {
+   "code": "icons",
+   "name": "单位图标阵",
+   "module": "V6",
+   "status": "todo",
+   "desc": "一个图标代表一个人或一件事：受害人、员工、投资者",
+   "tone": "lively"
+  },
+  {
+   "code": "quote",
+   "name": "金句卡",
+   "module": "V6",
+   "status": "todo",
+   "desc": "裁判要旨、关键条文原句，照录原文排成一页",
+   "tone": "lively"
+  },
+  {
+   "code": "balance",
+   "name": "天平",
+   "module": "V6",
+   "status": "todo",
+   "desc": "两方的分量对比；倾角由数量算出",
+   "tone": "lively"
+  },
+  {
+   "code": "journey",
+   "name": "旅程图",
+   "module": "V6",
+   "status": "todo",
+   "desc": "当事人经历的阶段、节点与等待",
+   "tone": "lively"
+  },
+  {
+   "code": "iceberg",
+   "name": "冰山",
+   "module": "V6",
+   "status": "todo",
+   "desc": "看得见的与看不见的：水上水下比例由数据算出",
+   "tone": "lively"
+  },
+  {
+   "code": "puzzle",
+   "name": "要件拼图",
+   "module": "V6",
+   "status": "todo",
+   "desc": "构成要件逐块拼合，缺哪块一眼可见",
+   "tone": "lively"
+  },
+  {
+   "code": "countdown",
+   "name": "倒计时",
+   "module": "V6",
+   "status": "todo",
+   "desc": "期限还剩几天：时效、审限、申报期",
+   "tone": "lively"
+  },
+  {
+   "code": "annotext",
+   "name": "条文批注",
+   "module": "V6",
+   "status": "todo",
+   "desc": "在原文上划线批注：风险、要点、修改",
+   "tone": "steady"
+  },
+  {
+   "code": "dialog",
+   "name": "问答摘录",
+   "module": "V6",
+   "status": "todo",
+   "desc": "笔录、庭审问答的照录摘录",
+   "tone": "steady"
+  },
+  {
+   "code": "docmark",
+   "name": "文书高亮",
+   "module": "V6",
+   "status": "todo",
+   "desc": "判决书、合同版式上高亮关键句",
+   "tone": "steady"
+  },
+  {
+   "code": "metro",
+   "name": "线路图",
+   "module": "V6",
+   "status": "todo",
+   "desc": "多条程序像地铁线路一样换乘",
+   "tone": "lively"
+  },
+  {
+   "code": "bubbles",
+   "name": "气泡群",
+   "module": "V6",
+   "status": "todo",
+   "desc": "一群大小不一的圆，面积即数量",
+   "tone": "lively"
+  },
+  {
+   "code": "scatter",
+   "name": "散点",
+   "module": "V6",
+   "status": "todo",
+   "desc": "两个连续变量的关系：标的额与审理天数",
+   "tone": "steady"
+  },
+  {
+   "code": "treemap",
+   "name": "矩形树图",
+   "module": "V6",
+   "status": "todo",
+   "desc": "两层构成，面积即数量",
+   "tone": "steady"
+  },
+  {
+   "code": "slope",
+   "name": "斜率图",
+   "module": "V6",
+   "status": "todo",
+   "desc": "两个时点之间的升降与排名变化",
+   "tone": "steady"
+  },
+  {
+   "code": "quadrant",
+   "name": "四象限",
+   "module": "V6",
+   "status": "caution",
+   "desc": "两个维度分四格；坐标须有可数依据",
+   "tone": "lively"
+  },
+  {
+   "code": "gauge",
+   "name": "进度环",
+   "module": "V6",
+   "status": "todo",
+   "desc": "一个比例：完成度、覆盖率",
+   "tone": "lively"
+  },
+  {
+   "code": "cardwall",
+   "name": "卡片墙",
+   "module": "V6",
+   "status": "todo",
+   "desc": "一组并列要点或案例卡片",
+   "tone": "lively"
+  },
+  {
+   "code": "yearring",
+   "name": "年度回顾环",
+   "module": "V6",
+   "status": "todo",
+   "desc": "一年十二个月的事件或数量排成一圈",
+   "tone": "lively"
+  },
+  {
+   "code": "dandelion",
+   "name": "蒲公英",
+   "module": "V6",
+   "status": "todo",
+   "desc": "从一个根出发的几条分支，茎长即数量",
+   "tone": "lively"
+  },
+  {
+   "code": "radar",
+   "name": "雷达",
+   "module": "V6",
+   "status": "caution",
+   "desc": "多维评分；维度与分数须有依据",
+   "tone": "lively"
+  },
+  {
+   "code": "chord",
+   "name": "弦图",
+   "module": "V6",
+   "status": "caution",
+   "desc": "多方之间的往来；超过八方易成毛线团",
+   "tone": "lively"
+  },
+  {
+   "code": "parallel",
+   "name": "平行坐标",
+   "module": "V6",
+   "status": "todo",
+   "desc": "多个对象在多个维度上的对比",
+   "tone": "steady"
+  },
+  {
+   "code": "fishbone",
+   "name": "鱼骨图",
+   "module": "V6",
+   "status": "todo",
+   "desc": "一个结果、几类原因：败诉原因、事故原因、合规失效复盘",
+   "tone": "steady"
+  },
+  {
+   "code": "pyramid",
+   "name": "金字塔",
+   "module": "V6",
+   "status": "todo",
+   "desc": "层级与位阶：法律位阶、证据证明力、请求权检索次序；层宽不编码数量",
+   "tone": "steady"
+  },
+  {
+   "code": "funnel",
+   "name": "漏斗",
+   "module": "V6",
+   "status": "todo",
+   "desc": "逐级筛减的件数：线索→立案→起诉→判决；层宽由件数算出",
+   "tone": "lively"
+  },
+  {
+   "code": "venn",
+   "name": "韦恩图",
+   "module": "V6",
+   "status": "caution",
+   "desc": "两三个集合的交叠：请求权竞合、责任竞合、法域重叠；有数时交叠面积须由件数算出，无数时只画关系",
+   "tone": "lively"
+  },
+  {
+   "code": "swimlane",
+   "name": "泳道图",
+   "module": "V6",
+   "status": "todo",
+   "desc": "多个主体各做什么、谁等谁：并购交割、破产程序、跨部门合规流程",
+   "tone": "steady"
+  },
+  {
+   "code": "lifecycle",
+   "name": "生命周期环",
+   "module": "V6",
+   "status": "todo",
+   "desc": "周而复始的阶段：合同全周期、数据处理全周期、案件状态流转",
+   "tone": "lively"
+  },
+  {
+   "code": "layers",
+   "name": "层层设防",
+   "module": "V6",
+   "status": "todo",
+   "desc": "几道防线各拦住什么、漏掉什么：合规三道防线、担保层次、风险缓释",
+   "tone": "lively"
+  },
+  {
+   "code": "paired",
+   "name": "成对推理",
+   "module": "V6",
+   "status": "todo",
+   "desc": "同一组事实、两条推理路径并排：一审与二审、多数意见与少数意见、两种学说",
+   "tone": "steady"
+  }
+ ]
+}

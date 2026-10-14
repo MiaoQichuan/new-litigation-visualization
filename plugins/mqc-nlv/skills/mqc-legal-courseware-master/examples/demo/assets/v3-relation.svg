@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="678" viewBox="0 0 1100 678" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei','Noto Sans SC','Helvetica Neue',Arial,sans-serif">
+<rect width="1100" height="678" fill="#FFFFFF"/>
+<defs><marker id="a" markerWidth="12" markerHeight="8.4" refX="0" refY="4.2" markerUnits="userSpaceOnUse" orient="auto"><path d="M 0 0 L 12 4.2 L 0 8.4 Z" fill="#4B5563"/></marker><marker id="ar" markerWidth="12" markerHeight="8.4" refX="0" refY="4.2" markerUnits="userSpaceOnUse" orient="auto"><path d="M 0 0 L 12 4.2 L 0 8.4 Z" fill="#991B1B"/></marker></defs>
+<text x="550" y="58" font-family="'Noto Serif CJK SC','方正小标宋简体','FZXiaoBiaoSong-B05S','思源宋体','Source Han Serif SC','华文中宋','STZhongsong',serif" font-size="30" font-weight="700" stroke="#1F2933" stroke-width="0.3" fill="#1F2933" text-anchor="middle">建设工程施工合同纠纷 · 主体与客体并存</text>
+<text x="550" y="86" font-size="13" fill="#6B7280" text-anchor="middle">浅灰为当事人，更淡的为合同与工程　深红实底为全图重点，至多两个</text>
+<g data-role="node">
+<rect data-kind="node" x="810" y="170" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="880" y="193" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">发包人</text>
+<text x="880" y="209" font-size="11" fill="#6B7280" text-anchor="middle">建设单位</text>
+</g>
+<g data-role="node">
+<rect data-kind="node" x="150" y="170" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="220" y="193" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">总承包人</text>
+<text x="220" y="209" font-size="11" fill="#6B7280" text-anchor="middle">施工总承包</text>
+</g>
+<g data-role="node">
+<rect data-kind="node" x="150" y="550" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="220" y="573" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">分包人</text>
+<text x="220" y="589" font-size="11" fill="#6B7280" text-anchor="middle">专业分包</text>
+</g>
+<g data-role="node">
+<rect data-kind="node" x="810" y="550" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="880" y="573" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">实际施工人</text>
+<text x="880" y="589" font-size="11" fill="#6B7280" text-anchor="middle">原告</text>
+</g>
+<g data-role="node">
+<rect data-kind="node" x="480" y="550" width="140" height="48" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="550" y="573" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">监理单位</text>
+<text x="550" y="589" font-size="11" fill="#6B7280" text-anchor="middle">受托监理</text>
+</g>
+<g data-role="node">
+<rect data-kind="node" x="480" y="170" width="140" height="48" rx="12" fill="#FAFAFA" stroke="#D6DAE0" stroke-width="1"/>
+<text x="550" y="193" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">建设工程施工合同</text>
+<text x="550" y="209" font-size="11" fill="#6B7280" text-anchor="middle">2021.3 签订</text>
+</g>
+<g data-role="node">
+<rect data-kind="node" x="150" y="360" width="140" height="48" rx="12" fill="#FAFAFA" stroke="#D6DAE0" stroke-width="1"/>
+<text x="220" y="383" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">专业分包合同</text>
+<text x="220" y="399" font-size="11" fill="#6B7280" text-anchor="middle">2021.9 签订</text>
+</g>
+<g data-role="node">
+<rect data-kind="node" x="480" y="360" width="140" height="48" rx="12" fill="#FAFAFA" stroke="#D6DAE0" stroke-width="1"/>
+<text x="550" y="383" font-size="14" fill="#1F2933" text-anchor="middle" font-weight="700">涉案工程</text>
+<text x="550" y="399" font-size="11" fill="#6B7280" text-anchor="middle">A 地块 1 号楼</text>
+</g>
+<g data-role="node" data-emph="1">
+<rect data-kind="node" x="810" y="360" width="140" height="48" rx="12" fill="#991B1B"/>
+<text x="880" y="383" font-size="14" fill="#FFFFFF" text-anchor="middle" font-weight="700">工程价款</text>
+<text x="880" y="399" font-size="11" fill="#E8D5D5" text-anchor="middle">诉讼标的 3200 万元</text>
+</g>
+<path data-kind="edge" d="M 810.00,194.00 L 632.00,194.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 290.00,194.00 L 468.00,194.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 550.00,218.00 L 550.00,348.00" fill="none" stroke="#4B5563" stroke-width="1.3" stroke-dasharray='4 3' marker-end="url(#a)"/>
+<path data-kind="edge" d="M 220.00,218.00 L 220.00,348.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 220.00,550.00 L 220.00,420.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 290.00,384.00 L 468.00,384.00" fill="none" stroke="#4B5563" stroke-width="1.3" stroke-dasharray='4 3' marker-end="url(#a)"/>
+<path data-kind="edge" d="M 810.00,574.00 L 699.79,574.00 A 3.12 3.12 0 0 1 696.67,570.88 L 696.67,261.12 A 3.12 3.12 0 0 0 693.55,258.00 L 579.12,258.00 A 3.12 3.12 0 0 0 576.00,261.12 L 576.00,348.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 550.00,550.00 L 550.00,420.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<path data-kind="edge" d="M 620.00,384.00 L 798.00,384.00" fill="none" stroke="#4B5563" stroke-width="1.3" stroke-dasharray='4 3' marker-end="url(#a)"/>
+<path data-kind="edge" d="M 880.00,550.00 L 880.00,420.00" fill="none" stroke="#991B1B" stroke-width="3.0" marker-end="url(#ar)"/>
+<path data-kind="edge" d="M 880.00,218.00 L 880.00,348.00" fill="none" stroke="#4B5563" stroke-width="1.3" marker-end="url(#a)"/>
+<text x="715" y="176" font-size="12" fill="#6B7280" text-anchor="middle">签订</text>
+<text x="385" y="176" font-size="12" fill="#6B7280" text-anchor="middle">签订</text>
+<text x="532" y="292" font-size="12" fill="#6B7280" text-anchor="end">承建标的</text>
+<text x="238" y="292" font-size="12" fill="#6B7280" text-anchor="start">签订</text>
+<text x="238" y="482" font-size="12" fill="#6B7280" text-anchor="start">签订</text>
+<text x="385" y="366" font-size="12" fill="#6B7280" text-anchor="middle">分包范围</text>
+<text x="715" y="419" font-size="12" fill="#6B7280" text-anchor="start">实际施工</text>
+<text x="568" y="482" font-size="12" fill="#6B7280" text-anchor="start">受托监理</text>
+<text x="757" y="366" font-size="12" fill="#6B7280" text-anchor="middle">已完工程量对应</text>
+<text x="898" y="482" font-size="12" fill="#991B1B" text-anchor="start">本案诉请 折价补偿</text>
+<text x="898" y="292" font-size="12" fill="#6B7280" text-anchor="start">欠付范围内担责</text>
+</svg>

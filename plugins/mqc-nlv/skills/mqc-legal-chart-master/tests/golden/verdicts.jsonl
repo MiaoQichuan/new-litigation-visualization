@@ -1,0 +1,66 @@
+{"id": "V001", "base": "bar-filings", "title": "2025 年收案较 2019 年增长 56%", "expect": "accept", "why": "示例原标题", "source": "examples"}
+{"id": "V002", "base": "dumbbell-claims", "title": "B 案判赔仅为诉请的 32%", "expect": "accept", "why": "示例原标题", "source": "examples"}
+{"id": "V003", "base": "hbar-annotated", "title": "民间借贷占全部收案的 23%", "expect": "accept", "why": "示例原标题", "source": "examples"}
+{"id": "V004", "base": "hbar-causes", "title": "民间借贷占全部收案的 23%", "expect": "accept", "why": "示例原标题", "source": "examples"}
+{"id": "V005", "base": "ribbon-funds", "title": "55% 的资金流入王某", "expect": "accept", "why": "示例原标题", "source": "examples"}
+{"id": "V006", "base": "rose-causes", "title": "民间借贷收案最多", "expect": "accept", "why": "示例原标题", "source": "examples"}
+{"id": "V007", "base": "sankey-appeals", "title": "上诉案件 20% 获改判", "expect": "accept", "why": "示例原标题", "source": "examples"}
+{"id": "V008", "base": "strip-duration", "title": "普通程序有 10 件审理超过六个月", "expect": "accept", "why": "示例原标题", "source": "examples"}
+{"id": "V009", "base": "waffle-outcomes", "title": "四成诉请获全额支持", "expect": "accept", "why": "示例原标题", "source": "examples"}
+{"id": "V010", "base": "waterfall-award", "title": "判赔额为诉请的 57%", "expect": "accept", "why": "示例原标题", "source": "examples"}
+{"id": "V011", "base": "external/T012", "title": null, "expect": "reject", "why": "驳回率41%：41% 属于全额支持", "source": "第一轮 T012"}
+{"id": "V012", "base": "external/T013", "title": null, "expect": "reject", "why": "提高20%：实为 20 个百分点", "source": "第一轮 T013"}
+{"id": "V013", "base": "external/T014", "title": null, "expect": "reject", "why": "九成：实际 41%", "source": "第一轮 T014"}
+{"id": "V014", "base": "external/T020", "title": null, "expect": "reject", "why": "增长9876%：数字紧贴汉字", "source": "第一轮 T020"}
+{"id": "V015", "base": "external/T028", "title": null, "expect": "reject", "why": "批注增长9876%", "source": "第一轮 T028"}
+{"id": "V016", "base": "bar-filings", "title": "增长9876%", "expect": "reject", "why": "N01 紧贴汉字", "source": "回归"}
+{"id": "V017", "base": "bar-filings", "title": "增长 9876%", "expect": "reject", "why": "N01 有空格", "source": "回归"}
+{"id": "V018", "base": "waffle-outcomes", "title": "全额支持41件", "expect": "accept", "why": "N02", "source": "回归"}
+{"id": "V019", "base": "waffle-outcomes", "title": "全额支持占41%", "expect": "accept", "why": "N02", "source": "回归"}
+{"id": "V020", "base": "waffle-outcomes", "title": "驳回26件", "expect": "accept", "why": "N02", "source": "回归"}
+{"id": "V021", "base": "waffle-outcomes", "title": "驳回占26%", "expect": "accept", "why": "N02", "source": "回归"}
+{"id": "V022", "base": "waffle-outcomes", "title": "全额支持占４１％", "expect": "accept", "why": "N02 全角", "source": "回归"}
+{"id": "V023", "base": "waffle-outcomes", "title": "驳回比全额支持少15个百分点", "expect": "accept", "why": "N02 百分点", "source": "回归"}
+{"id": "V024", "base": "waffle-outcomes", "title": "约三分之一部分支持", "expect": "accept", "why": "N02 约数", "source": "回归"}
+{"id": "V025", "base": "waffle-outcomes", "title": "四成诉请获全额支持", "expect": "accept", "why": "示例约数", "source": "回归"}
+{"id": "V026", "base": "waffle-outcomes", "title": "驳回率41%", "expect": "reject", "why": "N03 主语串", "source": "回归"}
+{"id": "V027", "base": "waffle-outcomes", "title": "驳回41件", "expect": "reject", "why": "N03", "source": "回归"}
+{"id": "V028", "base": "waffle-outcomes", "title": "全额支持占26%", "expect": "reject", "why": "N03", "source": "回归"}
+{"id": "V029", "base": "waffle-outcomes", "title": "近三分之一驳回", "expect": "reject", "why": "N03 约数主语", "source": "回归"}
+{"id": "V030", "base": "waffle-outcomes", "title": "九成诉请获全额支持", "expect": "reject", "why": "T014", "source": "回归"}
+{"id": "V031", "base": "waffle-outcomes", "title": "全额支持为驳回的两倍", "expect": "reject", "why": "倍数", "source": "回归"}
+{"id": "V032", "base": "waffle-outcomes", "title": "驳回12,34件", "expect": "reject", "why": "分组错", "source": "回归"}
+{"id": "V033", "base": "waffle-outcomes", "title": "全额支持比驳回多15%", "expect": "reject", "why": "百分点写成%", "source": "回归"}
+{"id": "V034", "base": "bar-filings", "title": "2018年以来收案增长56%", "expect": "reject", "why": "年份不在材料里", "source": "回归"}
+{"id": "V035", "base": "bar-filings", "title": "依民法典第577条，2025 年收案较 2019 年增长 56%", "expect": "accept", "why": "条文编号列请核", "source": "回归"}
+{"id": "V036", "base": "bar-filings", "title": "（2024）沪01民终123号所在法院 2025 年收案较 2019 年增长 56%", "expect": "accept", "why": "案号列请核", "source": "回归"}
+{"id": "V037", "base": "waterfall-award", "title": "违约金调减−1,500万元", "expect": "accept", "why": "负号对得上", "source": "回归"}
+{"id": "V038", "base": "waterfall-award", "title": "违约金调减−1,100万元", "expect": "reject", "why": "负号主语串", "source": "回归"}
+{"id": "V039", "base": "waffle-outcomes", "title": "未获支持占41%", "expect": "reject", "why": "R2-007", "source": "回归"}
+{"id": "V040", "base": "waffle-outcomes", "title": "驳回：41%", "expect": "reject", "why": "R2-008", "source": "回归"}
+{"id": "V041", "base": "waffle-outcomes", "title": "驳回：26%", "expect": "accept", "why": "R2-008 对照", "source": "回归"}
+{"id": "V042", "base": "waffle-outcomes", "title": "过半诉请获全额支持", "expect": "reject", "why": "R2-014", "source": "回归", "mutate": {"data.items": [{"id": "full", "label": "全额支持", "value": 50}, {"id": "part", "label": "部分支持", "value": 24}, {"id": "reject", "label": "驳回", "value": 26}]}}
+{"id": "V043", "base": "waffle-outcomes", "title": "半数诉请获全额支持", "expect": "accept", "why": "R2-014 对照", "source": "回归", "mutate": {"data.items": [{"id": "full", "label": "全额支持", "value": 50}, {"id": "part", "label": "部分支持", "value": 24}, {"id": "reject", "label": "驳回", "value": 26}]}}
+{"id": "V044", "base": "waffle-outcomes", "title": "全额支持并未过半", "expect": "accept", "why": "R2-016", "source": "回归"}
+{"id": "V045", "base": "waffle-outcomes", "title": "全额支持不足四成", "expect": "reject", "why": "R2-016 反向", "source": "回归"}
+{"id": "V046", "base": "waffle-outcomes", "title": "驳回不足三成", "expect": "accept", "why": "否定约数", "source": "回归"}
+{"id": "V047", "base": "waffle-outcomes", "title": "第9876件获得全额支持", "expect": "reject", "why": "R2-025", "source": "回归"}
+{"id": "V048", "base": "waffle-outcomes", "title": "第3件获得全额支持", "expect": "accept", "why": "R2-025 对照", "source": "回归"}
+{"id": "V049", "base": "waffle-outcomes", "title": "全额支持比驳回少15件", "expect": "reject", "why": "R2-028", "source": "回归"}
+{"id": "V050", "base": "waffle-outcomes", "title": "全额支持比驳回多15件", "expect": "accept", "why": "R2-027", "source": "回归"}
+{"id": "V051", "base": "waffle-outcomes", "title": "驳回比全额支持少15件", "expect": "accept", "why": "方向对", "source": "回归"}
+{"id": "V052", "base": "waffle-outcomes", "title": "全额支持比驳回多15个百分点", "expect": "accept", "why": "方向对 百分点", "source": "回归"}
+{"id": "V053", "base": "waffle-outcomes", "title": "驳回比全额支持高15个百分点", "expect": "reject", "why": "方向反 百分点", "source": "回归"}
+{"id": "V054", "base": "waffle-outcomes", "title": "金额1，234元", "expect": "reject", "why": "R2-033", "source": "回归"}
+{"id": "V055", "base": "waffle-outcomes", "title": "金额1e6元", "expect": "reject", "why": "R2-034", "source": "回归"}
+{"id": "V056", "base": "waffle-outcomes", "title": "全额支持与部分支持合计占74%", "expect": "accept", "why": "类目合计", "source": "回归"}
+{"id": "V057", "base": "waffle-outcomes", "title": "74% 的诉请获支持", "expect": "accept", "why": "类目合计（片段）", "source": "回归"}
+{"id": "V058", "base": "waffle-outcomes", "title": "全额支持占74%", "expect": "reject", "why": "合计安到单个类目", "source": "回归"}
+{"id": "V059", "base": "waffle-outcomes", "title": "过半诉请获支持", "expect": "accept", "why": "合计过半", "source": "回归"}
+{"id": "V060", "base": "waffle-outcomes", "title": "全额支持为驳回的1.6倍", "expect": "accept", "why": "倍数", "source": "回归"}
+{"id": "V061", "base": "bar-filings", "title": null, "expect": "reject", "why": "批注紧贴汉字的虚构数", "source": "N01", "annotations": [{"target": "y2019", "text": "金额增长9876%"}]}
+{"id": "V062", "base": "hbar-causes", "title": null, "expect": "accept", "why": "批注正常", "source": "示例", "annotations": [{"target": "loan", "text": "民间借贷收案量居首"}]}
+{"id": "V063", "base": "rose-causes", "title": null, "expect": "reject", "why": "墨绿：说明里写了第三种颜色", "source": "0.9.3 颜色只用风格原色", "mutate": {"accent": "#166534"}}
+{"id": "V064", "base": "rose-causes", "title": null, "expect": "reject", "why": "石青：说明里写了第三种颜色", "source": "0.9.3 颜色只用风格原色", "mutate": {"accent": "#155E75"}}
+{"id": "V065", "base": "waffle-outcomes", "title": null, "expect": "reject", "why": "强调色预设名（0.9.3 取消）", "source": "0.9.3 颜色只用风格原色", "mutate": {"accent": "墨绿"}}
+{"id": "V066", "base": "waffle-outcomes", "title": null, "expect": "reject", "why": "连奇川风原色也不能写：颜色由风格定，不由说明定", "source": "0.9.3 颜色只用风格原色", "mutate": {"accent": "#991B1B"}}

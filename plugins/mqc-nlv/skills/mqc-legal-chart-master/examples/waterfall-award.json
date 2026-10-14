@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "chart": "waterfall",
+  "title": "判赔额为诉请的 57%",
+  "scope": "示例：某买卖合同纠纷一审判决",
+  "unit": "万元",
+  "n": 1,
+  "source": "示例数据，非真实判决",
+  "emphasis": "end",
+  "data": {
+    "start": {
+      "label": "诉请总额",
+      "value": 12000
+    },
+    "steps": [
+      {
+        "id": "interest",
+        "label": "利息按 LPR 调减",
+        "value": -1100
+      },
+      {
+        "id": "penalty",
+        "label": "违约金调减",
+        "value": -1500
+      },
+      {
+        "id": "loss",
+        "label": "可得利益损失不予支持",
+        "value": -2600
+      },
+      {
+        "id": "fee",
+        "label": "律师费予以支持",
+        "value": 300
+      },
+      {
+        "id": "preservation",
+        "label": "保全费不予支持",
+        "value": -300
+      }
+    ],
+    "end": {
+      "label": "判决支持",
+      "value": 6800
+    }
+  }
+}

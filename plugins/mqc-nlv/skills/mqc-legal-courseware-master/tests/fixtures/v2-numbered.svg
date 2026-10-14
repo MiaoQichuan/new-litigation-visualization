@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="784" height="869" viewBox="0 0 784 869">
+<rect width="784" height="869" fill="#FFFFFF"/>
+<g transform="translate(42.0,29)">
+<rect data-role="canvas-bg" width="700" height="811" fill="#FFFFFF"/>
+<text x="350.0" y="52.0" font-size="30" font-weight="700" font-family="'方正小标宋简体','思源宋体','Source Han Serif SC','Noto Serif CJK SC','华文中宋',serif" fill="#1F2933" stroke="#1F2933" stroke-width="0.3" text-anchor="middle">合同纠纷案 · 本院查明事实时间轴</text>
+<line x1="350.5" y1="102.5" x2="350.5" y2="758.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="324.0" y1="102.5" x2="342.0" y2="102.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="358.0" y1="137.5" x2="376.0" y2="137.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="324.0" y1="171.5" x2="342.0" y2="171.5" stroke="#C3C9D2" stroke-width="1.2" stroke-dasharray="6 4"/>
+<line x1="358.0" y1="206.5" x2="376.0" y2="206.5" stroke="#C3C9D2" stroke-width="1.2" stroke-dasharray="6 4"/>
+<line x1="324.0" y1="240.5" x2="342.0" y2="240.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="358.0" y1="275.5" x2="376.0" y2="275.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="324.0" y1="309.5" x2="342.0" y2="309.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="358.0" y1="344.5" x2="376.0" y2="344.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="324.0" y1="378.5" x2="342.0" y2="378.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="358.0" y1="413.5" x2="376.0" y2="413.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="324.0" y1="447.5" x2="342.0" y2="447.5" stroke="#C3C9D2" stroke-width="1.2" stroke-dasharray="6 4"/>
+<line x1="358.0" y1="482.5" x2="376.0" y2="482.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="324.0" y1="516.5" x2="342.0" y2="516.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="358.0" y1="551.5" x2="376.0" y2="551.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="324.0" y1="585.5" x2="342.0" y2="585.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="358.0" y1="620.5" x2="376.0" y2="620.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="324.0" y1="654.5" x2="342.0" y2="654.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="358.0" y1="689.5" x2="376.0" y2="689.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="324.0" y1="723.5" x2="342.0" y2="723.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<line x1="358.0" y1="758.5" x2="376.0" y2="758.5" stroke="#C3C9D2" stroke-width="1.2"/>
+<rect x="24.0" y="78.0" width="300.0" height="49" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="174.0" y="98.0" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2015.05.12</text>
+<text x="174.0" y="116.0" font-size="13" fill="#1F2933" text-anchor="middle">丙公司向员工G、员工H转账4万元及9300元</text>
+<rect x="376.0" y="113.0" width="300.0" height="49" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="526.0" y="133.0" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2019.11.29</text>
+<text x="526.0" y="151.0" font-size="13" fill="#1F2933" text-anchor="middle">甲公司与丙公司签署《合作经营合同》</text>
+<rect x="24.0" y="147.0" width="300.0" height="49" rx="12" fill="#FFFFFF" stroke="#D6DAE0" stroke-width="1" stroke-dasharray="6 4"/>
+<text x="174.0" y="167.0" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2021年</text>
+<text x="174.0" y="185.0" font-size="13" fill="#1F2933" text-anchor="middle">丙公司起诉甲公司与乙公司</text>
+<rect x="376.0" y="190.5" width="300.0" height="32" rx="12" fill="#FFFFFF" stroke="#D6DAE0" stroke-width="1" stroke-dasharray="6 4"/>
+<text x="526.0" y="211.5" font-size="13" fill="#1F2933" text-anchor="middle">二审判决驳回上诉，维持原判</text>
+<rect x="24.0" y="216.0" width="300.0" height="49" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="174.0" y="236.0" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2021.03.26</text>
+<text x="174.0" y="254.0" font-size="13" fill="#1F2933" text-anchor="middle">甲公司与丁单位发布职工接转方案通知</text>
+<rect x="376.0" y="251.0" width="300.0" height="49" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="526.0" y="271.0" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2021.04.28</text>
+<text x="526.0" y="289.0" font-size="13" fill="#1F2933" text-anchor="middle">甲公司书面通知丙公司解除《合作经营合同》</text>
+<rect x="24.0" y="285.0" width="300.0" height="49" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="174.0" y="305.0" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2021.04.30</text>
+<text x="174.0" y="323.0" font-size="13" fill="#1F2933" text-anchor="middle">各方共同参会并形成会议纪要</text>
+<rect x="376.0" y="320.0" width="300.0" height="49" rx="12" fill="#991B1B"/>
+<text x="526.0" y="340.0" font-size="12" font-weight="600" fill="#FFFFFF" text-anchor="middle">2021.05.17</text>
+<text x="526.0" y="358.0" font-size="13" fill="#FFFFFF" text-anchor="middle">甲公司与丙公司签订《借款（垫款）协议》</text>
+<rect x="24.0" y="354.0" width="300.0" height="49" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="174.0" y="374.0" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2021.05.17</text>
+<text x="174.0" y="392.0" font-size="13" fill="#1F2933" text-anchor="middle">甲公司向丙公司支付首期垫款485000元</text>
+<rect x="376.0" y="389.0" width="300.0" height="49" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="526.0" y="409.0" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2021.05.19</text>
+<text x="526.0" y="427.0" font-size="13" fill="#1F2933" text-anchor="middle">甲公司向丙公司支付尾款485000元</text>
+<rect x="24.0" y="423.0" width="300.0" height="49" rx="12" fill="#FFFFFF" stroke="#D6DAE0" stroke-width="1" stroke-dasharray="6 4"/>
+<text x="174.0" y="443.0" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2021.05.19至21</text>
+<text x="174.0" y="461.0" font-size="13" fill="#1F2933" text-anchor="middle">丙公司向员工B转账共计35万元</text>
+<rect x="376.0" y="458.0" width="300.0" height="49" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="526.0" y="478.0" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2023.07.29</text>
+<text x="526.0" y="496.0" font-size="13" fill="#1F2933" text-anchor="middle">丙公司向员工A转账45000元</text>
+<rect x="24.0" y="492.0" width="300.0" height="49" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="174.0" y="512.0" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2024.11.11</text>
+<text x="174.0" y="530.0" font-size="13" fill="#1F2933" text-anchor="middle">法院就借款合同纠纷作出民事判决</text>
+<rect x="376.0" y="527.0" width="300.0" height="49" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="526.0" y="547.0" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2025.02.24</text>
+<text x="526.0" y="565.0" font-size="13" fill="#1F2933" text-anchor="middle">甲公司、乙公司出具沟通函</text>
+<rect x="24.0" y="561.0" width="300.0" height="49" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="174.0" y="581.0" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2025.02.27</text>
+<text x="174.0" y="599.0" font-size="13" fill="#1F2933" text-anchor="middle">丙公司出具回复函</text>
+<rect x="376.0" y="596.0" width="300.0" height="49" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="526.0" y="616.0" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2025.02.28</text>
+<text x="526.0" y="634.0" font-size="13" fill="#1F2933" text-anchor="middle">甲公司、乙公司出具相关意见</text>
+<rect x="24.0" y="630.0" width="300.0" height="49" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="174.0" y="650.0" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2025.03.05</text>
+<text x="174.0" y="668.0" font-size="13" fill="#1F2933" text-anchor="middle">丙公司出具第二次回复函</text>
+<rect x="376.0" y="665.0" width="300.0" height="49" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="526.0" y="685.0" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2025.03.06</text>
+<text x="526.0" y="703.0" font-size="13" fill="#1F2933" text-anchor="middle">甲公司、乙公司再次出具相关意见</text>
+<rect x="24.0" y="699.0" width="300.0" height="49" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="174.0" y="719.0" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2025.03.12</text>
+<text x="174.0" y="737.0" font-size="13" fill="#1F2933" text-anchor="middle">甲公司、乙公司至法院立案</text>
+<rect x="376.0" y="734.0" width="300.0" height="49" rx="12" fill="#F3F4F6" stroke="#D6DAE0" stroke-width="1"/>
+<text x="526.0" y="754.0" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">2025.03.19</text>
+<text x="526.0" y="772.0" font-size="13" fill="#1F2933" text-anchor="middle">本院立案并适用普通程序公开开庭审理</text>
+<circle data-role="node" data-id="11" cx="350.0" cy="102.5" r="8.0" fill="#374151"/>
+<text x="350.0" y="105.4" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">1</text>
+<circle data-role="node" data-id="1" cx="350.0" cy="137.5" r="8.0" fill="#374151"/>
+<text x="350.0" y="140.4" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">2</text>
+<circle data-role="node" data-id="9" cx="350.0" cy="171.5" r="8.0" fill="#374151"/>
+<text x="350.0" y="174.4" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">3</text>
+<circle data-role="node" data-id="10" cx="350.0" cy="206.5" r="8.0" fill="#374151"/>
+<text x="350.0" y="209.4" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">4</text>
+<circle data-role="node" data-id="2" cx="350.0" cy="240.5" r="8.0" fill="#374151"/>
+<text x="350.0" y="243.4" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">5</text>
+<circle data-role="node" data-id="3" cx="350.0" cy="275.5" r="8.0" fill="#374151"/>
+<text x="350.0" y="278.4" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">6</text>
+<circle data-role="node" data-id="4" cx="350.0" cy="309.5" r="8.0" fill="#374151"/>
+<text x="350.0" y="312.4" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">7</text>
+<circle data-role="node" data-id="5" cx="350.0" cy="344.5" r="8.0" fill="#991B1B"/>
+<text x="350.0" y="347.4" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">8</text>
+<circle data-role="node" data-id="6" cx="350.0" cy="378.5" r="8.0" fill="#374151"/>
+<text x="350.0" y="381.4" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">9</text>
+<circle data-role="node" data-id="7" cx="350.0" cy="413.5" r="8.0" fill="#374151"/>
+<text x="350.0" y="416.4" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">10</text>
+<circle data-role="node" data-id="8" cx="350.0" cy="447.5" r="8.0" fill="#374151"/>
+<text x="350.0" y="450.4" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">11</text>
+<circle data-role="node" data-id="12" cx="350.0" cy="482.5" r="8.0" fill="#374151"/>
+<text x="350.0" y="485.4" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">12</text>
+<circle data-role="node" data-id="13" cx="350.0" cy="516.5" r="8.0" fill="#374151"/>
+<text x="350.0" y="519.4" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">13</text>
+<circle data-role="node" data-id="14" cx="350.0" cy="551.5" r="8.0" fill="#374151"/>
+<text x="350.0" y="554.4" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">14</text>
+<circle data-role="node" data-id="15" cx="350.0" cy="585.5" r="8.0" fill="#374151"/>
+<text x="350.0" y="588.4" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">15</text>
+<circle data-role="node" data-id="16" cx="350.0" cy="620.5" r="8.0" fill="#374151"/>
+<text x="350.0" y="623.4" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">16</text>
+<circle data-role="node" data-id="17" cx="350.0" cy="654.5" r="8.0" fill="#374151"/>
+<text x="350.0" y="657.4" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">17</text>
+<circle data-role="node" data-id="18" cx="350.0" cy="689.5" r="8.0" fill="#374151"/>
+<text x="350.0" y="692.4" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">18</text>
+<circle data-role="node" data-id="19" cx="350.0" cy="723.5" r="8.0" fill="#374151"/>
+<text x="350.0" y="726.4" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">19</text>
+<circle data-role="node" data-id="20" cx="350.0" cy="758.5" r="8.0" fill="#374151"/>
+<text x="350.0" y="761.4" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">20</text>
+</g>
+</svg>

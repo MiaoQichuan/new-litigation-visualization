@@ -25,6 +25,12 @@ next person who finds it inconvenient.
 import json, os, re, sys
 from datetime import date
 
+def _py(script):
+    """给用户看的下一步命令：用脚本的真实路径，在哪个目录里照抄都能跑（0.9.8：SKILL.md 要求在用户的工作目录里运行）。"""
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), script)
+    return f'python3 "{p}"' if " " in p else f"python3 {p}"
+
+
 # ---------------------------------------------------------------- 1 normalise
 
 RULES = [
@@ -228,7 +234,7 @@ def read_pdf(path):
         raise PdfTextUnavailable(
             f"《{os.path.basename(path)}》{len(pages)} 页只抽出 {sum(cjk)} 个汉字，"
             f"是扫描件或照片，没有可用的文字层。请走读图流程：\n"
-            f"  python scripts/read_image.py probe \"{path}\"")
+            f"  {_py('read_image.py')} probe \"{path}\"")
     read_pdf.last_engine = engine
     read_pdf.last_pages = len(pages)
     return "\n".join(pages)
@@ -251,7 +257,54 @@ def _read_raw(path):
                 f"② soffice --headless --convert-to docx \"{path}\"")
     if low.endswith(".pdf"):
         return read_pdf(path)
-    return open(path, encoding="utf-8").read()
+    try:
+        txt, enc_note = read_plain(path)
+    except ValueError as e:
+        raise RuntimeError(str(e))
+    if enc_note:
+        print(f"  提示：{os.path.basename(path)} 是 {enc_note} 编码（记事本默认），已按 {enc_note} 读入", file=sys.stderr)
+    return txt
+
+# ---- 纯文本材料的编码（0.9.8 自检：中文 Windows 的记事本默认存 GBK）--------------------------
+# 原来按 UTF-8 读、errors="ignore"：GBK 的判决书被悄悄读成乱码（「ԭ׹˾뱻ҹ˾…」），还当作已读。
+# 现在：UTF-8（带不带 BOM）读得通就用；读不通再按 GBK（GB18030）读，且读出来的汉字六成以上是常用字才认
+# （真 GBK 的判决书实测九成以上；Big5 繁体、乱码都过不了）；否则拒，请用户另存为 UTF-8。宁可停下，不可把乱码当原文。
+_COMMON_HANZI = None
+
+
+def _common_hanzi():
+    global _COMMON_HANZI
+    if _COMMON_HANZI is None:                       # GB2312 一级字（3755 个常用字）
+        s = set()
+        for hi in range(0xB0, 0xD8):
+            for lo in range(0xA1, 0xFF):
+                try:
+                    s.add(bytes((hi, lo)).decode("gb2312"))
+                except UnicodeDecodeError:
+                    pass
+        _COMMON_HANZI = s
+    return _COMMON_HANZI
+
+
+def read_plain(path):
+    """读一份纯文本材料，返回 (正文, 编码说明)。编码说明为 None 表示就是 UTF-8。"""
+    raw = open(path, "rb").read()
+    try:
+        return raw.decode("utf-8-sig"), None
+    except UnicodeDecodeError:
+        pass
+    try:
+        txt = raw.decode("gb18030")
+    except UnicodeDecodeError:
+        txt = None
+    if txt is not None:
+        han = [c for c in txt if "\u4e00" <= c <= "\u9fff"]
+        common = _common_hanzi()
+        if han and sum(c in common for c in han) / len(han) >= 0.6:   # 真 GBK 的判决书实测九成以上是常用字
+            return txt, "GBK"
+    raise ValueError(f"{os.path.basename(path)} 不是 UTF-8，也认不准是哪种中文编码：请用记事本「另存为」，"
+                     f"编码选 UTF-8，再给我一次")
+
 
 def read_with_blocks(path):
     """一次读完，句子与叙述块**出自同一份规范化文本**，句号可以直接互用。
@@ -468,6 +521,14 @@ def read(path):
 
 
 if __name__ == "__main__":
+    if {"-h", "--help"} & set(__import__("sys").argv[1:]):   # 只打印用法、什么都不做（原来会把 --help 当成文件名）
+        getattr(__import__("sys").stdout, "reconfigure", lambda **k: None)(encoding="utf-8")
+        print((__doc__ or "").strip() or "用法见本模块的 SKILL.md")
+        raise SystemExit(0)
+    try:                                   # 常见输入错误（路径、JSON、编码）说人话，不甩堆栈
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
     # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是乱码，
     # 自检里的「↳」这类字符还会直接让程序崩溃。写法与关系图大师 make.py 一致。
     for _stream in (sys.stdout, sys.stderr):

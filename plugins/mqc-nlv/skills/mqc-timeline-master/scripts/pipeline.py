@@ -45,6 +45,15 @@ import read_source as R                                           # noqa: E402
 import check_model_output as C                                     # noqa: E402
 import capacity as CAP                                             # noqa: E402
 
+def _py(script):
+    """给用户看的下一步命令：用脚本的真实路径，在哪个目录里照抄都能跑（0.9.8：SKILL.md 要求在用户的工作目录里运行）。"""
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), script)
+    return f'python3 "{p}"' if " " in p else f"python3 {p}"
+
+
+PIPE = _py("pipeline.py")                  # 给用户看的命令：在哪个目录照抄都能跑
+
+
 STATE = "state.json"
 
 
@@ -158,6 +167,9 @@ SHAPES = {
 
 def print_shape(name):
     """打印某一份 JSON 的形状与判据。每一步结束时调用，不让人靠记性。"""
+    if name not in SHAPES:                     # 给了路径或拼错：列出可选的名字，不甩 KeyError
+        print(f"没有「{name}」这一份的形状说明。可选：{'、'.join(SHAPES)}")
+        raise SystemExit(2)
     s = SHAPES[name]
     print(f"下一步要写 {name}（{s['when']}）：")
     print(f"  {s['shape']}")
@@ -170,7 +182,7 @@ def _load(path, what):
     if not os.path.exists(path):
         print(f"缺 {path}（{what}）。这一步要模型先答，答完写成这个文件再来。")
         sys.exit(2)
-    return json.load(open(path, encoding="utf-8"))
+    return json.load(open(path, encoding="utf-8-sig"))
 
 
 def _items_outside_picked(sk, st):
@@ -194,7 +206,7 @@ def _load_verdicts():
     写坏的行（缺理由、把 Y/N 写成是/否）逐行报出行号，不静默丢弃。"""
     if os.path.exists("verdicts.txt"):
         out, bad = [], []
-        for n, line in enumerate(open("verdicts.txt", encoding="utf-8"), 1):
+        for n, line in enumerate(open("verdicts.txt", encoding="utf-8-sig"), 1):
             if not line.strip():
                 continue
             m = re.match(r"^\s*(\d+)\s+([YyNn])\s+(\S.*?)\s*$", line)
@@ -344,7 +356,7 @@ def stage_pick(paths_or_sel=None):
             print()
             print("  [全部] 全部时间")
             print()
-            print("然后跑：python pipeline.py span 全部      （或 span 1,2）")
+            print("然后跑：" + PIPE + " span 全部      （或 span 1,2）")
             return
         st["pick_r1"] = [{k: v for k, v in r.items() if k != "sentences"} for r in r1]
         _save(st)
@@ -358,8 +370,8 @@ def stage_pick(paths_or_sel=None):
         print("  [全部] 全部材料")
         print()
         print("报编号即可（可多选），或报「全部」。然后跑：")
-        print("  python pipeline.py pick 1,2      # 勾第 1、2 份")
-        print("  python pipeline.py pick 全部")
+        print("  " + PIPE + " pick 1,2      # 勾第 1、2 份")
+        print("  " + PIPE + " pick 全部")
         return
     # 用户可以直接报「全部」而不先看清单 —— 真跑就是这样崩的（KeyError: pick_r1）。
     # 不能假设用户按我设想的顺序来：每一步都要能独立成立，缺的前置自己补上。
@@ -393,7 +405,7 @@ def stage_pick(paths_or_sel=None):
     print()
     print("  [全部] 全部时间")
     print()
-    print("然后跑：python pipeline.py span 全部      （或 span 1,2）")
+    print("然后跑：" + PIPE + " span 全部      （或 span 1,2）")
 
 
 def stage_span(sel):
@@ -433,11 +445,11 @@ def _ask_style():
     first = PK.round_three()[0]
     print(f"  不回 = 1（{first['name']}）")
     print()
-    print("把使用者的选择填进去：python pipeline.py style <编号>")
+    print("把使用者的选择填进去：" + PIPE + " style <编号>")
     print()
     print("同一轮顺带问格式（可多选）：1 SVG　2 PNG　3 PPTX　4 VSDX　5 drawio")
     print("  不回 = 1,3（SVG + PPTX）；PNG 要本机有转图工具，选了才出。")
-    print("  使用者要别的就跑：python pipeline.py formats <编号，如 1,2,3 或 全部>")
+    print("  使用者要别的就跑：" + PIPE + " formats <编号，如 1,2,3 或 全部>")
 
 
 def stage_style(sel):
@@ -558,7 +570,7 @@ def stage_scope():
     print_shape("verdicts.json")
     print()
     print_shape("parts.json")
-    print("然后跑：python pipeline.py offer")
+    print("然后跑：" + PIPE + " offer")
 
 
 def in_scope(st, sid):
@@ -678,7 +690,7 @@ def stage_offer():
     # 例子里的编号必须来自**这份清单**：写死一个数时，清单只有一两项就会提示
     # 「budget 4」而第 4 项根本不存在 —— 用户照着敲就会撞错。
     _eg = str(parts[-1].get("id", 1)) if parts else "1"
-    print(f"然后跑：python pipeline.py budget {_eg}"
+    print(f"然后跑：{PIPE} budget {_eg}"
           + ("      （或 budget 1,2 多选 / budget all 全选）" if len(parts) > 1
              else "      （或 budget all）"))
 
@@ -785,7 +797,7 @@ def stage_capacity():
     if len(_tm) < len(sk):
         _miss = [it.get("id") for it in sk if not it.get("certainty")]
         print(f"骨架缺 certainty 的事项：{_miss} —— 时间归档是模型第五步的活，"
-              f"四档按材料的精度填（见 python pipeline.py shape skeleton.json）。"
+              f"四档按材料的精度填（见 {PIPE} shape skeleton.json）。"
               f"只到年月要判 range 并给 from 与 to，不许补成某月 1 日。")
         sys.exit(1)
     _te, _tr = C.check_dates(st["sentences"], _tm)
@@ -855,7 +867,7 @@ def stage_capacity():
                       # 有 medium=image 的事项时必须给，出图那一步据此填 scope。
                       ("image_docs.json", "image_docs")):
         if os.path.exists(_fn):
-            st[_key] = json.load(open(_fn, encoding="utf-8"))
+            st[_key] = json.load(open(_fn, encoding="utf-8-sig"))
     st["skeleton"] = sk
     st["cap"] = b["cap_per_module"]
     st["cap_title"] = b["cap_title"]
@@ -901,7 +913,7 @@ def stage_capacity():
         print()
         print("  不回 = 由我挑一处并说明理由")
         print()
-        print("  然后跑：python pipeline.py mark <编号>      # 0 = 不标红")
+        print("  然后跑：" + PIPE + " mark <编号>      # 0 = 不标红")
         print()
 
     print("下一步（模型）：按这个容量写正文，写成 items.json（在骨架上补 head）：")
@@ -915,8 +927,8 @@ def stage_capacity():
         print("    条右侧只放得下一行；条下方有整幅宽度，可以写长。")
     else:
         print(f'  · head 至多 {b["cap_per_module"]} 字，且必须是 src_sids 那几句拼接后的子序列')
-    print(f"  · 图名至多 {b['cap_title']} 字：python pipeline.py title '…'")
-    print("然后跑：python pipeline.py render 出图.svg")
+    print(f"  · 图名至多 {b['cap_title']} 字：{PIPE} title '…'")
+    print("然后跑：" + PIPE + " render 出图.svg")
 
 
 def _curly(s):
@@ -963,7 +975,7 @@ def stage_mark(sel):
     print(f"标红第 {_sel} 项：{_hit.get('raw') or _hit.get('date')}　"
           f"{(_hit.get('head') or '')[:24]}")
     print()
-    print("然后跑：python pipeline.py title '…'")
+    print("然后跑：" + PIPE + " title '…'")
 
 
 def stage_title(title):
@@ -981,7 +993,7 @@ def stage_title(title):
     st["title"] = title
     _save(st)
     print(f"图名已定（{len(title)} 字，容量 {cap} 字）：{title}")
-    print("然后跑：python pipeline.py render 出图.svg")
+    print("然后跑：" + PIPE + " render 出图.svg")
 
 
 def stage_budget(pick):
@@ -1007,14 +1019,14 @@ def stage_budget(pick):
     print(f"这 {len(sids)} 句事实要合成几个事项、每个属于哪一方，是模型的判断 —— "
           f"**容量只有等这个骨架定了才算得出来**。")
     print_shape("skeleton.json")
-    print("然后跑：python pipeline.py capacity      # 按真实骨架算容量")
+    print("然后跑：" + PIPE + " capacity      # 按真实骨架算容量")
     return
     print("下一步（模型）：按容量写每个事项，写成 items.json：")
     print('  [{"id": "1", "head": "<原句的子序列，只许删不许改写>", '
           '"src_sids": [25], "date": "2014/3/12", "lane": "P"}]')
     print("  · head 至多", b["cap_per_module"], "字，且必须是 src_sids 那几句拼接后的子序列")
     print("  · src_sids 必须升序；一个事项跨几句就都写上")
-    print("然后跑：python pipeline.py render 出图.svg")
+    print("然后跑：" + PIPE + " render 出图.svg")
 
 
 # ---------------------------------------------------------------- stage render
@@ -1331,7 +1343,7 @@ def _apply_style(st, out, layout=None):
     if _v1 not in _s.path:
         _s.path.insert(0, _v1)
     import render as _V1R
-    svg = open(out, encoding="utf-8").read()
+    svg = open(out, encoding="utf-8-sig").read()
     try:
         # layout 由调用方传进来 —— 它的真值是 render_figure.deliver **实际交付的图种**。
         # 不从 state 猜、也不给硬编码默认值：拿默认值当真值正是这个项目一直在避免的事
@@ -1371,7 +1383,7 @@ def _kill_autospace(docx):
     # 有自己的样式链，把默认值覆盖掉了。与其猜样式的层级，不如逐段写死，一处不漏。
     dp = os.path.join(tmpd, "word", "document.xml")
     add = '<w:autoSpaceDE w:val="0"/><w:autoSpaceDN w:val="0"/>'
-    xml = open(dp, encoding="utf-8").read()
+    xml = open(dp, encoding="utf-8-sig").read()
     # 有 pPr 的段落：插在 pPr 开头；没有 pPr 的：补一个
     xml = xml.replace("<w:pPr>", "<w:pPr>" + add)
     xml = re.sub(r"<w:p>(?!<w:pPr>)", "<w:p><w:pPr>" + add + "</w:pPr>", xml)
@@ -1503,8 +1515,10 @@ def _trace(items, S, st, out):
     tmp = os.path.splitext(out)[0] + "-trace.json"
     json.dump(payload, open(tmp, "w", encoding="utf-8"), ensure_ascii=False)
     try:
+        # node 一律输出 UTF-8；按系统区域设置（中文 Windows 是 GBK）解码，案名字数一奇就解码报错，
+        # Word 版明明写好了，却被当成「没写成」退回 Markdown。
         r = subprocess.run(["node", js, tmp, docx], capture_output=True, text=True,
-                           timeout=120)
+                           encoding="utf-8", errors="replace", timeout=120)
         if r.returncode == 0:
             _kill_autospace(docx)
             print(f"溯源索引：{docx}（{len(rows)} 行）")
@@ -1613,17 +1627,17 @@ def stage_next():
     st = None
     if os.path.exists(STATE):
         try:
-            st = json.load(open(STATE, encoding="utf-8"))
+            st = json.load(open(STATE, encoding="utf-8-sig"))
         except Exception as exc:
             print(f"state.json 读不出来（{type(exc).__name__}）—— 从头跑 read")
-            print("  python pipeline.py read <材料...>")
+            print(f"  {_py('pipeline.py')} read <材料...>")
             return
     if st is None:
         print("还没开始。第一步是读材料：")
-        print("  python pipeline.py read <材料...>")
+        print(f"  {_py('pipeline.py')} read <材料...>")
         print()
         print("材料是扫描件或照片（没有文字层）时，先走读图三步：")
-        print("  python scripts/read_image.py probe <材料.pdf>")
+        print(f"  {_py('read_image.py')} probe <材料.pdf>")
         return
 
     # 走到哪一步，看的是**产物**而不是自称：每一步都有它必须留下的东西
@@ -1656,20 +1670,20 @@ def stage_next():
     if nxt is None:
         print()
         print("九步已齐，最后一步出图（先写 items.json：在骨架上补 head）：")
-        print("  python pipeline.py render 出图.svg")
+        print("  " + PIPE + " render 出图.svg")
         print()
         print("出图会一并给出五种可编辑格式与溯源索引 docx。")
         return
     name, cmd, note = nxt
     print()
     print(f"下一步：{name}")
-    print(f"  python pipeline.py {cmd}" + (f"      # {note}" if note else ""))
+    print(f"  {PIPE} {cmd}" + (f"      # {note}" if note else ""))
     _need = {"offer": ("verdicts.json", "parts.json"),
              "capacity": ("skeleton.json",)}.get(cmd.split()[0], ())
     for f in _need:
         if not os.path.exists(f):
             print(f"  这一步要模型先写 {f} —— 形状与判据："
-                  f"python pipeline.py shape {f}")
+                  f"{PIPE} shape {f}")
 
 
 def stage_steps():
@@ -1688,8 +1702,8 @@ def stage_steps():
     print("  另有 mark <编号|0>    用户  第五轮：深红标在哪一处（0 = 不标）")
     print("  ——它在抽取完事项之后、出图之前问，只有奇川风才问，所以不在上表的主序里。")
     print()
-    print("中途接手：python pipeline.py next   —— 现在走到第几步、下一步跑什么")
-    print("四份 JSON 的形状与判据：python pipeline.py shape verdicts.json")
+    print("中途接手：" + PIPE + " next   —— 现在走到第几步、下一步跑什么")
+    print("四份 JSON 的形状与判据：" + PIPE + " shape verdicts.json")
     print("（也可写 parts.json / skeleton.json / items.json）")
 
 
@@ -1701,7 +1715,7 @@ def _log_time(cmd):
     而这一路已经证明猜是靠不住的。账只记命令名与时刻，不记任何材料内容。"""
     import datetime as _dt
     try:
-        st = json.load(open(STATE, encoding="utf-8"))
+        st = json.load(open(STATE, encoding="utf-8-sig"))
     except Exception:
         return
     log = st.get("timing") or []
@@ -1733,6 +1747,14 @@ def stage_time():
 
 
 if __name__ == "__main__":
+    if {"-h", "--help"} & set(__import__("sys").argv[1:]):   # 只打印用法、什么都不做（原来会把 --help 当成文件名）
+        getattr(__import__("sys").stdout, "reconfigure", lambda **k: None)(encoding="utf-8")
+        print((__doc__ or "").strip() or "用法见本模块的 SKILL.md")
+        raise SystemExit(0)
+    try:                                   # 常见输入错误（路径、JSON、编码）说人话，不甩堆栈
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
     # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是乱码，
     # 自检里的「↳」这类字符还会直接让程序崩溃。写法与关系图大师 make.py 一致。
     for _stream in (sys.stdout, sys.stderr):

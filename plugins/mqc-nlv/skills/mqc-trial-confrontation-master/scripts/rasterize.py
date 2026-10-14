@@ -4,6 +4,17 @@
 光栅化时换成本机确实装着的单一字族——cairosvg 解析不了带引号的多字族栈，
 会静默回退到无中文的字体，文字还在、字形全是豆腐块，且没有任何检查会报错。
 所以出图后量一次墨迹宽度，命中中文字体才算过。"""
+
+# 放在第三方依赖的 import 之前：没装 openpyxl / Pillow / numpy 的机器上 --help 也要能看用法
+if __name__ == "__main__" and {"-h", "--help"} & set(__import__("sys").argv[1:]):   # 只打印用法、什么都不做（原来会把 --help 当成文件名）
+    getattr(__import__("sys").stdout, "reconfigure", lambda **k: None)(encoding="utf-8")
+    print((__doc__ or "").strip() or "用法见本模块的 SKILL.md")
+    raise SystemExit(0)
+if __name__ == "__main__":                  # 出错边界也装在第三方 import 之前：没装 openpyxl / Pillow 时说缺什么、怎么装
+    try:
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
 import os, re, shutil, subprocess, sys, tempfile
 from PIL import Image
 import numpy as np
@@ -17,7 +28,7 @@ SANS = "Noto Sans CJK SC"
 SERIF = "Noto Serif CJK SC"
 
 def rasterize(src, dst, width=1400):
-    s = open(src, encoding="utf-8").read()
+    s = open(src, encoding="utf-8-sig").read()
     s = re.sub(r'font-family="[^"]*方正小标宋[^"]*"', f'font-family="{SERIF}"', s)
     s = re.sub(r'font-family="[^"]*(?:PingFang|Microsoft YaHei)[^"]*"', f'font-family="{SANS}"', s)
     # 换过字族的那份是中间产物，直接喂给 cairosvg，不落盘——
@@ -94,6 +105,10 @@ def verify(png, min_ratio=0.45):
     return runs > 0, f"采样行连通段 {runs}"
 
 if __name__ == "__main__":
+    try:                                   # 常见输入错误（路径、JSON、编码）说人话，不甩堆栈
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
     # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是
     # 乱码。真实运行记录里，时间轴大师就因此让模型摸索了一轮编码。写法与其余 skill 一致。
     for _stream in (sys.stdout, sys.stderr):

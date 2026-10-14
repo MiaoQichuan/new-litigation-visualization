@@ -22,7 +22,7 @@ def index():
     if _IDX is None:
         p = os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets"),
                          "plan_index.json")
-        _IDX = json.load(open(p, encoding="utf-8"))
+        _IDX = json.load(open(p, encoding="utf-8-sig"))
     return _IDX
 
 
@@ -32,7 +32,7 @@ def index_all():
     if _ALL is None:
         p = os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets"),
                          "index_all.json")
-        _ALL = json.load(open(p, encoding="utf-8")) if os.path.exists(p) else {}
+        _ALL = json.load(open(p, encoding="utf-8-sig")) if os.path.exists(p) else {}
     return _ALL
 
 
@@ -107,7 +107,73 @@ def plan(nodes, edges):
     return out
 
 
-def run(nodes, edges, verbose=False, svg_path=None, render=None, force_tall=False):
+WIDE_ASPECT = (1.2, 3.0)   # 横版：画面宽高比（不含页边）落在这一段；16:9 的课件页、投影都在这一段里
+
+
+def wide_grids(n, col, row):
+    """横版的候选网格：画面宽高比在 WIDE_ASPECT 之间、空格不多，按离 1.9（16:9 减去标题与页边后的大致比例）由近到远。
+
+    默认的纵向偏好是为插进 A4 Word 竖着读；放进 16:9 的课件页，竖长条只能缩得很小（6 个模块的单列图
+    放进课件，字只剩 5 像素），所以课件与投影用横版。"""
+    lo, hi = WIDE_ASPECT
+    out = []
+    for r in range(1, n + 1):
+        for c in range(1, n + 1):
+            if r * c < n or r * c - n > max(3, n // 3):
+                continue
+            a = c * col / (r * row)
+            if lo <= a <= hi:
+                out.append((abs(a - 1.9), r * c, (r, c)))
+    return [g for _, _, g in sorted(out)][:4]
+
+
+def aspect(rects):
+    """摆好的模块实际占的宽高比（网格里可能空着整行整列，按网格算会算错）。"""
+    xs = [v[0] for v in rects.values()] + [v[0] + v[2] for v in rects.values()]
+    ys = [v[1] for v in rects.values()] + [v[1] + v[3] for v in rects.values()]
+    return (max(xs) - min(xs)) / max(1, max(ys) - min(ys))
+
+
+def wide_small(ids, edges, g, col, row, k=6):
+    """横版、6 个模块以内：把各种摆法粗算一遍（同行同列直连不拐弯、中间隔着模块要绕、错开要拐一次），
+    取最省的几种交给走线精修。启发式搜索在小图上常错过一拐不拐的摆法（实测买卖加保证的 6 模块图，
+    搜索给 4 个拐弯、外圈绕一大圈，粗算挑出的摆法只拐 1 次）。粗算一种摆法不到 0.1 毫秒，精修只做 k 种。"""
+    import itertools
+    r_, c_ = g
+    cells = [(r, c) for r in range(r_) for c in range(c_)]
+    if len(cells) > 8 or len(ids) > 6:
+        return []
+    scored = []
+    for p in itertools.permutations(cells, len(ids)):
+        a = dict(zip(ids, p))
+        cols = {v[1] for v in p}
+        if (max(cols) - min(cols) + 1) * col < WIDE_ASPECT[0] * (max(v[0] for v in p) - min(v[0] for v in p) + 1) * row:
+            continue                                   # 摆出来不横，不要
+        occ = set(p)
+        bends = dist = 0
+        for u, v in edges:
+            (ru, cu), (rv, cv) = a[u], a[v]
+            dist += abs(ru - rv) + abs(cu - cv)
+            if ru == rv:
+                bends += 2 if any((ru, c) in occ for c in range(min(cu, cv) + 1, max(cu, cv))) else 0
+            elif cu == cv:
+                bends += 2 if any((r, cu) in occ for r in range(min(ru, rv) + 1, max(ru, rv))) else 0
+            else:
+                bends += 1
+        scored.append((bends, dist, p))
+    scored.sort()
+    out, seen = [], set()
+    for b, dd, p in scored:
+        if (b, dd) in seen and len(out) >= 2:
+            continue                                   # 同分的多是镜像，留两种就够
+        seen.add((b, dd))
+        out.append(dict(zip(ids, p)))
+        if len(out) >= k:
+            break
+    return out
+
+
+def run(nodes, edges, verbose=False, svg_path=None, render=None, force_tall=False, shape="auto"):
     """按查到的决定跑一遍。
 
     给了 svg_path 就在出图后自动验一遍判据——索引表只保证交叉与拐弯，
@@ -129,6 +195,19 @@ def run(nodes, edges, verbose=False, svg_path=None, render=None, force_tall=Fals
     importlib.reload(layout_heuristic)
     importlib.reload(optimize)
     NH, ROW, COL = d["node"][1], d["row"], d["col"]
+    wide = shape == "wide" and d["n"] >= 3   # 两个模块怎么排都是一行，不必换
+    if wide:
+        # 先按默认排一次：已经是横的（多数中等规模的图就是），原样用，与默认出图一致
+        r0 = run(nodes, edges, verbose, svg_path, render, force_tall)
+        if aspect(r0[4]) >= WIDE_ASPECT[0]:
+            r0[7]["shape"] = "wide"
+            return r0
+    if wide:
+        # 横版：不取存好的纵向布局，候选只留横向的网格；判据照样逐个验
+        d.pop("layout", None)
+        d["grids"] = [list(g) for g in wide_grids(d["n"], COL, ROW)] or [list(d.get("grid") or [1, d["n"]])]
+        d["portrait_bonus"] = 0
+        d["shape"] = "wide"
     # 1 到 6 直接用存好的布局，不跑搜索
     if d.get("layout"):
         NH, ROW, COL = d["node"][1], d["row"], d["col"]
@@ -167,8 +246,10 @@ def run(nodes, edges, verbose=False, svg_path=None, render=None, force_tall=Fals
         pass
     else:
         extra = []
+    if wide:
+        extra = []
     for g in [tuple(x) for x in d["grids"]] + extra:
-        for x in (g, (g[1], g[0])):
+        for x in ((g,) if wide else (g, (g[1], g[0]))):   # 横版不补转置：转过去就成了竖版
             if x not in cand_grids and x[0] * x[1] >= d["n"]:
                 cand_grids.append(x)
     rough = []
@@ -183,8 +264,22 @@ def run(nodes, edges, verbose=False, svg_path=None, render=None, force_tall=Fals
             rough.append((sc, g, a, pos, rects))
         except Exception:
             continue
+    if wide and d["n"] <= 6:
+        ids = [x["id"] if isinstance(x, dict) else x for x in nodes]
+        for g in cand_grids:
+            for a in wide_small(ids, edges, g, COL, ROW):
+                try:
+                    pos = {k: (v[1] * COL + 70, v[0] * ROW + NH / 2) for k, v in a.items()}
+                    rects = {k: (v[1] * COL, v[0] * ROW, d["node"][0], NH) for k, v in a.items()}
+                    _, _, sc = optimize.refine(pos, rects, edges, rounds=d["coarse"])
+                    rough.append((sc, g, a, pos, rects))
+                except Exception:
+                    continue
     if not rough:
         raise ValueError("候选网格都走不通，建议拆图")
+    if wide:
+        # 网格横着、摆出来却可能空出整列成了方的：按实际占地再筛一次，筛空了才退回全部
+        rough = [x for x in rough if aspect(x[4]) >= WIDE_ASPECT[0]] or rough
     bonus = d["portrait_bonus"]
     rough.sort(key=lambda x: (x[0][0] - (bonus if x[1][0] >= x[1][1] else 0),
                               x[0][1], x[0][2]))
@@ -241,6 +336,8 @@ def run(nodes, edges, verbose=False, svg_path=None, render=None, force_tall=Fals
         for g0 in list(cand_grids)[:2]:
             for x in ((g0[0], g0[1] + 1), (g0[0] + 1, g0[1])):
                 for y in (x, (x[1], x[0])):
+                    if wide and y[1] * COL < WIDE_ASPECT[0] * y[0] * ROW:
+                        continue                     # 横版的补救也只试横向的
                     if y not in tried and y not in more:
                         more.append(y)
         for g in more[:4]:

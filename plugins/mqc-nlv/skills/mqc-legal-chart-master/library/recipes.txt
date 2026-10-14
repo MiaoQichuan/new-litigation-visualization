@@ -1,0 +1,486 @@
+# 法律图表场景库 · 源文件
+#
+# 一行一条：领域|画法|意图|场景(逗号分隔)|名称|要回答的问题|法律例子|特有守卫(可空)
+# 代码含义见 taxonomy.json。改完运行 python3 scripts/build_library.py 重新生成 index.json 并校验。
+# 加场景只需加一行，不必写代码；画法（第二列）只能用 taxonomy.json 里已登记的。
+
+
+## GEN 通用
+GEN|number|count|case,client,research,public|一页一个关键数|这页只想让人记住哪一个数？|「判赔 6,800 万元」配口径与来源，整页只放这一个数。|数字须能由数据推得
+GEN|timeline|narrate|case,client,trial|案件经过|这个案子是怎么一步步走到今天的？|起诉状与判决书里的事实，按日期排成时间轴。|
+GEN|relation|structure|case,trial,client|主体关系|谁与谁、就什么、成立什么关系？|发包人、总包、分包、实际施工人之间的合同关系。|
+GEN|confront|contest|trial,case|攻防对抗|谁主张什么、对方怎么抗辩、法院审查什么？|原告请求权基础、被告抗辩、法院逐项审查。|
+GEN|flow|rule|newlaw,skill,public|程序路径|这类案件要走哪几步？|立案 → 保全 → 一审 → 二审 → 执行。|
+GEN|gantt|rule|case,newlaw,client|期间与时效|诉讼时效、保证期间、除斥期间各从哪天起算、到哪天届满？|保证期间与诉讼时效并排的期间图。|起止日由脚本按规则计算
+GEN|board|progress|client,firm|多案进展看板|名下几个案件，各自到了哪一步、下一个节点是什么？|客户名下 12 个案件，每案当前阶段与下一节点日期。|
+GEN|planactual|progress|client,case|程序时长：预期与实际|当初预计多久，实际用了多久，慢在哪一段？|一审、二审、执行各段的预期天数与实际天数。|
+GEN|strip|spread|research,client|审理周期分布|这类案子一般审多久？|某类案件 300 件的审理天数与审限线。|样本口径必填
+GEN|waterfall|compute|case,client|诉讼成本构成|这场官司一共要花多少钱？|受理费、保全费、鉴定费、律师费、执行费逐项累加。|各项合计须等于总额
+GEN|interval|compare|client,case|方案区间对照|几种处理方案各自的金额区间？|和解报价区间与类案判赔区间并排。|执业规范：不得画成结果承诺；须注明来源为类案
+GEN|matrix|contest|trial,case|证据与待证事实对照|每个待证事实靠哪几份证据撑着？|证据 × 要件点阵：实心直接证明、空心间接证明、空列为缺口。|证明力由律师标注，不由模型判断
+GEN|hbar|count|trial|证据清单统计|证据按类型、来源各有多少份？|书证、电子数据、证人证言、鉴定意见的份数。|
+GEN|ribbon|flow|trial,case|证据汇入事实|几份证据分别支撑哪几项事实？|12 份证据汇入 5 项待证事实，带宽为证据份数。|
+GEN|tree|rule|trial,skill|请求权基础检索|从哪条请求权基础出发、要件逐层拆到哪？|违约损害赔偿请求权 → 合同成立 → 违约行为 → 损失 → 因果关系。|
+GEN|table|compare|trial,newlaw|双方观点对照|同一争点上，我方与对方各怎么说？|争点逐行，左右两栏各列观点与依据。|
+GEN|textdiff|text|newlaw,research|条文新旧对照|这一条改了什么？|新旧条文逐句对照，增删改处标出。|差异由脚本逐字比出
+GEN|timeline|narrate|newlaw,research|立法沿革|这项制度怎么演变到今天？|历次立法、司法解释、指导案例的时间轴。|
+GEN|breakpoint|trend|newlaw,research|规则节点前后|新规施行前后，某个指标变了没有？|新司法解释施行前后，按季度的支持率。|图上固定写「前后对比，不表示因果」
+GEN|waffle|compose|research,paper|裁判观点分歧|在这个问题上，法院怎么看、各占多少？|286 份判决中，两种观点各占多少，代表案号标出。|每个点须追得回案号
+GEN|matrix|factor|research,paper,client|要素与结果|哪些事实因素和结果相关？|有无书面合同、有无转账凭证 × 支持/驳回，旁边算支持率。|固定写「相关不等于因果」
+GEN|interval|factor|paper,research|影响因素森林图|控制其他变量后，每个因素作用多大？|回归系数与 95% 置信区间。|数值须来自用户的统计输出
+GEN|waterfall|count|paper,research|样本筛选流程|这批样本是怎么筛出来的？|检索 1,204 份 → 去重 → 剔除程序性裁定 → 纳入 286 份。|逐步加减须平衡
+GEN|hbar|spread|research,paper|地域差异排序|各地法院尺度差多少？|31 个省份支持率排序点，附样本量，样本过少标灰。|样本量过小须标注
+GEN|map|spread|research,public|省级地图|各省分布在地图上什么样？|按省着色。|审图合规风险；默认改用地域差异排序
+GEN|stack|compose|research,paper|法院层级与结果|基层、中院、高院的裁判有没有差异？|四级法院 × 结果构成的 100% 堆叠。|
+GEN|hbar|count|research,paper,newlaw|高频引用法条|法院最常引用哪几条？|引用次数前 15 的条文。|
+GEN|lines|trend|research,paper,firm|多类案件量趋势|几类案件的数量这几年怎么走？|三类案件 2015–2025 年收案量。|
+GEN|spectrum|contest|paper,newlaw|学说观点光谱|学者与法院分别站在哪？|从「严格」到「宽松」的轴上各观点的位置。|位置须注明依据，否则改按阵营计数
+GEN|flow|rule|skill,public|实务操作清单|做这件事要几步、每步注意什么？|起诉前的十步检查。|
+GEN|number|risk|client|风险提示一页|这个案子最大的风险是什么？|一句话风险 + 一个关键数 + 依据。|
+GEN|quote|text|case,media,teach,moot|裁判要旨金句卡|这个案子法院最有分量的那句话是什么？|判决书说理部分的原句，单独排成一页。|原文照录，注明案号与页码
+GEN|cardwall|compare|case,report,media|典型案例卡片墙|十个典型案例，一页看完各自的要点？|每张卡：案号、争点、结果、一句要旨。|案号必填
+GEN|puzzle|rule|teach,trial,public|构成要件拼图|这个请求成立需要哪几块，缺了哪块？|违约责任四要件拼图，缺「损失」那一块。|要件来自法条或司法解释
+GEN|balance|contest|teach,moot,public|天平：双方论据|哪一边的证据或论据更多？|支持与反对的证据份数，天平倾角由份数差算出。|倾角只由数量算，不由判断定
+GEN|journey|narrate|client,public,media|当事人诉讼旅程|一个普通人打官司要经历什么、等多久？|立案、调解、开庭、判决、上诉、执行，每段时长。|时长须有来源
+GEN|iceberg|compose|client,training,board|看得见与看不见的成本|诉讼费只是冰山一角，水下还有什么？|水上：诉讼费；水下：律师费、时间、商誉、机会成本。|比例按金额算；不可量化的项只列不画比例
+GEN|countdown|risk|client,training|期限倒计时|还剩几天？|诉讼时效、上诉期、举证期限的剩余天数。|期限由脚本计算
+GEN|metro|rule|teach,public,skill|程序线路图|民事、刑事、行政程序怎么换乘？|三条线路，刑民交叉处设换乘站。|
+GEN|dialog|text|case,teach,moot|庭审问答摘录|庭审里那几问几答怎么定了胜负？|笔录原文的问答，关键一句高亮。|笔录原文照录
+GEN|docmark|text|case,teach|判决主文拆解|判决主文每一项对应什么？|主文版式上逐项高亮，旁注对应的计算或依据。|原文照录
+GEN|annotext|text|skill,training,teach|合同条款批注|这一条哪里有坑？|条款原文上划线批注风险与修改建议。|原文照录
+GEN|yearring|count|report,firm,media|年度回顾环|这一年发生了什么？|十二个月排成一圈，每月的案件、新规、大事。|
+GEN|scatter|factor|research,paper|标的额与审理天数|案子越大审得越久吗？|每件一个点，横轴标的额、纵轴审理天数。|固定写「相关不等于因果」
+GEN|slope|trend|research,report|两年对比斜率图|两年之间哪些指标升、哪些降？|几类案件支持率在两年间的变化。|
+GEN|treemap|compose|report,research|案由构成树图|几百类案由，大的小的一眼看出？|二级案由嵌在一级案由里，面积为件数。|
+GEN|bubbles|compare|media,public|案件规模气泡|哪类案子最多？|每类案件一个气泡。|面积按数值开方
+GEN|icons|count|public,media,teach|一百个人里|一百个原告里有几个胜诉？|100 个小人，按结果着色。|须注明样本与口径
+GEN|gauge|progress|client,board|进度环|任务完成到几成？|已完成比例。|比例由脚本算
+GEN|radar|compare|moot,teach|多维评价雷达|几个方案在几个维度上各怎么样？|方案 × 维度评分。|评分依据须写明，否则不出
+GEN|quadrant|risk|board,client|案件四象限|哪些案子值得投入？|案件价值 × 胜诉把握。|坐标须有可数依据；执业规范：不承诺结果
+GEN|dandelion|compose|teach,media|一个规则的几条分支|一个制度分出几种情形？|根是一条规则，每根茎是一种情形，茎长为案件数。|
+GEN|parallel|compare|research,paper|多案多维对比|几个案子在几项指标上怎么比？|标的、周期、判赔率、上诉与否。|
+
+## CON 合同与商事
+CON|waterfall|compute|case,client,trial|违约损失计算|违约损失是怎么算出来的？|合同价款 − 已付 − 可得利益扣减 + 违约金 = 主张金额。|逐级平衡；末级等于诉请或判决主文
+CON|dumbbell|compare|case,research|约定违约金与判决调整|约定的违约金被调成了多少？|六案约定违约金与判决支持额对照。|调整比例由脚本算
+CON|stepcurve|compute|case,newlaw|违约金过高的调整线|超过损失多少才算「过分高于」？|以实际损失为横轴，可支持违约金上限的分段线。|阈值须注明出处
+CON|stack|compute|case,client|利息分段计算|利息为什么是这个数？|按付款节点与利率变化分段，每段天数、利率、利息。|分段合计须等于总利息
+CON|timeline|narrate|case,trial|履约往来时间轴|合同签了以后双方都做了什么？|发货、验收、催款函、解除通知的时间轴。|
+CON|table|compare|skill,newlaw|合同条款版本对照|这一条各稿怎么改的？|陈述保证条款第一稿到终稿。|
+CON|matrix|risk|skill,deal|合同审查风险矩阵|风险集中在哪类条款、有多严重？|条款类别 × 严重程度，点大小为问题条数。|按条数计，不打主观分
+CON|waffle|compose|research|解除纠纷裁判结果|合同解除纠纷里，解除被认定有效的有多少？|200 份判决中解除有效 / 无效 / 部分。|
+CON|flow|rule|newlaw,skill|合同解除路径|约定解除、法定解除、司法解除各怎么走？|解除权来源 → 通知 → 异议 → 效力认定。|
+CON|ribbon|flow|case,trial|货款资金往来|几笔货款从谁付到谁？|三家关联公司之间的货款往来汇总。|
+CON|puzzle|rule|teach,trial|合同成立要件拼图|合同到底成立了没有？|要约、承诺、意思表示一致、形式要件。|
+CON|balance|contest|moot,teach|解除权是否成立|支持解除与反对解除的事实各有几项？|天平倾角由项数算出。|
+CON|cardwall|compare|report,teach|合同纠纷十大典型案例|今年最值得讲的十个合同案例。|十张案例卡。|案号必填
+CON|countdown|risk|client|解除异议期倒计时|对方的解除通知，还剩几天可以提异议？|异议期间剩余天数。|期限由脚本计算
+CON|iceberg|risk|training,board|合同风险冰山|审合同时看见的和没看见的风险。|水上：价款条款；水下：管辖、责任上限、解除。|只列不画比例，除非有数量
+
+## FIN 金融借贷与担保
+FIN|waterfall|compute|case,client|借贷本息计算|判决本息怎么算的？|借款本金 − 预扣利息 + 期内利息 + 逾期利息 = 判决金额。|预扣利息须从本金扣除
+FIN|stepcurve|rule|newlaw,public|民间借贷利率保护线|不同时期的利率保护上限是多少？|按时间段的利率上限分段线。|上限数值须注明依据与适用时间
+FIN|stack|compute|case|逾期利息分段|逾期利息按什么利率、分几段算？|按 LPR 调整节点分段。|
+FIN|ribbon|flow|case,trial|借款资金流向|出借款项最终流到哪里？|出借人账户 → 借款人 → 关联方 → 实际用款人。|
+FIN|sankey|flow|case,client|金融批量案件结果|几百件批量诉讼最后都去了哪？|起诉 → 调解 / 判决 → 执行到位 / 终本。|
+FIN|stack|progress|client|批量案件月度进度|批量案件每月各在哪个阶段？|480 件信用卡纠纷按月的立案、审理、结案、执行构成。|每月合计守恒
+FIN|interval|risk|client,deal|担保覆盖率|担保物够不够覆盖债权？|债权 5 亿，抵押 3.2 亿、质押 0.8 亿，覆盖率 80%。|覆盖率由脚本算
+FIN|relation|structure|case,deal|增信结构|谁为谁提供了什么担保？|保证、抵押、质押、差额补足的多方结构。|
+FIN|waffle|compose|research|差额补足性质认定|法院把差额补足认定成什么？|保证 / 债务加入 / 独立合同的件数。|
+FIN|bar|count|research,firm|金融借款收案趋势|这类案子这些年多了还是少了？|年度收案量。|
+FIN|timeline|narrate|case,client|贷后催收与时效|每次催收是否中断了时效？|催收记录与时效重新起算点。|中断节点须对应证据
+FIN|icons|count|media,public|非法集资受害人|一个集资案涉及多少人？|每个图标代表 100 名投资人。|单位须写明
+FIN|journey|narrate|client,public|一笔贷款的违约之路|从放款到起诉，一笔贷款怎么一步步违约？|放款、逾期、催收、起诉、执行。|
+FIN|scatter|factor|research|利率与支持率|约定利率越高，越不被支持吗？|每件一个点，横轴约定利率、纵轴支持比例。|相关不等于因果
+FIN|countdown|risk|client|保证期间倒计时|保证期间还剩几天？|剩余天数。|期限由脚本计算
+FIN|quote|text|teach,media|借贷案件裁判要旨|关于砍头息，法院原话怎么说？|裁判原句。|原文照录，注明案号
+
+## COR 公司治理与股权
+COR|pierce|structure|case,deal,newlaw|股权穿透与实际控制|实际控制人间接持有多少？|60% × 51% × 80% = 24.5%。|乘积由脚本算并核对
+COR|relation|structure|case,trial|股东与公司关系|股东、董事、公司、关联方之间怎么连？|显名股东、隐名股东与代持协议。|
+COR|timeline|narrate|case|股东会决议过程|这份决议是怎么作出的？|通知、召开、表决、签字的时间与瑕疵点。|
+COR|table|rule|newlaw,skill|新旧公司法对照|公司法修订后这一制度变了什么？|出资期限、董事责任等条文对照。|
+COR|textdiff|text|newlaw|章程条款修订对照|章程改了哪些字？|修订前后章程逐条比对。|差异由脚本逐字比出
+COR|stack|compose|deal,case|股权结构变动|每次增资、转让之后，各股东持股多少？|历次变更后的持股堆叠条。|每列合计 100%
+COR|matrix|count|research|股东知情权诉讼支持范围|法院支持查阅哪些材料？|材料类型 × 支持 / 不支持件数。|
+COR|waffle|compose|research|公司决议效力结果|决议被认定有效、可撤销、无效、不成立各多少？|300 份判决结果。|
+COR|flow|rule|skill,newlaw|股东出资责任追究路径|追究未出资股东责任要几步？|催缴 → 失权 → 加速到期 → 执行追加。|
+COR|ribbon|flow|case,trial|抽逃出资资金去向|增资款进账后去了哪？|公司账户 → 股东 → 关联方。|
+COR|dandelion|structure|teach,media|某集团业务版图|某集团下面有几条业务线？|根是集团，茎是业务板块，茎长为营收。|
+COR|puzzle|rule|teach,trial|人格否认要件拼图|法人人格否认需要哪几块？|人格混同、过度支配、资本显著不足。|
+COR|yearring|narrate|board|公司年度治理回顾|这一年开了几次会、做了哪些决议？|十二个月的会议与决议。|
+COR|slope|compare|board|股东持股变化|两次增资前后，各股东的位次变化。|斜率图。|
+
+## MNA 并购与投融资
+MNA|relation|structure|deal,case|交易前后结构对照|重组之后，谁持有谁、哪条线变了？|分拆上市前后股权与资产结构并排。|前后两图共用同一布局
+MNA|timeline|progress|deal,client|交易时间表|签约到交割还剩哪些步骤？|签约 → 申报 → 审批 → 交割。|
+MNA|board|progress|deal,client|先决条件清单|先决条件满足了几项？|每项 CP 的负责人、状态、截止日。|
+MNA|stack|compute|deal|对价支付结构|这笔钱分几次、凭什么付？|首付、托管、业绩达标后分期释放。|各段合计等于总对价
+MNA|stepcurve|compute|deal,case,newlaw|业绩补偿情景曲线|业绩差多少，要补多少？|实际利润为横轴，补偿金额分段线，标触发点与封顶点。|按合同公式计算
+MNA|stack|compose|deal,skill|多轮融资股权稀释|每一轮之后创始人还剩多少？|天使、A、B、C 轮后持股堆叠。|每列合计 100%
+MNA|matrix|risk|deal,client|尽调问题分布|问题集中在哪个领域、多严重？|法律领域 × 严重程度，点大小为问题数。|按条数计
+MNA|waterfall|compute|deal|估值调整与交易价格|企业价值怎么推到股权价格？|企业价值 − 净负债 ± 营运资金调整 = 股权对价。|逐级平衡
+MNA|table|compare|deal|投资方案比较|几家投资人的方案差在哪？|报价、付款、条件、承诺逐项对照。|
+MNA|waffle|compose|research|对赌纠纷裁判结果|对赌条款被支持履行的比例？|与目标公司对赌、与股东对赌的支持情况。|
+MNA|flow|rule|deal,newlaw|审批与申报路径|要过几个部门、关键路径多长？|发改、商务、外汇、经营者集中并行与串行。|
+MNA|tree|structure|deal|SPV 与基金架构|资金经过几层载体？|GP、LP、SPV、目标公司。|
+MNA|journey|progress|deal,client,pitch|并购交易旅程|一笔并购从接触到整合经历了什么？|接触、尽调、谈判、签约、审批、交割、整合。|
+MNA|iceberg|risk|deal,board|尽调发现的冰山|账面问题之下还有什么？|水上：已披露问题；水下：未决诉讼、税务、合规。|按问题数算比例
+MNA|treemap|compose|deal|交易对价构成|对价由哪几块组成？|现金、股份、或有对价、承债。|
+MNA|gauge|progress|deal,board|交割条件满足度|先决条件满足了几成？|满足比例。|比例由脚本算
+MNA|cardwall|compare|pitch,firm|代表交易卡片墙|团队做过哪些代表交易？|每张卡：交易类型、规模、角色。|须经客户同意披露
+
+## BKR 破产重整与不良资产
+BKR|waterfall|compute|deal,case,client|清偿顺位分配|可分配财产按顺位分下去，普通债权还剩多少？|财产按法定顺位逐级分配，算出普通债权清偿率。|顺位按法律规定；逐级平衡
+BKR|interval|compare|deal,client|重整与清算清偿率|重整比清算多拿回多少？|按债权类别，模拟清算与重整清偿率并排。|数值来自评估与偿债能力分析报告
+BKR|stack|compose|deal,client|债权申报与确认|申报多少、确认多少、暂缓多少？|按债权类别的申报、确认、暂缓确认。|
+BKR|board|progress|client,deal|重整程序进度|重整走到哪一步？|受理、债权申报、债权人会议、计划表决、批准、执行。|
+BKR|waffle|compose|deal|表决结果|各表决组通过了没有？|各组人数与金额两项是否过半、过三分之二。|通过标准按法律规定计算
+BKR|ribbon|flow|case,trial|破产撤销权资金流|临界期内的钱流向了谁？|债务人账户 → 关联方 → 个别清偿。|期间起止由受理日计算
+BKR|timeline|narrate|case|临界期内交易|哪些交易落在撤销期内？|受理前一年、六个月的期间与交易点。|
+BKR|table|compare|deal|重整投资人报价|几家投资人报价与条件差在哪？|报价、付款节奏、职工安置、经营承诺。|
+BKR|hbar|count|deal|债权人结构|哪类债权人占多数？|按债权类型或金额段的债权人数与金额。|
+BKR|waterfall|compute|deal,client|不良资产处置回收|不良包的回收是怎么算的？|账面本息 − 折价 − 处置费用 = 净回收。|逐级平衡
+BKR|icons|count|media,public|受影响职工|重整涉及多少职工安置？|每个图标代表 10 名职工。|单位须写明
+BKR|journey|narrate|client,public|一个债权人的破产旅程|债权人从申报到拿到钱要经历什么？|申报、核查、会议、表决、分配。|
+BKR|treemap|compose|deal|债务人资产构成|可变现资产都在哪？|房产、设备、应收、股权，面积为评估值。|
+BKR|slope|compare|deal,client|清算与重整清偿率斜率|每类债权从清算到重整升了多少？|斜率图。|数值来自报告
+BKR|countdown|risk|client|债权申报期倒计时|申报期还剩几天？|剩余天数。|期限由脚本计算
+
+## CST 建设工程与房地产
+CST|planactual|compare|case,trial,client|工期延误分析|计划工期与实际工期差在哪，责任归谁？|计划与实际两行，每段延误按发包方、承包方、不可抗力着色。|归责由律师标注
+CST|waterfall|compute|case,trial,client|工程款结算|工程款怎么从合同价算到欠款？|合同价 ± 变更签证 − 已付 − 质保金 = 欠付。|逐级平衡
+CST|dumbbell|compare|case,trial|三方造价口径|送审价、审定价、鉴定价各是多少？|分项工程的三套造价并排。|
+CST|tornado|risk|case,trial|造价鉴定敏感项|哪个计价争议对总价影响最大？|各争议项按影响金额从大到小排列。|数值来自鉴定意见
+CST|relation|structure|case,trial|转包与实际施工人|层层转包、挂靠之后，谁对谁负责？|发包人、总包、分包、实际施工人。|
+CST|ribbon|flow|case,trial|工程款流向|工程款进账后流到了哪？|项目账户 → 分包 → 材料商 → 实际施工人。|
+CST|stack|compute|case|逾期付款利息分段|欠付工程款利息怎么算？|按应付节点与利率分段。|分段合计等于总利息
+CST|waffle|compose|research|实际施工人突破合同相对性|法院支持实际施工人直接起诉发包人的比例？|300 份判决结果。|
+CST|timeline|narrate|case,trial|工程签证与索赔时间轴|签证、索赔、回复的时点是否在约定期限内？|索赔事件与逾期失权节点。|期限由脚本计算
+CST|matrix|risk|deal,skill|房地产项目合规清单|开发各阶段要拿哪些证照、拿到了没有？|开发阶段 × 证照，已取得与缺失。|
+CST|board|progress|client,deal|项目报建进度|报建手续各办到哪？|立项、规划、施工许可、预售、竣工验收。|
+CST|journey|narrate|client,training|一个工程款案件的旅程|从完工到拿到工程款经历了什么？|结算、审计、催款、起诉、鉴定、执行。|
+CST|iceberg|risk|training,deal|工程合同隐藏风险|签合同时看不到的风险。|水上：价款；水下：签证、索赔时效、优先受偿权。|只列不画比例
+CST|treemap|compose|case|工程造价构成|造价由哪些分部分项组成？|分部 × 分项面积图。|
+CST|countdown|risk|client|优先受偿权行使期限|建设工程价款优先受偿权还剩几天？|剩余天数。|期限由脚本计算
+
+## IP 知识产权
+IP|matrix|contest|case,trial|专利技术特征比对|被诉产品落入权利要求了吗？|权利要求逐特征 × 被诉产品，标相同、等同、不同。|权利要求原文照录
+IP|waterfall|compute|case,client|侵权获利计算|赔偿额是怎么推出来的？|销售额 × 利润率 × 贡献率 = 获利。|乘法链逐级核对
+IP|dumbbell|compare|research,case|诉请与判赔|知产案件判赔通常是诉请的几成？|一批案件诉请额与判赔额，附判赔率。|
+IP|waffle|compose|research|赔偿计算方式|法院用哪种方式确定赔偿？|实际损失、侵权获利、许可费倍数、法定赔偿的件数。|
+IP|table|compare|case,trial|商标近似比对|两个商标在音、形、义上像不像？|逐项对照与判断依据。|
+IP|timeline|narrate|case|专利生命周期与无效|申请、授权、无效、诉讼交织的时间轴。|专利与无效、侵权诉讼两条泳道。|
+IP|relation|structure|case,deal|许可与权利链|权利从谁到谁、许可范围多大？|权利人、独占被许可人、分许可。|
+IP|hbar|count|research,paper|侵权行为类型|哪类侵权最多？|制造、销售、许诺销售、进口的件数。|
+IP|lines|trend|research,paper,firm|知产案件趋势|各类知产案件数量怎么走？|专利、商标、著作权历年收案。|
+IP|matrix|contest|case,trial|商业秘密秘点比对|被告技术用了哪些秘点？|秘点 × 被告技术，相同、实质相同、不同。|
+IP|bubbles|compare|research,media|商标侵权赔偿规模|哪些行业判赔最高？|每个行业一个气泡。|面积按数值开方
+IP|quote|text|teach,media|知产案件裁判金句|法院对创新保护的说理原句。|原文。|原文照录，注明案号
+IP|puzzle|rule|teach,trial|商业秘密构成拼图|秘密性、价值性、保密措施齐了吗？|三块拼图。|
+IP|slope|trend|research,report|判赔额两年对比|各类知产案件判赔额的变化。|斜率图。|
+IP|dandelion|structure|teach,deal|一项专利的家族|一项核心专利在多少个国家布局？|根是优先权，茎是各国申请。|
+
+## SEC 证券与资本市场
+SEC|breakpoint|trend|case,research|揭露日前后股价|揭露日前后股价怎么走？|实施日、揭露日、基准日三条竖线与股价、指数走势。|日期按规定计算；价格来自行情数据
+SEC|waterfall|compute|case,client|投资差额损失|投资者损失怎么算的？|买入均价 − 基准价 × 股数 − 系统风险扣除 = 损失。|逐级平衡
+SEC|strip|spread|case,research|投资者损失分布|上千名投资者的损失落在哪？|每名投资者一个点，标中位数。|
+SEC|waffle|compose|research|系统风险扣除比例|法院一般扣多少系统风险？|一批判决的扣除比例分段。|
+SEC|timeline|narrate|case|信息披露时间轴|虚假陈述从实施到揭露的过程。|定期报告、临时公告、立案调查、处罚决定。|
+SEC|relation|structure|case|中介机构责任|谁对投资者承担什么责任？|发行人、董监高、保荐、审计、律所。|
+SEC|interval|compare|research|中介机构责任比例|中介机构一般被判承担多大比例？|各类中介的责任比例区间。|
+SEC|ribbon|flow|case|操纵市场资金账户|几十个账户的资金怎么归集？|资金来源账户汇入交易账户。|
+SEC|calendar|spread|case|异常交易日历|异常交易集中在哪些天？|按日的交易量热力。|
+SEC|icons|count|media,public|索赔投资者人数|多少投资者参加了特别代表人诉讼？|每个图标代表 1,000 名投资者。|单位须写明
+SEC|scatter|factor|research|损失与持股时间|持股越久损失越大吗？|每名投资者一个点。|相关不等于因果
+SEC|journey|narrate|public,media|投资者维权之路|普通投资者怎么索赔？|登记、诉讼、判决、执行。|
+SEC|countdown|risk|client|诉讼时效倒计时|从揭露日起还剩多久？|剩余天数。|期限由脚本计算
+
+## LAB 劳动与人事
+LAB|calendar|count|case,client|加班事实日历|哪些天加班、加了多久？|考勤记录按日着色，节假日单独标出。|天数与时长由脚本统计
+LAB|waterfall|compute|case,client|劳动争议金额计算|加班费、经济补偿、赔偿金各算多少？|工资基数 × 月数 + 加班费 + 未休年假工资。|计算基数与依据须注明
+LAB|stepcurve|rule|newlaw,public|经济补偿年限计算|工作年限对应几个月补偿？|按工作年限的分段线，标出半年进位与封顶。|规则须注明依据
+LAB|waffle|compose|research|违法解除认定结果|用人单位解除被认定违法的比例？|一批判决结果。|
+LAB|hbar|count|research,client|解除理由分布|单位最常用哪种理由解除？|严重违纪、不胜任、客观情况变化的件数。|
+LAB|flow|rule|skill,public|劳动争议程序|仲裁前置、诉讼、执行怎么走？|调解 → 仲裁 → 诉讼。|
+LAB|matrix|risk|skill,client|用工合规体检|各类用工风险在哪个环节？|入职、在职、离职 × 风险类别。|
+LAB|timeline|narrate|case|竞业限制履行|离职后的竞业限制义务与补偿支付。|离职、补偿发放、违约行为、诉讼。|
+LAB|dumbbell|compare|research|竞业违约金调整|约定违约金与判决支持额。|一批案件对照。|
+LAB|icons|count|training,media|一百名员工里|一百名员工里有几人签了竞业协议？|100 个小人。|须注明样本
+LAB|journey|narrate|public,training|一个劳动者的维权之路|被辞退之后能怎么做？|协商、仲裁、一审、二审。|
+LAB|puzzle|rule|teach,training|事实劳动关系拼图|没签合同，算不算劳动关系？|主体资格、管理关系、报酬、业务组成部分。|
+LAB|countdown|risk|client,public|仲裁时效倒计时|离职后还剩几天能申请仲裁？|剩余天数。|期限由脚本计算
+LAB|quadrant|risk|training,board|用工风险四象限|哪些风险发生多、代价大？|按发生次数与金额分四格。|坐标用可数数据
+
+## FAM 婚姻家事与继承
+FAM|waterfall|compute|case,client|夫妻共同财产分割|共同财产怎么分出来的？|房产、存款、股权、债务逐项加减后各得多少。|逐级平衡
+FAM|relation|structure|case,client|继承人与遗产关系|谁是继承人、谁继承什么？|亲属关系与遗产分配。|
+FAM|tree|rule|newlaw,public|法定继承顺序|第一顺序、第二顺序、代位继承怎么排？|继承顺序树。|按法律规定
+FAM|stack|compose|client|家族财富结构|家族资产分布在哪些载体？|个人持有、公司持股、信托、保险。|
+FAM|timeline|narrate|case|婚姻存续期间财产变动|婚前、婚后财产的时间分界。|婚前购房、婚后还贷、加名、离婚。|
+FAM|waffle|compose|research|抚养权归属结果|抚养权判归父亲、母亲的比例。|一批判决结果。|
+FAM|ribbon|flow|case|转移财产资金流|离婚前财产转去了哪？|夫妻一方账户 → 亲属 → 关联公司。|
+FAM|interval|compare|research|离婚损害赔偿数额|精神损害赔偿一般判多少？|判赔区间与中位数。|
+FAM|journey|narrate|public,client|离婚诉讼旅程|离婚诉讼要走几步？|起诉、调解、判决、再次起诉。|
+FAM|dandelion|structure|client,public|遗产分配蒲公英|一份遗产分给了几个人？|根是遗产，茎是继承人，茎长为份额。|份额合计须等于遗产
+FAM|iceberg|risk|client|家族财富隐藏风险|看得见的资产与看不见的风险。|水上：房产存款；水下：代持、婚姻、税务。|只列不画比例
+FAM|icons|count|research,media|抚养权一百个家庭|一百个离婚家庭里，孩子跟谁？|100 个小人。|须注明样本
+
+## CRM 刑事
+CRM|timeline|narrate|case,trial|案发经过|犯罪事实与侦查经过。|行为时间与立案、强制措施、起诉。|
+CRM|ribbon|flow|case,trial|涉案资金流向|非法集资款最终流到哪？|投资人 → 归集账户 → 关联公司 → 个人。|
+CRM|relation|structure|case,trial|共同犯罪关系|谁在犯罪中起什么作用？|主犯、从犯、帮助犯的关系。|
+CRM|stepcurve|rule|newlaw,public|数额与量刑档次|数额多大对应哪个量刑档？|数额为横轴的量刑幅度分段。|档次标准须注明依据
+CRM|interval|compare|research,case|量刑分布|同类案件一般判多久？|一批判决的刑期区间与中位数。|
+CRM|matrix|factor|research,paper|量刑情节与刑期|自首、退赃、认罪认罚与刑期的关系。|情节 × 刑期段。|相关不等于因果
+CRM|waterfall|compute|case|犯罪数额认定|指控数额怎么减到认定数额？|指控 − 不能认定 − 已退还 = 认定数额。|逐级平衡
+CRM|waffle|compose|research|辩护意见采纳|辩护意见被采纳的比例。|一批判决的采纳情况。|
+CRM|flow|rule|skill,public|刑事诉讼程序|从立案到执行的路径。|侦查 → 审查起诉 → 审判 → 执行。|
+CRM|table|compare|trial|控辩双方证据对照|指控证据与辩方意见逐项对照。|证据、证明对象、辩方质证意见。|
+CRM|icons|count|media,public|被害人人数|一个电诈案涉及多少被害人？|每个图标代表 100 名被害人。|单位须写明
+CRM|dialog|text|trial,case|讯问笔录对照|两次讯问的供述哪里矛盾？|两份笔录问答并排，矛盾处高亮。|笔录原文照录
+CRM|journey|narrate|public,client|一个刑事案件的旅程|从被抓到判决要经历什么？|刑拘、逮捕、审查起诉、审判，每段期限。|期限按规定
+CRM|countdown|risk|client|羁押期限倒计时|侦查羁押期限还剩几天？|剩余天数。|期限由脚本计算
+CRM|balance|contest|moot,trial|罪与非罪的天平|有罪证据与无罪辩点各几项？|天平倾角由项数算出。|倾角只由数量算
+
+## ADM 行政与监管
+ADM|flow|rule|skill,newlaw|行政处罚程序|告知、陈述申辩、听证、决定的路径。|处罚程序流程。|
+ADM|waffle|compose|research|行政诉讼结果|行政机关败诉的比例。|驳回、撤销、确认违法、责令履行。|
+ADM|hbar|count|research,client|处罚事由分布|监管最常因什么处罚？|处罚事由件数。|
+ADM|stepcurve|rule|newlaw,client|罚款裁量基准|违法情节对应多少罚款？|裁量基准分段线。|基准须注明出处
+ADM|board|progress|client|行政复议与诉讼进度|复议、诉讼各到哪一步？|多个行政案件的阶段看板。|
+ADM|timeline|narrate|case|征收拆迁程序|征收决定、补偿、强拆的时点与合法性。|程序节点与期限。|
+ADM|journey|narrate|public,client|一次行政处罚的旅程|从立案到处罚决定，企业经历了什么？|立案、调查、告知、听证、决定、复议。|
+ADM|countdown|risk|client|复议与起诉期限倒计时|还剩几天能申请复议或起诉？|剩余天数。|期限由脚本计算
+ADM|bubbles|compare|report,gov|各部门处罚规模|哪个部门罚得最多？|每个部门一个气泡。|面积按数值开方
+
+## DAT 数据与网络合规
+DAT|ribbon|flow|deal,skill,client|个人信息流向|数据从哪收、存到哪、给了谁？|App → 境内服务器 → 境外总部 → 第三方服务商。|
+DAT|matrix|rule|skill,newlaw,deal|跨境法域规则对照|同一件事各国怎么规定？|中国、欧盟、美国、新加坡 × 是否需评估、是否需同意。|格子只放有/无/附条件，原文进注释
+DAT|matrix|risk|deal,client|数据合规差距|各项义务完成了没有？|义务清单 × 业务线，已满足、部分、未满足。|
+DAT|flow|rule|newlaw,skill|数据出境路径选择|安全评估、标准合同、认证该走哪条？|按数据量与类型的判断流程。|门槛须注明依据
+DAT|hbar|count|research|数据合规处罚事由|监管最常处罚什么？|处罚事由件数。|
+DAT|timeline|narrate|newlaw|数据法规沿革|这几年出了哪些规定？|法律、行政法规、部门规章、标准。|
+DAT|board|progress|deal,client|合规整改进度|整改项各完成到哪？|整改项看板。|
+DAT|iceberg|risk|training,board|数据合规冰山|看得见的隐私政策下面还有什么？|水上：隐私政策；水下：SDK、数据出境、员工数据。|只列不画比例
+DAT|journey|narrate|training,public|一条个人信息的一生|一条手机号从收集到删除经历了什么？|收集、存储、使用、共享、出境、删除。|
+DAT|gauge|progress|board,deal|合规整改完成度|整改项完成了几成？|完成比例。|比例由脚本算
+DAT|countdown|risk|client,deal|评估申报截止倒计时|数据出境评估申报还剩几天？|剩余天数。|期限由脚本计算
+
+## ANT 竞争法
+ANT|stack|compose|deal|市场份额与集中度|合并后市场份额与 HHI 怎么变？|交易前后各竞争者份额，HHI 由脚本算。|HHI 由脚本计算
+ANT|stepcurve|rule|newlaw,deal|经营者集中申报标准|营业额多少要申报？|申报门槛分段示意。|门槛须注明依据与适用时间
+ANT|flow|rule|deal,skill|集中审查程序|初步审查、进一步审查、附条件批准。|审查流程与法定时限。|
+ANT|waffle|compose|research|垄断协议诉讼结果|原告胜诉的比例。|一批判决结果。|
+ANT|table|compare|case|不正当竞争行为对照|行为属于哪一类不正当竞争？|混淆、虚假宣传、商业诋毁逐项对照。|
+ANT|bubbles|compare|report,research|反垄断罚款规模|各案罚款多大？|每案一个气泡。|面积按数值开方
+ANT|slope|compare|deal|交易前后排名|合并后谁成了第一？|斜率图。|
+
+## CBX 涉外与跨境
+CBX|matrix|rule|deal,skill|各国规则对照|各法域在这件事上怎么规定？|国家 × 规则要点。|格子只放有/无/附条件
+CBX|flow|rule|skill|国际仲裁程序|从仲裁通知到裁决执行怎么走？|仲裁程序与承认执行。|
+CBX|timeline|narrate|case|跨境争议时间轴|多法域程序交织的时间轴。|仲裁、诉讼、保全在不同国家并行。|
+CBX|interval|compare|research|仲裁周期与费用|各仲裁机构一般多久、多少钱？|周期与费用区间。|数据来源须注明
+CBX|waffle|compose|research|外国裁决承认执行结果|承认与拒绝的比例。|一批裁定结果。|
+CBX|relation|structure|deal|跨境投资架构|红筹、VIE 架构怎么搭？|境外上市主体、WFOE、境内某运营公司。|
+CBX|waterfall|compute|deal|跨境税负测算|一笔分红到境外要扣多少税？|分红 − 预提所得税 − 其他税费 = 到手。|税率须注明依据
+CBX|metro|rule|teach,skill|跨境争议解决线路图|诉讼、仲裁、调解、承认执行怎么换乘？|多条线路与换乘站。|
+CBX|countdown|risk|client|仲裁程序期限|答辩、选定仲裁员还剩几天？|剩余天数。|期限由脚本计算
+
+## TAX 税务
+TAX|waterfall|compute|case,client|补税与滞纳金计算|补税、滞纳金、罚款各多少？|应纳税额 − 已缴 + 滞纳金 + 罚款。|逐级平衡
+TAX|stepcurve|rule|newlaw,public|累进税率|收入对应的税率与速算扣除。|个税累进分段线。|税率须注明依据与适用年度
+TAX|ribbon|flow|case,trial|虚开发票链条|票流、资金流、货物流对不对得上？|三流对照汇入。|
+TAX|flow|rule|skill|稽查应对路径|从检查通知到处理决定怎么走？|稽查程序。|
+TAX|hbar|count|research|税务处罚事由|最常见的稽查问题。|事由件数。|
+TAX|iceberg|risk|training,board|税务风险冰山|账面税负之下还有什么？|水上：已申报税款；水下：关联交易、发票、个税代扣。|只列不画比例
+TAX|countdown|risk|client|申报与缴款期限|还剩几天？|剩余天数。|期限由脚本计算
+
+## INS 保险与海商
+INS|waterfall|compute|case,client|保险理赔计算|理赔金额怎么算？|保险金额 − 免赔额 − 比例赔付 = 赔付额。|逐级平衡
+INS|waffle|compose|research|拒赔理由认定|法院支持拒赔的比例与理由。|一批判决结果。|
+INS|relation|structure|case|海上运输各方关系|托运人、承运人、实际承运人、收货人。|提单关系。|
+INS|timeline|narrate|case|货损事故时间轴|装船、航行、卸货、发现货损。|事故经过。|
+INS|table|compare|case|保险条款与事故对照|事故是否落入保险责任、有无除外？|条款逐项对照。|
+INS|journey|narrate|public,client|一次理赔的旅程|从出险到拿到赔款经历了什么？|报案、查勘、定损、核赔、赔付。|
+INS|puzzle|rule|teach|保险责任构成拼图|保险事故、损失、因果、未落入除外。|四块拼图。|
+
+## ENV 能源环境与资源
+ENV|timeline|narrate|case|污染事件经过|排放、发现、处罚、诉讼。|环境事件时间轴。|
+ENV|waterfall|compute|case|生态损害赔偿|修复费用、服务功能损失怎么算？|各项费用逐项累加。|数值来自鉴定评估
+ENV|hbar|count|research|环保处罚事由|最常见的环保违法类型。|事由件数。|
+ENV|board|progress|deal,client|能源项目审批进度|核准、环评、用地、并网各到哪？|项目审批看板。|
+ENV|matrix|risk|deal|项目合规清单|各阶段手续是否齐全。|阶段 × 手续。|
+ENV|icons|count|media,public|受影响居民|一次污染影响多少户？|每个图标代表 10 户。|单位须写明
+ENV|treemap|compose|case,report|生态损害费用构成|修复费用分在哪几块？|面积为金额。|数值来自鉴定评估
+
+## LAI 法律 AI 与法律科技
+LAI|planactual|compare|ai,skill|人工与 AI 工作流对照|AI 替代了哪几步、省了多少时间？|合同审查人工 6 步 4 小时，AI 辅助 4 步 1.2 小时。|时长来自实测记录
+LAI|hbar|count|ai,paper|任务准确率评测|各类任务上准不准？|案由识别、要素抽取、法条推荐的准确率。|评测集与口径必填
+LAI|waffle|compose|ai,paper|引证核验结果|AI 给的引用有多少是真的？|120 条引用：真实准确、真实但引错、不存在。|逐条可追溯
+LAI|waffle|compose|ai|错误类型构成|错在哪？|100 条错误的类型构成。|
+LAI|matrix|compare|ai,skill|工具能力矩阵|几款工具各能做什么？|工具 × 功能，有、无、部分。|
+LAI|flow|structure|ai,skill|AI 处理管线|这套系统怎么运转？|读材料 → 抽要素 → 检索 → 生成 → 人工复核。|
+LAI|interval|compare|ai|效率前后对比|用了之后快了多少？|每类任务耗时的前后区间。|
+LAI|spectrum|risk|ai|人机分工边界|哪些环节交给 AI、哪些必须人来？|环节在全自动到人工主导轴上的位置。|位置须注明依据
+LAI|lines|trend|ai,paper|模型能力演进|几代模型在法律任务上的表现。|多个基准的得分随时间。|基准来源必填
+LAI|number|count|ai,public|一页一个关键数|这次分享只想让人记住哪个数？|「审查时间缩短 70%」配口径。|数字须能由数据推得
+LAI|journey|narrate|ai,training|一份合同交给 AI 之后|AI 审查一份合同经过哪些步骤？|上传、解析、比对、生成意见、人工复核。|
+LAI|radar|compare|ai|几款工具能力雷达|几款工具在几个维度上各怎么样？|工具 × 维度。|评分依据须写明
+LAI|icons|count|ai,media|一百条引用里|一百条 AI 引用里有几条是真的？|100 个图标，按核验结果着色。|逐条可追溯
+LAI|cardwall|compare|ai,pitch|应用场景卡片墙|法律 AI 能用在哪些场景？|每张卡一个场景与效果。|效果数据须有来源
+LAI|quadrant|risk|ai,board|AI 应用价值风险象限|哪些场景值得先上？|价值 × 风险，每个场景一个点。|坐标须有可数依据
+
+## FIRM 律所与团队
+FIRM|rose|compose|firm|业务领域构成|我们主要做什么？|各业务领域收入或案件数构成。|
+FIRM|bar|count|firm|收案与标的趋势|业务在增长吗？|近五年收案量。|
+FIRM|lines|trend|firm|多指标趋势|收案、标的额、收入一起看。|三条线。|
+FIRM|hbar|count|firm|客户行业分布|客户来自哪些行业？|行业横条。|
+FIRM|stack|compose|firm|团队工时分布|时间花在哪？|各类事务工时堆叠。|
+FIRM|board|progress|firm,client|重点项目看板|重点项目各到哪一步？|项目阶段看板。|
+FIRM|waffle|compose|firm|案件结果总览|结案案件的结果构成。|全部或部分支持、调解、驳回。|执业规范：不以胜诉率宣传
+FIRM|relation|structure|firm|团队与合作网络|团队、合作律所、专家的关系。|合作网络。|
+FIRM|yearring|count|firm,report|律所年度回顾环|这一年团队做了什么？|十二个月的案件、交易、文章、活动。|
+FIRM|cardwall|compare|firm,pitch|团队成员卡片墙|团队里谁擅长什么？|每张卡一位律师。|
+FIRM|treemap|compose|firm|收入构成树图|收入来自哪些业务、哪些客户？|两层面积图。|
+FIRM|gauge|progress|firm|年度目标完成度|今年目标完成了几成？|完成比例。|比例由脚本算
+FIRM|bubbles|compare|firm,pitch|客户规模气泡|大客户有哪些？|每个客户一个气泡。|须经客户同意披露
+
+## EXE 执行与保全
+EXE|waterfall|compute|case,client|执行回款拆解|判决金额最后实际收回多少，差在哪？|判决金额 − 无财产可供执行 − 和解让步 − 执行费 = 实际到账。|逐级平衡
+EXE|lines|progress|client,case|执行回款累计曲线|钱是按什么节奏回来的？|按月累计回款，标出查封、拍卖、和解节点。|
+EXE|board|progress|client,firm|执行案件看板|几十个执行案件各卡在哪个环节？|查控、评估、拍卖、终本、恢复执行。|
+EXE|interval|risk|client,case|查封资产覆盖率|查封的资产够不够还债？|房产、股权、存款评估值与债权额对照。|覆盖率由脚本算
+EXE|waterfall|count|research,client|执行到位漏斗|立案执行的案子，最后有多少全额到位？|立案 → 查到财产 → 处置 → 部分到位 → 全额到位。|
+EXE|timeline|narrate|case|拍卖流拍降价过程|一拍、二拍、变卖各降了多少？|起拍价、流拍、降价、成交的时间轴。|降价比例由脚本算
+EXE|relation|structure|case,trial|追加被执行人|还能追加谁来承担责任？|未出资股东、一人公司股东、抽逃出资人。|
+EXE|metro|rule|skill,teach|执行程序线路图|执行异议、复议、执行异议之诉怎么换乘？|执行实施、执行审查、诉讼三条线路及换乘站。|
+EXE|countdown|risk|client|申请执行时效倒计时|还剩几天就过申请执行期间？|判决生效日起算的剩余天数。|期限由脚本计算
+EXE|waffle|compose|research|终本案件构成|终本的案子里，后来恢复执行的有多少？|一批终本案件的后续情况。|
+
+## PIN 人身损害与交通事故
+PIN|waterfall|compute|case,client|人身损害赔偿计算|赔偿总额怎么由各项加起来？|医疗费、误工费、护理费、残疾赔偿金、精神抚慰金逐项累加。|计算标准须注明地区与年度
+PIN|stepcurve|rule|newlaw,public|伤残等级与赔偿系数|伤残几级对应赔多少？|十级到一级的赔偿系数阶梯。|系数须注明依据
+PIN|waffle|compose|research|交通事故责任划分|同类事故里各方责任比例怎么分？|主次同等全部责任的件数。|
+PIN|relation|structure|case|多方责任主体|驾驶人、车主、某保险公司、用人单位各负什么责任？|多方关系与责任来源。|
+PIN|icons|count|public,media|事故受害人数|一场事故影响了多少人？|每个图标一名受害人，按伤情分色。|人数须有来源
+PIN|interval|compare|research|精神损害抚慰金区间|同类伤情一般判多少？|按伤残等级的判赔区间。|
+PIN|journey|narrate|client,public|一个人身损害案件的旅程|从受伤到拿到赔偿要经历什么？|就医、鉴定、协商、起诉、执行，每段时长。|时长须有来源
+
+## MED 医疗纠纷与医药合规
+MED|timeline|narrate|case,trial|诊疗经过|病人从入院到出院发生了什么？|入院、检查、手术、并发症、转院、死亡的时间轴。|时间来自病历
+MED|docmark|text|case,trial|病历关键记录|病历里哪几句话决定了过错？|病程记录原文上高亮关键句。|原文照录
+MED|waffle|compose|research|医疗过错参与度|鉴定意见认定的原因力大小分布。|主要、次要、轻微、无因果。|
+MED|matrix|contest|trial|诊疗规范对照|每个环节是否符合诊疗规范？|诊疗环节 × 规范要求，符合、不符合、无法判断。|规范来源须注明
+MED|hbar|count|research|医疗纠纷科室分布|哪些科室纠纷最多？|科室横条。|
+MED|flow|rule|skill,training|医药合规审查流程|学术推广活动怎么审才合规？|立项、审批、执行、核销四步。|
+MED|ribbon|flow|case|医药回扣资金流|推广费最后流到了哪？|某药企 → 某推广公司 → 个人。|
+
+## CSM 消费者与产品责任
+CSM|waffle|compose|research,report|消费欺诈认定结果|主张三倍赔偿得到支持的比例？|一批判决结果。|
+CSM|waterfall|compute|case,public|惩罚性赔偿计算|退一赔三怎么算？|价款 + 价款 × 3（不足 500 元按 500 元）。|规则须注明依据
+CSM|hbar|count|report,gov|投诉类型分布|消费者最常投诉什么？|投诉类型横条。|数据来源必填
+CSM|timeline|narrate|case|产品召回过程|缺陷发现到召回完成的过程。|发现、报告、召回、整改。|
+CSM|icons|count|media,public|受影响消费者|一次召回涉及多少车主？|每个图标代表 1 万名车主。|图标所代表的单位须写明
+CSM|journey|narrate|public,media|预付卡维权路径|老板跑路后消费者能怎么办？|协商、投诉、诉讼、刑事报案。|
+CSM|quote|text|public,media|典型案例裁判要旨|这类案件法院怎么说的？|指导性案例或典型案例的裁判要旨原句。|原文照录，注明案号
+
+## PLT 平台与电商
+PLT|flow|rule|newlaw,training|平台责任认定路径|通知删除、知道应当知道怎么判？|权利人通知 → 平台处理 → 责任认定。|
+PLT|waffle|compose|research|平台被判担责比例|平台作为共同被告时担责的比例。|一批判决结果。|
+PLT|hbar|count|research,report|网络交易纠纷类型|直播带货纠纷都在吵什么？|纠纷类型横条。|
+PLT|relation|structure|case,training|直播带货主体关系|主播、MCN、商家、平台各是什么角色？|多方合同与责任。|
+PLT|bubbles|compare|report,media|平台处罚规模|各平台被罚多少？|每个气泡一个平台，面积为罚款金额。|面积按数值开方
+PLT|annotext|text|training,skill|平台规则条款批注|这份用户协议哪些条款有风险？|协议原文上划线批注。|原文照录
+PLT|timeline|narrate|newlaw|平台监管规则沿革|电商、直播、算法规则这几年怎么来的？|规则发布时间轴。|
+
+## FTC 金融科技与虚拟资产
+FTC|ribbon|flow|case,trial|虚拟货币资金流|资金如何通过地址与交易所流转？|钱包地址 → 交易所 → 场外商户 → 银行卡。|地址照录
+FTC|timeline|narrate|newlaw,public|虚拟资产监管时间轴|这些年监管态度怎么变？|通知、公告、司法解释的时间轴。|
+FTC|waffle|compose|research|虚拟货币合同效力认定|法院认定合同有效、无效的比例。|一批判决结果。|
+FTC|flow|rule|skill,training|支付牌照合规路径|没有牌照能做哪些业务？|业务类型判断流程。|
+FTC|stack|compose|case|网贷平台资金池构成|出借人资金去了哪几类用途？|按用途的资金构成。|
+FTC|quadrant|risk|deal,board|金融科技业务风险象限|各业务线监管强度与合规成熟度。|每条业务线一个点。|坐标须有可数依据
+
+## SOE 国资国企
+SOE|flow|rule|deal,board|国有资产转让程序|国有股权转让要走哪几步？|审批、评估、进场交易、公示。|
+SOE|stack|compose|deal,board|混改前后股权结构|混改引入了谁、国资还占多少？|混改前后股权堆叠。|每列合计 100%
+SOE|matrix|risk|board,training|国企合规管理体系|各业务环节的合规制度建好了没有？|环节 × 制度，已建、在建、缺失。|
+SOE|gauge|progress|board,gov|合规整改完成度|整改任务完成了多少？|完成比例进度环。|比例由脚本算
+SOE|timeline|narrate|newlaw,gov|国企改革政策沿革|这一轮改革的政策脉络。|政策文件时间轴。|
+SOE|board|progress|board,gov|重点任务督办看板|几十项任务各到哪一步？|任务阶段看板。|
+
+## ESG ESG 与可持续
+ESG|matrix|risk|board,report|ESG 议题实质性矩阵|哪些议题对企业和利益相关方都重要？|议题落在两个维度的格子里。|评分来源须注明
+ESG|stack|compose|report|碳排放构成|排放来自哪几个范围？|范围一、二、三排放堆叠。|数据来源与口径必填
+ESG|lines|trend|report,board|ESG 指标趋势|几项指标这几年怎么变？|排放、用水、安全事故多条线。|
+ESG|ribbon|flow|deal,training|供应链尽责路径|原材料从哪来、经过谁？|矿山 → 冶炼 → 零部件 → 整机。|
+ESG|gauge|progress|board|披露指标覆盖率|披露要求满足了多少？|覆盖比例。|
+ESG|table|rule|newlaw,report|各地披露规则对照|各交易所的 ESG 披露要求差在哪？|规则逐项对照。|
+
+## PIL 公益诉讼
+PIL|hbar|count|report,gov|公益诉讼领域分布|检察公益诉讼都在管什么？|生态环境、食品药品、国有财产等件数。|
+PIL|waterfall|compute|case|生态修复费用构成|修复费用怎么算出来？|各项费用逐项累加。|数值来自鉴定评估
+PIL|flow|rule|teach,newlaw|公益诉讼诉前程序|检察建议、公告、起诉怎么衔接？|诉前程序流程。|
+PIL|lines|trend|report,research|公益诉讼案件量趋势|这几年案件量怎么走？|年度件数。|
+PIL|icons|count|media,public|受益人群|一起公益诉讼惠及多少人？|每个图标代表若干居民。|单位须写明
+
+## CUL 文娱体育与传媒
+CUL|relation|structure|case,deal|影视项目权利链|剧本、导演、演员、出品方之间的权利怎么流转？|改编权、摄制权、发行权链条。|
+CUL|timeline|narrate|case|名誉侵权传播过程|一条不实信息怎么扩散开的？|发布、转发、热搜、删除的时间轴。|
+CUL|bubbles|compare|research,media|侵权内容平台分布|侵权内容出现在哪些平台、各多少？|每个平台一个气泡。|面积按数值开方
+CUL|matrix|contest|case|作品实质性相似比对|两部作品哪些情节相似？|情节单元 × 两部作品，相同、相似、不同。|
+CUL|waffle|compose|research|体育仲裁结果|体育纠纷裁决结果构成。|一批裁决结果。|
+CUL|quote|text|media,public|肖像权案件金句|法院对公众人物肖像的说理。|裁判文书原句。|原文照录，注明案号
+
+## AGR 农村土地与征收
+AGR|flow|rule|teach,public|土地征收程序|征收要走哪几步，哪一步可以救济？|批准、公告、补偿、安置、救济。|
+AGR|waterfall|compute|case,client|征收补偿计算|补偿款由哪几项构成？|土地补偿、安置补助、地上附着物、青苗补偿。|标准须注明地区与年度
+AGR|relation|structure|case|集体经济组织成员资格|谁算成员、凭什么？|户籍、承包地、生活保障的关系。|
+AGR|waffle|compose|research|宅基地买卖合同效力|法院认定有效、无效的比例。|一批判决结果。|
+AGR|timeline|narrate|case|土地承包经营权流转|承包、流转、纠纷的时间轴。|关键节点。|
+
+## PRO 律师执业与职业伦理
+PRO|flow|rule|training,teach|利益冲突审查|新案子要怎么查冲突？|检索、识别、披露、豁免。|
+PRO|waffle|compose|research,training|律师受处分事由|律师最常因什么被处分？|一批处分决定的事由。|
+PRO|stepcurve|compute|client,training|律师费计费阶梯|按标的额分段计费怎么算？|分段费率阶梯。|费率须注明依据
+PRO|quote|text|training,teach|执业规范条文卡|执业规范怎么说？|规范原文。|原文照录
+PRO|matrix|risk|training,firm|执业风险自查|各环节风险点查了没有？|环节 × 风险点。|
+PRO|journey|narrate|training,teach|一个案子的律师工作旅程|从接案到结案律师要做什么？|接案、立案、庭前、庭审、执行、归档。|
+
+## GOV 立法与法治政府
+GOV|timeline|narrate|newlaw,gov|一部法律的立法过程|从立项到通过经历了什么？|起草、审议、征求意见、表决的时间轴。|
+GOV|bubbles|count|newlaw,report|征求意见分布|公众意见集中在哪些条文？|每个气泡一条条文，面积为意见数。|面积按数值开方
+GOV|textdiff|text|newlaw,gov|草案各稿对照|一审稿、二审稿、通过稿改了什么？|逐条逐字比对。|差异由脚本比出
+GOV|matrix|risk|gov|规范性文件审查|哪些文件存在合法性问题？|文件 × 审查要点。|
+GOV|parallel|compare|report,gov|法治政府评估|各地在几项指标上的表现。|多地多指标平行坐标。|指标来源须注明
+
+## 0.7.0 新增：学自 diagram-design 的画法（鱼骨、金字塔、漏斗、韦恩、泳道、生命周期、层层设防、成对推理）
+GEN|fishbone|factor|case,firm,training|败诉原因复盘|这个案子输在哪几类原因上？|证据、程序、法律适用、策略四根大骨，每根下列判决书里的原句。|每条原因须附判决原句
+CST|fishbone|factor|case,training|工程款纠纷败诉原因|施工方为什么没拿到工程款？|签证缺失、结算未确认、工期延误、质量争议。|每条原因须附判决原句
+PIN|fishbone|factor|case,public|事故责任成因|一起事故的责任由哪几方面原因构成？|驾驶人、车辆、道路、管理四类。|
+MED|fishbone|factor|training,case|医疗损害成因|医疗损害由哪几类过错导致？|告知、诊疗、护理、管理。|原因取自鉴定意见原文
+DAT|fishbone|factor|training,board|数据泄露事件复盘|这起数据泄露是哪几道环节失守？|权限、加密、第三方、员工操作。|
+GEN|pyramid|structure|teach,public,newlaw|法律位阶|宪法、法律、行政法规、地方性法规、规章怎么排？|五层金字塔，自上而下。|层宽不代表数量，图例须写明
+CRM|pyramid|structure|teach,trial|证明标准层级|刑事、民事、行政的证明标准各在哪一层？|排除合理怀疑、高度盖然性、优势证据。|
+GEN|pyramid|rule|teach,skill|请求权检索次序|请求权基础按什么次序检索？|契约、类契约、无因管理、物权、侵权、不当得利。|
+CRM|funnel|count|research,gov,report|刑事案件逐级筛减|多少线索最后进了判决？|线索、立案、移送起诉、起诉、有罪判决逐级件数。|层宽由件数算出；口径须逐级写明
+LAB|funnel|count|research,firm|劳动仲裁到诉讼|多少仲裁案件走到了二审？|申请仲裁、裁决、起诉、上诉逐级件数。|层宽由件数算出
+FIRM|funnel|count|firm,pitch|案源转化|咨询多少、签约多少、结案多少？|律所年度案源漏斗。|层宽由件数算出
+IP|funnel|count|research,report|专利无效逐级结果|无效请求有多少走到全部无效？|请求、受理、审查、全部无效、部分无效。|
+GEN|venn|structure|teach,skill|请求权竞合|违约与侵权在哪里重叠？|两个圆，交叠处是可择一主张的情形。|无数据时只画关系，不画面积
+CRM|venn|structure|teach,trial|想象竞合与法条竞合|一个行为同时符合几个罪名？|两到三个构成要件集合的交叠。|
+DAT|venn|structure|training,newlaw|个保法、数安法、网安法的交叠|三部法各管什么、哪里重叠？|三个圆，交叠处列共同义务。|
+GEN|venn|count|research|类案中的事由交叠|多少案件同时主张了几项事由？|主张违约、主张侵权、两者都主张的件数。|面积由件数算出
+MNA|swimlane|rule|deal,board|并购交割泳道|买方、卖方、监管、托管行各在哪一步做什么？|四条泳道，交割前提条件逐项满足。|
+BKR|swimlane|rule|teach,client|破产程序各方动作|管理人、债权人、法院、债务人各做什么？|申请、受理、债权申报、债权人会议、重整计划表决。|
+DAT|swimlane|rule|training|个人信息出境流程|业务、法务、安全、监管各在哪一步？|评估、备案、合同、出境。|
+CON|lifecycle|progress|training,client|合同全生命周期|一份合同从起草到归档经历哪些阶段？|起草、审批、签署、履行、变更、终止、归档。|
+DAT|lifecycle|progress|training,newlaw|个人信息处理全周期|收集、存储、使用、加工、传输、提供、公开、删除。|八个环节排成一圈，每环标义务条文。|条文照录
+GEN|lifecycle|progress|teach,client|案件状态流转|一个案件从立案到归档会在哪些状态之间流转？|立案、审理、中止、恢复、结案、执行。|
+COR|layers|risk|training,board|合规三道防线|业务、合规、审计三道防线各拦住什么？|三层同心或三道横墙，标每层拦截的风险。|拦截数量有数时须由数据算出
+FIN|layers|risk|deal,client|担保层次|主债务之外有几层增信，各覆盖多少？|保证、抵押、质押、回购。|覆盖金额须由数据算出
+DAT|layers|risk|training|数据安全纵深防护|边界、身份、加密、审计几层各防什么？|四层纵深。|
+GEN|paired|contest|case,research,moot|一审二审推理对照|同一组事实，一审与二审推理在哪一步分岔？|两列推理链并排，分岔点用重音。|推理原句照录判决书
+GEN|paired|contest|paper,teach|多数意见与少数意见|合议庭多数与少数意见的推理差在哪？|两列并排。|照录原文
+GEN|paired|contest|paper,teach|两种学说对照|同一问题两种学说的推理路径。|形式说与实质说并排。|观点须注明出处

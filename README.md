@@ -9,15 +9,17 @@
   <img src="https://img.shields.io/badge/Built%20with-Claude-D97757?logo=anthropic&logoColor=white" alt="Built with Claude"/>
   <img src="https://img.shields.io/badge/Claude-Skills-D97757?logo=anthropic&logoColor=white" alt="Claude Skills"/>
   <img src="https://img.shields.io/badge/DeepSeek%20Harness-supported-4D6BFE" alt="DeepSeek Harness supported"/>
-  <img src="https://img.shields.io/badge/Skills-5%20modules-0F766E" alt="5 skills"/>
+  <img src="https://img.shields.io/badge/Skills-7%20modules-0F766E" alt="7 skills"/>
   <img src="https://img.shields.io/badge/A4%20%E6%89%93%E5%8D%B0-%E8%AE%BE%E8%AE%A1%E5%89%8D%E6%8F%90-0F766E" alt="A4 打印是设计前提"/>
   <img src="https://img.shields.io/badge/%E8%BE%93%E5%87%BA-%E6%A0%BC%E5%BC%8F%E5%8F%AF%E9%80%89%20%C2%B7%20%E4%BA%94%E7%A7%8D%E5%8F%AF%E7%BC%96%E8%BE%91-7C3AED" alt="格式可选 · 五种可编辑格式"/>
 </p>
 
+<p align="center"><b>把法律画出来</b> · Make the Law Visible<br/>给法律人的诉讼可视化工具集：把案件材料变成能直接放进诉讼材料的图和表。</p>
+
 ---
 
-**Litigation visualization, made deterministic.** Five installable skills that turn case
-files into court-ready figures and tables. The model only reads meaning; every coordinate,
+**Litigation visualization, made deterministic.** Seven installable skills that turn case
+files and legal data into court-ready figures, charts and tables. The model only reads meaning; every coordinate,
 size and character budget is computed by deterministic scripts from the physical size of an
 A4 sheet. Text on a figure is always a subsequence of the source sentence, and every element
 traces back to the document and sentence it came from. MIT licensed, no network calls, works
@@ -48,24 +50,27 @@ with any agent that reads `SKILL.md`.
 | **A4 是前提** | 版面从纸的物理尺寸算起，不是导出选项。插进 Word 直接能印，白描一档可交法院 |
 | **判据先行** | 每条已修复的问题固化成守卫，且每条守卫都必须能失败：加守卫要先把代码改坏，确认它真报错 |
 
-## 五个模块
+## 七个模块
 
-| 模块 | 版本 | 回答什么问题 | 输入 | 交付物 |
-| --- | --- | --- | --- | --- |
-| **V1** [诉讼可视化重画](plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/) | v1.1.0 | 这张图怎么画得能进卷宗 | 一张已有的图（手绘、截图、AI 生成、Mermaid），或一段纯文字 | SVG · PPTX（默认）；PNG · VSDX · drawio 可选 |
-| **V2** [时间轴大师](plugins/mqc-nlv/skills/mqc-timeline-master/) | v2.1.0 | 案件经过是怎样的 | 判决书 · 起诉状 · 答辩状 · 合同 · 证据目录 · 流水 · 聊天记录（PDF、老式 .doc、扫描件、照片、口述） | 同上 + 溯源索引 |
-| **V3** [法律关系图大师](plugins/mqc-nlv/skills/mqc-legal-relation-master/) | v1.0.0 | 谁与谁、就什么标的、成立何种关系 | 一批案件材料 | 同上 + 出处索引 |
-| **V4** [大事记表大师](plugins/mqc-nlv/skills/mqc-chronicle-master/) | v1.0.0 | 什么时候发生了什么 | 一批案件材料 | 案件大事记 Word · Excel 母表 · A4 简表（默认）；简表 PDF/PNG 可选 |
-| **V5** [庭审对抗图大师](plugins/mqc-nlv/skills/mqc-trial-confrontation-master/) | v1.0.0 | 谁主张什么、对方怎么抗辩、法院审查什么 | 起诉状 · 答辩状 · 证据目录 · 代理意见 | 分析表 Excel · 对抗图 SVG（默认）；PNG 可选 |
+| | 模块 | 版本 | 回答什么问题 | 输入 | 交付物 |
+| --- | --- | --- | --- | --- | --- |
+| <img src="assets/icons/v1.png" width="44" alt="V1"/> | **V1** [诉讼可视化重画](plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/) | v1.1.0 | 这张图怎么画得能进卷宗 | 一张已有的图（手绘、截图、AI 生成、Mermaid），或一段纯文字 | SVG · PPTX（默认）；PNG · VSDX · drawio 可选 |
+| <img src="assets/icons/v2.png" width="44" alt="V2"/> | **V2** [时间轴大师](plugins/mqc-nlv/skills/mqc-timeline-master/) | v2.1.0 | 案件经过是怎样的 | 判决书 · 起诉状 · 答辩状 · 合同 · 证据目录 · 流水 · 聊天记录（PDF、老式 .doc、扫描件、照片、口述） | 同上 + 溯源索引 |
+| <img src="assets/icons/v3.png" width="44" alt="V3"/> | **V3** [法律关系图大师](plugins/mqc-nlv/skills/mqc-legal-relation-master/) | v1.0.0 | 谁与谁、就什么标的、成立何种关系 | 一批案件材料 | 同上 + 出处索引 |
+| <img src="assets/icons/v4.png" width="44" alt="V4"/> | **V4** [大事记表大师](plugins/mqc-nlv/skills/mqc-chronicle-master/) | v1.0.0 | 什么时候发生了什么 | 一批案件材料 | 案件大事记 Word · Excel 母表 · A4 简表（默认）；简表 PDF/PNG 可选 |
+| <img src="assets/icons/v5.png" width="44" alt="V5"/> | **V5** [庭审对抗图大师](plugins/mqc-nlv/skills/mqc-trial-confrontation-master/) | v1.0.0 | 谁主张什么、对方怎么抗辩、法院审查什么 | 起诉状 · 答辩状 · 证据目录 · 代理意见 | 分析表 Excel · 对抗图 SVG（默认）；PNG 可选 |
+| <img src="assets/icons/v6.png" width="44" alt="V6"/> | **V6** [法律图表大师](plugins/mqc-nlv/skills/mqc-legal-chart-master/) | v0.9.8 | 有多少、占几成、判了多少、钱流向哪里 | 一组法律数据（判决结果、案由、金额、天数、去向、资金流水） | SVG · PPTX（默认）；PNG 可选 |
+| <img src="assets/icons/v7.png" width="44" alt="V7"/> | **V7** [法律课件大师](plugins/mqc-nlv/skills/mqc-legal-courseware-master/) | v0.8.4 | 这些图怎么做成一页能上讲台的法律图表页，粘进自己的课件 | V1–V6 的图、法条与案例、一句想法、律所模板或截图（可选） | 可编辑 PPTX（整页或框选复制；图里每个元素各成一组，按读图编号自带讲课动画） |
 
-**两条线，一处交叠。**
+**三组用法，V3 是交叠处。**
 
-- **三大主力（V1 到 V3）** 覆盖日常出图：把手上已有的图重画干净、把案件经过画成时间轴、
+- **三大主力（V1 到 V3）· 日常出图**：把手上已有的图重画干净、把案件经过画成时间轴、
   把当事人与标的之间的关系画成一张网。
-- **庭前三大法宝（V3 到 V5）** 覆盖开庭前必须回答的三个问题：结构（V3）、时序（V4）、
+- **庭前三大法宝（V3 到 V5）· 开庭之前**：回答开庭前必须回答的三个问题：结构（V3）、时序（V4）、
   争点（V5）。V4 出的案件事实底稿是另两件的上游，三者读同一份底稿，同一件事在三张图上
-  指向同一个编号。
-- **V3 同属两条线**，既是日常出图的主力，也是庭前准备的第一件。
+  指向同一个编号。V3 同属两组，既是日常出图的主力，也是庭前准备的一件。
+- **课件组合（V6、V7）· 讲课与汇报**：V6 只画数字（有多少、占几成、判了多少），主要去处是课件、
+  讲座与汇报；V7 不画新图，把 V6 的图表与 V1–V5 的图排成课件，只读它们，不改它们一个字节。
 
 ### 各模块在做什么
 
@@ -87,11 +92,43 @@ Excel 母表（律师在里面填争点）、A4 简表（呈报用）。事实�
 **V5 庭审对抗图大师。** 按要件审判九步法与请求权基础，把案件推成左中右三栏：提出请求的
 一方、法院审查、抗辩的一方，深红标出决定性要件。图与表同源，一致性由判据核验。
 
+**V6 法律图表大师。** 九种精炼的统计图：竖柱、横条、百点方阵、南丁格尔玫瑰、哑铃、逐件分布、
+桑基、汇入图（资金流向）、逐级加减，图种由数据形状决定。背后是一个按领域、场景、意图、画法索引的
+场景库（34 个领域、410 个场景、63 种画法；现在能画的场景 170 个，其余标「待建」），用时按关键词检索，只取用得上的几条。
+前五件厚重严谨，这一件广泛灵动：旅程、倒计时、冰山、拼图、金句卡……灵动在表达，严谨在数据。
+丢一批判决给它，走类案编码：逐份编码、类别取封闭表、每个值附原文引句，一次出编码母表和一组图。图上的数只许算、不许编：标题里写的百分比与件数，脚本都会从数据里
+算一遍；没有 n、口径与来源的图不出。
+
+**V7 法律课件大师。** 法律垂类的磁吸课件编辑器。一页 12 栏 × 6 行的网格，法条、裁判要旨、案例、争议焦点、风险提示、
+证据、要点、大数字、金句等卡片，和 V1–V6 的图（案情时间轴、法律关系图、争点对抗图、大事记简表、类案数据图），拖进页面就吸到
+格子上，同类卡片自动连成一组（学自 M3E Canvas 的磁吸连接）。律所名片录一次，一键生成律所介绍页、律师简介页、结束页，
+每页页脚可放 Logo。用户点「AI 生成」写一句想法，由对话里的 AI 生成封面、整页、单张卡片，或调用 V1–V6 出图；用户拖一拖、
+改一改，导出每个元素都能改的 PPTX（只有 Logo 是图片）。上传律所自己的 PPT 模板，系统读懂它的主色、字体、Logo，生成律所风格，图表也跟着换成律所主色。法条与要旨照录原文、案号不编、大数字要能由图表推出；导出后回读审计。
+
+## 怎么配合
+
+从手上的材料、要办的事出发：左边是手上有什么，中间用哪几个模块，右边拿到什么。
+
 <p align="center">
-  <img src="assets/modules.png" width="100%" alt="五个模块"/>
+  <img src="assets/flow.png" width="100%" alt="七个模块怎么配合：材料、模块、成果"/>
 </p>
 
-**装在哪都行。** 五个模块都是标准的 `SKILL.md` 目录，没有产品特定的胶水代码：Claude Code、
+| 要办的事 | 手上有 | 用 | 拿到 |
+| --- | --- | --- | --- |
+| **图要交得出去** | 手绘、截图、AI 生成的图 | <img src="assets/icons/v1.png" width="28" alt="V1"/><br/>V1 | 可编辑的 SVG、PPTX；白描一档可交法院 |
+| **理清案件经过** | 判决书、合同、流水、聊天记录 | <img src="assets/icons/v2.png" width="28" alt="V2"/><br/>V2 | 时间轴，加溯源索引（每一项对得回原句） |
+| **理清法律关系** | 判决书、合同、工商登记 | <img src="assets/icons/v3.png" width="28" alt="V3"/><br/>V3 | 关系图，加出处索引 |
+| **整理案件事实** | 整套卷宗 | <img src="assets/icons/v4.png" width="28" alt="V4"/><br/>V4 | Word 交付版、Excel 母表、A4 简表 |
+| **推演庭审攻防** | 诉辩材料与证据 | <img src="assets/icons/v4.png" width="28" alt="V4"/> <img src="assets/icons/v5.png" width="28" alt="V5"/><br/>V4 → V5 | 对抗图，加 Excel 分析表 |
+| **庭前全面准备** | 整套卷宗 | <img src="assets/icons/v4.png" width="28" alt="V4"/> <img src="assets/icons/v3.png" width="28" alt="V3"/> <img src="assets/icons/v5.png" width="28" alt="V5"/><br/>V4 → V3 + V5 | 大事记、关系图、对抗图，同一套编号 |
+| **用数据说话** | 判决、案由、金额、流水 | <img src="assets/icons/v6.png" width="28" alt="V6"/><br/>V6 | 一页统计图，标题里的数都算得出 |
+| **做一堂课** | 一组数据，加画好的图 | <img src="assets/icons/v6.png" width="28" alt="V6"/> <img src="assets/icons/v7.png" width="28" alt="V7"/><br/>V6 → V7（V1–V5 的图也排进来） | 一套课件，导出可编辑 PPT |
+| **向委托人汇报** | 一个案件的卷宗 | <img src="assets/icons/v5.png" width="28" alt="V5"/> <img src="assets/icons/v7.png" width="28" alt="V7"/><br/>V4 → V3 + V5 → V7 | 一套汇报 PPT |
+
+箭头只表示读谁的产物：下游模块读上游写好的文件（事实底稿、图、出处记录），不改上游一个字节。
+每个模块也都能单独用，不必按顺序装齐。
+
+**装在哪都行。** 七个模块都是标准的 `SKILL.md` 目录，没有产品特定的胶水代码：Claude Code、
 Codex、DeepSeek Harness、Cursor、Gemini CLI、Copilot、Cline、Aider 都装得上。同一份仓库，
 不维护两套。
 
@@ -131,7 +168,15 @@ dsh 的发现优先级（先命中先生效）：项目 `.dsh` → 项目 `.agen
 用户 `.dsh` → 用户 `.agents`。它把 `allowed-tools` / `disallowed-tools` 当未知字段处理，
 技能内的工具约束需要在 harness 层自行保证。
 
+**桌面办公智能体**（WorkBuddy、千问、Codex、Claude 等）：在「技能」页选「上传技能」，
+把技能包拖进去。仓库 `plugins/mqc-nlv/skills/` 下的每个文件夹就是一个技能包，按需打包上传。
+
+**技能市场**：在 [缪奇川的 SkillHub 主页](https://www.skillhub.cn/user/user_92c667b1) 找到要装的技能，
+复制技能页上的安装提示词，发给能执行命令的智能体。
+
 **其他 agent**：把模块目录放进它们各自的 skills 目录，`SKILL.md` 是通用格式。
+
+各种装法的演示见 [项目主页](https://www.miaoqichuan.com/nlv.html)。
 
 ### 环境与依赖
 
@@ -148,9 +193,9 @@ dsh 的发现优先级（先命中先生效）：项目 `.dsh` → 项目 `.agen
 
 ```
 new-litigation-visualization/
-├── assets/                                  仓库封面与模块图
+├── assets/                                  仓库封面、模块图标与配合图
 ├── .claude-plugin/marketplace.json          插件市场清单
-├── .github/workflows/checks.yml             每次 push 与 PR 跑五个模块的回归
+├── .github/workflows/checks.yml             每次 push 与 PR 跑七个模块的回归
 └── plugins/mqc-nlv/
     ├── .claude-plugin/plugin.json           插件清单（插件版本只在这里声明）
     └── skills/
@@ -179,9 +224,16 @@ new-litigation-visualization/
         ├── mqc-chronicle-master/            V4
         │   ├── scripts/                     摄入 · 校验 · Word/Excel/简表
         │   └── references/ docs/adr/ examples/ tests/
-        └── mqc-trial-confrontation-master/  V5
-            ├── scripts/                     要件推演 · 三栏出图 · 光栅
-            └── references/ examples/ tests/
+        ├── mqc-trial-confrontation-master/  V5
+        │   ├── scripts/                     要件推演 · 三栏出图 · 光栅
+        │   └── references/ examples/ tests/
+        ├── mqc-legal-chart-master/          V6
+        │   ├── scripts/                     校验与派生数 · 九种图 · 守卫
+        │   └── references/ docs/adr/ examples/ schemas/ tests/
+        └── mqc-legal-courseware-master/     V7
+            ├── scripts/                     拼页 · 图导入 · PPTX 导出与审计 · 编辑器
+            ├── web/                         磁吸编辑器（单文件）
+            └── references/ docs/adr/ examples/ tests/
 ```
 
 **共享内核只有一份。** 几何、字体、换行、导出这些多模块共用的代码放在 V1，别的模块引用
@@ -320,7 +372,7 @@ new-litigation-visualization/
 不学任何语法。
 
 **它要联网吗？我的案卷会不会传出去？**
-五个模块都不联网、不调外部接口、不需要任何凭据，只读你给它的材料，只往你指定的
+七个模块都不联网、不调外部接口、不需要任何凭据，只读你给它的材料，只往你指定的
 目录写文件。你的材料本身去了哪里，取决于你用的那个 agent 怎么处理，
 与这些模块无关。
 
@@ -411,6 +463,8 @@ python3 plugins/mqc-nlv/skills/mqc-timeline-master/tests/run_checks.py
 python3 plugins/mqc-nlv/skills/mqc-chronicle-master/tests/run_checks.py
 python3 plugins/mqc-nlv/skills/mqc-trial-confrontation-master/tests/run_checks.py
 python3 plugins/mqc-nlv/skills/mqc-legal-relation-master/tests/make_checks.py
+python3 plugins/mqc-nlv/skills/mqc-legal-chart-master/tests/run_checks.py
+python3 plugins/mqc-nlv/skills/mqc-legal-courseware-master/tests/run_checks.py
 ```
 
 退出码 0 = 全过。回归套件把已修复的问题固化成守卫。**每条守卫都必须能失败**：加一
@@ -438,9 +492,19 @@ python3 plugins/mqc-nlv/skills/mqc-legal-relation-master/tests/make_checks.py
 想聊法律 AI、诉讼可视化，或者对这个项目有任何建议，欢迎开 Issue，也可以直接
 发邮件：miaoqichuan@hotmail.com。
 
+## 参与与反馈
+
+- 报告问题、提建议：开 [Issue](https://github.com/MiaoQichuan/new-litigation-visualization/issues)，按模板填。**请勿上传真实案件材料**，用脱敏或虚构的样例复现。
+- 提交代码：先读 [CONTRIBUTING.md](CONTRIBUTING.md)。
+- 安全问题：按 [SECURITY.md](SECURITY.md) 私下报告，不要公开开 Issue。
+- 社区守则：[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。
+- 引用本项目：见 [CITATION.cff](CITATION.cff)（GitHub 右侧「Cite this repository」）。
+
 ## 许可
 
 MIT。作者 [缪奇川](https://github.com/MiaoQichuan)，公众号：奇川律师。
+
+文中与示意图里出现的 PowerPoint、Visio、Illustrator、ProcessOn、draw.io、WPS 等产品名称与图标，归各自的权利人所有，只用来说明能导出哪些格式；它们不在 MIT 许可的范围内，本项目与这些公司也没有关联。
 
 ---
 

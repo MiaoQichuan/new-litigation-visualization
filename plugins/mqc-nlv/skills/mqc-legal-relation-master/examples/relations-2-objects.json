@@ -1,0 +1,62 @@
+{
+  "slug": "objects",
+  "title": "建设工程施工合同纠纷 · 主体与客体（虚构示例）",
+  "nodes": [
+    {
+      "id": "OWNER",
+      "name": "发包人",
+      "note": "建设单位",
+      "kind": "主体"
+    },
+    {
+      "id": "GC",
+      "name": "总承包人",
+      "note": "施工总承包",
+      "kind": "主体"
+    },
+    {
+      "id": "ACTUAL",
+      "name": "实际施工人",
+      "note": "原告",
+      "kind": "主体"
+    },
+    {
+      "id": "C1",
+      "name": "建设工程施工合同",
+      "note": "2021.3 签订",
+      "kind": "客体"
+    },
+    {
+      "id": "PROJ",
+      "name": "涉案工程",
+      "note": "A 地块 1 号楼",
+      "kind": "客体"
+    }
+  ],
+  "edges": [
+    {
+      "from": "OWNER",
+      "to": "C1",
+      "label": "签订",
+      "line": "实线"
+    },
+    {
+      "from": "GC",
+      "to": "C1",
+      "label": "签订",
+      "line": "实线"
+    },
+    {
+      "from": "C1",
+      "to": "PROJ",
+      "label": "承建标的",
+      "line": "虚线"
+    },
+    {
+      "from": "ACTUAL",
+      "to": "PROJ",
+      "label": "实际施工",
+      "line": "实线"
+    }
+  ]
+}

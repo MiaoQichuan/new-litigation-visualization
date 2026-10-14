@@ -17,8 +17,9 @@ jobs:
     # 于是代码一个字没动、CI 却红了。前后红过五轮，根因全是这一类。
     # 钉死之后升级由我们挑时间做，而不是它挑时间。
     runs-on: ubuntu-24.04
-    # 全套约半分钟，装依赖几分钟。25 分钟还没完就是卡住了，不该让它空转到六小时。
-    timeout-minutes: 25
+    # 装依赖几分钟；回归跑两遍（UTF-8 一遍、模拟中文 Windows 的 GBK 一遍），各约五分钟。
+    # 40 分钟还没完就是卡住了，不该让它空转到六小时。
+    timeout-minutes: 40
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -152,6 +153,15 @@ jobs:
       - name: Run regression · mqc-chronicle-master
         run: python plugins/mqc-nlv/skills/mqc-chronicle-master/tests/run_checks.py
 
+      # V6 只需标准库与 V1 内核；PPTX 回读与改坏验证都在 run_checks 里。
+      # 发版闸门 = 回归 + 判定账与成品账 + 变形测试 + 令牌 + 版本一致 + 单独安装包包内回归 + 测试只增不减。
+      - name: Release gate · mqc-legal-chart-master
+        run: python plugins/mqc-nlv/skills/mqc-legal-chart-master/tests/release_gate.py
+
+      # V7 只读 V1 / V6；回归最后比对 V1–V6 的指纹，确认一个字节没被改。
+      - name: Run regression · mqc-legal-courseware-master
+        run: python plugins/mqc-nlv/skills/mqc-legal-courseware-master/tests/run_checks.py
+
       - name: Run regression · mqc-trial-confrontation-master
         run: |
           python plugins/mqc-nlv/skills/mqc-trial-confrontation-master/tests/shape_checks.py
@@ -159,3 +169,51 @@ jobs:
           python plugins/mqc-nlv/skills/mqc-trial-confrontation-master/tests/coverage_checks.py
           python plugins/mqc-nlv/skills/mqc-trial-confrontation-master/tests/palette_checks.py
           python plugins/mqc-nlv/skills/mqc-trial-confrontation-master/tests/ingest_checks.py
+
+      # 用户大多在中文 Windows 上：不写编码时，Python 按系统区域设置读写，那里是 GBK。
+      # 积成（案图）在 Windows 上跑 CI；我们这里在 Linux 上造一个 GBK 区域设置，把同一套回归再跑一遍
+      # （0.9.8 第六轮这样跑出过四处真问题：法律图表大师的输出不是 UTF-8、生僻字让它崩掉，
+      # 时间轴大师把写好的 Word 报成没写成，读 PDF 解码出错，审计脚本读不了自己画的 SVG）。
+      # 它模拟的是「编码」，不是 Windows 的路径与命令行（那两样在 Windows 上是 Unicode，这里不是），
+      # 所以测试里传中文都走文件、不走命令行参数。造不出 GBK 就直接判红：跳过换来的绿色是假的。
+      - name: Re-run regression under a Chinese-Windows code page (GBK)
+        env:
+          LC_ALL: zh_CN.GBK
+          LOCPATH: ${{ runner.temp }}/locale
+        run: |
+          sudo apt-get install -y locales      # localedef 与 zh_CN 的定义在这个包里（镜像一般已装，装一次不花时间）
+          mkdir -p "$LOCPATH"
+          LC_ALL=C localedef -i zh_CN -f GBK "$LOCPATH/zh_CN.GBK" || true
+          python -c "import locale,sys; e=locale.getpreferredencoding(False); print('locale encoding:', e); sys.exit(e.lower()!='gbk')"
+          S=plugins/mqc-nlv/skills
+          python $S/mqc-litigation-visual-redraw/tests/run_checks.py
+          python $S/mqc-timeline-master/tests/run_checks.py
+          python $S/mqc-legal-relation-master/tests/make_checks.py
+          python $S/mqc-legal-relation-master/tests/layout_regression.py
+          python $S/mqc-chronicle-master/tests/run_checks.py
+          python $S/mqc-legal-chart-master/tests/run_checks.py
+          python $S/mqc-legal-courseware-master/tests/run_checks.py
+          for t in shape_checks break_tests coverage_checks palette_checks ingest_checks; do
+            python $S/mqc-trial-confrontation-master/tests/$t.py
+          done
+
+  # V6 在别的 Python 版本上也要出一模一样的图（开源前实跑抓到过 3.11 与 3.12+ 字宽不同，
+  # 3.9 是环境自检里写明的最低版本：写了就要真测；
+  # 横条名被拆成两行）。只需标准库与仓库里的 V1 内核，不装任何系统包，所以很快。
+  # 成品账逐字节比对，版本一换图就变的话这里会红。
+  v6-python-versions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.9', '3.11', '3.13']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Regression · mqc-legal-chart-master (stdlib only)
+        run: python plugins/mqc-nlv/skills/mqc-legal-chart-master/tests/run_checks.py

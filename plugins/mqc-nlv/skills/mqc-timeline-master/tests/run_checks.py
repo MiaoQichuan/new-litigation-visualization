@@ -1763,14 +1763,14 @@ def main_render_guards():
         _tj2.close()
         _td2 = _tj2.name.replace(".json", ".docx")
         _sp2.run(["node", os.path.join(SKILL, "scripts", "trace_index.js"),
-                  _tj2.name, _td2], capture_output=True, text=True, timeout=120)
+                  _tj2.name, _td2], capture_output=True, text=True, timeout=120, encoding="utf-8")
         if not os.path.exists(_td2):
             # **报清原因**，不要只说「没出来」。CI 上撞过一次：trace_index.js
             # require("docx")（npm 的包，本机是全局装的、仓库里没有 package.json），
             # CI 那台机器没有它，于是这条只印「没出来」，看不出该装什么。
             _why2 = ""
             _r2 = _sp2.run(["node", "-e", "require('docx')"],
-                           capture_output=True, text=True, timeout=60)
+                           capture_output=True, text=True, timeout=60, encoding="utf-8")
             if _r2.returncode:
                 _why2 = ("：node 找不到 docx 包（npm install -g docx@9）"
                          if "Cannot find module" in (_r2.stderr or "")
@@ -4282,7 +4282,7 @@ def main_env_guards():
     py311 = shutil.which("python3.11")
     if py311:
         for f in files:
-            r = subprocess.run([py311, "-m", "py_compile", f], capture_output=True, text=True)
+            r = subprocess.run([py311, "-m", "py_compile", f], capture_output=True, text=True, encoding="utf-8")
             if r.returncode:
                 msgs.append(f"Python 3.11 编译失败：{os.path.relpath(f, root)}")
     env = dict(os.environ, PYTHONIOENCODING="gbk")
@@ -4616,9 +4616,9 @@ def main():
     _sh15.copy(os.path.join(SKILL, "tests", "fixtures", "m1-judgment.txt"), _d15 + "/m.txt")
     _pipe15 = os.path.join(SKILL, "scripts", "pipeline.py")
     _sp15.run([sys.executable, _pipe15, "read", "m.txt"], cwd=_d15, capture_output=True)
-    _r15 = _sp15.run([sys.executable, _pipe15, "span", "1"], cwd=_d15, capture_output=True, text=True)
+    _r15 = _sp15.run([sys.executable, _pipe15, "span", "1"], cwd=_d15, capture_output=True, text=True, encoding="utf-8")
     _sp15.run([sys.executable, _pipe15, "style", "1"], cwd=_d15, capture_output=True)
-    _o15 = _sp15.run([sys.executable, _pipe15, "scope"], cwd=_d15, capture_output=True, text=True).stdout
+    _o15 = _sp15.run([sys.executable, _pipe15, "scope"], cwd=_d15, capture_output=True, text=True, encoding="utf-8").stdout
     if "句带日期" not in _o15 and "勾选范围是全部材料" not in _o15:
         read_msgs.append(f"scope 没报出时间段筛掉了什么：{_o15[:120]}")
 

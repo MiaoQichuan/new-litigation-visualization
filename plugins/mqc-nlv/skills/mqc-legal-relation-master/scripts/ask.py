@@ -24,6 +24,12 @@ resolve 输出一份 choice.json 的内容，出图脚本只认它：
 """
 import sys, json, argparse, os
 
+def _py(script):
+    """给用户看的下一步命令：用脚本的真实路径，在哪个目录里照抄都能跑（0.9.8：SKILL.md 要求在用户的工作目录里运行）。"""
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), script)
+    return f'python3 "{p}"' if " " in p else f"python3 {p}"
+
+
 STYLES = [
     ("法官", "开庭、提交法院、打印", "白描"),
     ("当事人与客户", "当面讲、微信发", "奇川风"),
@@ -249,7 +255,7 @@ def _load(path):
     第二轮每条关系都显示成「from → to：label」，使用者无从选起。
     同向重复的关系按与 make.py 相同的规则先合并，两边的编号才对得上。
     """
-    d = json.load(open(path, encoding="utf-8"))
+    d = json.load(open(path, encoding="utf-8-sig"))
     nodes = d["nodes"]
     edges = [[e["from"], e["to"], e.get("label", "")] for e in merge_parallel(d["edges"])]
     return nodes, edges
@@ -321,6 +327,10 @@ def needs_round2(choice_or_style):
 
 
 if __name__ == "__main__":
+    try:                                   # 常见输入错误（路径、JSON、编码）说人话，不甩堆栈
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
     ap = argparse.ArgumentParser()
     ap.add_argument("cmd", choices=["trim", "ask", "round1", "round2", "resolve"])
     ap.add_argument("--keep")
@@ -349,14 +359,14 @@ if __name__ == "__main__":
         print()
         print("两问一起回答即可，例如「2，7」= 奇川风 + 标第 7 项；"
               "只答风格也行。深红只有奇川风才有，选 1 或 3 时第二问自动作废。")
-        print("拿到答案后跑：python scripts/ask.py resolve %s --style 编号 --mark 编号 --formats 1,3（会直接写出 choice.json）"
-              % a.relations)
+        print("拿到答案后跑：%s resolve %s --style 编号 --mark 编号 --formats 1,3（会直接写出 choice.json）"
+              % (_py("ask.py"), a.relations))
     elif a.cmd == "round1":
         print(round1())
     elif a.cmd == "trim":
         if not a.relations:
             sys.exit("需要 relations.json")
-        rel = json.load(open(a.relations, encoding="utf-8"))
+        rel = json.load(open(a.relations, encoding="utf-8-sig"))
         merged = merge_parallel(rel["edges"])
         n_merged = len(rel["edges"]) - len(merged)
         rel["edges"] = merged
@@ -398,7 +408,7 @@ if __name__ == "__main__":
         print(msg)
         if len(res["nodes"]) <= MAX_MODULES and len(res["edges"]) > MAX_EDGES and not res.get("over12"):
             print(f"关系仍有 {len(res['edges'])} 条，超过 {MAX_EDGES} 条，接着问：")
-            print(f"python scripts/ask.py trim {dst}")
+            print(f"{_py('ask.py')} trim {dst}")
     else:
         if not a.relations:
             sys.exit("需要 relations.json")
@@ -429,5 +439,5 @@ if __name__ == "__main__":
             dst = a.out or os.path.join(os.path.dirname(os.path.abspath(a.relations)),
                                         "choice.json")
             json.dump(ch, open(dst, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-            print(f"已写入 {dst}；出图时带上：python scripts/make.py {a.relations} "
+            print(f"已写入 {dst}；出图时带上：{_py('make.py')} {a.relations} "
                   f"--choice {os.path.basename(dst)}")

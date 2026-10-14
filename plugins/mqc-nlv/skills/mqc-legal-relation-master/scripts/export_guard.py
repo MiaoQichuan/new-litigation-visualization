@@ -130,7 +130,7 @@ def read_vsdx(path):
 
 # ---------------------------------------------------------------- drawio
 def read_drawio(path):
-    s = open(path, encoding="utf-8").read()
+    s = open(path, encoding="utf-8-sig").read()
     cells = {}
     for m in re.finditer(r'<mxCell\b((?:[^>/]|/(?!>))*)>(.*?)</mxCell>', s, re.S):
         a = svg_geom.attrs(m.group(1))
@@ -172,7 +172,7 @@ def read_drawio(path):
 
 def check(svg_path, files):
     """files：{'pptx': 路径, 'vsdx': 路径, 'drawio': 路径}。返回 {格式: (全过, 明细)}。"""
-    ref = svg_geom.read(open(svg_path, encoding="utf-8").read())
+    ref = svg_geom.read(open(svg_path, encoding="utf-8-sig").read())
     # 参照 SVG 的走线要补回箭头长度吗？不补：三种导出物都从同一份 SVG 转，
     # 端点应当与 SVG 的 path 端点一致，箭头由格式自身的线端画出。
     out = {}
@@ -189,6 +189,19 @@ def check(svg_path, files):
 
 
 if __name__ == "__main__":
+    if {"-h", "--help"} & set(__import__("sys").argv[1:]):   # 只打印用法、什么都不做（原来会把 --help 当成文件名）
+        getattr(__import__("sys").stdout, "reconfigure", lambda **k: None)(encoding="utf-8")
+        print((__doc__ or "").strip() or "用法见本模块的 SKILL.md")
+        raise SystemExit(0)
+    try:                                   # 常见输入错误（路径、JSON、编码）说人话，不甩堆栈
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
+    for _stream in (sys.stdout, sys.stderr):   # 中文 Windows 默认 GBK：固定成 UTF-8，与其余脚本一致
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
     svg = sys.argv[1]
     files = {os.path.splitext(f)[1][1:]: f for f in sys.argv[2:]}
     allok = True

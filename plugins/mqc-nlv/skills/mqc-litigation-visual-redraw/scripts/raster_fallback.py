@@ -78,7 +78,7 @@ def playwright(svg_path, png_path, zoom=2.0):
     except Exception:
         raise RuntimeError("Playwright 不可用（pip 包或 Chromium 未装）")
     import re
-    s = open(svg_path, encoding="utf-8").read()
+    s = open(svg_path, encoding="utf-8-sig").read()
     m = re.search(r'<svg[^>]*\swidth="([\d.]+)"[^>]*\sheight="([\d.]+)"', s)
     w, h = (float(m.group(1)), float(m.group(2))) if m else (1600.0, 1200.0)
     with sync_playwright() as p:

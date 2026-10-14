@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "chart": "dumbbell",
+  "title": "B 案判赔仅为诉请的 32%",
+  "scope": "示例：六件买卖合同纠纷",
+  "unit": "万元",
+  "n": 6,
+  "source": "示例数据，非真实统计",
+  "emphasis": "B",
+  "data": {
+    "from_label": "诉请",
+    "to_label": "判赔",
+    "items": [
+      {
+        "id": "A",
+        "label": "A 案",
+        "from": 120,
+        "to": 86
+      },
+      {
+        "id": "B",
+        "label": "B 案",
+        "from": 300,
+        "to": 95
+      },
+      {
+        "id": "C",
+        "label": "C 案",
+        "from": 64,
+        "to": 60
+      },
+      {
+        "id": "D",
+        "label": "D 案",
+        "from": 210,
+        "to": 150
+      },
+      {
+        "id": "E",
+        "label": "E 案",
+        "from": 45,
+        "to": 12
+      },
+      {
+        "id": "F",
+        "label": "F 案",
+        "from": 180,
+        "to": 171
+      }
+    ]
+  }
+}

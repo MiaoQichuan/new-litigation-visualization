@@ -22,7 +22,7 @@ DOCX=_s.argv[1] if len(_s.argv)>1 else "案件大事记.docx"
 XLSX=_s.argv[2] if len(_s.argv)>2 else "案件大事记母表.xlsx"
 RI=_s.argv[3] if len(_s.argv)>3 else "渲染输入.json"
 import os
-D=json.load(open(RI,encoding="utf-8"))
+D=json.load(open(RI,encoding="utf-8-sig"))
 N=len(D["rows"])
 MD=os.path.join(os.path.dirname(DOCX) or ".", "案件大事记.md")
 if not os.path.exists(DOCX) and os.path.exists(MD):
@@ -30,7 +30,7 @@ if not os.path.exists(DOCX) and os.path.exists(MD):
     # 那些判据（字体三槽、页边距、rFonts）说的是 Word 排版，对 Markdown 无从谈起，
     # 所以这里改判 Markdown 自己的判据：表头与列序一致、行数与渲染输入一致。
     print("— Word 交付版（本机缺 node，已改出 Markdown 版）—")
-    md=open(MD,encoding="utf-8").read().splitlines()
+    md=open(MD,encoding="utf-8-sig").read().splitlines()
     head=[l for l in md if l.startswith("| 序号")]
     rows=[l for l in md if l.startswith("| ") and not l.startswith("| 序号") and "---" not in l]
     ck("M1", bool(head) and head[0].strip()=="| 序号 | 日期 | 事项 | 主要内容 | 备注 |",
@@ -81,6 +81,7 @@ else:
 
 print("— Excel 母表 —")
 sh=dec(zipfile.ZipFile(XLSX).read("xl/worksheets/sheet1.xml").decode())
+sh=re.sub(r"\s+/>", "/>", sh)          # 没装 lxml 时 openpyxl 写 <x />，装了写 <x/>：判据只认内容，不认空格
 sx=zipfile.ZipFile(XLSX).read("xl/styles.xml").decode()
 wb=load_workbook(XLSX, rich_text=True); ws2=wb.active
 # 列头行不写死：母表上方加了案件名标题之后，列头就不在第 1 行了。

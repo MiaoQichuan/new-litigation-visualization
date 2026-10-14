@@ -129,6 +129,47 @@ def read_text(path):
     return _run(["pdftotext", "-layout", path, "-"]).stdout
 
 
+# ---- 纯文本材料的编码（0.9.8 自检：中文 Windows 的记事本默认存 GBK）--------------------------
+# 原来按 UTF-8 读、errors="ignore"：GBK 的判决书被悄悄读成乱码（「ԭ׹˾뱻ҹ˾…」），还当作已读。
+# 现在：UTF-8（带不带 BOM）读得通就用；读不通再按 GBK（GB18030）读，且读出来的汉字六成以上是常用字才认
+# （真 GBK 的判决书实测九成以上；Big5 繁体、乱码都过不了）；否则拒，请用户另存为 UTF-8。宁可停下，不可把乱码当原文。
+_COMMON_HANZI = None
+
+
+def _common_hanzi():
+    global _COMMON_HANZI
+    if _COMMON_HANZI is None:                       # GB2312 一级字（3755 个常用字）
+        s = set()
+        for hi in range(0xB0, 0xD8):
+            for lo in range(0xA1, 0xFF):
+                try:
+                    s.add(bytes((hi, lo)).decode("gb2312"))
+                except UnicodeDecodeError:
+                    pass
+        _COMMON_HANZI = s
+    return _COMMON_HANZI
+
+
+def read_plain(path):
+    """读一份纯文本材料，返回 (正文, 编码说明)。编码说明为 None 表示就是 UTF-8。"""
+    raw = open(path, "rb").read()
+    try:
+        return raw.decode("utf-8-sig"), None
+    except UnicodeDecodeError:
+        pass
+    try:
+        txt = raw.decode("gb18030")
+    except UnicodeDecodeError:
+        txt = None
+    if txt is not None:
+        han = [c for c in txt if "\u4e00" <= c <= "\u9fff"]
+        common = _common_hanzi()
+        if han and sum(c in common for c in han) / len(han) >= 0.6:   # 真 GBK 的判决书实测九成以上是常用字
+            return txt, "GBK"
+    raise ValueError(f"{os.path.basename(path)} 不是 UTF-8，也认不准是哪种中文编码：请用记事本「另存为」，"
+                     f"编码选 UTF-8，再给我一次")
+
+
 def ingest(paths, workdir):
     """返回 (materials, sources, todo)。todo 列出还需要模型读图的材料。
     先按格式分派：只有 PDF 走探测那条路；图片本身就是图，不必再栅格化；
@@ -152,8 +193,16 @@ def ingest(paths, workdir):
                 raise SystemExit(f"{e}：{p}\n  用 Word 另存为 .docx，或 "
                                  f"soffice --headless --convert-to docx \"{p}\"")
         elif k in ("docx", "plain"):
-            txt = (read_docx(p) if k == "docx"
-                   else open(p, encoding="utf-8", errors="ignore").read())
+            if k == "docx":
+                txt = read_docx(p)
+            else:
+                try:
+                    txt, enc_note = read_plain(p)
+                except ValueError as e:
+                    raise UnknownFormat(str(e))
+                if enc_note:
+                    item["encoding"] = enc_note
+                    print(f"  提示：{item['name']} 是 {enc_note} 编码（记事本默认），已按 {enc_note} 读入")
             if not txt.strip():
                 raise UnknownFormat(f"{item['name']} 抽不出任何正文，不得当作已读")
             item.update(pages=max(1, len(txt) // 1500), medium="text",
@@ -203,6 +252,14 @@ def reconcile(materials, sources, external_anchor, read_images=(), waived=()):
 
 
 if __name__ == "__main__":
+    if {"-h", "--help"} & set(__import__("sys").argv[1:]):   # 只打印用法、什么都不做（原来会把 --help 当成文件名）
+        getattr(__import__("sys").stdout, "reconfigure", lambda **k: None)(encoding="utf-8")
+        print((__doc__ or "").strip() or "用法见本模块的 SKILL.md")
+        raise SystemExit(0)
+    try:                                   # 常见输入错误（路径、JSON、编码）说人话，不甩堆栈
+        __import__("_cli_errors").install()
+    except ImportError:
+        pass
     # Windows 中文系统的控制台默认 GBK：不固定成 UTF-8，外部 AI（按 UTF-8 读）看到的是
     # 乱码。真实运行记录里，时间轴大师就因此让模型摸索了一轮编码。写法与其余 skill 一致。
     for _stream in (sys.stdout, sys.stderr):

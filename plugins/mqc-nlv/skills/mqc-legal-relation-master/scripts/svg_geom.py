@@ -87,6 +87,8 @@ def read(svg):
     歸藏风会把整张图包进 translate(0,60)，不计入偏移就全部对不上。
     """
     m = re.search(r"<svg\b[^>]*>", svg)
+    if not m:                                   # 给的不是 SVG：说清楚，不甩 AttributeError
+        raise ValueError("这不是一张 SVG（找不到 <svg> 开头）：请给出图脚本写出的那份 .svg")
     sa = attrs(m.group(0))
     vb = [float(v) for v in re.findall(_NUM, sa.get("viewBox", ""))]
     W = vb[2] if len(vb) == 4 else float(sa.get("width", 0))

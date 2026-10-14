@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "chart": "hbar",
+  "title": "民间借贷占全部收案的 23%",
+  "scope": "示例：某基层法院 2025 年民商事收案",
+  "unit": "件",
+  "n": 1330,
+  "source": "示例数据，非真实统计",
+  "emphasis": "loan",
+  "data": {
+    "items": [
+      {
+        "id": "loan",
+        "label": "民间借贷",
+        "value": 312
+      },
+      {
+        "id": "sale",
+        "label": "买卖合同",
+        "value": 248
+      },
+      {
+        "id": "bank",
+        "label": "金融借款合同",
+        "value": 205
+      },
+      {
+        "id": "labor",
+        "label": "劳动争议",
+        "value": 176
+      },
+      {
+        "id": "divorce",
+        "label": "离婚纠纷",
+        "value": 141
+      },
+      {
+        "id": "property",
+        "label": "物业服务合同",
+        "value": 98
+      },
+      {
+        "id": "traffic",
+        "label": "机动车交通事故责任",
+        "value": 87
+      },
+      {
+        "id": "build",
+        "label": "建设工程施工合同",
+        "value": 63
+      }
+    ]
+  },
+  "annotations": [
+    {
+      "target": "loan",
+      "text": "民间借贷收案量居首"
+    },
+    {
+      "target": "build",
+      "text": "件数少，但标的额大"
+    }
+  ]
+}

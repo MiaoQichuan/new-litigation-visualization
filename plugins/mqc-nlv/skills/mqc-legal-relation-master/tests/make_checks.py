@@ -12,7 +12,7 @@
 七、第〇轮写回的文件，第二轮能正常列出关系；名称带 & < > 不被误判撑破；长关系名不越出画布
 五、第〇轮：超过 9 个模块时停下；建议、拒绝越界、未入图入索引、「全部」放行
 """
-import os, sys, json, subprocess, tempfile, shutil
+import os, sys, json, subprocess, tempfile, shutil, re
 HERE = os.path.dirname(os.path.abspath(__file__))
 MAKE = os.path.join(HERE, "..", "scripts", "make.py")
 FX = os.path.join(HERE, "fixtures", "relations-demo.json")
@@ -20,7 +20,9 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 tmp = tempfile.mkdtemp()
 fails = []
-ENV = dict(os.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8")
+# 不设 PYTHONUTF8：用户的电脑上没有它，子进程该按用户的环境跑（中文 Windows 默认 GBK）。
+# 输出按 UTF-8 读，所以仍固定 PYTHONIOENCODING。
+ENV = dict(os.environ, PYTHONIOENCODING="utf-8")
 
 
 def run(*args):
@@ -138,6 +140,20 @@ prov = open(os.path.join(out5, "c15-provenance.md"), encoding="utf-8").read() if
 missing = [n["name"] for n in r2.get("dropped", {}).get("nodes", []) if n["name"] not in prov]
 expect(code == 0 and "未入图" in prov and not missing and "判据：全部通过" in log,
        "精简后出图，判据全过，未入图的模块全部写进出处索引", log)
+# 出处的机读版（0.9.8 随课件大师：放进课件里鼠标停在图上就看得到出处）
+_tr = os.path.join(out5, [f for f in os.listdir(out5) if f.endswith("-trace.json")][0]) if code == 0 and any(
+    f.endswith("-trace.json") for f in os.listdir(out5)) else None
+_svgp = _tr[:-len("-trace.json")] + ".svg" if _tr else None
+_rows = json.load(open(_tr, encoding="utf-8"))["rows"] if _tr else []
+_svgt = open(_svgp, encoding="utf-8").read() if _svgp and os.path.exists(_svgp) else ""
+_refs = re.findall(r'data-ref="([^"]+)"', _svgt)
+_want = {n["id"] for n in r2.get("nodes", [])} | {f"{e['from']}→{e['to']}" for e in r2.get("edges", [])}
+_dropped = {n["id"] for n in r2.get("dropped", {}).get("nodes", [])}
+expect(_tr and set(_refs) == _want and {r_["no"] for r_ in _rows} == _want and not (_dropped & {r_["no"] for r_ in _rows}),
+       "图旁边写出处的机读版（-trace.json）：图上每个主体、每条关系各一条，与图里的 data-ref 一一对上；未入图的不写", _tr or log)
+_src = {n["id"]: n.get("source") or "" for n in r2.get("nodes", [])}
+expect(all(r_["locator"] == _src[r_["no"]] for r_ in _rows if r_["no"] in _src),
+       "出处照录 relations.json 的 source，没写的留空、不补不编")
 expect(ask("trim", R15, "--keep", "1,2,3,4,5,6,7,8,9,10", "--out", os.path.join(tmp, "x.json"))[0] != 0,
        "留 10 个 → 拒绝")
 expect(ask("trim", t1, "--keep-edges", "1,2", "--out", os.path.join(tmp, "y.json"))[0] != 0,
@@ -366,6 +382,80 @@ expect("_find_tool" in _src_mk and "ProgramFiles" in _src_mk,
        "转图工具会查 Windows 常见安装位置（不再误报「PNG 渲染：无」）", "没有按路径查找")
 expect("中间文件没删成" in _src_mk,
        "中间文件删不掉时不再让整轮失败（沙箱会拦 os.remove）", "仍是硬失败")
+
+print("八、examples/ 从最小到完整（学自案图：每份只多一个要点；0.9.8 自检时补）")
+EXD = os.path.join(HERE, "..", "examples")
+_guide = open(os.path.join(HERE, "..", "references", "relations-guide.md"), encoding="utf-8").read()
+_sample = json.loads(re.search(r"```json\n(.*?)```", _guide, re.S).group(1))       # 指南里的样例 JSON
+_doc_fields = (set(re.findall(r"^\| (?:nodes\[\]\.|edges\[\]\.)?([a-z_]+)(?: / [a-z]+)? \|", _guide, re.M))
+               | set(_sample) | {k for n in _sample["nodes"] for k in n} | {k for e in _sample["edges"] for k in e})
+for _f, _want in (("relations-1-minimal.json", 0), ("relations-2-objects.json", 0), ("relations-demo.json", 0),
+                  ("relations-4-over-limit.json", 4)):
+    _p = os.path.join(EXD, _f)
+    _d = json.load(open(_p, encoding="utf-8"))
+    _keys = set(_d) | {k for n in _d.get("nodes", []) for k in n} | \
+        {k for e in _d.get("edges", []) if isinstance(e, dict) for k in e}
+    expect(_keys <= _doc_fields, f"{_f}：只用 relations-guide.md 写明的字段（不教模型写会被忽略的字段）",
+           str(sorted(_keys - _doc_fields)))
+    if _want:
+        _c, _l = run(_p, "--plan-only")
+        expect(_c == _want and "ask.py trim" in _l, f"{_f}：超过 9 个模块，停下并给出第〇轮命令", _l)
+        continue
+    _ch = dump({"style": "奇川风", "emphasis": {"nodes": [], "edges": []}}, "ex-" + _f)
+    _o = os.path.join(tmp, "ex-" + _f[:-5])
+    _c, _l = run(_p, "--out", _o, "--choice", _ch)
+    _ck = "".join(open(os.path.join(_o, x), encoding="utf-8").read() for x in os.listdir(_o)
+                  if x.endswith("-checks.txt")) if _c == 0 else ""
+    expect(_c == 0 and _ck and "FAIL" not in _ck and "重点标记一律不用" not in _l,
+           f"{_f}：一条命令出图，判据全过", _l)
+_c, _l = run(os.path.join(EXD, "relations-4-over-limit.json"), "--plan-only")
+_cmd = re.search(r"(python3 \S+ask\.py) trim", _l)
+expect(_cmd is not None and os.path.isabs(_cmd.group(1).split(" ", 1)[1]) and os.path.exists(_cmd.group(1).split(" ", 1)[1]),
+       "打印的下一步命令写的是 ask.py 的真实路径，在用户的工作目录里照抄就能跑", _l)
+
+print("九、横版（--shape wide）：放进 16:9 课件页或投影")
+_six = {"title": "甲公司诉乙公司买卖合同纠纷（虚构）",
+        "nodes": [{"id": "A", "name": "甲公司", "note": "原告·出卖人", "kind": "主体", "source": "判决书第1页"},
+                  {"id": "B", "name": "乙公司", "note": "被告·买受人", "kind": "主体", "source": "判决书第1页"},
+                  {"id": "C", "name": "丙某", "note": "被告·保证人", "kind": "主体", "source": "判决书第2页"},
+                  {"id": "K", "name": "《买卖合同》", "note": "2023年3月", "kind": "客体", "source": "买卖合同第1页"},
+                  {"id": "G", "name": "《保证合同》", "note": "连带责任保证", "kind": "客体", "source": "保证合同第1页"},
+                  {"id": "M", "name": "货款120万元", "note": "尚欠86万元", "kind": "客体", "source": "判决书第4页"}],
+        "edges": [{"from": "A", "to": "K", "label": "签订"}, {"from": "B", "to": "K", "label": "签订"},
+                  {"from": "K", "to": "M", "label": "约定"}, {"from": "B", "to": "M", "label": "欠付"},
+                  {"from": "C", "to": "G", "label": "签订"}, {"from": "G", "to": "M", "label": "担保", "line": "虚线"}]}
+_sp = dump(_six, "six.json")
+_ch8 = dump({"style": "奇川风", "emphasis": {"nodes": [], "edges": []}}, "c8.json")
+
+
+def _vb(d, name):
+    t = open(os.path.join(d, name + "-qichuan.svg"), encoding="utf-8").read()
+    w, h = map(float, re.search(r'viewBox="0 0 ([\d.]+) ([\d.]+)"', t).group(1, 2))
+    ck = open(os.path.join(d, name + "-qichuan-checks.txt"), encoding="utf-8").read()
+    return w, h, ck, t
+
+
+_o8 = os.path.join(tmp, "o8")
+_c1, _l1 = run(_sp, "--out", _o8, "--choice", _ch8, "--name", "six")
+_w1, _h1, _, _ = _vb(_o8, "six") if _c1 == 0 else (0, 1, "", "")
+_c2, _l2 = run(_sp, "--out", _o8, "--choice", _ch8, "--name", "six", "--shape", "wide")
+_w2, _h2, _ck2, _t2 = _vb(_o8, "six") if _c2 == 0 else (0, 1, "FAIL", "")
+expect(_c1 == 0 and _w1 < _h1, "不加 --shape：小图照旧按读法竖排（插进 A4 Word），默认行为不变", _l1)
+expect(_c2 == 0 and "复用缓存" not in _l2 and _w2 >= 1.5 * _h2 and "FAIL" not in _ck2,
+       f"--shape wide：同一张 6 模块的图换成横版（{_w2:.0f}×{_h2:.0f}），不复用竖版布局，判据全过", _l2 + _ck2)
+_lay = json.load(open(os.path.join(_o8, "layout.json"), encoding="utf-8"))
+expect(_lay["grid"][1] > _lay["grid"][0] and _lay["score"][0] == 0 and _lay["score"][1] <= 2,
+       "横版不绕远：交叉 0、拐弯不超过 2（启发式搜索给的是外圈绕一大圈的 4 个拐弯）", str(_lay["grid"]) + str(_lay["score"]))
+expect(set(re.findall(r'data-ref="([^"]+)"', _t2)) == {n["id"] for n in _six["nodes"]} | {f"{e['from']}→{e['to']}" for e in _six["edges"]},
+       "横版照样给每个主体、每条关系写 data-ref（课件里悬停看出处）")
+# 已经是横的图（示例案 9 个模块）：加 --shape wide 与默认出同一张图
+_od = os.path.join(tmp, "ex-relations-demo")
+_o9 = os.path.join(tmp, "o9")
+_c9, _l9 = run(os.path.join(EXD, "relations-demo.json"), "--out", _o9, "--choice", _ch8, "--shape", "wide")
+_same = _c9 == 0 and all(
+    open(os.path.join(_od, f), "rb").read() == open(os.path.join(_o9, f), "rb").read()
+    for f in os.listdir(_od) if f.endswith(".svg"))
+expect(_same, "本来就是横版的图，加 --shape wide 出的图与默认逐字节相同", _l9)
 
 shutil.rmtree(tmp, ignore_errors=True)
 print("全部通过" if not fails else f"{len(fails)} 项未过")

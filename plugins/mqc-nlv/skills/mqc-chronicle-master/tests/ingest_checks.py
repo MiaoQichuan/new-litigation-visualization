@@ -34,7 +34,7 @@ with zipfile.ZipFile(doc,"w") as z:
 empty=os.path.join(D,"d.docx")
 with zipfile.ZipFile(empty,"w") as z:
     z.writestr("word/document.xml",'<?xml version="1.0"?><w:document xmlns:w="x"></w:document>')
-bad=os.path.join(D,"e.rtf"); open(bad,"w").write("x")
+bad=os.path.join(D,"e.rtf"); open(bad,"w", encoding="utf-8").write("x")
 
 ck("I5a", kind_of(img)=="image" and kind_of(doc)=="docx" and kind_of(txt)=="plain",
    "按扩展名分派：图片／docx／纯文本各归各路")

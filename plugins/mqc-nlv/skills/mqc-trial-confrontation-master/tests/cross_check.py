@@ -9,7 +9,7 @@ ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # 实测漏过一次——一处要件表里标了决定性、图上却不再强调，示例上看不出来。
 src = sys.argv[1] if len(sys.argv)>1 else os.path.join(ROOT,"examples","matrix-input.json")
 svgp= sys.argv[2] if len(sys.argv)>2 else os.path.join(_TMP, "_tcm_out", "庭审对抗图.svg")
-m=json.load(open(src,encoding="utf-8"))
+m=json.load(open(src,encoding="utf-8-sig"))
 sys.path.insert(0, os.path.join(ROOT,"scripts"))
 from to_figure import convert
 if __name__ == "__main__":
@@ -22,7 +22,7 @@ if __name__ == "__main__":
         except Exception:
             pass
 n=convert(m)   # 图由表派生，不另存一份
-svg=open(svgp,encoding="utf-8").read()
+svg=open(svgp,encoding="utf-8-sig").read()
 errs=[]
 def ck(no,cond,msg):
     print(("  OK  " if cond else "  FAIL")+f" {no}  {msg}")
