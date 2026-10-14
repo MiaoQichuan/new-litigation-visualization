@@ -831,7 +831,7 @@ try:
     _rej = [f"{f}: {e.message[:60]}" for f in EXAMPLES for e in _v.iter_errors(ex(f))]
     ok("全部示例都过 schema（jsonschema 全量核）", not _rej, _rej[:3])
 except ImportError:
-    print("  SKIP  全部示例都过 schema：本机没装 jsonschema（不计入通过与失败）")
+    print("  SKIP  全部示例都过 schema（jsonschema 全量核）  → 本机没装 jsonschema（不计入通过与失败）")
 
 print("　数据集 + 视图（学自 Perspective：模型只抄逐件记录，数数由脚本做）")
 import pivot as _pv                                  # noqa: E402
@@ -1131,7 +1131,7 @@ else:
                               __import__("zipfile").ZipFile(_x4).read("xl/worksheets/sheet1.xml").decode()))
                if os.path.exists(_x4) else 0)
     if _r4 is None:
-        print("  SKIP  V4 没有 lxml 时照常交付：本机连 openpyxl 都没装，测不了（不计入通过与失败）")
+        print("  SKIP  V4 在只装 openpyxl、没有 lxml 的电脑上照常交付，序号列带缓存值（原来拒绝交付，或序号在预览里是空的）  → 本机连 openpyxl 都没装，测不了（不计入通过与失败）")
     else:
         ok("V4 在只装 openpyxl、没有 lxml 的电脑上照常交付，序号列带缓存值（原来拒绝交付，或序号在预览里是空的）",
            _r4.returncode == 0 and _cached > 0, (_r4.returncode, _cached, (_r4.stdout + _r4.stderr).strip().splitlines()[-1:]))

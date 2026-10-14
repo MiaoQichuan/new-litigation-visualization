@@ -35,9 +35,12 @@ NAMES = os.path.join(HERE, "golden", "check-names.json")
 
 
 def check_names(out):
-    """回归输出里每一项检查的名字（数字归一成 #：「判定账 66 条」与「判定账 67 条」是同一项）。"""
+    """回归输出里每一项检查的名字（数字归一成 #：「判定账 66 条」与「判定账 67 条」是同一项）。
+
+    跳过的也算在：可选依赖（jsonschema、openpyxl）没装时那一项打 SKIP，名字照写，不算「不见了」。
+    原来只认 OK / FAIL，作者本机装了 jsonschema、把这一项记进名单，GitHub 上没装就被判「检查不见了」，发版闸门红。"""
     return sorted({re.sub(r"\d+(?:\.\d+)?", "#", l[8:].split("  →")[0].strip())
-                   for l in out.splitlines() if l.startswith(("  OK    ", "  FAIL  "))})
+                   for l in out.splitlines() if l.startswith(("  OK    ", "  FAIL  ", "  SKIP  "))})
 
 
 def vanished(names, kept):

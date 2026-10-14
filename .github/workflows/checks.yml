@@ -161,6 +161,8 @@ jobs:
           set -o pipefail
           python plugins/mqc-nlv/skills/mqc-legal-chart-master/tests/release_gate.py 2>&1 | tee gate.log || {
             grep -a -E "不过|FAIL|未过|Traceback|Error" gate.log | head -20 | sed 's/^/::error title=V6 发版闸门::/'
+            # 闸门只印回归输出的最后几百字；回归不过时把不过的那几项也标出来
+            python plugins/mqc-nlv/skills/mqc-legal-chart-master/tests/run_checks.py 2>&1 | grep -a -A3 "FAIL" | head -40 | sed 's/^/::error title=V6 回归::/'
             exit 1
           }
 
