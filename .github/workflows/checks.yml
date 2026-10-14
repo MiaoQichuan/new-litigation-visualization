@@ -156,7 +156,13 @@ jobs:
       # V6 只需标准库与 V1 内核；PPTX 回读与改坏验证都在 run_checks 里。
       # 发版闸门 = 回归 + 判定账与成品账 + 变形测试 + 令牌 + 版本一致 + 单独安装包包内回归 + 测试只增不减。
       - name: Release gate · mqc-legal-chart-master
-        run: python plugins/mqc-nlv/skills/mqc-legal-chart-master/tests/release_gate.py
+        # 不过时把不过的那几行标到检查结果上（Annotations），不必下载整份日志就看得到原因
+        run: |
+          set -o pipefail
+          python plugins/mqc-nlv/skills/mqc-legal-chart-master/tests/release_gate.py 2>&1 | tee gate.log || {
+            grep -a -E "不过|FAIL|未过|Traceback|Error" gate.log | head -20 | sed 's/^/::error title=V6 发版闸门::/'
+            exit 1
+          }
 
       # V7 只读 V1 / V6；回归最后比对 V1–V6 的指纹，确认一个字节没被改。
       - name: Run regression · mqc-legal-courseware-master
