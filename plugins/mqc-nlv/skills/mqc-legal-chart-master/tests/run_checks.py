@@ -1017,7 +1017,8 @@ else:
                           os.path.join(_bd, "坏.json"), _ro], capture_output=True, text=True, encoding="utf-8",
                          errors="replace", cwd=tempfile.mkdtemp(), timeout=120)
     ok("V5 光栅化给的不是 SVG：直接说「不是 SVG 图」，不硬转出乱码图、不甩堆栈",
-       _rr.returncode != 0 and "不是 SVG" in _rr.stderr and "Traceback" not in _rr.stderr and not os.path.exists(_ro),
+       _rr.returncode != 0 and ("不是 SVG" in _rr.stderr or "缺少 Python 包" in _rr.stderr)   # 只有标准库的电脑：先说缺 Pillow
+       and "Traceback" not in _rr.stderr and not os.path.exists(_ro),
        (_rr.stderr or _rr.stdout)[-200:])
     _v6 = os.path.join(ROOT, "scripts")
     _jobs = [([sys.executable, os.path.join(_v6, "cases.py")] + a, "cases.py " + a[0] + " " + os.path.basename(a[1]), False)
