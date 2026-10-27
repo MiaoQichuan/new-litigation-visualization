@@ -1,5 +1,29 @@
 # Changelog
 
+## Released with suite v2.5.0 (with V6 0.10.0 / 0.11.0)
+
+### Fixed
+- **PPTX text boxes could land 1 EMU apart on Python 3.11 and 3.12+.** `export_pptx._text_w`
+  summed character widths with `sum()`, which does compensated float summation from 3.12 on;
+  a label whose width sits exactly on a rounding boundary then got a different `a:off x`.
+  Found by V6 0.10.0's cross-version golden run (one text box in the converge example).
+  Widths are now accumulated left to right, which is the 3.11 answer on every version.
+  All existing V1–V7 golden outputs are unchanged on 3.9, 3.11, 3.12 and 3.13.
+
+### Added
+- **`export_pptx.export(..., title_face=None)`** (for V7 0.9.0). Text marked `data-title="1"` is a
+  Song title drawn at its face's own weight. When the caller names a title face (V7 does so only
+  after the editor has confirmed 方正小标宋 is installed), those runs are written in that face and
+  not bold; 方正小标宋 has no bold face, and faking one made titles far too heavy. Without it the
+  runs fall back to the profile's serif face in bold — the deck looks exactly as before. No V1 SVG
+  carries the marker, so every V1 output is unchanged byte for byte.
+- **Rotated text** (for V6 0.11.0's fan, whose labels run along the spokes). A `<text>` carrying
+  `transform="rotate(a x y)"` becomes its own text box with `a:xfrm rot`; because SVG turns about the
+  baseline anchor and PowerPoint about the box centre, the box centre is rotated about the anchor first,
+  so both land in the same place. Rotated text is never folded into a shape, and `audit_deck` checks the
+  rotated box against the slide edges. No V1 SVG uses rotation, so every V1 output is unchanged.
+
+
 ## Released with suite v2.4.0
 
 Rendering and geometry are unchanged; no figure changes by a single byte.

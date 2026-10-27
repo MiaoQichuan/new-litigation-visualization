@@ -113,7 +113,7 @@ python3 plugins/mqc-nlv/skills/mqc-timeline-master/tests/check_anonymised.py
 3. **Settings → General → Features**：Issues 打开；Discussions 可选。
 4. **Insights → Community Standards**：应当全部打勾，有缺项就照提示补。
 5. **Settings → Branches**：给 `main` 加保护规则，要求 `checks` 通过才能合并。
-6. **Releases**：打一个 tag（`v2.4.0`，与 `plugin.json` 的版本一致；上一版公开的是 v2.3.0）并写发布说明。
+6. **Releases**：打一个 tag（`v2.5.0`，与 `plugin.json` 的版本一致；上一版公开的是 v2.4.0）并写发布说明。
 
 **仓库里不该出现的东西**（推送前 `git status` 看一眼）：`__pycache__/`、`.DS_Store`、`__MACOSX/`、
 真实案件材料、律所模板与 Logo、任何本机路径。`.gitignore` 已覆盖前两项。

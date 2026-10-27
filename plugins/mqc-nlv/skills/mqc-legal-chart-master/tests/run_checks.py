@@ -753,9 +753,12 @@ for f in EXAMPLES:
             _paper = styles.palette(st)[0]["paper"]
             for t_ in re.findall(r"<text [^>]*>", _svg):
                 fill_ = re.search(r'fill="(#[0-9A-Fa-f]{6})"', t_).group(1)
-                if styles.contrast(fill_, _paper) < 4.5:
+                # 压在形状上的字（气泡里的数）标了 data-bg：按它真正的底色核，不按纸色（0.10.0）
+                _bg = re.search(r'data-bg="(#[0-9A-Fa-f]{6})"', t_)
+                _under = _bg.group(1) if _bg else _paper
+                if styles.contrast(fill_, _under) < 4.5:
                     _low.add((st, fill_, re.search(r'data-role="([^"]+)"', t_).group(1)
-                              if "data-role" in t_ else "-", round(styles.contrast(fill_, _paper), 2)))
+                              if "data-role" in t_ else "-", round(styles.contrast(fill_, _under), 2)))
 ok("图上每一个字与纸色的对比度 ≥ 4.5 : 1（WCAG AA，含来源行、刻度）", not _low, sorted(_low)[:4])
 
 print("　一页多图（同一网页里放两张图）")
@@ -1383,6 +1386,98 @@ try:
 finally:
     _bi.sum = _real
 ok("浮点金额的汇入图：按 3.11 与 3.12+ 两种内置求和各画一次，逐字节相同", _outs[0] == _outs[1])
+
+print("十四、0.11.0 · 点阵阶梯、法条沿革、区间胶囊、双读饼")
+
+
+def _title_case(fn, title, should_pass, label):
+    m_ = ex(fn)
+    m_["title"] = title
+    try:
+        make.build(m_)
+        got = True
+    except SpecError:
+        got = False
+    ok(label, got == should_pass)
+
+
+_title_case("cascade-issues.json", "违约金调整出现在 28 件判决里", False, "点阵阶梯：标题编了件数（28）→ 拒")
+_title_case("cascade-issues.json", "价款出现在 27 件判决里", False, "点阵阶梯：把违约金的 27 件安在价款上 → 拒")
+_title_case("cascade-issues.json", "违约金出现在 27 件判决里，占 16.1%", True, "点阵阶梯：件数与占 n 的比例（16.1%）→ 过")
+_title_case("lineage-laws.json", "公司法 30 年间修改 7 次", False, "法条沿革：修改次数编错（7）→ 拒")
+_title_case("lineage-laws.json", "民法典修改 6 次", False, "法条沿革：公司法的 6 次安在民法典上 → 拒（修改次数不做两两相减）")
+_title_case("lineage-laws.json", "公司法 1994 年通过", False, "法条沿革：年份不在材料里（1994）→ 拒")
+_title_case("lineage-laws.json", "公司法 1993 年通过，2023 年第 6 次修改", True, "法条沿革：年份与次数都对 → 过")
+_title_case("interval-solatium.json", "上海区间宽 7 万元", False, "区间胶囊：北京的区间宽度安在上海上 → 拒")
+_title_case("interval-solatium.json", "北京中位数 5 万元", True, "区间胶囊：中位数（mid）可以进标题 → 过")
+_title_case("radpie-durations.json", "建设工程只占 20%，审得最久", False, "双读饼：占比编错（20%）→ 拒")
+_title_case("radpie-durations.json", "建设工程平均 95 天", False, "双读饼：买卖合同的天数安在建设工程上 → 拒")
+_title_case("radpie-durations.json", "建设工程比买卖合同多审 115 天", True, "双读饼：两类天数之差 → 过")
+rejects("点阵阶梯：一列超过 30 格 → 拒", ("cascade-issues.json", lambda m: m["data"].update(per=0.5)), "最多 30 格")
+rejects("点阵阶梯：不到半格的一项 → 拒", ("cascade-issues.json", lambda m: m["data"].update(per=5)), "不到半格")
+rejects("法条沿革：修改年份没按先后写 → 拒", ("lineage-laws.json",
+        lambda m: m["data"]["items"][1].update(revisions=[2005, 1999])), "从早到晚")
+rejects("法条沿革：废止晚于截至年份 → 拒", ("lineage-laws.json", lambda m: m["data"]["items"][2].update(end=2026)), "晚于截至年份")
+rejects("法条沿革：n 与行数对不上 → 拒", ("lineage-laws.json", lambda m: m.update(n=7)), "必须一致")
+rejects("区间胶囊：from 大于 to → 拒", ("interval-solatium.json",
+        lambda m: m["data"]["items"][0].update(**{"from": 12})), "from")
+rejects("区间胶囊：写了 mid 没写 mid_label → 拒", ("interval-solatium.json", lambda m: m["data"].pop("mid_label")), "mid_label")
+rejects("双读饼：没写 size_label → 拒", ("radpie-durations.json", lambda m: m["data"].pop("size_label")), "size_label")
+rejects("双读饼：占比不足 1.5% 的扇区 → 拒", ("radpie-durations.json",
+        lambda m: (m["data"]["items"].append({"id": "x", "label": "小类", "value": 10, "size": 80}), m.update(n=1340))),
+        "1.5%")
+rejects("双读饼：件数之和与 n 对不上 → 拒", ("radpie-durations.json", lambda m: m.update(n=1000)), "必须一致")
+# 区间可以为负（置信区间、回归系数）：0 线在中间，守卫照样过
+_iv = ex("interval-solatium.json")
+_iv["data"]["items"][0].update(**{"from": -2.5})
+_iv["data"]["items"][0]["mid"] = 1
+_iv["title"] = "示例图"
+_svg, _rep = make.build(_iv, "歸藏风")
+ok("区间胶囊：有负数时纵轴含 0、守卫全过", not _rep["problems"] and 'data-role="axis" data-value="0"' in _svg, _rep["problems"][:2])
+# 法条沿革改叫法：合同沿革写「签订 / 变更 / 终止」
+_ln = ex("lineage-laws.json")
+_ln["data"]["marks"] = {"start": "签订", "revise": "变更", "end": "终止"}
+_ln["title"] = "示例图"
+_svg, _rep = make.build(_ln)
+ok("法条沿革：marks 换叫法后图例与右栏跟着换", not _rep["problems"] and "变更 6 次" in _svg and "2021 年终止" in _svg,
+   _rep["problems"][:2])
+# 点阵阶梯 order: given 时不排序、底边齐平（没有台阶线）
+_cs = ex("cascade-issues.json")
+_cs["order"] = "given"
+_svg, _rep = make.build(_cs)
+ok("点阵阶梯：order given 底边齐平，有 0 线、没有台阶线", not _rep["problems"] and 'data-role="stair"' not in _svg
+   and 'data-role="axis"' in _svg, _rep["problems"][:2])
+
+# 发射扇照作者给的样图（10-27）：由长到短、标签顺着辐条写、PPTX 也转写
+import re as _re3
+_svg, _rep = make.build(ex("fan-durations.json"))
+_sp = [float(v) for v in _re3.findall(r'data-role="spoke" data-id="[^"]+" data-value="([\d.]+)"', _svg)]
+ok("发射扇：由长到短排（从竖直方向顺时针倒下来）", not _rep["problems"] and _sp == sorted(_sp, reverse=True), _sp)
+_fx = ex("fan-durations.json")
+_fx["title"] = "示例图"
+for _it, _v in zip(_fx["data"]["items"], (1, 2, 160, 3, 150, 2, 155, 1)):
+    _it["value"] = _v                              # 长短差得悬殊：尖上放不下，改排到外弧
+_svg, _rep = make.build(_fx)
+ok("发射扇：辐条尖挤得画不下时自动改排外弧，照样出图、守卫全过", not _rep["problems"], _rep["problems"][:2])
+_svg, _rep = make.build(ex("fan-durations.json"))
+ok("发射扇：标签顺着辐条写（转过的字），守卫全过", not _rep["problems"] and _svg.count("rotate(") >= 14, _rep["problems"][:2])
+_fs = ex("fan-durations.json")
+for _it, _s in zip(_fs["data"]["items"], (3, 5, 4, 6, 8, 7, 9, 11)):
+    _it["start"] = _s
+_fs["data"]["start_label"] = "首次开庭"
+_fs["title"] = "示例图"
+_svg, _rep = make.build(_fs, None, None, "portrait")
+ok("发射扇：写了 start，圆在 start 处、弧上标刻度，守卫全过", not _rep["problems"] and 'role="tick"' in _svg.replace("data-", ""),
+   _rep["problems"][:2])
+rejects("发射扇：start 只写了一部分 → 拒", ("fan-durations.json", lambda m: m["data"]["items"][0].update(start=3)), "要么每根")
+rejects("发射扇：写了 start 没写 start_label → 拒", ("fan-durations.json",
+        lambda m: [it.update(start=1) for it in m["data"]["items"]]), "start_label")
+_tmpd = tempfile.mkdtemp()
+_r = subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "make.py"), os.path.join(EX, "fan-durations.json"),
+                     "-o", os.path.join(_tmpd, "fan"), "--formats", "svg,pptx"], capture_output=True, text=True, encoding="utf-8")
+_sl = zipfile.ZipFile(os.path.join(_tmpd, "fan.pptx")).read("ppt/slides/slide1.xml").decode() if _r.returncode == 0 else ""
+ok("发射扇：PPTX 里顺着辐条写的标签是转过的文本框（rot），回读干净", _r.returncode == 0 and _sl.count(' rot="') >= 14,
+   (_r.stderr or _r.stdout)[-200:])
 
 fails = [n for n, c, _ in results if not c]
 print()

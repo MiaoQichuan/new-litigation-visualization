@@ -515,3 +515,234 @@
 - dataset-causes|歸藏风|slide|pptx
 - dataset-causes|歸藏风|square
 - dataset-causes|歸藏风|wide-cover
+
+## 2026-10-26 · 成品账更新（56 份变化）
+
+理由：0.10.0 新增四种画法（漏斗、气泡矩阵、发射扇、放射汇聚）的四份示例：只新增成品，原有 154 份一份未变
+
+- converge-issues|奇川风|a4-landscape
+- converge-issues|奇川风|portrait
+- converge-issues|奇川风|slide
+- converge-issues|奇川风|slide-half
+- converge-issues|奇川风|slide|pptx
+- converge-issues|奇川风|square
+- converge-issues|奇川风|wide-cover
+- converge-issues|歸藏风|a4-landscape
+- converge-issues|歸藏风|portrait
+- converge-issues|歸藏风|slide
+- converge-issues|歸藏风|slide-half
+- converge-issues|歸藏风|slide|pptx
+- converge-issues|歸藏风|square
+- converge-issues|歸藏风|wide-cover
+- fan-durations|奇川风|a4-landscape
+- fan-durations|奇川风|portrait
+- fan-durations|奇川风|slide
+- fan-durations|奇川风|slide-half
+- fan-durations|奇川风|slide|pptx
+- fan-durations|奇川风|square
+- fan-durations|奇川风|wide-cover
+- fan-durations|歸藏风|a4-landscape
+- fan-durations|歸藏风|portrait
+- fan-durations|歸藏风|slide
+- fan-durations|歸藏风|slide-half
+- fan-durations|歸藏风|slide|pptx
+- fan-durations|歸藏风|square
+- fan-durations|歸藏风|wide-cover
+- funnel-enforcement|奇川风|a4-landscape
+- funnel-enforcement|奇川风|portrait
+- funnel-enforcement|奇川风|slide
+- funnel-enforcement|奇川风|slide-half
+- funnel-enforcement|奇川风|slide|pptx
+- funnel-enforcement|奇川风|square
+- funnel-enforcement|奇川风|wide-cover
+- funnel-enforcement|歸藏风|a4-landscape
+- funnel-enforcement|歸藏风|portrait
+- funnel-enforcement|歸藏风|slide
+- funnel-enforcement|歸藏风|slide-half
+- funnel-enforcement|歸藏风|slide|pptx
+- funnel-enforcement|歸藏风|square
+- funnel-enforcement|歸藏风|wide-cover
+- matrix-filings|奇川风|a4-landscape
+- matrix-filings|奇川风|portrait
+- matrix-filings|奇川风|slide
+- matrix-filings|奇川风|slide-half
+- matrix-filings|奇川风|slide|pptx
+- matrix-filings|奇川风|square
+- matrix-filings|奇川风|wide-cover
+- matrix-filings|歸藏风|a4-landscape
+- matrix-filings|歸藏风|portrait
+- matrix-filings|歸藏风|slide
+- matrix-filings|歸藏风|slide-half
+- matrix-filings|歸藏风|slide|pptx
+- matrix-filings|歸藏风|square
+- matrix-filings|歸藏风|wide-cover
+
+## 2026-10-26 · 成品账更新（8 份变化）
+
+理由：0.10.0 自测（随机生成 1200 份说明）发现放射汇聚的纵向留白没算条目名的宽度，顶部主题名会压到副标题：改正后只有新示例 converge-issues 的成品变化
+
+- converge-issues|奇川风|a4-landscape
+- converge-issues|奇川风|slide
+- converge-issues|奇川风|slide|pptx
+- converge-issues|奇川风|wide-cover
+- converge-issues|歸藏风|a4-landscape
+- converge-issues|歸藏风|slide
+- converge-issues|歸藏风|slide|pptx
+- converge-issues|歸藏风|wide-cover
+
+## 2026-10-26 · 成品账更新（1 份变化）
+
+理由：跨 Python 版本自测：V1 导出器的文字宽度原用 sum() 求和，3.12 起浮点补偿求和，放射汇聚示例的一个文字框在 3.11 与 3.12+ 上差 1 EMU；改为逐字累加后四个版本（3.9/3.11/3.12/3.13）一致，其余 209 份成品在四个版本上都不变
+
+- converge-issues|歸藏风|slide|pptx
+
+## 2026-10-27 · 成品账更新（14 份变化）
+
+理由：发射扇第二轮（0.10.0，缪律师：这张图本来能画得很好）：横的画布用半圆、根在底边正中；比例尺改为最长的辐条顶到弧。只有 fan-durations 的 14 份变化，其余逐字节不变
+
+- fan-durations|奇川风|a4-landscape
+- fan-durations|奇川风|portrait
+- fan-durations|奇川风|slide
+- fan-durations|奇川风|slide-half
+- fan-durations|奇川风|slide|pptx
+- fan-durations|奇川风|square
+- fan-durations|奇川风|wide-cover
+- fan-durations|歸藏风|a4-landscape
+- fan-durations|歸藏风|portrait
+- fan-durations|歸藏风|slide
+- fan-durations|歸藏风|slide-half
+- fan-durations|歸藏风|slide|pptx
+- fan-durations|歸藏风|square
+- fan-durations|歸藏风|wide-cover
+
+## 2026-10-27 · 撤回上一条（发射扇第二轮）
+
+理由：作者看过半圆版后定：比原来更差，先退回原来的画法。发射扇的 14 份成品指纹恢复为第二轮之前的值（代码、样图、回归项一并恢复），
+其余成品从未变过。
+
+## 2026-10-27 · 成品账更新（56 份变化）
+
+理由：0.11.0 新增四种画法（点阵阶梯、法条沿革、区间胶囊、双读饼）的示例：只新增 56 份，原有 210 份指纹逐一核过、一份未变
+
+- cascade-issues|奇川风|a4-landscape
+- cascade-issues|奇川风|portrait
+- cascade-issues|奇川风|slide
+- cascade-issues|奇川风|slide-half
+- cascade-issues|奇川风|slide|pptx
+- cascade-issues|奇川风|square
+- cascade-issues|奇川风|wide-cover
+- cascade-issues|歸藏风|a4-landscape
+- cascade-issues|歸藏风|portrait
+- cascade-issues|歸藏风|slide
+- cascade-issues|歸藏风|slide-half
+- cascade-issues|歸藏风|slide|pptx
+- cascade-issues|歸藏风|square
+- cascade-issues|歸藏风|wide-cover
+- interval-solatium|奇川风|a4-landscape
+- interval-solatium|奇川风|portrait
+- interval-solatium|奇川风|slide
+- interval-solatium|奇川风|slide-half
+- interval-solatium|奇川风|slide|pptx
+- interval-solatium|奇川风|square
+- interval-solatium|奇川风|wide-cover
+- interval-solatium|歸藏风|a4-landscape
+- interval-solatium|歸藏风|portrait
+- interval-solatium|歸藏风|slide
+- interval-solatium|歸藏风|slide-half
+- interval-solatium|歸藏风|slide|pptx
+- interval-solatium|歸藏风|square
+- interval-solatium|歸藏风|wide-cover
+- lineage-laws|奇川风|a4-landscape
+- lineage-laws|奇川风|portrait
+- lineage-laws|奇川风|slide
+- lineage-laws|奇川风|slide-half
+- lineage-laws|奇川风|slide|pptx
+- lineage-laws|奇川风|square
+- lineage-laws|奇川风|wide-cover
+- lineage-laws|歸藏风|a4-landscape
+- lineage-laws|歸藏风|portrait
+- lineage-laws|歸藏风|slide
+- lineage-laws|歸藏风|slide-half
+- lineage-laws|歸藏风|slide|pptx
+- lineage-laws|歸藏风|square
+- lineage-laws|歸藏风|wide-cover
+- radpie-durations|奇川风|a4-landscape
+- radpie-durations|奇川风|portrait
+- radpie-durations|奇川风|slide
+- radpie-durations|奇川风|slide-half
+- radpie-durations|奇川风|slide|pptx
+- radpie-durations|奇川风|square
+- radpie-durations|奇川风|wide-cover
+- radpie-durations|歸藏风|a4-landscape
+- radpie-durations|歸藏风|portrait
+- radpie-durations|歸藏风|slide
+- radpie-durations|歸藏风|slide-half
+- radpie-durations|歸藏风|slide|pptx
+- radpie-durations|歸藏风|square
+- radpie-durations|歸藏风|wide-cover
+
+## 2026-10-27 · 成品账更新（28 份变化）
+
+理由：玫瑰与发射扇按作者 10-27 给的样图重画：默认由大到小（玫瑰从十二点钟顺时针收小、圆心小孔、极小圆角；发射扇由长到短、圆在辐条尖上），只有这两份示例的 28 份变化
+
+- fan-durations|奇川风|a4-landscape
+- fan-durations|奇川风|portrait
+- fan-durations|奇川风|slide
+- fan-durations|奇川风|slide-half
+- fan-durations|奇川风|slide|pptx
+- fan-durations|奇川风|square
+- fan-durations|奇川风|wide-cover
+- fan-durations|歸藏风|a4-landscape
+- fan-durations|歸藏风|portrait
+- fan-durations|歸藏风|slide
+- fan-durations|歸藏风|slide-half
+- fan-durations|歸藏风|slide|pptx
+- fan-durations|歸藏风|square
+- fan-durations|歸藏风|wide-cover
+- rose-causes|奇川风|a4-landscape
+- rose-causes|奇川风|portrait
+- rose-causes|奇川风|slide
+- rose-causes|奇川风|slide-half
+- rose-causes|奇川风|slide|pptx
+- rose-causes|奇川风|square
+- rose-causes|奇川风|wide-cover
+- rose-causes|歸藏风|a4-landscape
+- rose-causes|歸藏风|portrait
+- rose-causes|歸藏风|slide
+- rose-causes|歸藏风|slide-half
+- rose-causes|歸藏风|slide|pptx
+- rose-causes|歸藏风|square
+- rose-causes|歸藏风|wide-cover
+
+## 2026-10-27 · 成品账更新（28 份变化）
+
+理由：发射扇照作者 10-27 第二次给的样图重画（圆沿螺旋排开、小点往外数、标签顺着辐条写）；玫瑰按作者要求退回原来的画法
+
+- fan-durations|奇川风|a4-landscape
+- fan-durations|奇川风|portrait
+- fan-durations|奇川风|slide
+- fan-durations|奇川风|slide-half
+- fan-durations|奇川风|slide|pptx
+- fan-durations|奇川风|square
+- fan-durations|奇川风|wide-cover
+- fan-durations|歸藏风|a4-landscape
+- fan-durations|歸藏风|portrait
+- fan-durations|歸藏风|slide
+- fan-durations|歸藏风|slide-half
+- fan-durations|歸藏风|slide|pptx
+- fan-durations|歸藏风|square
+- fan-durations|歸藏风|wide-cover
+- rose-causes|奇川风|a4-landscape
+- rose-causes|奇川风|portrait
+- rose-causes|奇川风|slide
+- rose-causes|奇川风|slide-half
+- rose-causes|奇川风|slide|pptx
+- rose-causes|奇川风|square
+- rose-causes|奇川风|wide-cover
+- rose-causes|歸藏风|a4-landscape
+- rose-causes|歸藏风|portrait
+- rose-causes|歸藏风|slide
+- rose-causes|歸藏风|slide-half
+- rose-causes|歸藏风|slide|pptx
+- rose-causes|歸藏风|square
+- rose-causes|歸藏风|wide-cover

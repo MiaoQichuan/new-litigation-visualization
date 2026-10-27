@@ -118,7 +118,9 @@ class Fig:
         self.parts.append(f'<path d="{d}" fill="none" stroke="{stroke}" stroke-width="{_n(sw)}"{cap}{da}'
                           f'{self._meta(**meta)}/>')
 
-    def text(self, x, y, s, fs, fill, anchor="start", weight=400, family="sans", track=0.0, **meta):
+    def text(self, x, y, s, fs, fill, anchor="start", weight=400, family="sans", track=0.0, rot=None, **meta):
+        """rot（度，顺时针）：绕 (x, y) 转，给顺着辐条写的标签用（0.11.0，发射扇）。
+        V1 的 PPTX 导出器照样转写（文本框带 rot），守卫按转过之后的外框核出界与互压。"""
         fam = {"serif": TITLE_FONT, "mono": MONO_FONT, "sans": BODY_FONT}[family]
         a = f' text-anchor="{anchor}"' if anchor != "start" else ""
         t = f' letter-spacing="{_n(track)}"' if track else ""
@@ -126,8 +128,9 @@ class Fig:
         # 宋体标题加同色细描边：没有粗体字面的回退宋体（例如 Linux 上的 LibreOffice）也显得够粗。
         # 做法与 V1 的标题一致。
         st = f' stroke="{fill}" stroke-width="0.3"' if family == "serif" and weight >= 700 else ""
+        tr = f' transform="rotate({_n(rot)} {_n(x)} {_n(y)})"' if rot else ""
         self.parts.append(f'<text x="{_n(x)}" y="{_n(y)}" font-size="{_n(fs)}" fill="{fill}"'
-                          f' font-family="{fam}"{a}{w}{t}{st}{self._meta(**meta)}>{esc(str(s))}</text>')
+                          f' font-family="{fam}"{a}{w}{t}{st}{tr}{self._meta(**meta)}>{esc(str(s))}</text>')
 
     def pattern_dots(self, color, step=26):
         self.defs.append(f'<pattern id="nlv-dots" width="{step}" height="{step}" patternUnits="userSpaceOnUse">'

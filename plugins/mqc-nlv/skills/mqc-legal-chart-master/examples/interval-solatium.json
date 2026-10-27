@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "chart": "interval",
+  "title": "北京判赔区间最宽：3 万到 10 万元",
+  "scope": "示例：八地法院 2024 年人身损害案件的精神损害抚慰金判赔额",
+  "unit": "万元",
+  "n": 412,
+  "source": "示例数据，非真实统计",
+  "emphasis": "bj",
+  "data": {
+    "mid_label": "中位数",
+    "items": [
+      {
+        "id": "bj",
+        "label": "北京",
+        "from": 3,
+        "to": 10,
+        "mid": 5
+      },
+      {
+        "id": "sh",
+        "label": "上海",
+        "from": 2,
+        "to": 8,
+        "mid": 4
+      },
+      {
+        "id": "gz",
+        "label": "广州",
+        "from": 2,
+        "to": 6,
+        "mid": 3.5
+      },
+      {
+        "id": "sz",
+        "label": "深圳",
+        "from": 3,
+        "to": 9,
+        "mid": 4.5
+      },
+      {
+        "id": "hz",
+        "label": "杭州",
+        "from": 1,
+        "to": 5,
+        "mid": 2.5
+      },
+      {
+        "id": "cd",
+        "label": "成都",
+        "from": 1,
+        "to": 4,
+        "mid": 2
+      },
+      {
+        "id": "wh",
+        "label": "武汉",
+        "from": 1.5,
+        "to": 5,
+        "mid": 2.5
+      },
+      {
+        "id": "xa",
+        "label": "西安",
+        "from": 0.5,
+        "to": 3,
+        "mid": 1.5
+      }
+    ]
+  }
+}

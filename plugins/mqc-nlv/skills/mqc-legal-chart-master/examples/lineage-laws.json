@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "chart": "lineage",
+  "title": "公司法 30 年间修改 6 次；民法典施行，三法同日废止",
+  "scope": "示例：几部民商事基本法律的通过、修改与废止，截至 2025 年",
+  "n": 6,
+  "source": "全国人大及其常委会公布的法律文本（示例，以官方文本为准）",
+  "emphasis": "company",
+  "data": {
+    "until": 2025,
+    "items": [
+      {
+        "id": "civproc",
+        "label": "民事诉讼法",
+        "start": 1991,
+        "revisions": [
+          2007,
+          2012,
+          2017,
+          2021,
+          2023
+        ]
+      },
+      {
+        "id": "company",
+        "label": "公司法",
+        "start": 1993,
+        "revisions": [
+          1999,
+          2004,
+          2005,
+          2013,
+          2018,
+          2023
+        ]
+      },
+      {
+        "id": "guarantee",
+        "label": "担保法",
+        "start": 1995,
+        "end": 2021
+      },
+      {
+        "id": "contract",
+        "label": "合同法",
+        "start": 1999,
+        "end": 2021
+      },
+      {
+        "id": "property",
+        "label": "物权法",
+        "start": 2007,
+        "end": 2021
+      },
+      {
+        "id": "civil",
+        "label": "民法典",
+        "start": 2020
+      }
+    ]
+  }
+}

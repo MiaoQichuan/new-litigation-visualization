@@ -64,3 +64,38 @@
 {"id": "V064", "base": "rose-causes", "title": null, "expect": "reject", "why": "石青：说明里写了第三种颜色", "source": "0.9.3 颜色只用风格原色", "mutate": {"accent": "#155E75"}}
 {"id": "V065", "base": "waffle-outcomes", "title": null, "expect": "reject", "why": "强调色预设名（0.9.3 取消）", "source": "0.9.3 颜色只用风格原色", "mutate": {"accent": "墨绿"}}
 {"id": "V066", "base": "waffle-outcomes", "title": null, "expect": "reject", "why": "连奇川风原色也不能写：颜色由风格定，不由说明定", "source": "0.9.3 颜色只用风格原色", "mutate": {"accent": "#991B1B"}}
+{"id": "V067", "base": "funnel-enforcement", "title": "立案执行 420 件，全部到位仅 74 件", "expect": "accept", "why": "示例原标题", "source": "0.10.0 新画法"}
+{"id": "V068", "base": "funnel-enforcement", "title": "全部到位仅占 18%", "expect": "accept", "why": "占第一级的比例由数据算出（74 / 420）", "source": "0.10.0 新画法"}
+{"id": "V069", "base": "funnel-enforcement", "title": "全部到位仅占 20%", "expect": "reject", "why": "编的比例", "source": "0.10.0 新画法"}
+{"id": "V070", "base": "funnel-enforcement", "title": "查控到财产的案件中 73% 采取了强制措施", "expect": "accept", "why": "与上一级之比（196 / 268）", "source": "0.10.0 新画法"}
+{"id": "V071", "base": "funnel-enforcement", "title": null, "expect": "reject", "why": "漏斗某一级比上一级多：不是漏斗", "source": "0.10.0 新画法", "mutate": {"data.stages": [{"id": "filed", "label": "立案执行", "value": 420}, {"id": "found", "label": "查控到财产", "value": 500}, {"id": "measure", "label": "采取强制措施", "value": 196}, {"id": "part", "label": "部分到位", "value": 131}, {"id": "full", "label": "全部到位", "value": 74}]}}
+{"id": "V072", "base": "matrix-filings", "title": "民间借贷收案 2025 年较 2019 年增长 158%", "expect": "accept", "why": "示例原标题", "source": "0.10.0 新画法"}
+{"id": "V073", "base": "matrix-filings", "title": "民间借贷收案 2025 年较 2019 年增长 160%", "expect": "reject", "why": "编的增长率", "source": "0.10.0 新画法"}
+{"id": "V074", "base": "matrix-filings", "title": "民间借贷收案 2025 年较 2020 年增长 158%", "expect": "reject", "why": "比较的年份不对（158% 是与 2019 年相比）", "source": "0.10.0 新画法"}
+{"id": "V075", "base": "matrix-filings", "title": "2025 年共收案 349 件", "expect": "accept", "why": "行合计由脚本算出", "source": "0.10.0 新画法"}
+{"id": "V076", "base": "matrix-filings", "title": null, "expect": "reject", "why": "有虚线圈却没写它是什么意思", "source": "0.10.0 新画法", "mutate": {"data.dashed_label": ""}}
+{"id": "V077", "base": "fan-durations", "title": "建设工程案件平均审理 31 周，为各类之首", "expect": "accept", "why": "示例原标题", "source": "0.10.0 新画法"}
+{"id": "V078", "base": "fan-durations", "title": "建设工程案件平均审理 33 周", "expect": "reject", "why": "编的周数", "source": "0.10.0 新画法"}
+{"id": "V079", "base": "fan-durations", "title": "股权转让审理 22 周，收案 17 件", "expect": "accept", "why": "辐条长与外圈圆的数都是原值", "source": "0.10.0 新画法"}
+{"id": "V080", "base": "fan-durations", "title": null, "expect": "reject", "why": "写了 size 却没说外圈圆代表什么", "source": "0.10.0 新画法", "mutate": {"data.size_label": ""}}
+{"id": "V081", "base": "converge-issues", "title": "违约金调整占争议焦点的 32%", "expect": "accept", "why": "示例原标题", "source": "0.10.0 新画法"}
+{"id": "V082", "base": "converge-issues", "title": "违约金调整占争议焦点的 40%", "expect": "reject", "why": "编的占比", "source": "0.10.0 新画法"}
+{"id": "V083", "base": "converge-issues", "title": "本金认定涉及 9 个争议焦点", "expect": "accept", "why": "主题的条目数", "source": "0.10.0 新画法"}
+{"id": "V084", "base": "converge-issues", "title": null, "expect": "reject", "why": "n 与条目数对不上", "source": "0.10.0 新画法", "mutate": {"n": 40}}
+{"id": "V085", "base": "converge-issues", "title": null, "expect": "reject", "why": "重音指向条目而不是主题", "source": "0.10.0 新画法", "mutate": {"emphasis": "f01"}}
+{"id": "V086", "base": "cascade-issues", "title": null, "expect": "accept", "why": "示例原标题", "source": "0.11.0 新画法"}
+{"id": "V087", "base": "cascade-issues", "title": "违约金调整出现在 28 件判决里", "expect": "reject", "why": "件数编错", "source": "0.11.0 新画法"}
+{"id": "V088", "base": "cascade-issues", "title": "价款出现在 27 件判决里", "expect": "reject", "why": "把违约金的件数安在价款上", "source": "0.11.0 新画法"}
+{"id": "V089", "base": "cascade-issues", "title": "违约金出现在 27 件判决里，占 16.1%", "expect": "accept", "why": "占 n 的比例由脚本算", "source": "0.11.0 新画法"}
+{"id": "V090", "base": "lineage-laws", "title": null, "expect": "accept", "why": "示例原标题", "source": "0.11.0 新画法"}
+{"id": "V091", "base": "lineage-laws", "title": "公司法 30 年间修改 7 次", "expect": "reject", "why": "修改次数编错", "source": "0.11.0 新画法"}
+{"id": "V092", "base": "lineage-laws", "title": "民法典修改 6 次", "expect": "reject", "why": "公司法的次数安在民法典上（修改次数不做两两相减）", "source": "0.11.0 新画法"}
+{"id": "V093", "base": "lineage-laws", "title": "公司法 1994 年通过", "expect": "reject", "why": "年份不在材料里", "source": "0.11.0 新画法"}
+{"id": "V094", "base": "lineage-laws", "title": null, "expect": "reject", "why": "n 与行数对不上", "source": "0.11.0 新画法", "mutate": {"n": 7}}
+{"id": "V095", "base": "interval-solatium", "title": null, "expect": "accept", "why": "示例原标题", "source": "0.11.0 新画法"}
+{"id": "V096", "base": "interval-solatium", "title": "上海区间宽 7 万元", "expect": "reject", "why": "北京的区间宽度安在上海上", "source": "0.11.0 新画法"}
+{"id": "V097", "base": "interval-solatium", "title": "北京中位数 5 万元", "expect": "accept", "why": "mid 可以进标题", "source": "0.11.0 新画法"}
+{"id": "V098", "base": "radpie-durations", "title": null, "expect": "accept", "why": "示例原标题", "source": "0.11.0 新画法"}
+{"id": "V099", "base": "radpie-durations", "title": "建设工程只占 20%，审得最久", "expect": "reject", "why": "占比编错", "source": "0.11.0 新画法"}
+{"id": "V100", "base": "radpie-durations", "title": "建设工程平均 95 天", "expect": "reject", "why": "买卖合同的天数安在建设工程上", "source": "0.11.0 新画法"}
+{"id": "V101", "base": "radpie-durations", "title": null, "expect": "reject", "why": "件数之和与 n 对不上", "source": "0.11.0 新画法", "mutate": {"n": 1000}}

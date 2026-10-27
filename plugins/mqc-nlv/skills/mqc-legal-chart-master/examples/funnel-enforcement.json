@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "chart": "funnel",
+  "title": "立案执行 420 件，全部到位仅 74 件",
+  "scope": "示例：某基层法院 2025 年首次执行案件",
+  "unit": "件",
+  "n": 420,
+  "source": "示例数据，非真实统计",
+  "emphasis": "full",
+  "data": {
+    "stages": [
+      {
+        "id": "filed",
+        "label": "立案执行",
+        "value": 420
+      },
+      {
+        "id": "found",
+        "label": "查控到财产",
+        "value": 268
+      },
+      {
+        "id": "measure",
+        "label": "采取强制措施",
+        "value": 196
+      },
+      {
+        "id": "part",
+        "label": "部分到位",
+        "value": 131
+      },
+      {
+        "id": "full",
+        "label": "全部到位",
+        "value": 74
+      }
+    ]
+  }
+}

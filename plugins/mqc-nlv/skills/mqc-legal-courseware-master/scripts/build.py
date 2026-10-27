@@ -36,6 +36,8 @@ def main(argv=None):
     ap.add_argument("--style", help="奇川风 / 歸藏风 / 律所名片里的律所风格名")
     ap.add_argument("--fonts", default="safe", choices=("safe", "master"))
     ap.add_argument("--notes", action="store_true", help="把图里每个元素的出处写进演讲者备注（只读原模块的溯源记录）")
+    ap.add_argument("--title-face", choices=("方正小标宋简体",),
+                    help="本机装了方正小标宋时给：PPT 里的宋体标题用它、不加粗；不给就用宋体加粗（别人电脑上也不变样）")
     a = ap.parse_args(argv)
     folder = os.path.abspath(a.folder)
     path = os.path.join(folder, "deck.json")
@@ -82,7 +84,7 @@ def main(argv=None):
     safe = re.sub(r'[\\/:*?"<>|]+', "_", d.get("title") or "课件")[:60]
     out = a.out or os.path.join(folder, "exports", safe + ".pptx")
     try:
-        p, rep = E.build(d, folder, out, fonts=a.fonts, cache={}, notes=a.notes)
+        p, rep = E.build(d, folder, out, fonts=a.fonts, cache={}, notes=a.notes, title_face=a.title_face)
     except E.ExportError as e:
         msg = str(e)                        # 消息里本来就说了「未导出」的不再加前缀（原来印成「未导出：…，未导出：」）
         print(msg if msg.startswith("未导出") or "未导出" in msg.split("\n")[0] else f"未导出：{msg}", file=sys.stderr)

@@ -44,6 +44,7 @@ for _p in (HERE, os.path.join(HERE, "..", "..", "mqc-litigation-visual-redraw", 
 import read_source as R                                           # noqa: E402
 import check_model_output as C                                     # noqa: E402
 import capacity as CAP                                             # noqa: E402
+import omission as OM                                              # noqa: E402
 
 def _py(script):
     """给用户看的下一步命令：用脚本的真实路径，在哪个目录里照抄都能跑（0.9.8：SKILL.md 要求在用户的工作目录里运行）。"""
@@ -159,6 +160,9 @@ SHAPES = {
             "head 不超容量（capacity 那一步给的数）；attrib 占容量，连括号一起算",
             "attrib 不超 5 字，只说明是谁陈述；冲突的两方都要有",
             "emphasis 最多一项（多标就不是重点了），只在奇川风有效",
+            "**不写 body / items**：本图是摘要图，卡片只放 head。原句里删掉的部分出图后"
+            "逐条披露，删去的若含付款条件、期限、质量异议、违约、担保这类限制性表述，"
+            "交付前要用户确认 —— 所以要紧的限制条件，容量够就留在 head 里",
         ],
         "checker": "check_subsequence / check_capacity",
     },
@@ -323,6 +327,7 @@ def stage_pick(paths_or_sel=None):
     """
     import pick as PK
     st = _load(STATE, "先跑 read")
+    st.pop("omission_review", None)   # 出图的输入变了：上一张图的未上图确认作废，等 render 重算
     if paths_or_sel in (None, "", "show"):
         r1 = PK.round_one(st["files_full"])
         # **只有一个选项时不问，直接进下一环节。**
@@ -412,6 +417,7 @@ def stage_span(sel):
     """第二轮的答案：勾了哪几个时间段。勾完进第三轮。"""
     import pick as PK
     st = _load(STATE, "先跑到 pick")
+    st.pop("omission_review", None)   # 出图的输入变了：上一张图的未上图确认作废，等 render 重算
     rows2 = st.get("pick_r2") or []
     if not rows2:
         # 同理：直接跑 span 时补上第二轮
@@ -456,6 +462,7 @@ def stage_style(sel):
     """第三轮的答案：呈报给谁 → 风格。奇川风才进第五轮（标红）。"""
     import pick as PK
     st = _load(STATE, "先跑到 span")
+    st.pop("omission_review", None)   # 出图的输入变了：上一张图的未上图确认作废，等 render 重算
     tbl = {s["id"]: s for s in PK.round_three()}
     # 不回默认第一档（奇川风）—— 照 v1 的「不回 = 1」。
     if str(sel).strip() in ("", "默认", "d"):
@@ -627,6 +634,7 @@ def in_scope(st, sid):
 def stage_offer():
     """代码做：验模型的两份输出，然后生成勾选清单。"""
     st = _load(STATE, "先跑 read")
+    st.pop("omission_review", None)   # 出图的输入变了：上一张图的未上图确认作废，等 render 重算
     S = st["sentences"]
     verdicts = _load_verdicts()
     parts = _expand_parts(_load("parts.json", "模型的部分划分"), st)
@@ -721,6 +729,7 @@ def stage_capacity():
     所以容量必须等骨架定了才算，不能按句数估。
     """
     st = _load(STATE, "先跑到 budget")
+    st.pop("omission_review", None)   # 出图的输入变了：上一张图的未上图确认作废，等 render 重算
     sk = _load("skeleton.json", "模型定的事项骨架（只有 id / src_sids / date / lane）")
     # 勾选的范围要真的生效：范围外的事项直接剔掉并报出来，不能默默画进去。
     # 事项的来源句全部不在勾选的部分里，等于画进了律师没勾的内容（实测时我就犯过：
@@ -950,6 +959,7 @@ def stage_mark(sel):
     产物里能看出这一处红是谁决定的。
     """
     st = _load(STATE, "先跑到 capacity")
+    st.pop("omission_review", None)   # 出图的输入变了：上一张图的未上图确认作废，等 render 重算
     if st.get("style") != "奇川风":
         print(f"{st.get('style')} 不标红，这一轮不适用。")
         return
@@ -985,6 +995,7 @@ def stage_title(title):
     空着，比任何排版问题都刺眼。凡是产物上会出现的东西，管道里都要有一步管它。
     """
     st = _load(STATE, "先跑到 budget")
+    st.pop("omission_review", None)   # 出图的输入变了：上一张图的未上图确认作废，等 render 重算
     title = _curly(title)
     cap = st.get("cap_title") or 0
     if cap and len(title) > cap:
@@ -999,6 +1010,7 @@ def stage_title(title):
 def stage_budget(pick):
     """代码做：按勾选的部分算形态与容量。这是前后端对接的那个数。"""
     st = _load(STATE, "先跑 read 与 offer")
+    st.pop("omission_review", None)   # 出图的输入变了：上一张图的未上图确认作废，等 render 重算
     S, ev = st["sentences"], set(st["events"])
     parts = st["parts"]
     ids = ([p["id"] for p in parts] if pick == "all"
@@ -1131,6 +1143,12 @@ def stage_render(out):
         kind, form, why, wh = RF.deliver(m, out)
         print(f"出图：{kind}·{form}　整幅 {wh[0]:.0f}x{wh[1]:.0f}　{out}")
         _say_why(kind, why)
+        # 期间型的条上标签同样是原句删出来的，同样要披露。这一档不出溯源索引，
+        # 所以没上图的原文直接在这里全部打出来。
+        _om_lines, _ = _review_omissions(items, S, st, with_index=False)
+        print()
+        for _ln in _om_lines:
+            print(_ln)
         return
 
     proto = {"unit_type": "fact", "source": {}, "time": {}}
@@ -1294,10 +1312,59 @@ def stage_render(out):
     #   ② 每条一句话说完，不带两个句号；
     #   ③ 写实际发生的，不写能力上限 —— 容量那条第一版写「至多 110 字」，
     #      而图上每条只有 8 到 15 字，读起来像自相矛盾。改成同时给实际值。
-    _trace(items, S, st, out)
+    # 卡片日期行印的是骨架里的 raw：只有它算「已上图」，原句里别的日期删掉了照样要报
+    _dates_of = {}
+    for _sk in (st.get("skeleton") or []):
+        _raw = str(_sk.get("raw") or "").strip()
+        if _raw:
+            _dates_of[str(_sk.get("id"))] = [_raw]
+    _om_lines, _om_rows = _review_omissions(items, S, st, with_index=True,
+                                            dates_of=_dates_of)
+    _trace(items, S, st, out, omissions=_om_rows)
     _print_checklist(m)
     print()
+    for _ln in _om_lines:
+        print(_ln)
+    print()
     stage_time()          # 出图后顺带给出计时账，下次要提速就知道该从哪一段下手
+
+
+def _review_omissions(items, S, st, with_index=True, dates_of=None):
+    """未上图披露（方案一：摘要图 + 强制披露）。返回 (要打印的行, 写进溯源索引的行)。
+
+    卡片只放一行标题，标题是原句删出来的。删掉的那些字里若有付款条件、期限、
+    质量异议这类限制性表述，图照样画得出、自检照样过，而律师并不知道它们没上图 ——
+    外部复核称之为「交付图的信息被静默遗漏」。这里逐条算出来，写进溯源索引，
+    命中限制性表述的列进交付清单，**交付前须用户确认**（pipeline.py ack）。
+
+    这一步**绝不能让出图失败**：图已经写好了，核对本身出错时，按「全部待人工核对」
+    记下并说清楚，确认门照样关着 —— 宁可多确认一次，也不许因为核对坏了就当作没有遗漏。
+    """
+    try:
+        recs = OM.review_items(items, S, dates_of=dates_of)
+        flag = OM.flagged(recs)
+        lines = OM.summary_lines(recs, with_index=with_index)
+        rows = OM.index_rows(recs) if with_index else []
+        review = {"flagged": [r["id"] for r in flag],
+                  "with_omission": [r["id"] for r in OM.with_omission(recs)],
+                  "acked": not flag}
+    except Exception as exc:                              # noqa: BLE001
+        flag = [True]
+        lines = [f"未上图核对没有做成（{type(exc).__name__}）：请逐条把图上文字与原句对照，"
+                 f"确认没有遗漏要紧的限制条件。"]
+        rows = []
+        review = {"flagged": [str(it.get("id")) for it in items], "with_omission": [],
+                  "acked": False, "error": type(exc).__name__}
+    if flag:
+        lines += ["",
+                  "  交付前须确认：请把上面这几条原样给用户看，说明它们没有画到图上；",
+                  "  用户确认可以按摘要交付（或改写 items.json 把要紧的字放回标题后重跑 render），",
+                  f"  确认后跑：{PIPE} ack",
+                  "  未确认之前，不要把图当作「已完整展示案件事实」交出去。"]
+    review["with_index"] = bool(with_index)
+    st["omission_review"] = review
+    _save(st)
+    return lines, rows
 
 
 def _print_checklist(m):
@@ -1476,7 +1543,7 @@ def _source_of(sids, st):
                                 for f, ns in by_file.items())}
 
 
-def _trace(items, S, st, out):
+def _trace(items, S, st, out, omissions=None):
     """顺带写一份**溯源索引**：图上每个元素出自材料何处。
 
     作者定过：不做「事实与证据对照表」（那会破坏这个 skill 的纯粹，它只画时间轴），
@@ -1501,7 +1568,9 @@ def _trace(items, S, st, out):
                      "head": it.get("head") or it.get("label_text", ""),
                      "file": _src["file"],
                      "locator": _src["locator"],
-                     "quote": quote[:120]})
+                     # 原文**不截断**。原来截到 120 字，而溯源索引是未上图披露
+                     # 指向的「完整内容所在位置」—— 截了就又是一处静默遗漏。
+                     "quote": quote})
     # 标题用换行分两级，不要拿全角空格拼在一行（渲出来是两个突兀的空格）
     # **一处挤干净**，不逐字段挤。
     # 逐字段挤过一版，漏了「定位」那一列（「句 9」是我自己拼的字符串，忘了挤），
@@ -1510,6 +1579,9 @@ def _trace(items, S, st, out):
     payload = {"title": (st.get("title") or "本图") + "・溯源索引",
                "rows": [{k: _squeeze_cjk(v) if isinstance(v, str) else v
                          for k, v in r.items()} for r in rows]}
+    if omissions:
+        payload["omissions"] = [{k: _squeeze_cjk(v) if isinstance(v, str) else v
+                                 for k, v in r.items()} for r in omissions]
     js = os.path.join(HERE, "trace_index.js")
     docx = os.path.splitext(out)[0] + "-溯源索引.docx"
     tmp = os.path.splitext(out)[0] + "-trace.json"
@@ -1540,6 +1612,13 @@ def _trace_md(payload, out, why):
              "| --- | --- | --- | --- | --- |"]
     lines += [f"| {esc(r['no'])} | {esc(r['head'])} | {esc(r['file'])} | "
               f"{esc(r['locator'])} | {esc(r['quote'])} |" for r in payload["rows"]]
+    if payload.get("omissions"):
+        lines += ["", "## 未上图的原文", "",
+                  "本图是摘要图，卡片只放一行标题。下列事项的原句有部分内容没有画到图上，"
+                  "请据此核对；「涉及」一列标出其中的限制性表述。", "",
+                  "| 编号 | 涉及 | 未上图的原文 |", "| --- | --- | --- |"]
+        lines += [f"| {esc(r['no'])} | {esc(r['kinds'])} | {esc(r['omitted'])} |"
+                  for r in payload["omissions"]]
     open(md, "w", encoding="utf-8").write("\n".join(lines) + "\n")
     print(f"溯源索引：{md}（{len(payload['rows'])} 行；{why}，已改出 Markdown 版，内容相同）")
 
@@ -1640,6 +1719,17 @@ def stage_next():
         print(f"  {_py('read_image.py')} probe <材料.pdf>")
         return
 
+    # 出过图、但还有限制性表述没经用户确认：这一步优先于其余一切。
+    # 图文件已经在磁盘上，最容易出事的就是在这时把它当成定稿交出去。
+    _rv = st.get("omission_review")
+    if _rv and not _rv.get("acked"):
+        print(f"已出图，但还差一步确认：事项 {'、'.join(_rv.get('flagged') or [])} "
+              f"删去的部分含限制性表述，没有画到图上。")
+        print("  把 render 打印的「未上图核对」那几条给用户看，用户确认后跑：")
+        print(f"  {PIPE} ack")
+        print("  确认之前不要交付。")
+        return
+
     # 走到哪一步，看的是**产物**而不是自称：每一步都有它必须留下的东西
     done, nxt = [], None
     done.append(f"read（{len(st.get('sentences') or [])} 句，"
@@ -1684,6 +1774,30 @@ def stage_next():
         if not os.path.exists(f):
             print(f"  这一步要模型先写 {f} —— 形状与判据："
                   f"{PIPE} shape {f}")
+
+
+def stage_ack():
+    """用户确认：命中限制性表述、没有画到图上的那几条，已经看过，同意按摘要图交付。
+
+    这一步只记一笔「谁在什么时候确认了哪几条」，不改图。要把那些字放回图上，
+    是改 items.json 的标题再重跑 render，不是在这里做。"""
+    import datetime
+    st = _load(STATE, "先跑到 render")
+    rv = st.get("omission_review")
+    if not rv:
+        print("还没出图，没有可确认的未上图事项。先跑 render。")
+        sys.exit(1)
+    if not rv.get("flagged"):
+        print("本图没有命中限制性表述的未上图事项，不需要确认。")
+        return
+    rv["acked"] = True
+    rv["acked_at"] = datetime.datetime.now().isoformat(timespec="seconds")
+    st["omission_review"] = rv
+    _save(st)
+    print(f"已记下用户确认：事项 {'、'.join(rv['flagged'])} 的限制性表述不上图，"
+          f"按摘要图交付；"
+          + ("完整原句见溯源索引。" if rv.get("with_index", True)
+             else "完整原句见 render 打印的「未上图核对」。"))
 
 
 def stage_steps():
@@ -1777,7 +1891,9 @@ if __name__ == "__main__":
         print("出图格式：" + "、".join(x.upper() for x in _st["formats"]))
         _log_time(cmd)
         sys.exit(0)
-    if cmd == "mark":
+    if cmd == "ack":
+        stage_ack()
+    elif cmd == "mark":
         stage_mark(sys.argv[2] if len(sys.argv) > 2 else "")
     elif cmd == "next":
         stage_next()

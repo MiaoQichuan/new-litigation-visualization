@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>法律课件大师</title>
+<title>法律课件大师 · 新诉讼可视化</title>
+<link rel="icon" type="image/png" href="/brand/qichuan-favicon.png">
 <style>
 :root, body[data-style="奇川风"] {
   --acc:#991B1B; --accC:#F7EAEA; --onAccC:#7A1414;
@@ -289,41 +290,400 @@ body.noside .side { display:none; }
 .thumb, .thumb .pic { width:128px; } .thumb .pic { height:72px; }
 .insp { padding:14px 12px; }
 .drop { margin-top:4px; }
+
+/* ===================================================================================
+   0.9 · 界面改版：与新诉讼可视化的整体界面同一套视觉语言（作者定的，2026-10-27）
+   像一张安静的白纸：几乎没有颜色，靠灰度与留白分层；品牌名用宋体；主按钮是黑的。
+   深红只留在课件页面（内容）里，界面上一处都不用。有深色模式：跟随系统，也能手动切换。
+   这一段只覆盖视觉，不动结构：上面各条布局规则（含缩放、滚动）原样生效。
+   =================================================================================== */
+:root {
+  --w-bg:#FFFFFF; --w-side:#F7F7F8; --w-hover:#EFEFF1; --w-sel:#E9E9EC; --w-line:#ECECEF; --w-line2:#DCDCE0;
+  --w-ink:#1D1D1F; --w-ink2:#48484D; --w-mute:#86868B; --w-faint:#B4B4B9; --w-solid:#1D1D1F; --w-on:#FFFFFF;
+  --w-pop:0 12px 40px rgba(0,0,0,.10), 0 1px 3px rgba(0,0,0,.06);
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Segoe UI","Microsoft YaHei UI","Noto Sans CJK SC",sans-serif;
+  --song:"Source Han Serif SC","Noto Serif CJK SC","Songti SC","STSong","SimSun",serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --w-bg:#18181A; --w-side:#1E1E21; --w-hover:#26262A; --w-sel:#2C2C30; --w-line:#2A2A2E; --w-line2:#3A3A3F;
+  --w-ink:#EDEDF0; --w-ink2:#C4C4C9; --w-mute:#8E8E94; --w-faint:#5E5E64; --w-solid:#EDEDF0; --w-on:#18181A;
+  --w-pop:0 12px 40px rgba(0,0,0,.5); color-scheme:dark;
+} }
+:root[data-theme="dark"] {
+  --w-bg:#18181A; --w-side:#1E1E21; --w-hover:#26262A; --w-sel:#2C2C30; --w-line:#2A2A2E; --w-line2:#3A3A3F;
+  --w-ink:#EDEDF0; --w-ink2:#C4C4C9; --w-mute:#8E8E94; --w-faint:#5E5E64; --w-solid:#EDEDF0; --w-on:#18181A;
+  --w-pop:0 12px 40px rgba(0,0,0,.5); color-scheme:dark;
+}
+/* 旧变量全部接到中性灰上：界面不随课件风格换皮，也不再有红 */
+body[data-style] {
+  --acc:var(--w-solid); --accC:var(--w-sel); --onAccC:var(--w-ink);
+  --bg:var(--w-bg); --panel:var(--w-bg); --tone:var(--w-side); --tone2:var(--w-hover); --line:var(--w-line2);
+  --ink:var(--w-ink); --ink2:var(--w-mute); --ink3:var(--w-faint);
+  --rs:8px; --rm:10px; --rl:10px; --pill:8px;
+}
+html, body { background:var(--w-bg); color:var(--w-ink); font:400 13px/1.65 var(--sans); letter-spacing:.01em; -webkit-font-smoothing:antialiased; }
+:focus-visible { outline:1.5px solid var(--w-ink); outline-offset:2px; }
+svg.i { width:16px; height:16px; stroke-width:1.4; }
+/* 画布上的纸永远是白的：选框、吸附线、手柄一律用近黑，深色模式下也看得见 */
+.stage { --acc:#1D1D1F; background:#fff; box-shadow:none; outline:1px solid var(--w-line2); border-radius:2px; }
+
+/* 导轨与左栏：一整条浅灰侧栏，细线分开 */
+.rail { background:var(--w-side); gap:2px; padding:14px 0 12px; }
+.logo { width:auto; height:auto; background:none; border-radius:0; color:var(--w-ink); font-family:var(--song); font-weight:700;
+  font-size:15px; letter-spacing:.04em; margin:2px 0 16px; }
+.rbtn { width:56px; color:var(--w-mute); font-size:11.5px; gap:3px; padding:4px 0; }
+.rbtn .pill { width:40px; height:30px; border-radius:8px; }
+.rbtn:hover { color:var(--w-ink); } .rbtn:hover .pill { background:var(--w-hover); }
+.rbtn.on { color:var(--w-ink); font-weight:400; }
+.rbtn.on .pill { background:var(--w-sel); color:var(--w-ink); box-shadow:none; }
+.side { background:var(--w-side); margin:0; border-radius:0; border-right:1px solid var(--w-line); padding:16px 12px 18px; }
+.side h3 { font-size:15px; font-weight:500; margin:2px 4px 6px; letter-spacing:.02em; }
+.sec { font-size:12px; color:var(--w-mute); letter-spacing:0; margin:20px 4px 8px; }
+.sec::after { background:var(--w-line); }
+.tile, .tpl, .asset, .scn { background:transparent; border:1px solid var(--w-line2); border-radius:10px; box-shadow:none; color:var(--w-ink); }
+.tile:hover, .tpl:hover, .asset:hover, .scn:hover { background:transparent; color:var(--w-ink); border-color:var(--w-mute); box-shadow:none; }
+.tile svg.i, .tile:hover svg.i, .scn svg.i { color:var(--w-ink2); }
+.asset .ic { background:var(--w-bg); color:var(--w-ink2); border:1px solid var(--w-line); border-radius:8px; }
+.asset span, .tile small { color:var(--w-mute); }
+.drop { border:1px dashed var(--w-line2); border-radius:10px; color:var(--w-mute); }
+.drop.hot { border-color:var(--w-ink); color:var(--w-ink); background:var(--w-hover); }
+.mini { background:var(--w-bg); box-shadow:0 0 0 1px var(--w-line); border-radius:4px; }
+.mini i { background:var(--w-sel); }
+.mini i.chart, .mini i.figure { background:var(--w-hover); outline:1px solid var(--w-line2); }
+.mini i.accent { background:var(--w-ink2); }
+.mini i.conclusion { border-left:2px solid var(--w-ink2); }
+
+/* 中间：白底，工具栏不再是浮着的胶囊 */
+.main { background:var(--w-bg); padding:10px 14px; gap:8px; }
+.group { background:transparent; border-radius:8px; padding:0; gap:2px; }
+.ib { height:30px; min-width:30px; border-radius:8px; color:var(--w-ink2); font-size:13px; }
+.ib:hover { background:var(--w-hover); color:var(--w-ink); }
+.ib.on { background:var(--w-sel); color:var(--w-ink); font-weight:400; box-shadow:none; }
+.ib.primary { background:var(--w-solid); color:var(--w-on); padding:0 16px; }
+.ib.primary:hover { background:var(--w-solid); color:var(--w-on); filter:none; opacity:.88; }
+.ib.ai { background:transparent; color:var(--w-ink); font-weight:400; border:1px solid var(--w-line2); }
+.ib.ai:hover { background:transparent; border-color:var(--w-mute); filter:none; }
+.ib.ai svg.i { color:var(--w-ink2); }
+#styleSeg { background:var(--w-side); border-radius:8px; padding:2px; gap:0; }
+#styleSeg .ib { height:26px; padding:0 10px; border-radius:6px; font-size:12px; color:var(--w-mute); }
+#styleSeg .ib:hover { background:transparent; color:var(--w-ink); }
+#styleSeg .ib.on { background:var(--w-bg); color:var(--w-ink); box-shadow:0 1px 2px rgba(0,0,0,.08); }
+.title-in { font-size:15px; font-weight:500; letter-spacing:.02em; border-radius:8px; color:var(--w-ink); }
+.title-in:hover, .title-in:focus { background:var(--w-hover); }
+.status { color:var(--w-mute); }
+.zoombar { background:var(--w-bg); border:1px solid var(--w-line); box-shadow:var(--w-pop); border-radius:8px; }
+.zoombar .ib { border-radius:6px; }
+.film { border-top:1px solid var(--w-line); padding-top:10px; }
+.thumb .pic { outline:1px solid var(--w-line2); outline-offset:0; border-radius:3px; }
+.thumb.on .pic { outline:1.5px solid var(--w-ink); outline-offset:2px; }
+.thumb .no { background:rgba(255,255,255,.92); color:#86868B; border-radius:4px; }
+.thumb .bad { background:var(--w-ink); }
+.thumb .tools button { border-radius:6px; }
+.thumb .aib { background:var(--w-solid); color:var(--w-on); border-radius:4px; }
+.addpage { background:transparent; border:1px dashed var(--w-line2); border-radius:8px; color:var(--w-mute); }
+.addpage:hover { background:transparent; border-color:var(--w-mute); color:var(--w-ink); }
+.emptypage b { font-family:var(--song); font-weight:700; font-size:20px; letter-spacing:.04em; color:#1D1D1F; }
+.emptypage span { color:#86868B; }
+.scn { padding:16px 8px; font-size:13px; }
+
+/* 画布上的手柄与提示：近黑，不用红 */
+.mod .chip { background:#1D1D1F; color:#fff; border-radius:6px; }
+.mod .dot { background:#1D1D1F; border-color:#fff; }
+.mod .dot.warn { background:#86868B; }
+.ghost.bad { background:rgba(0,0,0,.04); outline-color:#86868B; }
+.gchip, .gchip.bad { background:#1D1D1F; color:#fff; border-radius:6px; }
+.lift { border:1px solid var(--w-line2); border-radius:10px; box-shadow:var(--w-pop); background:var(--w-bg); }
+
+/* 右栏：白底，细线分开 */
+.insp { background:var(--w-bg); margin:0; border-radius:0; border-left:1px solid var(--w-line); padding:16px 14px; }
+.ihead { background:transparent; color:var(--w-ink); border-radius:0; padding:2px 0 10px; border-bottom:1px solid var(--w-line); font-weight:500; }
+.ihead svg.i { color:var(--w-ink2); }
+.ihead button { border-radius:8px; } .ihead button:hover { background:var(--w-hover); }
+.field label { color:var(--w-mute); }
+.field input, .field textarea, .field select { background:var(--w-bg); border:1px solid var(--w-line2); border-radius:8px; color:var(--w-ink); }
+.field input:focus, .field textarea:focus, .field select:focus { outline:none; border-color:var(--w-mute); background:var(--w-bg); }
+.c { height:28px; padding:0 12px; border-radius:999px; background:transparent; border:1px solid var(--w-line2); color:var(--w-ink2); font-size:12px; }
+.c:hover { background:transparent; border-color:var(--w-mute); color:var(--w-ink); }
+.c.on, .aibox .row .c.on { background:var(--w-solid); color:var(--w-on); border-color:var(--w-solid); font-weight:400; box-shadow:none; }
+.step { background:transparent; border:1px solid var(--w-line2); border-radius:8px; }
+.step button { border-radius:6px; } .step span { font-weight:500; }
+.msg { border-radius:8px; }
+.msg.p { background:var(--w-hover); color:var(--w-ink); }
+.msg.w { background:var(--w-side); color:var(--w-ink2); }
+.msg.n { color:var(--w-mute); }
+.sw { background:var(--w-line2); } .sw.on { background:var(--w-solid); }
+.sw::after { background:#fff; } .sw.on::after { background:var(--w-on); }
+.aibox { background:transparent; border:1px dashed var(--w-line2); border-radius:10px; }
+.aibox textarea { background:var(--w-bg); border:1px solid var(--w-line2); border-radius:8px; color:var(--w-ink); }
+.aibox .row .c { background:transparent; }
+.aibox .go { background:var(--w-solid); color:var(--w-on); border-radius:8px; }
+.req { background:var(--w-side); border-radius:8px; }
+.req .st { background:var(--w-bg); border:1px solid var(--w-line2); }
+.req .st.pending, .req .st.working { background:var(--w-solid); color:var(--w-on); border-color:var(--w-solid); }
+.req .st.failed { background:var(--w-hover); color:var(--w-ink); }
+.ai-wait { color:#1D1D1F; background-color:rgba(255,255,255,.72); }
+.brandlogo, .lawyer, .prov, kbd, .pinrow button { background:var(--w-side); }
+.toast { background:var(--w-solid); color:var(--w-on); border-radius:8px; }
+.provtip, .pop { background:var(--w-bg); color:var(--w-ink); border:1px solid var(--w-line); border-radius:10px; box-shadow:var(--w-pop); }
+.provtip q, .prov q { border-left:2px solid var(--w-line2); }
+.pinrow .n, .anc b { background:#1D1D1F; color:#fff; }
+
+/* ===================================================================================
+   0.9 · 版面（安静的对话式布局）：左边一条侧栏（品牌、入口、页面），中间只有这一页，
+   底下一个输入框交给 AI；工具抽屉只在点开时出现，右栏只在选中卡片时出现。
+   不常用的（网格、整理、风格切换）收进顶栏的「⋯」。
+   =================================================================================== */
+.app { --rw:244px; --sw:304px; --iw:0px; }
+@media (max-width:1500px) { .app { --rw:228px; --sw:292px; } }
+@media (max-width:1280px) { .app { --rw:212px; --sw:280px; } }
+body.insp-on .app { --iw:300px; }
+@media (max-width:1280px) { body.insp-on .app { --iw:272px; } }
+body:not(.insp-on) .insp { display:none; }
+.stash { display:none !important; }
+
+/* 侧栏 */
+.rail { align-items:stretch; gap:1px; padding:12px 10px 10px; overflow:hidden; border-right:1px solid var(--w-line); }
+.logo { text-align:left; padding:6px 10px 18px; margin:0; font-size:16px; white-space:nowrap; }
+.rail .rbtn { flex-direction:row; width:100%; height:34px; padding:0 10px; gap:10px; border-radius:8px; font-size:13px;
+  color:var(--w-ink); justify-content:flex-start; flex:none; }
+.rail .rbtn .pill { width:16px; height:16px; background:none; border-radius:0; color:var(--w-ink2); display:grid; place-items:center; flex:none; }
+.rail .rbtn:hover { background:var(--w-hover); }
+.rail .rbtn:hover .pill, .rail .rbtn.on .pill { background:none; color:var(--w-ink); }
+.rail .rbtn.on { background:var(--w-sel); font-weight:400; }
+body.noside .rail .rbtn.on { background:none; }
+body.noside .rail .rbtn.on:hover { background:var(--w-hover); }
+.rail .newpage { margin-bottom:6px; }
+.rail .newpage .pill.plus { width:16px; height:16px; border-radius:50%; background:var(--w-solid); color:var(--w-on); }
+.rail .newpage .pill.plus svg.i { width:10px; height:10px; stroke-width:2.2; }
+.sbsec { font-size:12px; color:var(--w-mute); padding:18px 10px 6px; flex:none; }
+.rail .film { flex:1 1 auto; min-height:0; flex-direction:column; align-items:stretch; overflow-y:auto; overflow-x:hidden;
+  padding:2px 2px 8px; gap:10px; border-top:0; }
+.rail .thumb { width:100%; display:flex; align-items:flex-start; gap:8px; }
+.rail .thumb .no { position:static; background:none; padding:0; width:16px; flex:none; text-align:right; font-size:11px; color:var(--w-mute); margin-top:1px; }
+.rail .thumb.on .no { color:var(--w-ink); }
+.rail .thumb .pic { width:auto; flex:1; height:auto; aspect-ratio:16/9; }
+.rail .thumb .aib { left:30px; }
+.rail .addpage { display:none; }
+.sbfoot { display:flex; align-items:center; gap:4px; border-top:1px solid var(--w-line); padding-top:8px; margin-top:4px; flex:none; }
+.sbfoot .rbtn { flex:1 1 auto; width:auto; color:var(--w-ink2); }
+.sbfoot .ib { color:var(--w-mute); }
+
+/* 工具抽屉（选图、排法、说明、适配、导出、更多） */
+.side { background:var(--w-bg); border-right:1px solid var(--w-line); position:relative; padding:18px 16px 20px; }
+.dclose { position:absolute; right:10px; top:12px; width:28px; height:28px; border-radius:8px; display:grid; place-items:center; color:var(--w-mute); z-index:2; }
+.dclose:hover { background:var(--w-hover); color:var(--w-ink); }
+
+/* 顶栏：标题、这一页的检查、撤销与「⋯」、导出 */
+.main { padding:6px 22px 14px; gap:6px; }
+.bar { height:46px; gap:6px; }
+.title-in { flex:0 1 auto; max-width:420px; min-width:120px; }
+.pchk { flex:none; height:24px; padding:0 10px; border:1px solid var(--w-line2); border-radius:999px; font-size:12px; color:var(--w-ink2); white-space:nowrap; }
+.pchk:hover { border-color:var(--w-mute); color:var(--w-ink); }
+.pchk.ok { border-color:var(--w-line); color:var(--w-mute); }
+.bar .group { gap:0; }
+.bar .group .ib { color:var(--w-mute); }
+.bar .group .ib:hover { color:var(--w-ink); }
+#exportBtn { height:30px; padding:0 16px; margin-left:6px; }
+
+/* 画布：缩放按钮平时淡一些，鼠标过来再显出来 */
+.zoombar { box-shadow:none; border:1px solid var(--w-line); opacity:.55; transition:opacity .15s; }
+.stagebox:hover .zoombar { opacity:1; }
+
+/* 底部输入框（交给 AI） */
+.composer { flex:none; display:flex; flex-direction:column; align-items:center; gap:6px; padding:2px 0 0; }
+.composer:empty { display:none; }
+.composer .req { width:min(680px, 100%); margin:0; }
+.cbox { width:min(680px, 100%); border:1px solid var(--w-line2); border-radius:12px; background:var(--w-bg); padding:6px 8px 8px 14px; }
+.cbox:focus-within { border-color:var(--w-mute); }
+.ckinds { display:flex; gap:2px; margin:0 0 2px -6px; }
+.ck { font-size:12px; color:var(--w-mute); padding:1px 8px; border-radius:6px; }
+.ck:hover { color:var(--w-ink); }
+.ck.on { background:var(--w-side); color:var(--w-ink); }
+.crow { display:flex; align-items:flex-end; gap:8px; }
+.crow textarea { flex:1; border:0; outline:0; resize:none; background:transparent; color:var(--w-ink); font:inherit; line-height:1.6;
+  padding:3px 0; min-height:28px; max-height:120px; }
+.crow textarea::placeholder { color:var(--w-mute); }
+.crow .go { flex:none; width:30px; height:30px; border-radius:8px; background:var(--w-solid); color:var(--w-on); display:grid; place-items:center; }
+.crow .go:hover { opacity:.88; }
+
+/* 「⋯」菜单与小弹层 */
+.pop:has(.menu) { padding:6px; }
+.menu button { display:flex; align-items:center; gap:10px; width:100%; padding:6px 10px; border-radius:6px; font-size:13px; color:var(--w-ink); text-align:left; }
+.menu button:hover { background:var(--w-hover); }
+.menu button span { flex:1; }
+.menu button.cur { color:var(--w-ink); }
+.menu svg.i { color:var(--w-ink2); }
+.menu kbd { background:none; color:var(--w-mute); }
+.msep { height:1px; background:var(--w-line); margin:4px 6px; }
+.mlabel { font-size:11.5px; color:var(--w-mute); padding:6px 10px 2px; }
+
+/* 细节：少一根线、少一圈框 */
+.logo { display:block; }
+/* 品牌：作者头像 + 「新诉讼可视化」字标，下面一行小字是产品名（作者 10-27 定） */
+.logo.bmark { display:flex; align-items:center; gap:10px; padding:4px 8px 16px; font-weight:400; }
+.bm-av { width:32px; height:32px; border-radius:50%; flex:none; display:block;
+  background:#fff; }
+.bm-txt { display:flex; flex-direction:column; gap:3px; min-width:0; line-height:1; }
+.bm-name { font-family:"FZXiaoBiaoSong-B05S","方正小标宋简体","FZXiaoBiaoSong-B05",var(--song); font-size:17px;
+  letter-spacing:.08em; color:var(--w-ink2); font-weight:700; white-space:nowrap; }
+body.has-xbs .bm-name { font-weight:400; }      /* 方正小标宋本身就有分量：不再加粗（加粗会伪粗） */
+.bm-prod { font-family:var(--sans, inherit); font-size:11px; letter-spacing:.06em; color:var(--w-mute); }
+.rail .thumb .no { order:-1; }
+.sec::after { display:none; }
+.sec { margin:18px 4px 6px; }
+.mod.sel { outline-width:1.5px; }
+.h { width:10px; height:10px; border-width:1.5px; }
+.h.e { right:-7px; top:calc(50% - 5px); } .h.w { left:-7px; top:calc(50% - 5px); }
+.h.s { bottom:-7px; left:calc(50% - 5px); } .h.n { top:-7px; left:calc(50% - 5px); }
+.h.se { right:-7px; bottom:-7px; }
+
+/* 0.9.0 · 图表库、缩略图、卡片样张（缪律师：示意图要有极简的高级感，不要灰块拼线框、小图标挤一堆） */
+:root { --title:"方正小标宋简体","FZXiaoBiaoSong-B05S","华文中宋","STZhongsong","思源宋体 SemiBold","Source Han Serif SC SemiBold","Noto Serif CJK SC SemiBold","思源宋体","Source Han Serif SC","Noto Serif CJK SC",serif; }
+.app { --sw:340px; }
+@media (max-width:1500px) { .app { --sw:328px; } }
+@media (max-width:1280px) { .app { --sw:300px; } }
+.rail .rbtn .rcount { margin-left:auto; font-size:11px; color:var(--w-mute); }
+.side .msg.n { color:var(--w-mute); }
+.side .sec { font-size:11.5px; color:var(--w-mute); margin:20px 2px 10px; }
+/* 版式、场景缩略图：16:9 的小页面 */
+.tpls { gap:16px 12px; }
+.tpl { background:none !important; border:0 !important; padding:0; text-align:left; font-size:12.5px; color:var(--w-ink); box-shadow:none !important; }
+.tpl .th, .tile.pv .pvb.th { aspect-ratio:16/9; background:#fff; border:1px solid var(--w-line2); border-radius:9px; overflow:hidden; line-height:0;
+  transition:border-color .15s, box-shadow .15s; }
+.tpl .th svg, .tile.pv .pvb.th svg { width:100%; height:100%; display:block; }
+.tpl span { display:block; margin-top:7px; line-height:1.35; }
+.tpl:hover .th, .tile.pv:hover .pvb { border-color:var(--w-mute); }
+.tpl:active .th, .tile.pv:active .pvb { box-shadow:0 0 0 1px var(--w-ink); border-color:var(--w-ink); }
+/* 卡片样张 */
+.tiles.pv { grid-template-columns:1fr 1fr; gap:16px 12px; }
+.tile.pv { background:none !important; border:0 !important; box-shadow:none !important; padding:0; display:block; text-align:left; transform:none !important; }
+.tile.pv .pvb { height:88px; border:1px solid var(--w-line2); border-radius:9px; background:#F5F5F7; padding:11px 12px; color:#1D1D1F;
+  display:flex; flex-direction:column; justify-content:center; overflow:hidden; line-height:1.4; transition:border-color .15s, box-shadow .15s; }
+.tile.pv[data-part="conclusion"] .pvb, .tile.pv[data-part="stat"] .pvb, .tile.pv[data-part="title"] .pvb, .tile.pv[data-part="note"] .pvb,
+.tile.pv[data-part="quote"] .pvb, .tile.pv[data-part="logo"] .pvb, .tile.pv[data-part="contact"] .pvb { background:#fff; }
+.tile.pv .pvl { margin-top:7px; line-height:1.35; }
+.tiles.pv > .tile { min-width:0; }
+.tile.pv .pvb.th { height:auto; padding:0; background:#fff; display:block; }
+.pvb .pv-s { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pvb .pv-c b { white-space:nowrap; }
+.tile.pv .pvl span { font-size:12.5px; color:var(--w-ink); }
+.tile.pv .pvl small { display:block; font-size:11.5px; color:var(--w-mute); margin-top:1px; }
+.pvb .pv-c { display:flex; align-items:center; gap:8px; } .pvb .pv-c i { width:2px; height:20px; background:var(--pacc); flex:none; }
+.pvb .pv-c b { font-weight:400; font-size:14px; line-height:1.3; }
+.pvb .pv-li { display:flex; align-items:center; gap:6px; font-size:10.5px; color:#3A3A3C; margin:2px 0; white-space:nowrap; }
+.pvb .pv-li i { width:4px; height:4px; background:var(--pacc); flex:none; }
+.pvb .pv-big { font-size:30px; line-height:1; letter-spacing:-.01em; }
+.pvb .pv-no { font-size:18px; line-height:1; color:var(--pacc); }
+.pvb .pv-h { font-size:17px; line-height:1.25; }
+.pvb .pv-t { font-size:11px; margin-top:4px; } .pvb .pv-t2 { font-size:10.5px; line-height:1.5; color:#3A3A3C; margin-top:3px; }
+.pvb .pv-s { font-size:9.5px; color:#8E8E93; margin-top:4px; } .pvb .pv-k { font-size:9.5px; color:var(--pacc); margin-top:3px; display:flex; align-items:center; gap:5px; }
+.pvb .pv-sq { width:5px; height:5px; background:var(--pacc); display:inline-block; }
+.pvb .pv-ev { display:flex; gap:8px; font-size:10px; margin:2px 0; } .pvb .pv-ev span { color:var(--pacc); width:30px; flex:none; }
+.pvb .pv-q { font-size:13px; line-height:1.45; }
+.pvb .pv-logo { width:26px; height:26px; border-radius:6px; background:#1D1D1F; color:#fff; display:grid; place-items:center; font-size:13px; }
+/* 图表库：盖住画布的一整页 */
+.libsheet { position:fixed; top:0; bottom:0; left:var(--rw); right:0; z-index:40; background:var(--w-bg); overflow-y:auto; display:none; }
+body.libon:not(.noside) .libsheet { display:block; }
+body.libon .side { display:none; }
+.libsheet .dclose { position:fixed; right:22px; top:16px; }
+.lbody { max-width:1320px; margin:0 auto; padding:34px 40px 60px; }
+.lh1 { font-family:var(--title); font-size:28px; line-height:1.2; color:var(--w-ink); letter-spacing:.01em; }
+.lsub { color:var(--w-mute); font-size:13px; margin-top:8px; max-width:860px; }
+.lsearch { margin-top:22px; height:42px; max-width:620px; border-radius:12px; background:var(--w-side); display:flex; align-items:center; gap:10px; padding:0 14px; color:var(--w-mute); border:1px solid transparent; }
+.lsearch:focus-within { border-color:var(--w-line2); background:var(--w-bg); }
+.lsearch input { flex:1; border:0; outline:0; background:transparent; font:inherit; font-size:14px; color:var(--w-ink); }
+.lsearch input::placeholder { color:var(--w-mute); }
+.ltabs { display:flex; align-items:flex-end; gap:22px; margin-top:22px; border-bottom:1px solid var(--w-line); flex-wrap:wrap; }
+.ltabs button { padding:0 0 10px; font-size:13.5px; color:var(--w-mute); border-bottom:1.5px solid transparent; margin-bottom:-1px; }
+.ltabs button:hover { color:var(--w-ink); } .ltabs button.on { color:var(--w-ink); border-bottom-color:var(--w-ink); }
+.ltabs select { margin-left:auto; margin-bottom:6px; border:0; background:transparent; color:var(--w-ink2); font:inherit; font-size:13px; cursor:pointer; }
+.lcount { color:var(--w-mute); font-size:12px; margin-top:14px; min-height:18px; }
+.lgrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:34px 26px; margin-top:22px; }
+.lsteps { display:flex; gap:22px; margin-top:16px; font-size:12.5px; color:var(--w-ink2); }
+.lsteps span { display:flex; align-items:center; gap:7px; }
+.lsteps b { width:18px; height:18px; border-radius:50%; border:1px solid var(--w-line2); display:grid; place-items:center; font-size:11px; font-weight:500; color:var(--w-ink); }
+.lint { display:flex; flex-wrap:wrap; gap:8px; margin-top:20px; }
+.lint button { height:30px; padding:0 12px; border-radius:999px; border:1px solid var(--w-line2); font-size:13px; color:var(--w-ink2); display:flex; align-items:center; gap:6px; }
+.lint button i { font-style:normal; font-size:11px; color:var(--w-mute); }
+.lint button:hover { border-color:var(--w-mute); color:var(--w-ink); }
+.lint button.on { background:var(--w-solid); border-color:var(--w-solid); color:var(--w-on); }
+.lint button.on i { color:var(--w-on); opacity:.65; }
+.lfil { display:flex; align-items:center; gap:14px; margin-top:14px; padding-bottom:12px; border-bottom:1px solid var(--w-line); }
+.lfil select { border:0; background:transparent; color:var(--w-ink2); font:inherit; font-size:13px; cursor:pointer; padding:0; }
+.lfil .lcount { margin:0 0 0 auto; min-height:0; }
+.lcard { cursor:pointer; }
+.lth { position:relative; aspect-ratio:16/9; border-radius:10px; background:#fff; border:1px solid var(--w-line); overflow:hidden;
+  transition:border-color .15s, box-shadow .15s; }
+.lth img { width:100%; height:100%; object-fit:contain; display:block; }
+.lcard:hover .lth { box-shadow:0 6px 20px rgba(0,0,0,.06); }
+.lcard:hover .lth { border-color:var(--w-ink); }
+.lact { position:absolute; right:10px; bottom:10px; display:flex; gap:6px; opacity:0; transform:translateY(4px); transition:opacity .15s, transform .15s; }
+.lcard:hover .lact, .lcard:focus-within .lact { opacity:1; transform:none; }
+.lact button { font-size:12px; padding:5px 10px; border-radius:7px; background:#1D1D1F; color:#fff; }
+.lact button + button { background:#fff; color:#1D1D1F; box-shadow:0 0 0 1px #DCDCE0; }
+.lcard .lq { margin-top:14px; font-family:var(--title); font-size:16px; line-height:1.4; color:var(--w-ink); }
+.lcard .ln { margin-top:5px; font-size:12.5px; color:var(--w-ink2); }
+.lcard .ln span { color:var(--w-mute); margin-left:8px; }
+.lcard .lx { margin-top:7px; font-size:12px; line-height:1.55; color:var(--w-mute); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.lcard .lg { margin-top:7px; font-size:11.5px; color:var(--w-ink2); display:flex; align-items:center; gap:5px; }
+.lcard .lg svg.i { width:13px; height:13px; color:var(--w-mute); flex:none; }
+/* 空页：先去图表库 */
+.emptypage .golib { display:flex; align-items:center; gap:10px; margin-top:6px; padding:11px 18px; border-radius:10px; background:#1D1D1F; color:#fff; font-size:13.5px; }
+.emptypage .golib small { color:rgba(255,255,255,.6); font-size:12px; }
+.emptypage .golib svg.i { color:#fff; }
+.pop .golib.pg { display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px; border-radius:10px; background:var(--w-solid); color:var(--w-on); font-size:13px; text-align:left; }
+.pop .golib.pg small { margin-left:auto; opacity:.65; font-size:12px; }
+.pop .golib.pg svg.i { color:var(--w-on); }
+.emptypage .scns { grid-template-columns:repeat(5, auto); gap:8px; margin-top:6px; }
+.emptypage .scn { flex-direction:row; padding:7px 12px; font-size:12.5px; gap:6px; }
 </style>
 </head>
-<body data-style="奇川风">
+<body data-style="奇川风" class="noside">
 <div class="app">
-  <nav class="rail" aria-label="工具">
-    <div class="logo" title="法律课件大师">V7</div>
-    <button class="rbtn on" data-tab="pick"><span class="pill" data-ic="figure"></span>选图</button>
-    <button class="rbtn" data-tab="tpl"><span class="pill" data-ic="tpl"></span>排法</button>
-    <button class="rbtn" data-tab="parts"><span class="pill" data-ic="parts"></span>说明</button>
+  <nav class="rail" aria-label="课件">
+    <div class="logo bmark" title="新诉讼可视化 · V7">
+      <img class="bm-av" src="/brand/qichuan-avatar.png" alt="" width="32" height="32">
+      <span class="bm-txt"><span class="bm-name">新诉讼可视化</span><span class="bm-prod">法律课件大师</span></span>
+    </div>
+    <button class="rbtn newpage" id="newPageBtn" title="加一页"><span class="pill plus" data-ic="plus"></span>新建一页</button>
+    <button class="rbtn" data-tab="lib"><span class="pill" data-ic="lib"></span>图表库<small class="rcount" id="libCountRail"></small></button>
+    <button class="rbtn on" data-tab="pick"><span class="pill" data-ic="figure"></span>诉讼图<small class="rcount">V1–V5</small></button>
+    <button class="rbtn" data-tab="tpl"><span class="pill" data-ic="tpl"></span>版式</button>
+    <button class="rbtn" data-tab="parts"><span class="pill" data-ic="parts"></span>卡片</button>
     <button class="rbtn" data-tab="fit"><span class="pill" data-ic="frame"></span>适配</button>
     <button class="rbtn" data-tab="export"><span class="pill" data-ic="download"></span>导出</button>
-    <div class="grow"></div>
     <button class="rbtn" data-tab="more"><span class="pill" data-ic="more"></span>更多</button>
-    <button class="rbtn" id="helpBtn"><span class="pill" data-ic="help"></span>快捷键</button>
+    <div class="sbsec">页面</div>
+    <div class="film" id="film"></div>
+    <div class="sbfoot">
+      <button class="rbtn" id="helpBtn"><span class="pill" data-ic="help"></span>快捷键</button>
+      <button class="ib" id="themeBtn" title="浅色 / 深色（默认跟随系统）" data-ic="moon"></button>
+    </div>
   </nav>
 
   <aside class="side" id="side"></aside>
+  <section class="libsheet" id="libSheet" aria-label="图表库"></section>
 
   <main class="main">
     <div class="bar">
       <input class="title-in" id="deckTitle" aria-label="课件标题">
+      <button class="pchk" id="pageCheck" hidden></button>
+      <span class="status" id="status">载入中…</span>
+      <div class="spacer"></div>
       <div class="group">
         <button class="ib" id="undoBtn" title="撤销 Ctrl+Z" data-ic="undo"></button>
         <button class="ib" id="redoBtn" title="重做 Ctrl+Shift+Z" data-ic="redo"></button>
+        <button class="ib" id="moreBtn" title="网格、整理、风格" data-ic="more"></button>
       </div>
-      <div class="group">
+      <!-- 不常用的放进「⋯」：元素留着（快捷键与各处调用都靠它们），只是不摆在顶栏上 -->
+      <div class="stash" hidden>
         <button class="ib" id="gridBtn" title="显示网格 G"><span data-ic="grid"></span>网格</button>
         <button class="ib" id="tidyBtn" title="整理：上推补缝、并排等高、补齐空白"><span data-ic="tidy"></span>整理</button>
+        <button class="ib ai" id="aiBtn" title="让对话里的 AI 按您的想法生成"><span data-ic="ai"></span>AI 生成</button>
+        <div class="group" id="styleSeg"></div>
       </div>
-
-      <button class="ib ai" id="aiBtn" title="让对话里的 AI 按您的想法生成"><span data-ic="ai"></span>AI 生成</button>
-      <span class="status" id="status">载入中…</span>
-      <div class="spacer"></div>
-      <div class="group" id="styleSeg"></div>
-      <button class="ib primary" id="exportBtn" title="导出全部图表页：每页都能整页复制、或框选复制进您自己的课件"><span data-ic="download"></span>导出</button>
+      <button class="ib primary" id="exportBtn" title="导出全部图表页：每页都能整页复制、或框选复制进您自己的课件">导出</button>
     </div>
     <div class="stagebox">
       <div class="stagewrap" id="stagewrap">
@@ -341,7 +701,7 @@ body.noside .side { display:none; }
         <button class="ib" id="zoomIn" title="放大 Ctrl+=" data-ic="plus"></button>
       </div>
     </div>
-    <div class="film" id="film"></div>
+    <div class="composer" id="composer"></div>
   </main>
 
   <aside class="insp" id="insp"></aside>
@@ -400,6 +760,12 @@ const IC = {
   evidence: '<path d="M8 4.5h8M6.5 6.5h11a1 1 0 0 1 1 1V19a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V7.5a1 1 0 0 1 1-1z"/><path d="M8.5 11h7M8.5 14h7M8.5 17h4"/>',
   logo: '<rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="M8 15.5V9l4 4 4-4v6.5"/>',
   profile: '<circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5"/>',
+  send: '<path d="M12 19V5M6.5 10.5 12 5l5.5 5.5"/>',
+  check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+  close: '<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
+  lib: '<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/>',
+  search: '<circle cx="11" cy="11" r="6"/><path d="M15.5 15.5L20 20"/>',
+  moon: '<path d="M19.5 14.5A7.5 7.5 0 0 1 9.5 4.5a7.5 7.5 0 1 0 10 10z"/>',
   contact: '<path d="M6.5 4.5h3l1.5 4-2 1.2a10 10 0 0 0 5.3 5.3l1.2-2 4 1.5v3a1.5 1.5 0 0 1-1.6 1.5C10.6 18.5 5.5 13.4 5 6.1a1.5 1.5 0 0 1 1.5-1.6z"/>',
 };
 const icon = (k, extra = "") => `<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" ${extra}>${IC[k] || ""}</svg>`;
@@ -646,8 +1012,9 @@ function renderOverlay() {
     </div>`;
   }
   h += anchorsOverlay(rep);
-  if (!ms.length) h += `<div class="emptypage"><b>这一页要讲什么？</b><span>点一个法律场景，图和说明一次排好。</span><div class="scns">` +
-    SCENES.map(([sc, , , zh, , ic]) => `<button class="scn" data-scene-fill="${sc}">${icon(ic)}<span>${esc(zh)}</span></button>`).join("") + `</div></div>`;
+  if (!ms.length) h += `<div class="emptypage"><b>这一页要讲什么？</b><span>从图表库挑一张法律图表，或点一个诉讼图场景，图和说明一次排好。</span>
+    <button class="golib" data-golib>${icon("lib")}<span>打开图表库</span><small>${S.chartlib ? S.chartlib.recipes.length + " 个法律场景" : "V6 法律图表"}</small></button><div class="scns">` +
+    SCENES.filter(([, type]) => type === "figure").map(([sc, , , zh, , ic]) => `<button class="scn" data-scene-fill="${sc}">${icon(ic)}<span>${esc(zh)}</span></button>`).join("") + `</div></div>`;
   $("#overlay").innerHTML = h;
   markDragging();
 }
@@ -683,33 +1050,211 @@ function markDragging() {
   });
 }
 
+/* ---------- 缩略图与卡片样张（0.9.0）：画成一页真的小页面，不用灰方块拼线框 ---------- */
+function tplThumb(ms) {
+  const W = 160, H = 90, mx = W * .07, my = H * .1, gx = W * .018, gy = H * .035, COLS = 12, ROWS = 6;
+  const cw = (W - 2 * mx - (COLS - 1) * gx) / COLS, ch = (H - 2 * my - (ROWS - 1) * gy) / ROWS;
+  const INK = "#1D1D1F", LINE = "#D9D9DE", FILL = "#F2F2F4", MUTE = "#C7C7CC", ACC = styleR()?.accent || "#991B1B";
+  const n = (v) => Math.round(v * 100) / 100;
+  const r = (x, y, w, h, fill, rx = 1, ex = "") => `<rect x="${n(x)}" y="${n(y)}" width="${n(Math.max(w, 0))}" height="${n(Math.max(h, 0))}" rx="${rx}" fill="${fill}"${ex}/>`;
+  let s = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">`;
+  for (const m of ms) {
+    let x = mx + m.x * (cw + gx), y = my + m.y * (ch + gy), w = m.w * cw + (m.w - 1) * gx, h = m.h * ch + (m.h - 1) * gy;
+    if (m.bleed) { x = 0; y = 0; w = W; h = H; }
+    const t = m.type;
+    if (t === "title") {
+      if (m.level === "cover") s += r(x, y + h * .35, w * .62, H * .07, INK, 1.2) + r(x, y + h * .35 + H * .11, w * .36, H * .035, MUTE);
+      else if (m.level === "section") s += r(x, y + h * .4, w * .42, H * .065, INK, 1.2);
+      else s += r(x, y + h * .22, Math.min(w * .46, W * .4), H * .052, INK);
+      continue;
+    }
+    if (t === "conclusion") { s += r(x, y + h * .36, 1.6, H * .05, ACC, 0) + r(x + 4, y + h * .4, w * .5, H * .035, INK, 1, ' opacity=".75"'); continue; }
+    if (t === "note") { s += r(x, y + h * .45, w * .3, H * .025, MUTE); continue; }
+    if (t === "logo") { s += r(x, y + h * .2, h * .55, h * .55, INK, 1.5); continue; }
+    if (t === "contact") { for (let k = 0; k < 3; k++) s += r(x + k * w * .22, y + h * .45, w * .16, H * .022, MUTE); continue; }
+    if (t !== "quote") s += r(x, y, w, h, FILL, 2.5);
+    const px = x + w * .12, py = y + h * .16, pw = w * .76, ph = h * .68;
+    if (t === "chart") {
+      const k0 = 5, bw = pw / (k0 * 1.6);
+      for (let k = 0; k < k0; k++) { const bh = ph * (.35 + .13 * k); s += r(px + k * bw * 1.6, py + ph - bh, bw, bh, k === k0 - 1 ? ACC : MUTE, .6); }
+    } else if (t === "figure") {
+      const fr = String(m.from || "");
+      if (fr.includes("V2")) {
+        const cy = py + ph * .5;
+        s += `<line x1="${n(px)}" y1="${n(cy)}" x2="${n(px + pw)}" y2="${n(cy)}" stroke="${MUTE}" stroke-width="1"/>`;
+        for (let k = 0; k < 5; k++) {
+          const cx = px + pw * k / 4;
+          s += `<circle cx="${n(cx)}" cy="${n(cy)}" r="1.7" fill="${k === 3 ? ACC : "#fff"}" stroke="${k === 3 ? ACC : "#AEAEB2"}" stroke-width=".8"/>`;
+          s += r(cx - pw * .07, cy + (k % 2 ? -ph * .32 : ph * .14), pw * .14, ph * .12, MUTE, .8);
+        }
+      } else if (fr.includes("V5")) {
+        for (let k = 0; k < 3; k++) { const yy = py + k * ph * .34;
+          s += r(px, yy, pw * .42, ph * .24, "#fff", 1, ` stroke="${MUTE}" stroke-width=".7"`) + r(px + pw * .58, yy, pw * .42, ph * .24, "#fff", 1, ` stroke="${MUTE}" stroke-width=".7"`); }
+      } else if (fr.includes("V4")) {
+        for (let k = 0; k < 5; k++) { const yy = py + k * ph * .22; s += r(px, yy, pw * .2, ph * .08, MUTE, .6) + r(px + pw * .28, yy, pw * .66, ph * .08, LINE, .6); }
+      } else {
+        const P = [[px + pw * .15, py + ph * .25], [px + pw * .85, py + ph * .25], [px + pw * .5, py + ph * .8], [px + pw * .5, py + ph * .3]];
+        for (const [a, b] of [[0, 2], [1, 2], [0, 3], [1, 3]]) s += `<line x1="${n(P[a][0])}" y1="${n(P[a][1])}" x2="${n(P[b][0])}" y2="${n(P[b][1])}" stroke="${MUTE}" stroke-width=".8"/>`;
+        P.slice(0, 3).forEach(([cx, cy], k) => { s += r(cx - pw * .1, cy - ph * .08, pw * .2, ph * .16, "#fff", 1.2, ` stroke="${k === 2 ? ACC : "#AEAEB2"}" stroke-width=".8"`); });
+      }
+    } else if (t === "stat") {
+      s += r(px, py + ph * .1, pw * .5, ph * .34, ACC) + r(px, py + ph * .6, pw * .7, ph * .12, MUTE);
+    } else if (["bullets", "issue", "step", "evidence", "profile", "text"].includes(t)) {
+      const rows = h > H * .2 ? 3 : 2;
+      for (let k = 0; k < rows; k++) {
+        const yy = py + k * ph / rows + ph * .08;
+        if (t === "bullets" || t === "evidence") s += r(px, yy, 2.2, 2.2, ACC, 0) + r(px + 5, yy + .2, pw * (.8 - .12 * (k % 2)), 1.8, MUTE, .9);
+        else if (k === 0 && (t === "issue" || t === "step")) s += r(px, yy, pw * .25, 2.6, ACC);
+        else s += r(px, yy, pw * (.85 - .15 * (k % 2)), 1.8, MUTE, .9);
+      }
+    } else if (["statute", "holding", "case", "risk"].includes(t)) {
+      s += r(px, py, pw * .38, 2.4, t === "case" ? INK : ACC);
+      for (let k = 0; k < 2; k++) s += r(px, py + ph * (.38 + k * .28), pw * (.9 - .25 * k), 1.8, MUTE, .9);
+    } else if (t === "quote") {
+      s += `<text x="${n(x + w * .08)}" y="${n(y + h * .42)}" font-size="${n(h * .3)}" fill="${ACC}" font-family="serif">“</text>`;
+      s += r(x + w * .2, y + h * .4, w * .6, H * .05, INK) + r(x + w * .2, y + h * .58, w * .35, H * .03, MUTE);
+    }
+  }
+  return s + "</svg>";
+}
+/* 卡片样张：每种卡片的样子（示例文字），不是图标加一行字 */
+const PV_SERIF = 'font-family:var(--title)';
+const PREVIEW = {
+  conclusion: `<div class="pv-c"><i></i><b style="${PV_SERIF}">收案六年增长 56%</b></div>`,
+  bullets: ["只有 2021 年回落", "近三年每年多百余件", "改判集中在利率"].map((z) => `<div class="pv-li"><i></i>${z}</div>`).join(""),
+  stat: `<div class="pv-big" style="${PV_SERIF}">+56%</div><div class="pv-s">2025 年较 2019 年</div>`,
+  step: `<div class="pv-no" style="${PV_SERIF}">01</div><div class="pv-t">先固定证据</div><div class="pv-s">催告函、送达凭证</div>`,
+  title: `<div class="pv-h" style="${PV_SERIF}">收案逐年增长</div>`,
+  note: `<div class="pv-s">来源：某法院公开数据（示例）</div>`,
+  statute: `<div class="pv-k">《民法典》第 680 条</div><div class="pv-t2">禁止高利放贷，借款的利率不得违反国家有关规定。</div>`,
+  holding: `<div class="pv-t2" style="${PV_SERIF}">服务存在瑕疵的，业主可请求适当减少物业费。</div><div class="pv-s">—— 某区人民法院（虚构）</div>`,
+  case: `<div class="pv-s">（2024）示例民初 0000 号</div><div class="pv-t">业主以电梯停运抗辩</div><div class="pv-k">判付物业费，酌减 20%</div>`,
+  issue: `<div class="pv-s">焦点一</div><div class="pv-t" style="${PV_SERIF}">约定利率是否超过上限</div>`,
+  risk: `<div class="pv-k"><i class="pv-sq"></i>风险提示</div><div class="pv-t2">缺送达凭证，可能被认定未催告。</div>`,
+  evidence: [["证据1", "物业服务合同"], ["证据2", "收费备案"], ["证据3", "催告函"]].map(([a, b]) => `<div class="pv-ev"><span>${a}</span>${b}</div>`).join(""),
+  text: `<div class="pv-t2">业主举证电梯停运累计 3 个月、报修 11 次未修复，法院认定服务存在实质瑕疵。</div>`,
+  quote: `<div class="pv-q" style="${PV_SERIF}">“程序正义是看得见的正义。”</div>`,
+  logo: `<div class="pv-logo">某</div><div class="pv-s">律所 Logo</div>`,
+  profile: `<div class="pv-t">某某律师事务所</div><div class="pv-s">专注民商事争议解决（示例）</div>`,
+  contact: `<div class="pv-s">地址 · 电话 · 邮箱 · 网址</div>`,
+  chart: `<div class="pv-s">空图表卡</div>`, figure: `<div class="pv-s">空图卡</div>`,
+};
+function partPreview(t) { return PREVIEW[t] || `<div class="pv-s">${esc(T(t).zh)}</div>`; }
+
+/* ---------- 图表库（0.9.0）：V6 法律图表大师的场景库，放在侧栏第一位 ---------- */
+async function loadChartlib() {
+  try { S.chartlib = await api("/api/chartlib"); } catch (e) { S.chartlib = { forms: [], recipes: [], scenes: [], intents: [] }; }
+  const rc = $("#libCountRail"); if (rc) rc.textContent = S.chartlib.recipes.length || "";
+  if (S.tab === "lib") renderLib();
+}
+function renderLib() {
+  const box = $("#libSheet");
+  if (!S.chartlib) { box.innerHTML = `<div class="lbody"><div class="msg n">载入图表库…</div></div>`; loadChartlib(); return; }
+  const L = S.chartlib;
+  const intents = [{ name: "全部", n: L.recipes.length }].concat(L.intents || []);
+  /* 从律师要说明的事出发（缪律师：要像给法律人解决真问题的工具）：先问「这一页想让人看懂什么」，再看场合、画法 */
+  box.innerHTML = `<button class="dclose" id="libClose" title="收起">${icon("close")}</button><div class="lbody">
+    <div class="lh1">这一页，想让人看懂什么？</div>
+    <div class="lsub">图表库收了 ${L.recipes.length} 个律师常讲的问题，每个配好了画法（V6 法律图表大师，${L.forms.length} 种）。挑一个放进这一页，告诉 AI 材料在哪——
+      数字由数据推出来，标题里的数字也要推得出；导出前逐项核对。</div>
+    <div class="lsteps"><span><b>1</b>挑一个问题</span><span><b>2</b>告诉 AI 材料在哪</span><span><b>3</b>核对数字，导出</span></div>
+    <label class="lsearch">${icon("search")}<input id="libQ" placeholder="搜一个问题：判赔、审理多久、钱流向哪、证据够不够、违约金调了多少…" value="${esc(S.libq || "")}"></label>
+    <div class="lint">${intents.map((z) => `<button data-lint="${esc(z.name)}" class="${(S.libInt || "全部") === z.name ? "on" : ""}">${esc(z.name)}<i>${z.n}</i></button>`).join("")}</div>
+    <div class="lfil"><select id="libScene" aria-label="场合"><option value="">所有场合</option>${L.scenes.map((z) => `<option${S.libScene === z ? " selected" : ""}>${esc(z)}</option>`).join("")}</select>
+      <select id="libForm" aria-label="画法"><option value="">所有画法</option>${L.forms.map((f) => `<option value="${f.code}"${S.libForm === f.code ? " selected" : ""}>${esc(f.zh)} · ${f.n}</option>`).join("")}</select>
+      <span class="lcount" id="libCount"></span></div>
+    <div class="lgrid" id="libGrid"></div></div>`;
+  $("#libClose").onclick = closeLib;
+  const q = $("#libQ"); q.oninput = () => { S.libq = q.value; renderLibGrid(); };
+  box.querySelectorAll("[data-lint]").forEach((b) => (b.onclick = () => { S.libInt = b.dataset.lint; box.querySelectorAll("[data-lint]").forEach((x) => x.classList.toggle("on", x === b)); renderLibGrid(); }));
+  $("#libScene").onchange = (e) => { S.libScene = e.target.value; renderLibGrid(); };
+  $("#libForm").onchange = (e) => { S.libForm = e.target.value; renderLibGrid(); };
+  renderLibGrid();
+}
+function renderLibGrid() {
+  const L = S.chartlib, words = (S.libq || "").trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const list = L.recipes.filter((r) => (!S.libForm || r.form === S.libForm) && (!S.libScene || r.scenes.includes(S.libScene)) &&
+    (!S.libInt || S.libInt === "全部" || r.intent === S.libInt) &&
+    words.every((w) => [r.name, r.question, r.example, r.area, r.form_zh, r.intent, r.scenes.join(" ")].join(" ").toLowerCase().includes(w)));
+  $("#libCount").textContent = `${list.length} 个问题`;
+  const st = encodeURIComponent(S.deck.style);
+  $("#libGrid").innerHTML = list.map((r) => `<div class="lcard" data-lplace="${esc(r.id)}">
+    <div class="lth"><img src="/api/chartthumb/${r.form}.svg?st=${st}" loading="lazy" alt="">
+      <div class="lact"><button data-lplace="${esc(r.id)}">放进这一页</button><button data-lnew="${esc(r.id)}">新建一页</button></div></div>
+    <div class="lq">${esc(r.question)}</div>
+    <div class="ln">${esc(r.name)}<span>${esc(r.area || "")}${r.area ? " · " : ""}${esc(r.form_zh)}</span></div>
+    ${r.example ? `<div class="lx">比如：${esc(r.example)}</div>` : ""}
+    ${r.guard ? `<div class="lg">${icon("check")}核对：${esc(r.guard)}</div>` : ""}</div>`).join("")
+    || `<div class="msg n">没找到。换个说法，或在「所有画法」里挑一种。</div>`;
+}
+function closeLib() { S.libNew = false; document.body.classList.add("noside"); document.body.classList.remove("libon"); requestAnimationFrame(fit); }
+async function placeRecipe(id, asNew) {
+  const L = S.chartlib, rc = L && L.recipes.find((x) => x.id === id); if (!rc) return;
+  const f = L.forms.find((x) => x.code === rc.form);
+  if (!S.lib) S.lib = await api("/api/library");
+  const b = (S.lib.builtin || []).find((x) => x.name === f?.example);
+  if (!b) return toast("找不到这种画法的示例，请检查 V6 是否完整安装", 4000);
+  const patch = { spec: JSON.parse(JSON.stringify(b.spec)), sample: true, recipe: rc.id };
+  let m = null;
+  if (asNew || !mods().length) {                         /* 新的一页：图 + 一句结论 */
+    const r = await api("/api/template", { method: "POST", body: JSON.stringify({ modules: [], name: "chart-conclusion" }) });
+    if (!r.ok) return toast(r.error, 4000);
+    if (asNew) {
+      const ids = new Set(S.deck.slides.map((s_) => s_.id)); let k = S.deck.slides.length + 1; while (ids.has("s" + k)) k++;
+      S.deck.slides.splice(S.cur + 1, 0, { id: "s" + k, modules: r.modules }); S.cur++;
+    } else slide().modules = r.modules;
+    m = mods().find((x) => x.type === "chart");
+  } else {                                               /* 这一页：选中的图表卡、空的图表卡、图表库的示例卡，依次优先 */
+    const ok = (x) => x.type === "chart" && (isEmpty(x) || x.sample);
+    m = mods().find((x) => x.id === S.sel && ok(x)) || mods().find(ok);
+    if (!m) {
+      const p = G.place(S.R, mods(), "chart", 0, 0);
+      if (!p) return toast("这一页放不下了：点「新建一页」放，或先腾出地方", 4000);
+      m = { id: newId(), type: "chart", x: p[0], y: p[1], w: p[2], h: p[3] }; mods().push(m);
+    }
+  }
+  delete m.file; delete m.pins; delete m.focus; Object.assign(m, patch);
+  S.sel = m.id; closeLib(); commit("图表库：" + rc.name); renderAll(); refreshSlide(); renderInspector();
+  const ta = $("#aiPrompt");
+  if (ta) { ta.value = `按图表库「${rc.name}」（${rc.question}），用我的材料出图。材料在：`; ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+  toast("放好了。现在是示例数据：在右边交给 AI 换成您的数据，导出前会提醒。", 5000);
+}
+
 /* ---------- 左面板 ---------- */
 function renderSide() {
   const el = $("#side");
   if (S.tab === "tools" || S.tab === "assets") S.tab = "pick";            /* 旧入口并进「选图」 */
   if (S.tab === "frame" || S.tab === "custom") S.tab = "fit";             /* 风格与版面并进「适配」 */
   document.querySelectorAll(".rbtn[data-tab]").forEach((b) => b.classList.toggle("on", b.dataset.tab === S.tab || (S.tab === "brand" && b.dataset.tab === "more")));
-  const tiles = (list) => `<div class="tiles">` + list.map((t) => `<div class="tile" data-part="${t}">${icon(t)}<span>${esc(T(t).zh)}</span><small>${PART_TIP[t] || ""}</small></div>`).join("") + `</div>`;
-  if (S.tab === "pick") {
+  document.body.classList.toggle("libon", S.tab === "lib");
+  if (S.tab !== "lib") S.libNew = false;
+  el.style.setProperty("--pacc", styleR()?.accent || "#991B1B");
+  const tiles = (list) => `<div class="tiles pv">` + list.map((t) => `<div class="tile pv" data-part="${t}"><div class="pvb">${partPreview(t)}</div>
+    <div class="pvl"><span>${esc(T(t).zh)}</span><small>${PART_TIP[t] || ""}</small></div></div>`).join("") + `</div>`;
+  if (S.tab === "lib") {
+    el.innerHTML = "";
+    renderLib();
+  } else if (S.tab === "pick") {
     const L = S.lib || { charts: [], builtin: [], figures: [] };
     const card = (a, kind, sub, bad) => `<div class="asset${bad ? " bad" : ""}" data-asset="${kind}" data-key="${esc(a.file || a.name)}">
       <span class="ic">${icon(kind)}</span><span><b>${esc(a.title || a.name)}</b><span>${esc(sub)}</span></span></div>`;
-    el.innerHTML = `<h3>选图</h3><div class="msg n">点场景：新建一页并排好。拖到页面上：只放一张图卡。</div>
-      <div class="sec">法律场景</div><div class="tiles">` +
-      SCENES.map(([sc, type, from, zh, tip, ic]) => `<div class="tile" data-part="${type}" data-from="${esc(from)}" data-label="${esc(zh)}" data-scene="${sc}">${icon(ic)}<span>${esc(zh)}</span><small>${esc(tip)}</small></div>`).join("") +
+    el.innerHTML = `<h3>诉讼图</h3><div class="msg n">V1–V5 的图：时间轴、关系图、对抗图、大事记、重画。点一个场景：新建一页并排好；拖到页面上：只放一张图卡。统计图在「图表库」。</div>
+      <div class="sec">法律场景</div><div class="tiles pv">` +
+      SCENES.filter(([, type]) => type === "figure").map(([sc, type, from, zh, tip]) => `<div class="tile pv" data-part="${type}" data-from="${esc(from)}" data-label="${esc(zh)}" data-scene="${sc}">
+        <div class="pvb th">${tplThumb(S.R.templates[sc].mods)}</div><div class="pvl"><span>${esc(zh)}</span><small>${esc(tip)}</small></div></div>`).join("") +
       `</div><div class="sec">已有的图</div>
       ${L.charts.map((c) => card(c, "chart", `V6 ${c.chart} · ${c.file}`)).join("")}
       ${L.figures.map((f) => card(f, "figure", f.kind === "v5" ? `V5 对抗图数据 · ${f.parts} 个要件 · 按页面尺寸现出图` : `${f.style} · ${Math.round(f.w)}×${Math.round(f.h)}`, !["中性", S.deck.style].includes(f.style))).join("")}
       ${!L.charts.length && !L.figures.length ? '<div class="msg n">还没有：V1–V6 出的图会出现在这里。</div>' : ""}
       <div class="drop" id="drop">${icon("upload")}<br>把 V6 图表说明（.json）或 V1–V5 的图（.svg）拖到这里<br><span class="status">V2、V3 图旁边的 <b>-trace.json</b> 一起拖进来，鼠标停在图上就能看出处</span><br><label class="c" style="cursor:pointer;display:inline-flex;margin-top:8px">选文件<input type="file" id="dropFile" accept=".json,.svg" multiple hidden></label></div>
 
-      <div class="sec">V6 内置示例</div>${L.builtin.map((b) => card(b, "chart", `${b.chart} · V6 示例`)).join("")}`;
+      <div class="msg n" style="margin-top:12px">V6 的 ${S.chartlib ? S.chartlib.recipes.length + " 个" : ""}法律图表场景在「图表库」里。</div>`;
     bindDrop();
   } else if (S.tab === "tpl") {
-    el.innerHTML = `<h3>排法</h3><div class="msg n">点一个，这一页换成它；放不下的内容进「暂存」，不会丢。</div>
-      ${tplGroups(3, ["场景", "排法"])}` + parkedHtml();
+    el.innerHTML = `<h3>版式</h3><div class="msg n">点一个，这一页换成它；放不下的内容进「暂存」，不会丢。</div>
+      ${tplGroups(2, ["排法"])}` + parkedHtml();
   } else if (S.tab === "parts") {
-    el.innerHTML = `<h3>说明</h3>` + PARTS.map(([name, list]) => `<div class="sec">${name}</div>` + tiles(list)).join("") +
+    el.innerHTML = `<h3>卡片</h3><div class="msg n">拖到页面上，或点一下放进这一页空着的地方。</div>` + PARTS.map(([name, list]) => `<div class="sec">${name}</div>` + tiles(list)).join("") +
       `<div class="msg n" style="margin-top:12px">结论拖到图的上下方会吸过去。选中图，在右侧放编号、切片。</div>` + parkedHtml();
   } else if (S.tab === "fit") {
     el.innerHTML = `<div id="fitStyle"></div><div id="fitFrame" style="margin-top:18px"></div>`;
@@ -722,6 +1267,7 @@ function renderSide() {
       <label class="toggle"><span>按读图编号生成讲课动画（点一下，出编号、它指的元素和同号要点）</span><button class="sw${S.animate === false ? "" : " on"}" id="exAnim" aria-label="讲课动画"></button></label>
       <label class="toggle"><span>把图里每个元素的出处写进演讲者备注（讲课时演示者视图里看得到，观众看不到；只有 V2 时间轴、V3 关系图和用逐件记录的 V6 图表有出处）</span><button class="sw${S.notes ? " on" : ""}" id="exNotes" aria-label="出处写进备注"></button></label>
 
+      <div class="msg n">标题字：${HAS_XBS ? "本机装了方正小标宋，PPT 里的标题用它，不加粗。" : "本机没装方正小标宋，PPT 里的标题用宋体加粗（在别人电脑上也不变样）。"}</div>
       <div class="sec">导出前检查</div>
       ${bad.length ? bad.map(([i, p_, w_]) => `<div class="msg ${p_ ? "p" : "w"}" data-goto-page="${i}" style="cursor:pointer">第 ${i + 1} 页：${p_ ? p_ + " 处要改" : ""}${p_ && w_ ? "，" : ""}${w_ ? w_ + " 处请核" : ""}</div>`).join("") : '<div class="msg n">每一页都可以导出。</div>'}`;
     $("#exOne").onclick = () => doExport($("#exOne"), true);
@@ -747,12 +1293,23 @@ function renderSide() {
       el.querySelectorAll("[data-morekind]").forEach((x) => x.classList.remove("on")); b.classList.add("on"); mk = b.dataset.morekind; }));
     $("#moreAiGo").onclick = () => sendAi(mk, null, null, $("#moreAiPrompt").value);
   }
+  sideClose();
+}
+function sideClose() {                       /* 抽屉右上角的收起：点了把地方还给画布 */
+  const el = $("#side");
+  el.insertAdjacentHTML("afterbegin", `<button class="dclose" id="sideClose" title="收起">${icon("close")}</button>`);
+  $("#sideClose").onclick = () => { document.body.classList.add("noside"); requestAnimationFrame(fit); };
 }
 function tplGroups(cols, only) {
   const groups = {};
-  for (const [k, t] of Object.entries(S.R.templates)) (groups[t.group || "排法"] ||= []).push([k, t]);
-  return (only || ["场景", "排法", "整套课件"]).filter((g) => groups[g]).map((g) => `<div class="sec">${g}</div><div class="tpls" style="grid-template-columns:repeat(${cols === 4 ? 4 : 2},1fr)">` +
-    groups[g].map(([k, t]) => `<div class="tpl" data-tpl="${k}">${miniHtml(t.mods)}${esc(t.zh)}</div>`).join("") + `</div>`).join("");
+  for (const [k, t] of Object.entries(S.R.templates)) {
+    let g = t.group || "排法";
+    if (g === "排法") g = t.mods.some((m) => m.type === "chart") ? "以图表为中心" : "以诉讼图为中心";   /* 版式分两组：统计图、诉讼图 */
+    (groups[g] ||= []).push([k, t]);
+  }
+  const want = (only || ["场景", "排法", "整套课件"]).flatMap((g) => g === "排法" ? ["以图表为中心", "以诉讼图为中心"] : [g]);
+  return want.filter((g) => groups[g]).map((g) => `<div class="sec">${g}</div><div class="tpls" style="grid-template-columns:repeat(${cols === 4 ? 4 : 2},1fr)">` +
+    groups[g].map(([k, t]) => `<div class="tpl" data-tpl="${k}"><div class="th">${tplThumb(t.mods)}</div><span>${esc(t.zh)}</span></div>`).join("") + `</div>`).join("");
 }
 function miniHtml(ms) {
   const g = S.R.grid;
@@ -1008,10 +1565,23 @@ function bindRead(m) {
 function renderInspector(soft) {
   const el = $("#insp");
   if (soft && el.contains(document.activeElement) && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) {
-    renderMsgs(); return;                  /* 正在打字时不重画，只更新提示 */
+    renderMsgs(); updatePageChip(); return;      /* 正在打字时不重画，只更新提示（顶栏的检查标签也跟着更新） */
   }
   const m = mods().find((x) => x.id === S.sel);
-  if (!m) { el.innerHTML = pageInspector(); bindInspector(null); return; }
+  updatePageChip();
+  const was = document.body.classList.contains("insp-on");
+  document.body.classList.toggle("insp-on", !!m);           /* 右栏只在选中卡片时出现：没选中时把地方还给画布 */
+  if (was !== !!m) requestAnimationFrame(fit);
+  if (!m) {
+    el.innerHTML = "";
+    const ta = $("#aiPrompt"), typing = ta && $("#composer").contains(ta) && document.activeElement === ta;
+    if (soft && typing) return;                          /* 正在输入时不重画（与右栏同一条规矩） */
+    const keep = ta && $("#composer").contains(ta) ? ta.value : "";
+    renderComposer();
+    if (keep) $("#aiPrompt").value = keep;
+    return;
+  }
+  $("#composer").innerHTML = "";
   const t = T(m.type), fu = G.fusion(S.R, mods())[m.id];
   let h = `<div class="ihead">${icon(m.type)}<span>${esc(t.zh)}</span><span class="spacer"></span>
     <button id="dupMod" title="复制 Ctrl+D">${icon("copy")}</button><button id="delMod" title="删除 Delete">${icon("trash")}</button></div>`;
@@ -1028,7 +1598,9 @@ function renderInspector(soft) {
     } else if (kind === "lines") {
       h += `<div class="field"><label>${label}</label><textarea rows="5" data-k="${k}" data-kind="lines">${esc((m[k] || []).join("\n"))}</textarea></div>`;
     } else if (kind === "spec") {
-      const src = m.file && !m.spec ? `<div class="msg n">引用素材 <b>${esc(m.file)}</b>。在这里改会把说明复制进课件，原文件不变。</div>` : "";
+      const rc = m.recipe && S.chartlib ? S.chartlib.recipes.find((x) => x.id === m.recipe) : null;
+      const src = (m.sample ? `<div class="msg w">这是图表库${rc ? "「" + esc(rc.name) + "」" : ""}的示例数据，导出前要换成您的：在下面交给 AI，或改这份说明后点「应用」。</div>` : "") +
+        (m.file && !m.spec ? `<div class="msg n">引用素材 <b>${esc(m.file)}</b>。在这里改会把说明复制进课件，原文件不变。</div>` : "");
       h += `<div class="field"><label>${label}</label>${src}<textarea class="code" id="specBox" spellcheck="false">${esc(m.spec ? JSON.stringify(m.spec, null, 1) : "")}</textarea>
         <div class="chips" style="margin-top:6px"><button class="c" id="applySpec">应用</button>${m.file ? `<button class="c" id="loadSpec">载入素材原文</button>` : ""}</div></div>`;
     } else {
@@ -1036,7 +1608,7 @@ function renderInspector(soft) {
       h += `<div class="field"><label>${label}</label>${kind === "textarea" ? `<textarea rows="3" data-k="${k}">${esc(v)}</textarea>` : `<input data-k="${k}" value="${esc(v)}">`}</div>`;
     }
   }
-  if (m.type === "figure") h += `<div class="msg n">${m.file ? "图：" + esc(m.file) : "从左边「选图 → 已有的图」点一张，或拖到这张卡上；也可以让 AI 生成。"}</div>`;
+  if (m.type === "figure") h += `<div class="msg n">${m.file ? "图：" + esc(m.file) : "从左边「诉讼图 → 已有的图」点一张，或拖到这张卡上；也可以让 AI 生成。"}</div>`;
   if ((m.type === "chart" || m.type === "figure") && !isEmpty(m)) h += readSection(m) + provSection(m);
   h += aiBox(m);
   h += `<div class="sec">外观</div><div class="chips">${Object.entries(S.R.tones).map(([v, z]) => {
@@ -1068,13 +1640,46 @@ function renderMsgs() {
     (info.warnings || []).map((x) => `<div class="msg w">请核：${esc(x)}</div>`).join("") +
     (info.notes || []).map((x) => `<div class="msg n">${esc(x)}</div>`).join("") || '<div class="msg n">没有问题。</div>';
 }
+/* ---------- 页面级：底部的输入框（交给 AI）与顶栏的检查标签 ---------- */
+function renderComposer() {
+  const c = $("#composer");
+  c.innerHTML = `${reqList()}<div class="cbox">
+    <div class="ckinds">${AI_KINDS_PAGE.map(([k, z], i) => `<button class="ck${i === 0 ? " on" : ""}" data-aikind="${k}">${z}</button>`).join("")}</div>
+    <div class="crow"><textarea id="aiPrompt" rows="1" placeholder="这一页要讲什么、材料在哪？写一句，交给 AI"></textarea>
+    <button class="go" id="aiGo" data-kind="page" title="交给 AI">${icon("send")}</button></div></div>`;
+  bindAiBox(null);
+  c.querySelectorAll("[data-aikind]").forEach((b) => b.addEventListener("click", () => {
+    c.querySelectorAll(".ck").forEach((x) => x.classList.toggle("on", x === b)); }));
+  c.querySelectorAll("[data-cancel]").forEach((b) => (b.onclick = async () => { await api("/api/ai/cancel?id=" + b.dataset.cancel, { method: "POST" }); pollNow(); }));
+  const ta = $("#aiPrompt");
+  ta.oninput = () => { ta.style.height = "auto"; ta.style.height = Math.min(ta.scrollHeight, 120) + "px"; };
+  ta.onkeydown = (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); $("#aiGo").click(); } };
+}
+function updatePageChip() {
+  const b = $("#pageCheck"); if (!b || !S.deck) return;
+  const rep = S.reps[slide().id];
+  if (!rep) { b.hidden = true; return; }
+  const ps = rep.problems || [], ws = rep.warnings || [];
+  b.hidden = false;
+  b.classList.toggle("ok", !ps.length && !ws.length);
+  b.textContent = !ps.length && !ws.length ? "可以导出" : [ps.length ? ps.length + " 处要改" : "", ws.length ? ws.length + " 处请核" : ""].filter(Boolean).join(" · ");
+}
+function openPop(anchor, html, w = 320, below = true) {
+  $(".pop")?.remove();
+  const r = anchor.getBoundingClientRect();
+  const p = document.createElement("div"); p.className = "pop"; p.style.width = w + "px";
+  p.innerHTML = html; document.body.appendChild(p);
+  p.style.left = Math.max(10, Math.min(r.left, innerWidth - w - 10)) + "px";
+  p.style.top = (below ? r.bottom + 6 : Math.max(10, r.top - p.offsetHeight - 6)) + "px";
+  return p;
+}
 function pageInspector() {
   const rep = S.reps[slide().id] || {};
   const ps = rep.problems || [], ws = rep.warnings || [];
   return `<div class="ihead">${icon("page")}<span>第 ${S.cur + 1} 页</span><span class="spacer"></span></div>
     <div class="sec">这一页</div>
-    <div class="msg n">${mods().length} 个模块。点页面上的卡片编辑它；从左边「选图」「说明」拖进来。</div>
-    <div class="chips"><button class="c" id="pTidy">${icon("tidy", 'style="width:16px;height:16px"')}整理这一页</button><button class="c" data-goto="tpl">换排法</button></div>
+    <div class="msg n">${mods().length} 个模块。点页面上的卡片编辑它；从左边「图表库」「诉讼图」「卡片」放进来。</div>
+    <div class="chips"><button class="c" id="pTidy">${icon("tidy", 'style="width:16px;height:16px"')}整理这一页</button><button class="c" data-goto="tpl">换版式</button></div>
     <div class="sec">检查</div>
     ${ps.map((x) => `<div class="msg p">${esc(x)}</div>`).join("")}${ws.map((x) => `<div class="msg w">请核：${esc(x)}</div>`).join("")}
     ${!ps.length && !ws.length ? '<div class="msg n">这一页可以导出。</div>' : ""}
@@ -1106,7 +1711,11 @@ function bindInspector(m) {
   $("#dupMod").onclick = () => dupMod(m);
   $("#delMod").onclick = () => delMod(m);
   const ap = $("#applySpec"); if (ap) ap.onclick = () => {
-    try { m.spec = JSON.parse($("#specBox").value); delete m.file; commit("已应用图表说明"); renderInspector(); }
+    try {
+      const sp = JSON.parse($("#specBox").value);
+      if (m.sample && JSON.stringify(sp) !== JSON.stringify(m.spec)) delete m.sample;   /* 改了数据：不再是示例 */
+      m.spec = sp; delete m.file; commit("已应用图表说明"); renderInspector();
+    }
     catch (e) { toast("JSON 写错了：" + e.message, 4000); }
   };
   const ls = $("#loadSpec"); if (ls) ls.onclick = async () => {
@@ -1448,7 +2057,7 @@ function dropAsset(d, cand) {
     const [mw, mh] = T(patch.type).min;
     if (m.w < mw || m.h < mh) return toast(`这张卡太小：${T(patch.type).zh}最小 ${mw}×${mh}，先把卡片拉大`, 4000);
     const keepFrom = m.from && !a.from && patch.type === "figure" && !patch.data ? m.from : null;   /* 场景卡原来写着来自哪个模块：留着 */
-    delete m.file; delete m.spec; delete m.from; delete m.data; delete m.part; delete m.crop; delete m.pins; Object.assign(m, patch);
+    delete m.file; delete m.spec; delete m.from; delete m.data; delete m.part; delete m.crop; delete m.pins; delete m.sample; delete m.recipe; Object.assign(m, patch);
     if (keepFrom) m.from = keepFrom;
     S.sel = m.id; commit("已放进图卡"); renderInspector(); return;
   }
@@ -1501,6 +2110,12 @@ document.addEventListener("click", (e) => {
     else { document.body.classList.remove("noside"); S.tab = tb.dataset.tab; renderSide(); }
     requestAnimationFrame(fit); return;
   }
+  const ln = e.target.closest("[data-lnew]");
+  if (ln) { e.stopPropagation(); return placeRecipe(ln.dataset.lnew, true); }
+  const lp = e.target.closest("[data-lplace]");
+  if (lp) { e.stopPropagation(); return placeRecipe(lp.dataset.lplace, !!S.libNew && !lp.matches("button")); }
+  const gl = e.target.closest("[data-golib]");
+  if (gl) { $(".pop")?.remove(); S.libNew = gl.dataset.golib === "new"; document.body.classList.remove("noside"); S.tab = "lib"; renderSide(); return; }
   const tp = e.target.closest("[data-tpl]");
   if (tp) { if (tp.closest(".pop")) { $(".pop")?.remove(); return applyTemplate(tp.dataset.tpl, true); } return applyTemplate(tp.dataset.tpl, false); }
   const dup = e.target.closest("[data-dup]");
@@ -1515,14 +2130,16 @@ document.addEventListener("click", (e) => {
   if (e.target.closest("#addPage")) return openTplPop(e.target.closest("#addPage"));
   if (!e.target.closest(".pop")) $(".pop")?.remove();
 });
-function openTplPop(anchor) {
+function openTplPop(anchor, below) {
   $(".pop")?.remove();
   const r = anchor.getBoundingClientRect();
   const p = document.createElement("div"); p.className = "pop";
   p.style.width = "560px"; p.style.maxHeight = "70vh"; p.style.overflow = "auto";
-  p.innerHTML = `<div class="sec" style="margin-top:0">新页用哪个组合</div>${tplGroups(4)}`;
+  p.innerHTML = `<button class="golib pg" data-golib="new">${icon("lib")}<span>从图表库挑一张图，放在新的一页</span><small>${S.chartlib ? S.chartlib.recipes.length + " 个法律场景" : ""}</small></button>
+    <div class="sec">或者先选一个组合</div>${tplGroups(4)}`;
   document.body.appendChild(p);
-  p.style.left = Math.max(10, Math.min(r.left, innerWidth - 570)) + "px"; p.style.top = Math.max(10, r.top - p.offsetHeight - 10) + "px";
+  p.style.left = Math.max(10, Math.min(r.left, innerWidth - 570)) + "px";
+  p.style.top = (below ? Math.min(r.bottom + 6, innerHeight - p.offsetHeight - 10) : Math.max(10, r.top - p.offsetHeight - 10)) + "px";
 }
 /* 页面条拖动排序（HTML5 拖放，只在页面条里） */
 let dragPage = null;
@@ -1535,7 +2152,8 @@ document.addEventListener("drop", (e) => {
   S.cur = to; dragPage = null; commit("已调整页序");
 });
 document.addEventListener("keydown", (e) => {
-  if (/INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  if (e.key === "Escape" && document.body.classList.contains("libon") && !document.body.classList.contains("noside")) { e.preventDefault(); return closeLib(); }
+  if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
   const mod = e.ctrlKey || e.metaKey;
   if (mod && e.key.toLowerCase() === "z") { e.preventDefault(); return e.shiftKey ? redo() : undo(); }
   if (mod && e.key.toLowerCase() === "y") { e.preventDefault(); return redo(); }
@@ -1568,16 +2186,71 @@ document.addEventListener("click", (e) => {        /* 空页上点场景：这�
   const b = e.target.closest("[data-scene-fill]"); if (b) applyTemplate(b.dataset.sceneFill, false);
 });
 $("#gridBtn").onclick = () => { S.grid = !S.grid; $("#gridBtn").classList.toggle("on", S.grid); renderGridlines(); };
+/* 浅色 / 深色：默认跟随系统；手动切过就记在这台电脑的浏览器里（只是偏好，不进课件） */
+(function () {
+  const K = "nlv7-theme", root = document.documentElement;
+  try { const t = localStorage.getItem(K); if (t === "dark" || t === "light") root.dataset.theme = t; } catch (e) {}
+  $("#themeBtn").onclick = () => {
+    const cur = root.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    const nx = cur === "dark" ? "light" : "dark";
+    root.dataset.theme = nx;
+    try { localStorage.setItem(K, nx); } catch (e) {}
+  };
+})();
+$("#pageCheck").onclick = (e) => {
+  e.stopPropagation();
+  const rep = S.reps[slide().id] || {}, ps = rep.problems || [], ws = rep.warnings || [];
+  openPop(e.currentTarget, `<div class="sec" style="margin-top:0">第 ${S.cur + 1} 页 · 检查</div>` +
+    (ps.map((x) => `<div class="msg p">${esc(x)}</div>`).join("") + ws.map((x) => `<div class="msg w">请核：${esc(x)}</div>`).join("")
+     || '<div class="msg n">这一页可以导出。</div>'), 360);
+};
+$("#moreBtn").onclick = (e) => {
+  e.stopPropagation();
+  const p = openPop(e.currentTarget, `<div class="menu">
+    <button data-act="grid">${icon("grid")}<span>${S.grid ? "隐藏网格" : "显示网格"}</span><kbd>G</kbd></button>
+    <button data-act="tidy">${icon("tidy")}<span>整理这一页</span></button>
+    <button data-act="tpl">${icon("tpl")}<span>换版式</span></button>
+    <div class="msep"></div>
+    <div class="mlabel">课件风格</div>
+    ${["奇川风", "歸藏风", CUSTOM].map((s_) => `<button data-st="${s_}" class="${s_ === S.deck.style ? "cur" : ""}"><span>${s_}</span>${s_ === S.deck.style ? icon("check") : ""}</button>`).join("")}
+    <div class="msep"></div>
+    <button data-act="help">${icon("help")}<span>快捷键</span></button></div>`, 220);
+  p.style.left = Math.max(10, e.currentTarget.getBoundingClientRect().right - 220) + "px";
+  p.querySelectorAll("[data-act]").forEach((b) => (b.onclick = () => {
+    p.remove();
+    const a = b.dataset.act;
+    if (a === "grid") $("#gridBtn").click();
+    else if (a === "tidy") tidy();
+    else if (a === "tpl") { document.body.classList.remove("noside"); S.tab = "tpl"; renderSide(); requestAnimationFrame(fit); }
+    else if (a === "help") $("#helpBtn").click();
+  }));
+  p.querySelectorAll("[data-st]").forEach((b) => (b.onclick = () => { p.remove(); $(`#styleSeg [data-st="${b.dataset.st}"]`)?.click(); }));
+};
+$("#newPageBtn").onclick = (e) => { e.stopPropagation(); openTplPop(e.currentTarget, true); };
 $("#helpBtn").onclick = () => toast("拖：吸到格子（按住 Ctrl / ⌘ 不吸附、不推挤）· 方向键：挪一格 · Shift+方向键：改大小 · Ctrl+D：复制 · Delete：删除 · Ctrl+Z / Ctrl+Shift+Z：撤销 / 重做 · G：网格 · PageUp/PageDown：翻页 · Ctrl+= / Ctrl+- / Ctrl+0：放大 / 缩小 / 适应窗口（Ctrl+滚轮也可）", 8000);
 $("#deckTitle").onchange = (e) => { S.deck.title = e.target.value.trim() || "未命名课件"; commit("已改标题"); };
+/* 本机装没装方正小标宋：量一串拉丁字母的宽度（汉字各家都是一个字宽，量不出来） */
+const HAS_XBS = (() => {
+  try {
+    const c = document.createElement("canvas").getContext("2d"), t = "mmmmmmmmmmlli 0123456789 WQ";
+    return ["monospace", "serif"].some((g) => { c.font = `40px ${g}`; const a = c.measureText(t).width;
+      c.font = `40px "方正小标宋简体", ${g}`; return Math.abs(c.measureText(t).width - a) > 0.5; });
+  } catch (e) { return false; }
+})();
+if (HAS_XBS) document.body.classList.add("has-xbs");
 async function doExport(btn, one) {
   btn.disabled = true; status("导出中…");
   await saveNow();
-  const r = await api("/api/export?animate=" + (S.animate === false ? 0 : 1) + (S.notes ? "&notes=1" : "") + (one ? "&page=" + S.cur : ""), { method: "POST" });
+  const r = await api("/api/export?animate=" + (S.animate === false ? 0 : 1) + (S.notes ? "&notes=1" : "") + (one ? "&page=" + S.cur : "") + (HAS_XBS ? "&tf=1" : ""), { method: "POST" });
   btn.disabled = false;
-  if (!r.ok) { status("未导出"); S.sel = null; renderInspector(); $("#insp").insertAdjacentHTML("afterbegin", r.error.split("\n").map((l) => `<div class="msg p">${esc(l)}</div>`).join("")); return toast("有页面没准备好，见右侧", 4000); }
+  if (!r.ok) {                               /* 0.9.0：没选中卡片时右栏收起，问题清单改在「导出」下方弹出 */
+    status("未导出");
+    const ls = r.error.split("\n").map((l) => l.trim()).filter(Boolean);
+    openPop(btn, `<div class="sec" style="margin-top:0">${esc(ls[0] || "未导出")}</div>` + ls.slice(1).map((l) => `<div class="msg p">${esc(l)}</div>`).join(""), 400);
+    return toast("有页面没准备好，见「导出」下方的清单", 4000);
+  }
   status((one ? `已导出第 ${S.cur + 1} 页` : `已导出 ${r.slides} 页`) + (r.clicks ? ` · 讲课动画 ${r.clicks} 步` : ""));
-  toast(r.warnings.length ? `已导出。${r.warnings.length} 处请核，见右侧检查` : "已导出。在 PowerPoint 里整页复制，或框选图复制，粘进您的课件即可", 5000);
+  toast(r.warnings.length ? `已导出。${r.warnings.length} 处请核，各页顶部的「检查」可看` : "已导出。在 PowerPoint 里整页复制，或框选图复制，粘进您的课件即可", 5000);
   location.href = "/api/download?f=" + encodeURIComponent(r.file);
 }
 $("#exportBtn").onclick = () => doExport($("#exportBtn"), false);
@@ -1625,7 +2298,7 @@ const AI_KINDS_PAGE = [["page", "重做这一页"], ["new-page", "后面加一�
 const AI_KINDS_MORE = [["cover", "做封面"], ["deck", "按想法出几页"]];
 function aiBadge(id) {
   const r = (S.ai || []).find((x) => x.slide === slide().id && x.module === id && ["pending", "working"].includes(x.status));
-  return r ? `<div class="ai-wait">${icon("ai", 'style="width:16px;height:16px"')}${r.status === "working" ? "AI 正在做…" : "等 AI…"}</div>` : "";
+  return r ? `<div class="ai-wait">${icon("ai", 'style="width:16px;height:16px"')}${r.status === "working" ? "AI 正在做…" : S.listening ? "AI 马上开始…" : "等 AI · 回对话里说「处理课件请求」"}</div>` : "";
 }
 function aiBox(m) {
   if (m) {
@@ -1655,15 +2328,17 @@ async function sendAi(kind, module, tool, prompt) {
   await saveNow();
   const r = await api("/api/ai", { method: "POST", body: JSON.stringify({ kind, slide: slide().id, module, tool, prompt }) });
   if (!r.ok) return toast(r.error, 4000);
-  toast("已交给 AI。回到对话里说「处理课件请求」；AI 若正在等，会自动开始。做好后这里自动刷新。", 6500);
+  toast(S.listening ? "已交给 AI，AI 正在等，马上开始。做好后这里自动刷新。" : "已交给 AI。请回到对话里说「处理课件请求」；做好后这里自动刷新。", 6500);
   pollNow();
 }
 function reqList() {
   const rs = (S.ai || []).filter((r) => r.slide === slide().id || r.kind === "deck").slice(-6).reverse();
   if (!rs.length) return "";
   const ZH = { pending: "等 AI", working: "正在做", done: "做好了", failed: "没做成", cancelled: "已取消" };
+  const idle = !S.listening && rs.some((r) => r.status === "pending")
+    ? `<div class="msg n" style="width:min(680px,100%)">AI 现在没在等：请回到对话里说「处理课件请求」。</div>` : "";
   return rs.map((r) => `<div class="req"><span><b>${esc((S.aiKinds || {})[r.kind] || r.kind)}</b>${r.tool ? " · " + r.tool : ""}<br>${esc(r.prompt || "（没写想法）")}${r.note ? `<br><span style="color:var(--ink2)">${esc(r.note)}</span>` : ""}</span>
-    <span class="st ${r.status}">${ZH[r.status] || r.status}</span>${["pending", "working"].includes(r.status) ? `<button class="c" data-cancel="${r.id}" style="height:24px">取消</button>` : ""}</div>`).join("");
+    <span class="st ${r.status}">${ZH[r.status] || r.status}</span>${["pending", "working"].includes(r.status) ? `<button class="c" data-cancel="${r.id}" style="height:24px">取消</button>` : ""}</div>`).join("") + idle;
 }
 $("#aiBtn").onclick = () => { S.sel = null; renderOverlay(); renderInspector(); setTimeout(() => $("#aiPrompt")?.focus(), 50); };
 
@@ -1674,6 +2349,7 @@ async function poll() {
   try {
     if (!S.saving && !S.drag) {
       const v = await api("/api/version");
+      if (v.listen !== S.listening) { S.listening = v.listen; renderOverlay(); renderFilm(); renderInspector(true); }
       if (v.ai !== S.seen.ai) {
         S.seen.ai = v.ai; const r = await api("/api/ai"); S.ai = r.requests; S.aiKinds = r.kinds;
         renderOverlay(); renderFilm(); renderInspector(true);
@@ -1682,7 +2358,9 @@ async function poll() {
         S.seen.brand = v.brand; await loadBrand(); for (const s of S.deck.slides) S.ver[s.id] = (S.ver[s.id] || 0) + 1;
         refreshSlide(); renderFilm(); refreshReports();
       }
-      if (v.deck !== S.seen.deck && !S.dirty) {
+      /* 正在打字（AI 输入框、标题……）时先不刷新：原来 AI 一改课件，右栏整块重画，打了一半的字就没了（缪律师实测） */
+      const typing = /INPUT|TEXTAREA/.test(document.activeElement?.tagName || "") && document.activeElement.id !== "libQ";
+      if (v.deck !== S.seen.deck && !S.dirty && !typing) {
         S.seen.deck = v.deck;
         const st = await api("/api/state");
         if (st.mtime !== undefined) S.seen.deck = st.mtime;
@@ -1889,7 +2567,7 @@ async function introPage(kind, lawyer) {
   if (st.mtime !== undefined) S.seen.deck = st.mtime;                                /* 版本以读课件那一刻为准 */
   const q = await api("/api/ai"); S.ai = q.requests; S.aiKinds = q.kinds;
   syncGrid(); applyStyle(); renderSide(); fit(); renderAll(); renderInspector();
-  await refreshSlide(); refreshReports(); loadLib();
+  await refreshSlide(); refreshReports(); loadLib(); loadChartlib();
   status("就绪 · 自动保存"); poll();
   window.__ready = true;
 })();

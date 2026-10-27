@@ -55,12 +55,12 @@ with any agent that reads `SKILL.md`.
 | | 模块 | 版本 | 回答什么问题 | 输入 | 交付物 |
 | --- | --- | --- | --- | --- | --- |
 | <img src="assets/icons/v1.png" width="44" alt="V1"/> | **V1** [诉讼可视化重画](plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/) | v1.1.0 | 这张图怎么画得能进卷宗 | 一张已有的图（手绘、截图、AI 生成、Mermaid），或一段纯文字 | SVG · PPTX（默认）；PNG · VSDX · drawio 可选 |
-| <img src="assets/icons/v2.png" width="44" alt="V2"/> | **V2** [时间轴大师](plugins/mqc-nlv/skills/mqc-timeline-master/) | v2.1.0 | 案件经过是怎样的 | 判决书 · 起诉状 · 答辩状 · 合同 · 证据目录 · 流水 · 聊天记录（PDF、老式 .doc、扫描件、照片、口述） | 同上 + 溯源索引 |
+| <img src="assets/icons/v2.png" width="44" alt="V2"/> | **V2** [时间轴大师](plugins/mqc-nlv/skills/mqc-timeline-master/) | v2.2.0 | 案件经过是怎样的 | 判决书 · 起诉状 · 答辩状 · 合同 · 证据目录 · 流水 · 聊天记录（PDF、老式 .doc、扫描件、照片、口述） | 同上 + 溯源索引 |
 | <img src="assets/icons/v3.png" width="44" alt="V3"/> | **V3** [法律关系图大师](plugins/mqc-nlv/skills/mqc-legal-relation-master/) | v1.0.0 | 谁与谁、就什么标的、成立何种关系 | 一批案件材料 | 同上 + 出处索引 |
 | <img src="assets/icons/v4.png" width="44" alt="V4"/> | **V4** [大事记表大师](plugins/mqc-nlv/skills/mqc-chronicle-master/) | v1.0.0 | 什么时候发生了什么 | 一批案件材料 | 案件大事记 Word · Excel 母表 · A4 简表（默认）；简表 PDF/PNG 可选 |
 | <img src="assets/icons/v5.png" width="44" alt="V5"/> | **V5** [庭审对抗图大师](plugins/mqc-nlv/skills/mqc-trial-confrontation-master/) | v1.0.0 | 谁主张什么、对方怎么抗辩、法院审查什么 | 起诉状 · 答辩状 · 证据目录 · 代理意见 | 分析表 Excel · 对抗图 SVG（默认）；PNG 可选 |
-| <img src="assets/icons/v6.png" width="44" alt="V6"/> | **V6** [法律图表大师](plugins/mqc-nlv/skills/mqc-legal-chart-master/) | v0.9.8 | 有多少、占几成、判了多少、钱流向哪里 | 一组法律数据（判决结果、案由、金额、天数、去向、资金流水） | SVG · PPTX（默认）；PNG 可选 |
-| <img src="assets/icons/v7.png" width="44" alt="V7"/> | **V7** [法律课件大师](plugins/mqc-nlv/skills/mqc-legal-courseware-master/) | v0.8.4 | 这些图怎么做成一页能上讲台的法律图表页，粘进自己的课件 | V1–V6 的图、法条与案例、一句想法、律所模板或截图（可选） | 可编辑 PPTX（整页或框选复制；图里每个元素各成一组，按读图编号自带讲课动画） |
+| <img src="assets/icons/v6.png" width="44" alt="V6"/> | **V6** [法律图表大师](plugins/mqc-nlv/skills/mqc-legal-chart-master/) | v0.11.0 | 有多少、占几成、判了多少、钱流向哪里 | 一组法律数据（判决结果、案由、金额、天数、去向、资金流水） | SVG · PPTX（默认）；PNG 可选 |
+| <img src="assets/icons/v7.png" width="44" alt="V7"/> | **V7** [法律课件大师](plugins/mqc-nlv/skills/mqc-legal-courseware-master/) | v0.9.0 | 这些图怎么做成一页能上讲台的法律图表页，粘进自己的课件 | V1–V6 的图、法条与案例、一句想法、律所模板或截图（可选） | 可编辑 PPTX（整页或框选复制；图里每个元素各成一组，按读图编号自带讲课动画） |
 
 **三组用法，V3 是交叠处。**
 
@@ -92,9 +92,9 @@ Excel 母表（律师在里面填争点）、A4 简表（呈报用）。事实�
 **V5 庭审对抗图大师。** 按要件审判九步法与请求权基础，把案件推成左中右三栏：提出请求的
 一方、法院审查、抗辩的一方，深红标出决定性要件。图与表同源，一致性由判据核验。
 
-**V6 法律图表大师。** 九种精炼的统计图：竖柱、横条、百点方阵、南丁格尔玫瑰、哑铃、逐件分布、
-桑基、汇入图（资金流向）、逐级加减，图种由数据形状决定。背后是一个按领域、场景、意图、画法索引的
-场景库（34 个领域、410 个场景、63 种画法；现在能画的场景 170 个，其余标「待建」），用时按关键词检索，只取用得上的几条。
+**V6 法律图表大师。** 十七种精炼的统计图：竖柱、横条、百点方阵、南丁格尔玫瑰、哑铃、逐件分布、
+桑基、汇入图（资金流向）、逐级加减，以及 0.10.0 新增的气泡矩阵（年鉴）、发射扇、放射汇聚（另有漏斗作备用），0.11.0 新增的点阵阶梯、法条沿革、区间胶囊、双读饼，图种由数据形状决定。背后是一个按领域、场景、意图、画法索引的
+场景库（34 个领域、430 个场景、68 种画法；现在能画的场景 226 个，其余标「待建」），用时按关键词检索，只取用得上的几条。
 前五件厚重严谨，这一件广泛灵动：旅程、倒计时、冰山、拼图、金句卡……灵动在表达，严谨在数据。
 丢一批判决给它，走类案编码：逐份编码、类别取封闭表、每个值附原文引句，一次出编码母表和一组图。图上的数只许算、不许编：标题里写的百分比与件数，脚本都会从数据里
 算一遍；没有 n、口径与来源的图不出。
@@ -228,7 +228,7 @@ new-litigation-visualization/
         │   ├── scripts/                     要件推演 · 三栏出图 · 光栅
         │   └── references/ examples/ tests/
         ├── mqc-legal-chart-master/          V6
-        │   ├── scripts/                     校验与派生数 · 九种图 · 守卫
+        │   ├── scripts/                     校验与派生数 · 十七种图 · 守卫
         │   └── references/ docs/adr/ examples/ schemas/ tests/
         └── mqc-legal-courseware-master/     V7
             ├── scripts/                     拼页 · 图导入 · PPTX 导出与审计 · 编辑器

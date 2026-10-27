@@ -52,6 +52,13 @@ FONT_PROFILES = {
 }
 _FONTS = dict(FONT_PROFILES["master"])
 _SVG_SRC = [""]                       # the source SVG, for resolving pattern fills
+# Title face (V7 0.9.0). Text marked data-title="1" is a Song title drawn at the
+# face's own weight (方正小标宋 has no bold; faking one made titles far too heavy).
+# When the caller knows the reader has the title face, it names it here and the
+# run is written in that face, not bold. Otherwise the run falls back to the
+# profile's serif face in bold, which is exactly what the deck looked like before
+# — so nothing changes for anyone who does not ask.
+_TITLE = [None]
 
 
 # A fixed timestamp on every ZIP entry. Otherwise the same map produces a
@@ -178,10 +185,14 @@ def parse_svg(svg):
             prims.append({"k": "text", "x": _f(a, "x") + ox, "y": _f(a, "y") + oy, "t": txt,
                           "fs": _f(a, "font-size", 13),
                           "bold": a.get("font-weight", "400") in ("600", "700", "bold"),
+                          "title": a.get("data-title") == "1",
                           "fill": _clean(a.get("fill"), "000000"),
                           "anchor": a.get("text-anchor", "start"),
                           "track": _f(a, "letter-spacing", 0.0),
-                          "family": a.get("font-family", "")})
+                          "family": a.get("font-family", ""),
+                          # 转过的字（V6 发射扇顺着辐条写的标签）：绕自己的 (x, y) 顺时针转这么多度
+                          "rot": float(rt.group(1)) if (rt := re.search(r"rotate\(\s*(-?[\d.]+)",
+                                                                        a.get("transform", ""))) else 0.0})
         elif kind == "rect":
             w, h = _f(a, "width"), _f(a, "height")
             if w <= 0 or h <= 0:
@@ -235,7 +246,7 @@ def attach_text(prims, W=None, H=None):
         canvas = W * H
         shapes = [s for s in shapes if s["w"] * s["h"] < 0.9 * canvas]
     for p in prims:
-        if p["k"] != "text":
+        if p["k"] != "text" or p.get("rot"):         # 转过的字不归入任何形状：自己一个文本框
             continue
         host, best = None, None
         for s in shapes:
@@ -321,8 +332,9 @@ def _run(t):
     # the engineered texture that is half of what defines the mode.
     spc = int(round(float(t.get("track", 0) or 0) * PT_PER_PX * 100))
     spc_attr = f' spc="{spc}"' if spc else ""
+    bold = t["bold"] or (t.get("title") and not _TITLE[0])
     return (f'<a:r><a:rPr lang="zh-CN" altLang="en-US" sz="{sz}"{spc_attr} '
-            f'b="{1 if t["bold"] else 0}" dirty="0">{_solid(t["fill"])}{fam}</a:rPr>'
+            f'b="{1 if bold else 0}" dirty="0">{_solid(t["fill"])}{fam}</a:rPr>'
             f'<a:t>{escape(t["t"])}</a:t></a:r>')
 
 
@@ -332,6 +344,8 @@ def _face(p):
     "sans-serif" CONTAINS "serif" — testing for the latter first mapped every
     body stack ('PingFang SC', …, sans-serif) and 歸藏风's sans title onto the
     Song face. Sans is therefore tested FIRST."""
+    if p.get("title") and _TITLE[0]:
+        return _TITLE[0]
     low = p.get("family", "").lower()
     if "mono" in low:
         return _FONTS["mono"]
@@ -528,8 +542,17 @@ def _connector(sid, p):
 
 def _text_w(s, fs, track=0.0):
     """Same metric the renderers wrap with (CJK ≈ 1 em, latin ≈ 0.56 em), plus
-    any tracking, which 歸藏风 applies to Latin runs."""
-    return sum(fs if ord(c) > 0x2E7F else fs * 0.56 for c in s) + track * max(0, len(s) - 1)
+    any tracking, which 歸藏风 applies to Latin runs.
+
+    Accumulated char by char, left to right — NOT with sum(). From Python 3.12
+    sum() does compensated summation on floats, so the same label could land
+    1 EMU apart on 3.11 and 3.12+ whenever the width sits on a rounding
+    boundary (found by V6 0.10.0: one text box in the converge example). The
+    plain loop gives the 3.11 answer on every version."""
+    w = 0.0
+    for c in s:
+        w += fs if ord(c) > 0x2E7F else fs * 0.56
+    return w + track * max(0, len(s) - 1)
 
 
 def _textbox(sid, p, W):
@@ -545,9 +568,17 @@ def _textbox(sid, p, W):
     # and makes "is it on the slide?" impossible to answer honestly.
     h = fs * 1.05
     y = p["y"] - fs * 0.88
+    rot = ""
+    if p.get("rot"):
+        # SVG 绕基线上的锚点转；PowerPoint 绕文本框中心转。把中心绕锚点转过去，框放在那里再标 rot，两者重合
+        a = math.radians(p["rot"])
+        cx, cy = x + w / 2 - p["x"], y + h / 2 - p["y"]
+        x = p["x"] + cx * math.cos(a) - cy * math.sin(a) - w / 2
+        y = p["y"] + cx * math.sin(a) + cy * math.cos(a) - h / 2
+        rot = f' rot="{int(round((p["rot"] % 360) * 60000))}"'
     return (f'<p:sp><p:nvSpPr><p:cNvPr id="{sid}" name="Text {sid}"/>'
             f'<p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr><p:spPr>'
-            f'<a:xfrm><a:off x="{_emu(x)}" y="{_emu(y)}"/>'
+            f'<a:xfrm{rot}><a:off x="{_emu(x)}" y="{_emu(y)}"/>'
             f'<a:ext cx="{max(1, _emu(w))}" cy="{max(1, _emu(h))}"/></a:xfrm>'
             f'<a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/></p:spPr>'
             f'{_txbody([p], align, "ctr")}</p:sp>')
@@ -657,7 +688,7 @@ def _layout():
             '</p:clrMapOvr></p:sldLayout>')
 
 
-def export(svg_path, out_path, fonts="master"):
+def export(svg_path, out_path, fonts="master", title_face=None):
     """Write the deck.
 
     `_FONTS` and `_SVG_SRC` are module-level because the font face and the
@@ -671,8 +702,9 @@ def export(svg_path, out_path, fonts="master"):
     global _FONTS
     if fonts not in FONT_PROFILES:
         raise ValueError(f"unknown font profile {fonts!r}; use one of {sorted(FONT_PROFILES)}")
-    prev_fonts, prev_src = _FONTS, _SVG_SRC[0]
+    prev_fonts, prev_src, prev_title = _FONTS, _SVG_SRC[0], _TITLE[0]
     _FONTS = dict(FONT_PROFILES[fonts])
+    _TITLE[0] = title_face
     svg = open(svg_path, encoding="utf-8-sig").read()
     _SVG_SRC[0] = svg
     mw = re.search(r'<svg[^>]*width="([\d.]+)"[^>]*height="([\d.]+)"', svg)
@@ -740,7 +772,7 @@ def export(svg_path, out_path, fonts="master"):
             for name, data in parts.items():
                 _zip_write(z, name, data)
     finally:
-        _FONTS, _SVG_SRC[0] = prev_fonts, prev_src
+        _FONTS, _SVG_SRC[0], _TITLE[0] = prev_fonts, prev_src, prev_title
     return out_path, len(shapes)
 
 
@@ -799,6 +831,15 @@ def audit_deck(pptx_path):
         if not off:
             continue
         x, y, cx, cy = [int(v) / EMU_PER_PX for v in off.groups()]
+        rt = re.search(r'<a:xfrm[^>]* rot="(\d+)"', sp)
+        if rt:                                   # 转过的框：按转过之后的外接矩形核是否在页内
+            a = math.radians(int(rt.group(1)) / 60000)
+            mx, my = x + cx / 2, y + cy / 2
+            ex = abs(cx / 2 * math.cos(a)) + abs(cy / 2 * math.sin(a))
+            ey = abs(cx / 2 * math.sin(a)) + abs(cy / 2 * math.cos(a))
+            x, y, bw, bh = mx - ex, my - ey, 2 * ex, 2 * ey
+        else:
+            bw, bh = cx, cy
         runs = re.findall(r'sz="(\d+)"[^>]*>.*?<a:t>(.*?)</a:t>', sp, re.S)
         for pts, txt in runs:
             fs_px = int(pts) / 100.0 / PT_PER_PX
@@ -808,6 +849,6 @@ def audit_deck(pptx_path):
                            f"(font {fs_px:.1f}px)")
             if fs_px > cy + 1:
                 bad.append(f"{txt[:16]!r} is {fs_px:.1f}px tall in a {cy:.0f}px box")
-            if x < -1 or y < -1 or x + cx > W + 1 or y + cy > H + 1:
+            if x < -1 or y < -1 or x + bw > W + 1 or y + bh > H + 1:
                 bad.append(f"{txt[:16]!r} sits off the slide")
     return bad

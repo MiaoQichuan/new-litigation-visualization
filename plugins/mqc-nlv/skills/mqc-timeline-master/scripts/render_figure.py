@@ -194,3 +194,13 @@ if __name__ == "__main__":
     print(f"PNG 导出请放大 {paper.raster_scale(w)} 倍（纸上 "
           f"{paper.raster_dpi(w):.0f} dpi，印刷下限 {paper.PRINT_DPI}）")
     print(f"已写入 {out}")
+    # 未上图披露：直接拿地图出图时没有原句可比，但地图里写了 body / items 的，
+    # 渲染器一个字都不画 —— 照实说出来，不许静默丢掉（方案一，见 omission.py）。
+    try:
+        import omission as _OM
+        _recs = _OM.review_map(m)
+        if _OM.with_omission(_recs) or _OM.flagged(_recs):
+            for _ln in _OM.summary_lines(_recs, with_index=False):
+                print(_ln)
+    except Exception as _exc:                     # 披露失败也要说出来，不吞
+        print(f"未上图核对没有做成（{type(_exc).__name__}），请人工核对正文是否上图。")

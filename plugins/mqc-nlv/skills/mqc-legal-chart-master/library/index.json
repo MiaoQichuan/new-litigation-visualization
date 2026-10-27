@@ -1,23 +1,23 @@
 {
  "version": 1,
- "count": 410,
+ "count": 430,
  "form_usage": {
   "waffle": 28,
   "timeline": 27,
   "waterfall": 23,
-  "matrix": 21,
+  "matrix": 22,
   "flow": 20,
+  "hbar": 18,
   "relation": 17,
-  "hbar": 16,
   "journey": 16,
   "stack": 15,
   "ribbon": 14,
   "countdown": 13,
   "icons": 12,
-  "interval": 11,
   "board": 10,
   "table": 10,
   "stepcurve": 10,
+  "interval": 8,
   "bubbles": 8,
   "lines": 7,
   "iceberg": 7,
@@ -25,14 +25,17 @@
   "puzzle": 6,
   "treemap": 6,
   "gauge": 6,
+  "dumbbell": 6,
   "cardwall": 5,
   "slope": 5,
   "fishbone": 5,
   "quadrant": 4,
   "dandelion": 4,
-  "dumbbell": 4,
   "funnel": 4,
   "venn": 4,
+  "converge": 4,
+  "cascade": 4,
+  "lineage": 4,
   "number": 3,
   "planactual": 3,
   "tree": 3,
@@ -46,6 +49,8 @@
   "lifecycle": 3,
   "layers": 3,
   "paired": 3,
+  "fan": 3,
+  "radpie": 3,
   "strip": 2,
   "breakpoint": 2,
   "spectrum": 2,
@@ -234,7 +239,7 @@
    "question": "几种处理方案各自的金额区间？",
    "example": "和解报价区间与类案判赔区间并排。",
    "guard": "执业规范：不得画成结果承诺；须注明来源为类案",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "GEN-12",
@@ -249,7 +254,7 @@
    "question": "每个待证事实靠哪几份证据撑着？",
    "example": "证据 × 要件点阵：实心直接证明、空心间接证明、空列为缺口。",
    "guard": "证明力由律师标注，不由模型判断",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "GEN-13",
@@ -384,7 +389,7 @@
    "question": "哪些事实因素和结果相关？",
    "example": "有无书面合同、有无转账凭证 × 支持/驳回，旁边算支持率。",
    "guard": "固定写「相关不等于因果」",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "GEN-22",
@@ -399,7 +404,7 @@
    "question": "控制其他变量后，每个因素作用多大？",
    "example": "回归系数与 95% 置信区间。",
    "guard": "数值须来自用户的统计输出",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "GEN-23",
@@ -983,7 +988,7 @@
    "question": "风险集中在哪类条款、有多严重？",
    "example": "条款类别 × 严重程度，点大小为问题条数。",
    "guard": "按条数计，不打主观分",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "CON-08",
@@ -1194,7 +1199,7 @@
   {
    "id": "FIN-07",
    "area": "FIN",
-   "form": "interval",
+   "form": "hbar",
    "intent": "risk",
    "scenes": [
     "client",
@@ -1204,7 +1209,7 @@
    "question": "担保物够不够覆盖债权？",
    "example": "债权 5 亿，抵押 3.2 亿、质押 0.8 亿，覆盖率 80%。",
    "guard": "覆盖率由脚本算",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "FIN-08",
@@ -1439,7 +1444,7 @@
    "question": "法院支持查阅哪些材料？",
    "example": "材料类型 × 支持 / 不支持件数。",
    "guard": "",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "COR-08",
@@ -1646,7 +1651,7 @@
    "question": "问题集中在哪个领域、多严重？",
    "example": "法律领域 × 严重程度，点大小为问题数。",
    "guard": "按条数计",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "MNA-08",
@@ -1813,7 +1818,7 @@
   {
    "id": "BKR-02",
    "area": "BKR",
-   "form": "interval",
+   "form": "dumbbell",
    "intent": "compare",
    "scenes": [
     "deal",
@@ -1823,7 +1828,7 @@
    "question": "重整比清算多拿回多少？",
    "example": "按债权类别，模拟清算与重整清偿率并排。",
    "guard": "数值来自评估与偿债能力分析报告",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "BKR-03",
@@ -2162,7 +2167,7 @@
    "question": "开发各阶段要拿哪些证照、拿到了没有？",
    "example": "开发阶段 × 证照，已取得与缺失。",
    "guard": "",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "CST-11",
@@ -2250,7 +2255,7 @@
    "question": "被诉产品落入权利要求了吗？",
    "example": "权利要求逐特征 × 被诉产品，标相同、等同、不同。",
    "guard": "权利要求原文照录",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "IP-02",
@@ -2384,7 +2389,7 @@
    "question": "被告技术用了哪些秘点？",
    "example": "秘点 × 被告技术，相同、实质相同、不同。",
    "guard": "",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "IP-11",
@@ -2560,7 +2565,7 @@
    "question": "中介机构一般被判承担多大比例？",
    "example": "各类中介的责任比例区间。",
    "guard": "",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "SEC-08",
@@ -2750,7 +2755,7 @@
    "question": "各类用工风险在哪个环节？",
    "example": "入职、在职、离职 × 风险类别。",
    "guard": "",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "LAB-08",
@@ -2968,7 +2973,7 @@
    "question": "精神损害赔偿一般判多少？",
    "example": "判赔区间与中位数。",
    "guard": "",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "FAM-09",
@@ -3102,7 +3107,7 @@
    "question": "同类案件一般判多久？",
    "example": "一批判决的刑期区间与中位数。",
    "guard": "",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "CRM-06",
@@ -3117,7 +3122,7 @@
    "question": "自首、退赃、认罪认罚与刑期的关系。",
    "example": "情节 × 刑期段。",
    "guard": "相关不等于因果",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "CRM-07",
@@ -3411,7 +3416,7 @@
    "question": "同一件事各国怎么规定？",
    "example": "中国、欧盟、美国、新加坡 × 是否需评估、是否需同意。",
    "guard": "格子只放有/无/附条件，原文进注释",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "DAT-03",
@@ -3426,7 +3431,7 @@
    "question": "各项义务完成了没有？",
    "example": "义务清单 × 业务线，已满足、部分、未满足。",
    "guard": "",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "DAT-04",
@@ -3660,7 +3665,7 @@
    "question": "各法域在这件事上怎么规定？",
    "example": "国家 × 规则要点。",
    "guard": "格子只放有/无/附条件",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "CBX-02",
@@ -3702,7 +3707,7 @@
    "question": "各仲裁机构一般多久、多少钱？",
    "example": "周期与费用区间。",
    "guard": "数据来源须注明",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "CBX-05",
@@ -4046,7 +4051,7 @@
    "question": "各阶段手续是否齐全。",
    "example": "阶段 × 手续。",
    "guard": "",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "ENV-06",
@@ -4150,7 +4155,7 @@
    "question": "几款工具各能做什么？",
    "example": "工具 × 功能，有、无、部分。",
    "guard": "",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "LAI-06",
@@ -4170,7 +4175,7 @@
   {
    "id": "LAI-07",
    "area": "LAI",
-   "form": "interval",
+   "form": "dumbbell",
    "intent": "compare",
    "scenes": [
     "ai"
@@ -4179,7 +4184,7 @@
    "question": "用了之后快了多少？",
    "example": "每类任务耗时的前后区间。",
    "guard": "",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "LAI-08",
@@ -4533,7 +4538,7 @@
   {
    "id": "EXE-04",
    "area": "EXE",
-   "form": "interval",
+   "form": "hbar",
    "intent": "risk",
    "scenes": [
     "client",
@@ -4543,7 +4548,7 @@
    "question": "查封的资产够不够还债？",
    "example": "房产、股权、存款评估值与债权额对照。",
    "guard": "覆盖率由脚本算",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "EXE-05",
@@ -4717,7 +4722,7 @@
    "question": "同类伤情一般判多少？",
    "example": "按伤残等级的判赔区间。",
    "guard": "",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "PIN-07",
@@ -4790,7 +4795,7 @@
    "question": "每个环节是否符合诊疗规范？",
    "example": "诊疗环节 × 规范要求，符合、不符合、无法判断。",
    "guard": "规范来源须注明",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "MED-05",
@@ -5173,7 +5178,7 @@
    "question": "各业务环节的合规制度建好了没有？",
    "example": "环节 × 制度，已建、在建、缺失。",
    "guard": "",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "SOE-04",
@@ -5233,7 +5238,7 @@
    "question": "哪些议题对企业和利益相关方都重要？",
    "example": "议题落在两个维度的格子里。",
    "guard": "评分来源须注明",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "ESG-02",
@@ -5438,7 +5443,7 @@
    "question": "两部作品哪些情节相似？",
    "example": "情节单元 × 两部作品，相同、相似、不同。",
    "guard": "",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "CUL-05",
@@ -5614,7 +5619,7 @@
    "question": "各环节风险点查了没有？",
    "example": "环节 × 风险点。",
    "guard": "",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "PRO-06",
@@ -5688,7 +5693,7 @@
    "question": "哪些文件存在合法性问题？",
    "example": "文件 × 审查要点。",
    "guard": "",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "GOV-05",
@@ -5841,7 +5846,7 @@
    "question": "多少线索最后进了判决？",
    "example": "线索、立案、移送起诉、起诉、有罪判决逐级件数。",
    "guard": "层宽由件数算出；口径须逐级写明",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "LAB-15",
@@ -5856,7 +5861,7 @@
    "question": "多少仲裁案件走到了二审？",
    "example": "申请仲裁、裁决、起诉、上诉逐级件数。",
    "guard": "层宽由件数算出",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "FIRM-14",
@@ -5871,7 +5876,7 @@
    "question": "咨询多少、签约多少、结案多少？",
    "example": "律所年度案源漏斗。",
    "guard": "层宽由件数算出",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "IP-16",
@@ -5886,7 +5891,7 @@
    "question": "无效请求有多少走到全部无效？",
    "example": "请求、受理、审查、全部无效、部分无效。",
    "guard": "",
-   "status": "todo"
+   "status": "ready"
   },
   {
    "id": "GEN-57",
@@ -6125,6 +6130,314 @@
    "example": "形式说与实质说并排。",
    "guard": "观点须注明出处",
    "status": "todo"
+  },
+  {
+   "id": "GEN-63",
+   "area": "GEN",
+   "form": "fan",
+   "intent": "spread",
+   "scenes": [
+    "research",
+    "report",
+    "firm"
+   ],
+   "name": "各类案件审理周期",
+   "question": "哪类案件审得最久、量又有多大？",
+   "example": "各案由一根辐条，平均审理周数为辐条上的点数，圆面积为收案件数。",
+   "guard": "辐条长与圆面积各自由数值算出，不凭感觉排",
+   "status": "ready"
+  },
+  {
+   "id": "CST-17",
+   "area": "CST",
+   "form": "fan",
+   "intent": "progress",
+   "scenes": [
+    "case",
+    "client",
+    "trial"
+   ],
+   "name": "工程各项工期延误",
+   "question": "哪几项工作拖得最久？",
+   "example": "各分项工程一根辐条，实际工期（周）为点数，圆面积为延误损失金额。",
+   "guard": "工期以合同与签证为准，逐项注明来源",
+   "status": "ready"
+  },
+  {
+   "id": "EXE-11",
+   "area": "EXE",
+   "form": "fan",
+   "intent": "spread",
+   "scenes": [
+    "research",
+    "gov"
+   ],
+   "name": "执行各环节耗时",
+   "question": "执行案件卡在哪个环节最久？",
+   "example": "查控、评估、拍卖、分配各环节平均天数。",
+   "guard": "天数由立案、结案日期算出",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-64",
+   "area": "GEN",
+   "form": "converge",
+   "intent": "structure",
+   "scenes": [
+    "research",
+    "case",
+    "trial"
+   ],
+   "name": "争议焦点归类",
+   "question": "几十个争议焦点，集中在哪几类问题上？",
+   "example": "类案判决归纳的争议焦点，按主题汇聚，枢纽面积为焦点数。",
+   "guard": "归类标准事先写明，焦点逐条可查",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-65",
+   "area": "GEN",
+   "form": "converge",
+   "intent": "structure",
+   "scenes": [
+    "case",
+    "client",
+    "trial"
+   ],
+   "name": "诉讼请求归类",
+   "question": "这一串诉请其实是哪几类主张？",
+   "example": "本金、利息、违约金、费用、担保责任五类诉请逐条汇聚。",
+   "guard": "诉请原文照录，归类不改原意",
+   "status": "ready"
+  },
+  {
+   "id": "CON-17",
+   "area": "CON",
+   "form": "converge",
+   "intent": "contest",
+   "scenes": [
+    "trial",
+    "case"
+   ],
+   "name": "证据归入待证事实",
+   "question": "每份证据证明的是哪一项待证事实？",
+   "example": "证据目录逐份汇入待证事实，枢纽面积为证据份数。",
+   "guard": "证明目的照录证据目录",
+   "status": "ready"
+  },
+  {
+   "id": "DAT-17",
+   "area": "DAT",
+   "form": "converge",
+   "intent": "risk",
+   "scenes": [
+    "training",
+    "client"
+   ],
+   "name": "合规问题归类",
+   "question": "几十个合规发现集中在哪几类风险？",
+   "example": "个人信息、数据出境、内部制度、第三方管理四类。",
+   "guard": "按条数计，不打主观分",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-66",
+   "area": "GEN",
+   "form": "matrix",
+   "intent": "trend",
+   "scenes": [
+    "research",
+    "report",
+    "firm"
+   ],
+   "name": "历年收案年鉴",
+   "question": "这几年哪类案件涨得最快？",
+   "example": "年份 × 案由的收案件数，气泡面积为件数，当年数据不全的一年画虚线圈。",
+   "guard": "行列合计由脚本算；虚线圈须写明含义",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-67",
+   "area": "GEN",
+   "form": "cascade",
+   "intent": "count",
+   "scenes": [
+    "research",
+    "case",
+    "paper"
+   ],
+   "name": "争点出现频次",
+   "question": "类案判决里，哪些争点出现得最多？",
+   "example": "168 份判决中各争点出现的件数，一格一件，由少到多排成阶梯。",
+   "guard": "一份判决可涉及几项争点：件数之和不等于 n，口径写明",
+   "status": "ready"
+  },
+  {
+   "id": "CON-18",
+   "area": "CON",
+   "form": "cascade",
+   "intent": "count",
+   "scenes": [
+    "research",
+    "client"
+   ],
+   "name": "违约事由频次",
+   "question": "买卖合同纠纷里，违约多因为什么？",
+   "example": "逾期付款、质量异议、逾期交货等事由各出现几件。",
+   "guard": "事由按判决认定归类，归类标准事先写明",
+   "status": "ready"
+  },
+  {
+   "id": "LAB-16",
+   "area": "LAB",
+   "form": "cascade",
+   "intent": "count",
+   "scenes": [
+    "research",
+    "training"
+   ],
+   "name": "劳动争议请求类型",
+   "question": "劳动仲裁里，员工最常主张什么？",
+   "example": "加班费、经济补偿、未签合同二倍工资等请求各几件。",
+   "guard": "一案多请求，件数之和不等于 n",
+   "status": "ready"
+  },
+  {
+   "id": "CRM-19",
+   "area": "CRM",
+   "form": "cascade",
+   "intent": "count",
+   "scenes": [
+    "research"
+   ],
+   "name": "量刑情节出现频次",
+   "question": "判决里最常被认定的量刑情节是什么？",
+   "example": "自首、坦白、退赃、认罪认罚各出现几件。",
+   "guard": "情节照录判决认定",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-68",
+   "area": "GEN",
+   "form": "lineage",
+   "intent": "narrate",
+   "scenes": [
+    "newlaw",
+    "research",
+    "teach"
+   ],
+   "name": "法律与司法解释沿革",
+   "question": "这几部法律何时通过、改过几次、哪些已废止？",
+   "example": "公司法、民事诉讼法的历次修改，民法典施行后废止的担保法、合同法、物权法。",
+   "guard": "年份照录公布文本，修改次数由脚本数",
+   "status": "ready"
+  },
+  {
+   "id": "COR-16",
+   "area": "COR",
+   "form": "lineage",
+   "intent": "narrate",
+   "scenes": [
+    "newlaw",
+    "training",
+    "board"
+   ],
+   "name": "公司法修订脉络",
+   "question": "公司法改了几次，这次改在什么背景下？",
+   "example": "1993 年通过以来的历次修改，与配套司法解释并排。",
+   "guard": "年份以全国人大公布为准",
+   "status": "ready"
+  },
+  {
+   "id": "CON-19",
+   "area": "CON",
+   "form": "lineage",
+   "intent": "narrate",
+   "scenes": [
+    "case",
+    "trial"
+   ],
+   "name": "合同与补充协议沿革",
+   "question": "主合同签了之后，补充协议、变更、解除依次发生在哪年？",
+   "example": "主合同、三份补充协议、解除通知并排，用 marks 改成「签订 / 变更 / 终止」。",
+   "guard": "年份照录合同落款",
+   "status": "ready"
+  },
+  {
+   "id": "DAT-18",
+   "area": "DAT",
+   "form": "lineage",
+   "intent": "narrate",
+   "scenes": [
+    "newlaw",
+    "training"
+   ],
+   "name": "数据合规规则沿革",
+   "question": "个人信息与数据安全规则这些年怎么一层层加上来？",
+   "example": "网络安全法、数据安全法、个人信息保护法与配套规定的施行与修改。",
+   "guard": "年份照录公布文本",
+   "status": "ready"
+  },
+  {
+   "id": "PIN-09",
+   "area": "PIN",
+   "form": "interval",
+   "intent": "compare",
+   "scenes": [
+    "research",
+    "client"
+   ],
+   "name": "各地判赔区间",
+   "question": "同类伤情，各地一般判多少？",
+   "example": "各地精神损害抚慰金的最低到最高判赔额，白点为中位数。",
+   "guard": "区间来自类案，不得画成对结果的承诺",
+   "status": "ready"
+  },
+  {
+   "id": "GEN-69",
+   "area": "GEN",
+   "form": "radpie",
+   "intent": "compose",
+   "scenes": [
+    "research",
+    "report",
+    "firm"
+   ],
+   "name": "案件构成与审理时长",
+   "question": "哪类案件占比不大、却审得最久？",
+   "example": "各案由收案占比为角度，平均审理天数为扇区长度。",
+   "guard": "占比由脚本算；天数口径写明（立案到结案）",
+   "status": "ready"
+  },
+  {
+   "id": "FIRM-15",
+   "area": "FIRM",
+   "form": "radpie",
+   "intent": "compose",
+   "scenes": [
+    "firm",
+    "pitch"
+   ],
+   "name": "业务构成与平均标的",
+   "question": "律所各业务线的案件占比与平均标的额。",
+   "example": "诉讼、仲裁、非诉、顾问的件数占比与平均标的。",
+   "guard": "件数与标的额口径分别写明",
+   "status": "ready"
+  },
+  {
+   "id": "EXE-12",
+   "area": "EXE",
+   "form": "radpie",
+   "intent": "compose",
+   "scenes": [
+    "research",
+    "gov"
+   ],
+   "name": "执行案件构成与执行到位率",
+   "question": "哪类执行案件多，又最难执行到位？",
+   "example": "各类执行案件占比为角度，平均执行到位率为长度。",
+   "guard": "到位率由脚本算，size_unit 写 %",
+   "status": "ready"
   }
  ]
 }

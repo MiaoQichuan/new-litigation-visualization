@@ -6,6 +6,7 @@
 而且报的是该报的那一条」——报错报到别的守卫上，也算这一条没守住。
 """
 import json
+import math
 import os
 import sys
 
@@ -354,6 +355,217 @@ def p_g9h():
 
 trial("汇入图的流带被磨了圆角", "G9", "ribbon-funds", p_g9h)
 trial("桑基的流带被磨了圆角", "G9", "sankey-appeals", p_g9h)
+
+# ---- 0.10.0 新画法的几何守卫 -------------------------------------------------
+# G5 面积：半径没开平方（按数值线性放大）。全部同比例放大仍是成正比的，守卫不该报；
+# 所以改坏成「半径 ∝ 数值」——大的更大、小的更小，面积与数值就不成正比了。
+def p_g5e():
+    orig = charts.Fig.circle
+
+    def bad(self, cx, cy, r, fill, stroke=None, sw=1, dash=None, **meta):
+        if meta.get("role") == "bubble":
+            ex = meta.get("extra") or {}
+            if ex.get("rmax") and ex.get("vmax"):
+                r = ex["rmax"] * meta["value"] / ex["vmax"]
+        return orig(self, cx, cy, r, fill, stroke, sw, dash, **meta)
+    return setattr_undo(charts.Fig, "circle", bad)
+
+
+trial("气泡矩阵的气泡半径没开平方（歸藏风）", "G5", "matrix-filings", p_g5e, style="歸藏风")
+trial("发射扇的外圈圆半径没开平方", "G5", "fan-durations", p_g5e)
+
+
+def p_g5f():
+    orig = charts._pebble
+
+    def bad(cx, cy, r, key, corner):
+        return orig(cx, cy, r * (1.3 if key.endswith("|sale") else 1.0), key, corner)
+    return setattr_undo(charts, "_pebble", bad)
+
+
+trial("气泡矩阵的卵石形气泡面积不对（奇川风）", "G5", "matrix-filings", p_g5f)
+
+
+def p_g5g():
+    orig = charts.Fig.circle
+
+    def bad(self, cx, cy, r, fill, stroke=None, sw=1, dash=None, **meta):
+        if meta.get("role") == "hub" and meta.get("id") == "cost":
+            r = r * 1.5
+        return orig(self, cx, cy, r, fill, stroke, sw, dash, **meta)
+    return setattr_undo(charts.Fig, "circle", bad)
+
+
+trial("放射汇聚的一个枢纽面积不对", "G5", "converge-issues", p_g5g)
+
+
+def p_g5h():
+    orig = charts.Fig.rect
+
+    def bad(self, x, y, w, h, *a, **k):
+        if k.get("role") == "stage" and k.get("id") == "part":
+            w = w * 1.2
+        return orig(self, x, y, w, h, *a, **k)
+    return setattr_undo(charts.Fig, "rect", bad)
+
+
+trial("漏斗的一级条宽不对", "G5", "funnel-enforcement", p_g5h)
+
+
+def p_g6b():
+    orig = charts.Fig.rect
+
+    def bad(self, x, y, w, h, *a, **k):
+        if k.get("role") == "stage" and k.get("id") == "measure":
+            x = x + 25
+        return orig(self, x, y, w, h, *a, **k)
+    return setattr_undo(charts.Fig, "rect", bad)
+
+
+trial("漏斗的一级偏离中线", "G6", "funnel-enforcement", p_g6b)
+
+
+def p_g5i():
+    orig = charts.Fig.line
+
+    def bad(self, x1, y1, x2, y2, *a, **k):
+        if k.get("role") == "spoke" and k.get("id") == "ip":
+            x2, y2 = x1 + (x2 - x1) * 1.25, y1 + (y2 - y1) * 1.25
+        return orig(self, x1, y1, x2, y2, *a, **k)
+    return setattr_undo(charts.Fig, "line", bad)
+
+
+trial("发射扇的一根辐条长度不对", "G5", "fan-durations", p_g5i)
+
+
+def p_g6c():
+    orig = charts.Fig.line
+
+    def bad(self, x1, y1, x2, y2, *a, **k):
+        if k.get("role") == "spoke" and k.get("id") == "sale":
+            x1, x2 = x1 + 20, x2 + 20
+        return orig(self, x1, y1, x2, y2, *a, **k)
+    return setattr_undo(charts.Fig, "line", bad)
+
+
+trial("发射扇的一根辐条不是从根发出的", "G6", "fan-durations", p_g6c)
+trial("漏斗的收窄带被磨了圆角", "G9", "funnel-enforcement", p_g9h)
+
+
+# ---- 0.11.0 四种新画法：每一条新守卫都要能失败
+def p_g5j():
+    orig = charts.Fig.module
+
+    def bad(self, cx, cy, side, *a, **k):
+        if k.get("id") == "price" and (k.get("extra") or {}).get("col") is not None and cy < 330:
+            return None                                 # 价款一列少画几格
+        return orig(self, cx, cy, side, *a, **k)
+    return setattr_undo(charts.Fig, "module", bad)
+
+
+trial("点阵阶梯的一列少了格", "G5", "cascade-issues", p_g5j)
+
+
+def p_g9i():
+    orig = charts.Fig.module
+
+    def bad(self, cx, cy, side, fill, stroke=None, sw=1, dash=None, **meta):
+        return self.circle(cx, cy, side / 2, fill, stroke, sw, dash, **meta)
+    return setattr_undo(charts.Fig, "module", bad)
+
+
+trial("点阵阶梯的格画成了圆点", "G9", "cascade-issues", p_g9i)
+
+
+def p_g5k():
+    orig = charts.Fig.circle
+
+    def bad(self, cx, cy, r, fill, stroke=None, sw=1, dash=None, **meta):
+        if meta.get("role") == "revise" and meta.get("id") == "company" and meta.get("value") == 2013:
+            cx += 30
+        return orig(self, cx, cy, r, fill, stroke, sw, dash, **meta)
+    return setattr_undo(charts.Fig, "circle", bad)
+
+
+trial("法条沿革的一次修改画错了年份位置", "G5", "lineage-laws", p_g5k)
+
+
+def p_g5l():
+    orig = charts.Fig.line
+
+    def bad(self, x1, y1, x2, y2, *a, **k):
+        if k.get("role") == "life" and k.get("id") == "contract":
+            x2 += 40                                    # 已废止的法律，线却画过了废止年份
+        return orig(self, x1, y1, x2, y2, *a, **k)
+    return setattr_undo(charts.Fig, "line", bad)
+
+
+trial("法条沿革的生命线画过了废止年份", "G5", "lineage-laws", p_g5l)
+
+
+def p_g5m():
+    orig = charts.Fig.rect
+
+    def bad(self, x, y, w, h, *a, **k):
+        if k.get("role") == "range" and k.get("id") == "sh":
+            y, h = y - 20, h + 20                       # 上沿多画了一截
+        return orig(self, x, y, w, h, *a, **k)
+    return setattr_undo(charts.Fig, "rect", bad)
+
+
+trial("区间胶囊的上沿不在 to 上", "G5", "interval-solatium", p_g5m)
+
+
+def p_g6d():
+    orig = charts.Fig.line
+
+    def bad(self, x1, y1, x2, y2, *a, **k):
+        if k.get("role") == "axis":
+            k = dict(k, role="grid")                    # 0 线没了
+        return orig(self, x1, y1, x2, y2, *a, **k)
+    return setattr_undo(charts.Fig, "line", bad)
+
+
+trial("区间胶囊没有 0 线", "G6", "interval-solatium", p_g6d)
+
+
+def p_g5n():
+    orig = charts._annulus
+
+    def bad(cx, cy, r0, r1, a0, a1):
+        if abs(a0 + math.pi / 2) < 1e-9:                # 第一块扇区多画 20% 的角度
+            a1 = a0 + (a1 - a0) * 1.2
+        return orig(cx, cy, r0, r1, a0, a1)
+    return setattr_undo(charts, "_annulus", bad)
+
+
+trial("双读饼的一块角度与占比不符", "G5", "radpie-durations", p_g5n)
+
+
+def p_g5o():
+    orig = charts._annulus
+
+    def bad(cx, cy, r0, r1, a0, a1):
+        if abs(a0 + math.pi / 2) < 1e-9:
+            r1 = r0 + (r1 - r0) * 1.25                  # 长度没按 size 算
+        return orig(cx, cy, r0, r1, a0, a1)
+    return setattr_undo(charts, "_annulus", bad)
+
+
+trial("双读饼的一块长度与 size 不符", "G5", "radpie-durations", p_g5o)
+
+
+def p_g6e():
+    orig = charts._annulus
+
+    def bad(cx, cy, r0, r1, a0, a1):
+        if abs(a0 + math.pi / 2) < 1e-9:
+            r0 = r0 * 0.6                               # 不是从内圈量起
+        return orig(cx, cy, r0, r1, a0, a1)
+    return setattr_undo(charts, "_annulus", bad)
+
+
+trial("双读饼的一块不是从内圈量起的", "G6", "radpie-durations", p_g6e)
 
 fails = [l for l, g in rows if not g]
 print(f"\n  {len(rows) - len(fails)}/{len(rows)} 条守卫确认可失败")

@@ -1,7 +1,7 @@
 {
   "name": "mqc-nlv",
   "description": "新诉讼可视化 · New Litigation Visualization。诉讼 skill 集：模型只出 JSON，确定性脚本算和验。出图的交 SVG / PNG / PPTX / VSDX / drawio 等可继续编辑的源文件；出表的交 Word 交付版、Excel 母表、可直接呈报的 A4 简表，与供下游读取的案件事实底稿。庭前三大法宝已齐：大事记表大师、庭审对抗图大师、法律关系图大师。新增 V6 法律图表大师：把法律数据画成精炼的统计图，标题里的数字必须由数据推得出。新增 V7 法律课件大师（法律图表页助手）：把 V1–V6 的图吸进磁吸网格，配结论、读图要点与法条，导出可整页或框选粘进自己课件的可编辑 PPTX。",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "author": {
     "name": "缪奇川",
     "url": "https://github.com/MiaoQichuan"

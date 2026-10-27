@@ -45,6 +45,9 @@ items.json
 # 法律课件大师：几方同时写课件时的锁文件与暂存文件（在用户的课件文件夹里，不入库）
 .nlv-lock
 *.nlv-new
+# 独立运行的编辑器（studio.py --detach）记下的网址、进程号与日志
+.nlv-studio.json
+.nlv-studio.log
 
 # ---- 系统 / 编辑器 ----
 .DS_Store

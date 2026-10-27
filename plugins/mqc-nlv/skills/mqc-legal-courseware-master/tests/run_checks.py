@@ -30,6 +30,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -191,7 +192,7 @@ def t_validate():
     check("新建课件可用：标题照写，第一页是空页（编辑器请律师先选场景）", D.validate(nd) is None and nd["title"] == "新课件"
           and nd["slides"][0]["modules"] == [])
     _, rnd = D.compose(nd, 0, DEMO, {})
-    check("空页导出前被拦下，并告诉律师去「选图」点场景", any("还是空的" in p_ and "选图" in p_ for p_ in rnd["problems"]), rnd["problems"])
+    check("空页导出前被拦下，并告诉律师去「图表库」挑图或「诉讼图」点场景", any("还是空的" in p_ and "图表库" in p_ and "诉讼图" in p_ for p_ in rnd["problems"]), rnd["problems"])
     # 旧格式自动升级
     v1 = {"schema": "mqc-nlv/deck@1", "title": "旧", "style": "奇川风", "slides": [
         {"id": "s1", "layout": "cover", "slots": {"title": {"type": "text", "text": "旧课件"},
@@ -1623,6 +1624,174 @@ def t_prov(td):
     check("演讲者备注只写有出处的（没写出处的不往备注里写「没写」）", any("判决书第2页" in x for x in nl) and not any(x.startswith("· 乙公司：") for x in nl), nl)
 
 
+def t_detach(td):
+    """0.9.0：由 AI 助手（Agent）代开编辑器。模拟 Agent 的命令工具：新进程组跑命令、管道收输出，命令结束后掐整个进程组。"""
+    import signal
+    proj = os.path.join(td, "detach")
+    shutil.copytree(DEMO, proj)
+    cli = os.path.join(ROOT, "scripts", "studio.py")
+    op = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+
+    def alive(url):
+        try:
+            with op.open(url + "api/ping", timeout=3) as r:
+                return json.loads(r.read().decode("utf-8"))
+        except Exception:
+            return None
+
+    def agent(*args, env=None):
+        t0 = time.time()
+        kw = {"start_new_session": True} if os.name != "nt" else {}
+        p = subprocess.Popen([sys.executable, cli, proj, *args], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, **kw)
+        try:
+            out, err = p.communicate(timeout=60)
+        except subprocess.TimeoutExpired:
+            p.kill()
+            return 99, "", "命令 60 秒没返回（输出管道被占着）", 60
+        if os.name != "nt":
+            try:
+                os.killpg(p.pid, signal.SIGTERM)
+            except (ProcessLookupError, PermissionError):
+                pass
+            time.sleep(1.0)
+        return p.returncode, out.decode("utf-8", "replace"), err.decode("utf-8", "replace"), time.time() - t0
+
+    rc, out, err, dt = agent("--detach", "--no-open", "--port", "18790")
+    m = re.search(r"http://127\.0\.0\.1:\d+/", out)
+    url = m.group(0) if m else ""
+    check("--detach：返回 0 并打印网址", rc == 0 and url, (rc, out, err))
+    check("--detach：命令马上返回，不占 Agent 的输出管道（Agent 等管道关上才算命令结束）", dt < 20, dt)
+    info = alive(url) if url else None
+    check("--detach：Agent 掐掉自己的进程组后，编辑器还在，开的是这套课件",
+          info and os.path.normcase(info["dir"]) == os.path.normcase(os.path.abspath(proj)), info)
+    rc2, out2, err2, _ = agent("--detach", "--no-open")
+    check("--detach 再开一次：认出已开着、给原网址，不开第二个", rc2 == 0 and "已经开着" in out2 and url in out2, (out2, err2))
+    bad = dict(os.environ, HTTP_PROXY="http://127.0.0.1:9", http_proxy="http://127.0.0.1:9")
+    rc3, out3, _, _ = agent("--detach", "--no-open", env=bad)
+    check("--detach：设了 HTTP 代理也照样认（连本机不走代理）", rc3 == 0 and "已经开着" in out3, out3)
+    rc4, out4, err4, _ = agent("--stop")
+    check("--stop：关掉，状态文件删掉", rc4 == 0 and "已关掉" in out4 and alive(url) is None
+          and not os.path.exists(os.path.join(proj, studio.STATE)), (out4, err4))
+    rc5, out5, _, _ = agent("--stop")
+    check("--stop：没开着时不报错", rc5 == 0 and "没有独立运行" in out5, out5)
+    with open(os.path.join(proj, studio.STATE), "w", encoding="utf-8") as f:
+        json.dump({"url": "http://127.0.0.1:1/", "pid": 1}, f)
+    rc6, out6, _, _ = agent("--stop")
+    check("--stop：旧状态文件里的进程号不信（不去结束进程 1）", rc6 == 0 and "已关掉" in out6, out6)
+    dev = os.path.join(td, "netdev")
+    head = "Inter-|   Receive\n face |bytes\n"
+    with open(dev, "w", encoding="ascii") as f:
+        f.write(head + "    lo: 0 0\n")
+    one = studio._net_isolated(dev)
+    with open(dev, "w", encoding="ascii") as f:
+        f.write(head + "    lo: 0 0\n  eth0: 0 0\n")
+    two = studio._net_isolated(dev)
+    check("认得出关网沙箱（只剩回环口）；有网卡时不误报",
+          (one, two) == ((True, False) if sys.platform.startswith("linux") else (False, False)), (one, two))
+
+
+def t_lib090(td):
+    """0.9.0：图表库（V6 场景库放进 V7）、示例数据拦导出、标题不再伪加粗、AI 做完就停（缪律师实测的几处问题）。"""
+    import zipfile
+    import ai as A
+    from spec import CHARTS
+    L = studio.chart_library()
+    rs = L["recipes"]
+    check("图表库：列出 V6 场景库里现在就能画的场景（100 个以上）", len(rs) >= 100, len(rs))
+    check("图表库：每个场景的画法都是 V6 已就绪的、并有示例可放", all(r["form"] in CHARTS for r in rs)
+          and {r["form"] for r in rs} <= {f["code"] for f in L["forms"]})
+    check("图表库：漏斗是备用画法，排在最后（作者定的）",
+          [r["form"] for r in rs if r["form"] == "funnel"] == [r["form"] for r in rs[-sum(1 for r in rs if r["form"] == "funnel"):]])
+    check("图表库：同一种画法不扎堆（前 10 个里至少 8 种画法）", len({r["form"] for r in rs[:10]}) >= 8, [r["form"] for r in rs[:10]])
+    check("图表库：场景都带名字、要回答的问题、适用场合", all(r["name"] and r["question"] and r["scenes"] for r in rs))
+    d = demo()
+    bad = [f["code"] for f in L["forms"] if not (studio.chart_thumb(d, DEMO, f["code"], {}) or "").startswith("<svg")]
+    check("图表库缩略图：每种画法都画得出来（发射扇、放射汇聚放大画布再画）", not bad, bad)
+    # 示例数据：放进来能看，导不出去
+    x = copy.deepcopy(d)
+    sp = json.load(open(os.path.join(studio.V6_EXAMPLES, studio.form_examples()["bar"][0] + ".json"), encoding="utf-8"))
+    sp.pop("annotations", None)
+    x["slides"][3]["modules"] = [m for m in x["slides"][3]["modules"] if m["type"] != "chart"] + \
+        [{"id": "mx", "type": "chart", "x": 0, "y": 1, "w": 8, "h": 5, "spec": sp, "sample": True, "recipe": rs[0]["id"]}]
+    x["slides"][3]["modules"] = [m for m in x["slides"][3]["modules"] if m["type"] in ("title", "chart")]
+    D.validate(x, DEMO)
+    _, rep = D.compose(x, 3, DEMO, {})
+    check("图表库放进来的示例数据：照常画出来，但导出前被拦下", any("示例数据" in p_ for p_ in rep["problems"]), rep["problems"])
+    z = copy.deepcopy(x)
+    z["slides"][3]["modules"].append({"id": "my", "type": "bullets", "x": 8, "y": 1, "w": 4, "h": 5, "items": ["a"], "sample": True})
+    check("示例记号只给图表卡", raises(lambda: D.validate(z, DEMO), D.DeckError, "图表库"))
+    proj = os.path.join(td, "lib090")
+    shutil.copytree(DEMO, proj)
+    path = os.path.join(proj, "deck.json")
+    dk = D.load(path)
+    dk["slides"][3]["modules"] = x["slides"][3]["modules"]
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(dk, f, ensure_ascii=False)
+    sid = dk["slides"][3]["id"]
+    r = A.add(proj, "tool", sid, "mx", "V6", "用我的数据")
+    ctx = A.context(proj, r)
+    check("AI 上下文带上图表库场景（要回答的问题、怎么换数据）", ctx.get("recipe", {}).get("id") == rs[0]["id"]
+          and "示例数据" in ctx["recipe"]["how"], ctx.get("recipe"))
+    check("AI 上下文：做完就停，不要一遍遍 wait（原来写「回到 wait 等下一条」，AI 一直空等不收尾）",
+          "做完就停" in ctx["answer"]["then"] and "回到 wait" not in ctx["answer"]["then"], ctx["answer"]["then"])
+    sp2 = copy.deepcopy(sp)
+    sp2["title"] = sp2["title"]
+    A.apply(proj, r["id"], {"module": {"spec": sp2}})
+    m = next(q for q in page(D.load(path), sid)["modules"] if q["id"] == "mx")
+    check("AI 交回用户的数据：示例记号去掉，场景记号留着", "sample" not in m and m.get("recipe") == rs[0]["id"], m.keys())
+    # AI 是否在等：编辑器据此提示
+    check("AI 没在 wait 时，编辑器知道", not A.listening(proj))
+    pw = subprocess.Popen([sys.executable, os.path.join(ROOT, "scripts", "ai.py"), proj, "wait", "--timeout", "4"],
+                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    seen = False
+    for _ in range(30):
+        time.sleep(0.1)
+        if A.listening(proj):
+            seen = True
+            break
+    out, _ = pw.communicate(timeout=30)
+    check("AI 在 wait 时，编辑器知道；等完了又知道", seen and not A.listening(proj) and pw.returncode == 4)
+    check("wait 等不到：告诉 AI 收尾，不要再等", "不要再 wait" in out.decode("utf-8", "replace"), out.decode("utf-8", "replace")[-200:])
+    # 标题：方正小标宋本来的字重，不加粗、不描边
+    svg, _ = D.compose(d, 3, DEMO, {})
+    heavy = [t for t in re.findall(r"<text\b[^>]*>", svg) if D._is_song(re.search(r'font-family="([^"]*)"', t).group(1))
+             and re.search(r'font-weight="(600|700|bold)"', t)]
+    check("宋体标题不再加粗、不再描边（页标题、卡片标题、V6 图的标题）", not heavy and 'stroke-width="0.3"' not in svg, heavy[:2])
+    check("宋体标题打了标题记号，导出 PPT 时据此选字", svg.count('data-title="1"') >= 3)
+    f_svg, _ = D.compose(d, next(i for i, s_ in enumerate(d["slides"]) if any(m["type"] == "figure" for m in s_["modules"])), DEMO, {})
+    f_heavy = [t for t in re.findall(r"<text\b[^>]*>", f_svg) if re.search(r'font-family="([^"]*)"', t)
+               and D._is_song(re.search(r'font-family="([^"]*)"', t).group(1)) and re.search(r'font-weight="(600|700|bold)"', t)]
+    check("V1–V5 的图放进来：图里的宋体加粗标题同样改成本来字重（旧图也照改）", not f_heavy and 'data-title="1"' in f_svg, f_heavy[:2])
+    q_svg, _ = D.compose(d, next(i for i, s_ in enumerate(d["slides"]) if any(m["type"] == "quote" for m in s_["modules"])), DEMO, {})
+    check("本来就是常规字重的宋体（金句）不动：不加标题记号", 'data-title="1"' not in q_svg)
+    check("黑体的粗字不动（一句话结论、编号）", D.unbold_titles('<text font-family="\'PingFang SC\',sans-serif" font-weight="700">x</text>')
+          == '<text font-family="\'PingFang SC\',sans-serif" font-weight="700">x</text>')
+    runs = {}
+    for tf in (None, "方正小标宋简体", "<x>"):
+        p_, _ = E.build(d, DEMO, os.path.join(td, f"tf{len(tf or '')}.pptx"), cache={}, pages=[3], title_face=tf)
+        zz = zipfile.ZipFile(p_)
+        xml = "".join(zz.read(n).decode("utf-8") for n in zz.namelist() if re.match(r"ppt/slides/slide\d+\.xml$", n))
+        runs[tf] = re.findall(r'<a:rPr[^>]*?b="(\d)"[^>]*>(?:(?!</a:rPr>).)*?typeface="([^"]*)".*?<a:t>([^<]*)</a:t>', xml, flags=re.S)
+    t0 = [r_ for r_ in runs[None] if r_[2] == "收案逐年增长"]
+    t1 = [r_ for r_ in runs["方正小标宋简体"] if r_[2] == "收案逐年增长"]
+    check("PPT 标题：没确认装了小标宋，照旧宋体加粗（别人电脑上不变样）", t0 and t0[0][:2] == ("1", "宋体"), t0)
+    check("PPT 标题：确认装了小标宋，用它、不加粗", t1 and t1[0][:2] == ("0", "方正小标宋简体"), t1)
+    check("PPT：标题以外的字不受影响", [r_ for r_ in runs[None] if r_[2] != "收案逐年增长" and r_[1] != "宋体"]
+          == [r_ for r_ in runs["方正小标宋简体"] if r_[2] != "收案逐年增长" and r_[1] not in ("宋体", "方正小标宋简体")])
+    tx = [r_ for r_ in runs["<x>"] if r_[2] == "收案逐年增长"]
+    check("标题字只认白名单里的名字：别的名字一律当没给", tx and tx[0][:2] == ("1", "宋体"), tx)
+    html_ = open(os.path.join(HERE, "..", "web", "studio.html"), encoding="utf-8").read()
+    check("编辑器：图表库放在侧栏第一位，按场景、画法、关键词找，点一下放进这一页",
+          html_.index('data-tab="lib"') < html_.index('data-tab="pick"') and "function placeRecipe" in html_
+          and "data-lint" in html_ and 'id="libScene"' in html_ and 'id="libQ"' in html_)
+    check("图表库：先问「这一页想让人看懂什么」，按律师要说明的事分（占几成、钱怎么算、流向哪里……），卡片写问题、例子与核对规则",
+          all(r["intent"] for r in rs) and len(L["intents"]) >= 8 and "这一页，想让人看懂什么" in html_ and "核对：" in html_)
+    check("编辑器：版式、卡片画成真的小页面和样张（不再是灰方块拼线框）", "function tplThumb" in html_ and "const PREVIEW" in html_)
+    check("编辑器：正在打字时 AI 改了课件也先不刷新", "const typing = /INPUT|TEXTAREA/" in html_)
+    check("编辑器：AI 没在等时提示回对话里说一声", "回对话里说「处理课件请求」" in html_ and "v.listen" in html_)
+    check("编辑器：装了小标宋才让 PPT 用它（量拉丁字母宽度认字体）", "HAS_XBS" in html_ and '"&tf=1"' in html_)
+
+
 def t_studio(td):
     proj = os.path.join(td, "proj")
     shutil.copytree(DEMO, proj)
@@ -1663,6 +1832,14 @@ def t_studio(td):
               and lib["figures"])
         c, b = get("/api/slide/0.svg")
         check("/api/slide 预览", c == 200 and b.startswith(b"<svg"))
+        _bc, _bb = get("/brand/qichuan-avatar.png")
+        _bc2, _bb2 = get("/brand/qichuan-favicon.png")
+        _bc3, _bb3 = get("/brand/../studio.py")
+        _bc4, _bpage = get("/")
+        check("品牌：侧栏左上角是作者头像 + 「新诉讼可视化」，标签页小图标是头像；别的路径不放行",
+              _bc == 200 and _bb.startswith(b"\x89PNG") and _bc2 == 200 and _bb2.startswith(b"\x89PNG") and _bc3 != 200
+              and "/brand/qichuan-avatar.png" in _bpage.decode("utf-8") and '<span class="bm-name">新诉讼可视化</span>' in _bpage.decode("utf-8")
+              and 'rel="icon"' in _bpage.decode("utf-8"))
         check("预览与导出同一个拼页函数", b.decode("utf-8") == D.compose(P.load(), 0, proj, {})[0])
         c, _ = get("/api/slide/99.svg")
         check("没有这一页：404", c == 404)
@@ -1754,7 +1931,9 @@ def t_studio(td):
         cm_ = next(m_ for m_ in dd["slides"][ci_]["modules"] if m_["type"] == "chart")
         c, b = post("/api/chart/alts", json.dumps({"slide": ci_, "module": cm_["id"]}).encode("utf-8"))
         al = b.get("alts") or []
-        check("换一种图：V6 自己试，九种里标出能换的和当前这种", b.get("ok") and len(al) == 9 and sum(x["current"] for x in al) == 1
+        from spec import CHARTS as _V6_CHARTS          # 图种数跟着 V6 走（0.10.0 起十三种），不写死
+        check(f"换一种图：V6 自己试，{len(_V6_CHARTS)} 种里标出能换的和当前这种",
+              b.get("ok") and len(al) == len(_V6_CHARTS) and sum(x["current"] for x in al) == 1
               and any(x["ok"] and not x["current"] for x in al), [(x["chart"], x["ok"]) for x in al])
         check("换一种图：画不了的说清原因", all(x["why"] for x in al if not x["ok"]))
         sp_ = next(x for x in al if x["ok"] and not x["current"])["spec"]
@@ -1920,6 +2099,8 @@ def main():
         t_js_parity(td)
         t_prov(td)
         t_studio(td)
+        t_detach(td)
+        t_lib090(td)
         t_golden(update)
     finally:
         shutil.rmtree(td, ignore_errors=True)

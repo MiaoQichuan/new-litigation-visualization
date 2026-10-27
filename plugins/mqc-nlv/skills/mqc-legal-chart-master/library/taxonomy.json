@@ -485,10 +485,10 @@
   },
   {
    "code": "matrix",
-   "name": "点阵矩阵",
+   "name": "气泡矩阵",
    "module": "V6",
-   "status": "todo",
-   "desc": "两个维度交叉，点大小或实空表示强弱",
+   "status": "ready",
+   "desc": "两个维度交叉（年份 × 案由），气泡面积即数值；带行列合计，虚线圈标口径不完整的格",
    "tone": "steady"
   },
   {
@@ -501,10 +501,10 @@
   },
   {
    "code": "interval",
-   "name": "区间",
+   "name": "区间胶囊",
    "module": "V6",
-   "status": "todo",
-   "desc": "区间、置信区间、范围对照（含森林图、区间胶囊）",
+   "status": "ready",
+   "desc": "每一项一段从低到高的区间（判赔最低到最高、量刑区间、置信区间），可加中位数白点；纵轴含 0",
    "tone": "steady"
   },
   {
@@ -791,8 +791,48 @@
    "code": "funnel",
    "name": "漏斗",
    "module": "V6",
-   "status": "todo",
+   "status": "ready",
    "desc": "逐级筛减的件数：线索→立案→起诉→判决；层宽由件数算出",
+   "tone": "lively"
+  },
+  {
+   "code": "fan",
+   "name": "发射扇",
+   "module": "V6",
+   "status": "ready",
+   "desc": "从左下角一个根发出几根辐条，由长到短倒下来；辐条上一格一个点（周数、天数），圆面积即第二个量",
+   "tone": "lively"
+  },
+  {
+   "code": "converge",
+   "name": "放射汇聚",
+   "module": "V6",
+   "status": "ready",
+   "desc": "一圈条目（诉请、争点、证据）各自汇入所属主题，枢纽面积即条目数",
+   "tone": "lively"
+  },
+  {
+   "code": "cascade",
+   "name": "点阵阶梯",
+   "module": "V6",
+   "status": "ready",
+   "desc": "几个类目各有多少件：一格一件（或 per 件），一列方块由少到多排成阶梯，数得出来",
+   "tone": "lively"
+  },
+  {
+   "code": "lineage",
+   "name": "法条沿革",
+   "module": "V6",
+   "status": "ready",
+   "desc": "几部法律或文件各自何年通过、修改、废止：一行一部，横向是年份，修改次数由脚本数",
+   "tone": "steady"
+  },
+  {
+   "code": "radpie",
+   "name": "双读饼",
+   "module": "V6",
+   "status": "ready",
+   "desc": "一张饼读两个数：角度是占比，从内圈量起的长度是第二个量（平均审理天数、平均标的）",
    "tone": "lively"
   },
   {

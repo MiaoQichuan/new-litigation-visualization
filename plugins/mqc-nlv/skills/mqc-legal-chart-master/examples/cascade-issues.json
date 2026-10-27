@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "chart": "cascade",
+  "title": "违约金调整出现在 27 件判决里，居各争点之首",
+  "scope": "示例：某中级法院 2024 年审结的买卖合同二审判决（一份判决可涉及几项争点）",
+  "unit": "件",
+  "n": 168,
+  "source": "示例数据，非真实统计",
+  "emphasis": "penalty",
+  "data": {
+    "per": 1,
+    "items": [
+      {
+        "id": "service",
+        "label": "送达",
+        "value": 2
+      },
+      {
+        "id": "venue",
+        "label": "管辖",
+        "value": 3
+      },
+      {
+        "id": "preserve",
+        "label": "保全",
+        "value": 4
+      },
+      {
+        "id": "appraise",
+        "label": "鉴定",
+        "value": 6
+      },
+      {
+        "id": "interest",
+        "label": "利息",
+        "value": 8
+      },
+      {
+        "id": "quality",
+        "label": "质量异议",
+        "value": 11
+      },
+      {
+        "id": "rescind",
+        "label": "合同解除",
+        "value": 14
+      },
+      {
+        "id": "delivery",
+        "label": "交付",
+        "value": 17
+      },
+      {
+        "id": "price",
+        "label": "价款",
+        "value": 22
+      },
+      {
+        "id": "penalty",
+        "label": "违约金",
+        "value": 27
+      }
+    ]
+  }
+}

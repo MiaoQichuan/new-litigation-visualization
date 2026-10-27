@@ -449,7 +449,7 @@ TEMPLATES = {
 COMPAT = {"text": ("text", "bullets"), "bullets": ("bullets", "text")}
 CONTENT_KEYS = ("text", "sub", "kicker", "items", "heading", "value", "label", "note", "source", "spec", "file", "from",
                 "level", "tone", "join", "bleed", "law", "article", "case_no", "court", "cause", "result", "point", "who",
-                "pins", "numbered", "crop", "locked", "data", "part", "focus")
+                "pins", "numbered", "crop", "locked", "data", "part", "focus", "sample", "recipe")
 
 
 def new_id(mods, prefix="m"):

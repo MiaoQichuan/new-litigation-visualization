@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "chart": "fan",
+  "title": "建设工程案件平均审理 31 周，为各类之首",
+  "scope": "示例：某中级法院 2025 年审结的二审民商事案件",
+  "unit": "周",
+  "n": 312,
+  "source": "示例数据，非真实统计",
+  "emphasis": "build",
+  "data": {
+    "size_label": "收案件数",
+    "items": [
+      {
+        "id": "loan",
+        "label": "民间借贷",
+        "value": 9,
+        "size": 96
+      },
+      {
+        "id": "sale",
+        "label": "买卖合同",
+        "value": 12,
+        "size": 71
+      },
+      {
+        "id": "labor",
+        "label": "劳动争议",
+        "value": 8,
+        "size": 44
+      },
+      {
+        "id": "bank",
+        "label": "金融借款",
+        "value": 6,
+        "size": 38
+      },
+      {
+        "id": "lease",
+        "label": "租赁合同",
+        "value": 14,
+        "size": 22
+      },
+      {
+        "id": "equity",
+        "label": "股权转让",
+        "value": 22,
+        "size": 17
+      },
+      {
+        "id": "ip",
+        "label": "知识产权",
+        "value": 26,
+        "size": 14
+      },
+      {
+        "id": "build",
+        "label": "建设工程",
+        "value": 31,
+        "size": 10
+      }
+    ]
+  }
+}

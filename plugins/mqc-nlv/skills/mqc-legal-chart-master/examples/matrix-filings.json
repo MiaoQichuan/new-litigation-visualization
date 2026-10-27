@@ -1,0 +1,351 @@
+{
+  "schema_version": 1,
+  "chart": "matrix",
+  "title": "民间借贷收案 2025 年较 2019 年增长 158%",
+  "scope": "示例：某基层法院 2019–2026 年民商事一审收案",
+  "unit": "件",
+  "n": 1983,
+  "source": "示例数据，非真实统计",
+  "emphasis": "loan",
+  "data": {
+    "rows": [
+      {
+        "id": "y2019",
+        "label": "2019"
+      },
+      {
+        "id": "y2020",
+        "label": "2020"
+      },
+      {
+        "id": "y2021",
+        "label": "2021"
+      },
+      {
+        "id": "y2022",
+        "label": "2022"
+      },
+      {
+        "id": "y2023",
+        "label": "2023"
+      },
+      {
+        "id": "y2024",
+        "label": "2024"
+      },
+      {
+        "id": "y2025",
+        "label": "2025"
+      },
+      {
+        "id": "y2026",
+        "label": "2026"
+      }
+    ],
+    "cols": [
+      {
+        "id": "loan",
+        "label": "民间借贷"
+      },
+      {
+        "id": "sale",
+        "label": "买卖合同"
+      },
+      {
+        "id": "labor",
+        "label": "劳动争议"
+      },
+      {
+        "id": "bank",
+        "label": "金融借款"
+      },
+      {
+        "id": "prop",
+        "label": "物业服务"
+      },
+      {
+        "id": "traffic",
+        "label": "交通事故"
+      },
+      {
+        "id": "build",
+        "label": "建设工程"
+      }
+    ],
+    "cells": [
+      {
+        "row": "y2019",
+        "col": "loan",
+        "value": 40
+      },
+      {
+        "row": "y2020",
+        "col": "loan",
+        "value": 46
+      },
+      {
+        "row": "y2021",
+        "col": "loan",
+        "value": 58
+      },
+      {
+        "row": "y2022",
+        "col": "loan",
+        "value": 71
+      },
+      {
+        "row": "y2023",
+        "col": "loan",
+        "value": 86
+      },
+      {
+        "row": "y2024",
+        "col": "loan",
+        "value": 92
+      },
+      {
+        "row": "y2025",
+        "col": "loan",
+        "value": 103
+      },
+      {
+        "row": "y2026",
+        "col": "loan",
+        "value": 51,
+        "status": "dashed"
+      },
+      {
+        "row": "y2019",
+        "col": "sale",
+        "value": 62
+      },
+      {
+        "row": "y2020",
+        "col": "sale",
+        "value": 60
+      },
+      {
+        "row": "y2021",
+        "col": "sale",
+        "value": 64
+      },
+      {
+        "row": "y2022",
+        "col": "sale",
+        "value": 66
+      },
+      {
+        "row": "y2023",
+        "col": "sale",
+        "value": 63
+      },
+      {
+        "row": "y2024",
+        "col": "sale",
+        "value": 61
+      },
+      {
+        "row": "y2025",
+        "col": "sale",
+        "value": 58
+      },
+      {
+        "row": "y2026",
+        "col": "sale",
+        "value": 27,
+        "status": "dashed"
+      },
+      {
+        "row": "y2019",
+        "col": "labor",
+        "value": 18
+      },
+      {
+        "row": "y2020",
+        "col": "labor",
+        "value": 22
+      },
+      {
+        "row": "y2021",
+        "col": "labor",
+        "value": 31
+      },
+      {
+        "row": "y2022",
+        "col": "labor",
+        "value": 38
+      },
+      {
+        "row": "y2023",
+        "col": "labor",
+        "value": 35
+      },
+      {
+        "row": "y2024",
+        "col": "labor",
+        "value": 41
+      },
+      {
+        "row": "y2025",
+        "col": "labor",
+        "value": 44
+      },
+      {
+        "row": "y2026",
+        "col": "labor",
+        "value": 23,
+        "status": "dashed"
+      },
+      {
+        "row": "y2019",
+        "col": "bank",
+        "value": 12
+      },
+      {
+        "row": "y2020",
+        "col": "bank",
+        "value": 15
+      },
+      {
+        "row": "y2021",
+        "col": "bank",
+        "value": 21
+      },
+      {
+        "row": "y2022",
+        "col": "bank",
+        "value": 30
+      },
+      {
+        "row": "y2023",
+        "col": "bank",
+        "value": 44
+      },
+      {
+        "row": "y2024",
+        "col": "bank",
+        "value": 57
+      },
+      {
+        "row": "y2025",
+        "col": "bank",
+        "value": 66
+      },
+      {
+        "row": "y2026",
+        "col": "bank",
+        "value": 35,
+        "status": "dashed"
+      },
+      {
+        "row": "y2020",
+        "col": "prop",
+        "value": 8
+      },
+      {
+        "row": "y2021",
+        "col": "prop",
+        "value": 14
+      },
+      {
+        "row": "y2022",
+        "col": "prop",
+        "value": 20
+      },
+      {
+        "row": "y2023",
+        "col": "prop",
+        "value": 27
+      },
+      {
+        "row": "y2024",
+        "col": "prop",
+        "value": 30
+      },
+      {
+        "row": "y2025",
+        "col": "prop",
+        "value": 33
+      },
+      {
+        "row": "y2026",
+        "col": "prop",
+        "value": 17,
+        "status": "dashed"
+      },
+      {
+        "row": "y2019",
+        "col": "traffic",
+        "value": 35
+      },
+      {
+        "row": "y2020",
+        "col": "traffic",
+        "value": 30
+      },
+      {
+        "row": "y2021",
+        "col": "traffic",
+        "value": 33
+      },
+      {
+        "row": "y2022",
+        "col": "traffic",
+        "value": 31
+      },
+      {
+        "row": "y2023",
+        "col": "traffic",
+        "value": 29
+      },
+      {
+        "row": "y2024",
+        "col": "traffic",
+        "value": 28
+      },
+      {
+        "row": "y2025",
+        "col": "traffic",
+        "value": 26
+      },
+      {
+        "row": "y2026",
+        "col": "traffic",
+        "value": 12,
+        "status": "dashed"
+      },
+      {
+        "row": "y2021",
+        "col": "build",
+        "value": 6
+      },
+      {
+        "row": "y2022",
+        "col": "build",
+        "value": 9
+      },
+      {
+        "row": "y2023",
+        "col": "build",
+        "value": 13
+      },
+      {
+        "row": "y2024",
+        "col": "build",
+        "value": 15
+      },
+      {
+        "row": "y2025",
+        "col": "build",
+        "value": 19
+      },
+      {
+        "row": "y2026",
+        "col": "build",
+        "value": 8,
+        "status": "dashed"
+      }
+    ],
+    "dashed_label": "2026 年仅统计至 6 月"
+  }
+}

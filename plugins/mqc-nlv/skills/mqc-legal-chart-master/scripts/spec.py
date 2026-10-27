@@ -17,9 +17,12 @@ import math
 import re
 from statistics import median
 
-CHARTS = ("bar", "hbar", "waffle", "rose", "dumbbell", "strip", "sankey", "ribbon", "waterfall")
+CHARTS = ("bar", "hbar", "waffle", "rose", "dumbbell", "strip", "sankey", "ribbon", "waterfall",
+          "funnel", "matrix", "fan", "converge", "cascade", "lineage", "interval", "radpie")
 CHART_ZH = {"bar": "竖柱", "hbar": "横条", "waffle": "百点方阵", "rose": "南丁格尔玫瑰",
-            "dumbbell": "哑铃", "strip": "逐件分布", "sankey": "桑基", "ribbon": "汇入图", "waterfall": "逐级加减"}
+            "dumbbell": "哑铃", "strip": "逐件分布", "sankey": "桑基", "ribbon": "汇入图", "waterfall": "逐级加减",
+            "funnel": "漏斗", "matrix": "气泡矩阵", "fan": "发射扇", "converge": "放射汇聚",
+            "cascade": "点阵阶梯", "lineage": "法条沿革", "interval": "区间胶囊", "radpie": "双读饼"}
 
 CANVAS = {                      # 物理尺寸 → 像素（96 dpi，与 PPTX 的 EMU 换算一致）
     "slide": (1280, 720),       # 16:9 整页，13.33 × 7.5 英寸
@@ -37,7 +40,9 @@ CANVAS_ZH = {"slide": "16:9 整页", "slide-half": "16:9 半页", "a4-landscape"
 # 用到七成以上，出图计划里会提醒「接近上限」。
 BUDGET = {"bar": (14, "根柱"), "hbar": (16, "条"), "waffle": (4, "个类目"), "rose": (12, "个扇区"),
           "dumbbell": (12, "行"), "strip": (6, "组"), "sankey": (14, "个节点"),
-          "ribbon": (16, "个来源与去处"), "waterfall": (12, "级")}
+          "ribbon": (16, "个来源与去处"), "waterfall": (12, "级"),
+          "funnel": (8, "级"), "matrix": (120, "格"), "fan": (12, "根辐条"), "converge": (60, "个条目"),
+          "cascade": (16, "列"), "lineage": (10, "行"), "interval": (12, "条"), "radpie": (8, "个扇区")}
 MAX_ANNOTATIONS = 2           # 批注一页最多两条：第三条开始，读者就分不清哪条要紧
 ANNOTATABLE = ("bar", "hbar", "dumbbell", "waterfall")
 MIN_CANVAS = (480, 360)
@@ -93,8 +98,12 @@ def _items(data, chart, need=("id", "label", "value")):
 # 每一类数组里，一条要写成什么样子：报错时原样告诉模型
 _ROW_HINT = {"items": "{id, label, value}", "groups": "{id, label, values}", "nodes": "{id, label, stage}",
              "links": "{from, to, value}", "sources": "{id, label}", "targets": "{id, label}",
-             "steps": "{id, label, value}"}
+             "steps": "{id, label, value}", "stages": "{id, label, value}", "rows": "{id, label}",
+             "cols": "{id, label}", "cells": "{row, col, value}"}
+_CONVERGE_HINT = {"groups": "{id, label}", "items": "{id, group, label?}"}
 _DUMBBELL_HINT = "{id, label, from, to}"
+_ITEM_HINT = {"dumbbell": _DUMBBELL_HINT, "lineage": "{id, label, start, revisions?, end?}",
+              "interval": "{id, label, from, to, mid?}", "radpie": "{id, label, value, size}"}
 
 
 def _is_key(v):
@@ -118,12 +127,14 @@ def _shape(m, chart, data):
         arr = data.get(key)
         if arr is None or not isinstance(arr, list):
             continue
-        if chart == "dumbbell" and key == "items":
-            hint = _DUMBBELL_HINT
+        if key == "items" and chart in _ITEM_HINT:
+            hint = _ITEM_HINT[chart]
+        if chart == "converge" and key in _CONVERGE_HINT:
+            hint = _CONVERGE_HINT[key]
         for k, row in enumerate(arr):
             if not isinstance(row, dict):
                 raise SpecError(f"data.{key}[{k}] 要写成一个对象 {hint}，收到 {row!r:.40}")
-            for f in ("id", "from", "to"):
+            for f in ("id", "from", "to", "row", "col", "group"):
                 if f in row and not _is_key(row[f]):
                     raise SpecError(f"data.{key}[{k}].{f} 要是文字（建议加引号），收到 {row[f]!r:.40}")
             if key == "nodes" and "stage" in row and not isinstance(row["stage"], int):
@@ -157,6 +168,293 @@ def load(path_or_obj):
         except UnicodeDecodeError:
             raise SpecError("图表说明不是 UTF-8 文本：请用 UTF-8 保存（可能是别的格式改了扩展名）")
     return validate(m)
+
+
+# ------------------------------------------------------------ 0.10.0 新增四种画法的校验
+def _rows_of(data, key, need, lo, hi, what):
+    """一列 {id, label, ...}：个数在 lo..hi 之间，字段齐、id 不重复。"""
+    arr = data.get(key)
+    if not isinstance(arr, list) or not lo <= len(arr) <= hi:
+        raise SpecError(f"{what}要在 data.{key} 里给 {lo} 到 {hi} 个")
+    ids = set()
+    for k, r in enumerate(arr):
+        for f in need:
+            if f not in r:
+                raise SpecError(f"data.{key}[{k}] 缺 {f}")
+        if r["id"] in ids:
+            raise SpecError(f"data.{key} 里 id {r['id']!r} 重复")
+        ids.add(r["id"])
+        if "label" in r and not str(r["label"]).strip():
+            raise SpecError(f"data.{key}[{k}].label 是空的")
+    return arr
+
+
+def _validate_funnel(data):
+    """漏斗：一级比一级少（或相等）。有增有减不是漏斗，是逐级加减。"""
+    stages = _rows_of(data, "stages", ("id", "label", "value"), 2, BUDGET["funnel"][0], "漏斗")
+    prev = None
+    for k, s in enumerate(stages):
+        _num(s["value"], f"data.stages[{k}].value")
+        if s["value"] <= 0:
+            raise SpecError(f"data.stages[{k}]「{s['label']}」要大于 0；漏斗里件数为 0 的一级请删掉，"
+                            f"并在标题或来源里说明到哪一级为止")
+        if prev is not None and s["value"] > prev["value"] + 1e-9:
+            raise SpecError(f"漏斗的「{s['label']}」（{_fmt(s['value'])}）比上一级「{prev['label']}」"
+                            f"（{_fmt(prev['value'])}）多：漏斗只能一级级减少。有增有减请用逐级加减（waterfall）")
+        prev = s
+
+
+def _validate_matrix(data):
+    """气泡矩阵：行 × 列，每格一个数，气泡面积即数值。没写的格就是 0。"""
+    rows = _rows_of(data, "rows", ("id", "label"), 2, 12, "气泡矩阵的行")
+    cols = _rows_of(data, "cols", ("id", "label"), 2, 14, "气泡矩阵的列")
+    if len(rows) * len(cols) > BUDGET["matrix"][0]:
+        raise SpecError(f"气泡矩阵 {len(rows)} 行 × {len(cols)} 列 = {len(rows) * len(cols)} 格，"
+                        f"超过一页的 {BUDGET['matrix'][0]} 格。请拆成两页，或合并长尾为「其他」")
+    rid, cid = {r["id"] for r in rows}, {c["id"] for c in cols}
+    both = rid & cid
+    if both:
+        raise SpecError(f"行与列的 id 不能同名：{'、'.join(map(str, sorted(both, key=str)))}")
+    cells = data.get("cells")
+    if not isinstance(cells, list) or not cells:
+        raise SpecError("气泡矩阵要在 data.cells 里给出每一格：[{\"row\": 行 id, \"col\": 列 id, \"value\": 数}]；"
+                        "没写的格按 0 画（空格）")
+    seen, dashed = set(), False
+    for k, c in enumerate(cells):
+        for f in ("row", "col", "value"):
+            if f not in c:
+                raise SpecError(f"data.cells[{k}] 缺 {f}")
+        if c["row"] not in rid:
+            raise SpecError(_id_miss(f"data.cells[{k}].row", c["row"], [r["id"] for r in rows]))
+        if c["col"] not in cid:
+            raise SpecError(_id_miss(f"data.cells[{k}].col", c["col"], [x["id"] for x in cols]))
+        if (c["row"], c["col"]) in seen:
+            raise SpecError(f"data.cells[{k}] 与前面的一格重复（{c['row']} × {c['col']}）")
+        seen.add((c["row"], c["col"]))
+        _num(c["value"], f"data.cells[{k}].value")
+        if c["value"] <= 0:
+            raise SpecError(f"data.cells[{k}].value 要大于 0；是 0 的格不要写（没写的格按 0 画）")
+        if set(c) - {"row", "col", "value", "status"}:
+            raise SpecError(f"data.cells[{k}] 只写 row、col、value、status")
+        if "status" in c:
+            if c["status"] != "dashed":
+                raise SpecError(f"data.cells[{k}].status 只认 \"dashed\"（虚线圈：例如试行期、数据不全的年份）")
+            dashed = True
+    if dashed and not (isinstance(data.get("dashed_label"), str) and data["dashed_label"].strip()):
+        raise SpecError("有虚线圈的格，就要写 data.dashed_label：虚线圈是什么意思（例如「试行期」「当年数据不全」），"
+                        "印在图例里")
+
+
+def _validate_fan(data):
+    """发射扇：从一个根发出几根辐条，辐条长即数值；可选 size，辐条端点的圆面积即 size。"""
+    items = _items(data, "fan")
+    if not 2 <= len(items) <= BUDGET["fan"][0]:
+        raise SpecError(f"发射扇要 2 到 {BUDGET['fan'][0]} 根辐条")
+    for k, it in enumerate(items):
+        if it["value"] <= 0:
+            raise SpecError(f"data.items[{k}].value 要大于 0（辐条长度）")
+    st = [("start" in it) for it in items]
+    if any(st) and not all(st):
+        raise SpecError("发射扇的 start（圆在径向上的位置，例如立案后第几周开庭）要么每根辐条都写，要么都不写")
+    if all(st):
+        for k, it in enumerate(items):
+            _num(it["start"], f"data.items[{k}].start")
+            if it["start"] < 0:
+                raise SpecError(f"data.items[{k}].start 不能是负数")
+        if not (isinstance(data.get("start_label"), str) and data["start_label"].strip()):
+            raise SpecError("写了 start，就要写 data.start_label：圆的位置代表什么（例如「首次开庭」）")
+    has = [("size" in it) for it in items]
+    if any(has) and not all(has):
+        raise SpecError("发射扇的 size（圆的面积）要么每根辐条都写，要么都不写")
+    if all(has):
+        for k, it in enumerate(items):
+            _num(it["size"], f"data.items[{k}].size")
+            if it["size"] <= 0:
+                raise SpecError(f"data.items[{k}].size 要大于 0")
+        if not (isinstance(data.get("size_label"), str) and data["size_label"].strip()):
+            raise SpecError("写了 size，就要写 data.size_label：圆的面积代表什么（例如「标的额（万元）」）")
+
+
+def _validate_converge(data):
+    """放射汇聚：一圈条目（一条请求、一个争点），各自汇入一个主题。"""
+    groups = _rows_of(data, "groups", ("id", "label"), 2, 8, "放射汇聚的主题")
+    items = data.get("items")
+    lim = BUDGET["converge"][0]
+    if not isinstance(items, list) or not 4 <= len(items) <= lim:
+        raise SpecError(f"放射汇聚要在 data.items 里给 4 到 {lim} 个条目（一个点一条）")
+    gid = {g["id"] for g in groups}
+    seen = set()
+    for k, it in enumerate(items):
+        if not isinstance(it, dict):
+            raise SpecError(f"data.items[{k}] 要写成一个对象 {{id, group, label?}}")
+        for f in ("id", "group"):
+            if f not in it:
+                raise SpecError(f"data.items[{k}] 缺 {f}")
+        if it["id"] in seen or it["id"] in gid:
+            raise SpecError(f"data.items[{k}] 的 id {it['id']!r} 重复或与主题同名")
+        seen.add(it["id"])
+        if it["group"] not in gid:
+            raise SpecError(_id_miss(f"data.items[{k}].group", it["group"], [g["id"] for g in groups]))
+        if "label" in it and not str(it["label"]).strip():
+            raise SpecError(f"data.items[{k}].label 是空的；不写名字就整项不写 label")
+        if set(it) - {"id", "group", "label"}:
+            raise SpecError(f"data.items[{k}] 只写 id、group、label")
+    for g in groups:
+        if not any(it["group"] == g["id"] for it in items):
+            raise SpecError(f"主题「{g['label']}」没有任何条目；没有条目的主题请删掉")
+    has = [("label" in it) for it in items]
+    if any(has) and not all(has):
+        raise SpecError("条目的 label 要么每一条都写，要么都不写（都不写就只画点，名单附在交付清单里）")
+
+
+# ------------------------------------------------------------ 0.11.0 新增四种画法的校验
+_PER_STEPS = (1, 2, 5, 10, 20, 25, 50)
+CASCADE_MAX_CELLS = 30          # 一列最多 30 格：再多，一格就小到看不出是方块
+
+
+def cascade_per(data):
+    """点阵阶梯一格代表多少：写了 data.per 就用它；没写就从 1、2、5、10、20、25、50、100……里
+    取最小的一档，使最高的一列不超过 24 格。由数据决定，同一份说明永远同一档。"""
+    if data.get("per") is not None:
+        return data["per"]
+    vmax = max(i["value"] for i in data["items"])
+    mag = 1
+    while True:
+        for s in _PER_STEPS:
+            if math.ceil(vmax / (s * mag) - 1e-9) <= 24:
+                return s * mag
+        mag *= 100 if mag == 1 else 10
+        if mag > 10 ** 15:
+            return s * mag
+
+
+def cascade_cells(v, per):
+    """一列画几格：四舍五入到格（2.5 格画 3 格）。"""
+    return int(math.floor(v / per + 0.5 + 1e-9))
+
+
+def _validate_cascade(data):
+    """点阵阶梯：几个类目各有一个件数，一格 = per 件，一列方块由少到多排成阶梯。"""
+    items = _items(data, "cascade")
+    lim = BUDGET["cascade"][0]
+    if not 3 <= len(items) <= lim:
+        raise SpecError(f"点阵阶梯要 3 到 {lim} 列；两三个类目请用竖柱或百点方阵，更多请合并长尾为「其他」")
+    for k, it in enumerate(items):
+        if it["value"] <= 0:
+            raise SpecError(f"data.items[{k}]「{it['label']}」要大于 0；是 0 的一项请删掉")
+    per = data.get("per")
+    if per is not None:
+        _num(per, "data.per")
+        if per <= 0:
+            raise SpecError("data.per（一格代表多少）要大于 0")
+    per = cascade_per(data)
+    for k, it in enumerate(items):
+        c = cascade_cells(it["value"], per)
+        if c < 1:
+            raise SpecError(f"「{it['label']}」只有 {_fmt(it['value'])}，不到半格（一格 = {_fmt(per)}），画出来就没了。"
+                            f"请把 data.per 调小")
+        if c > CASCADE_MAX_CELLS:
+            raise SpecError(f"「{it['label']}」要画 {c} 格，一列最多 {CASCADE_MAX_CELLS} 格。请把 data.per 调大"
+                            f"（例如 {_fmt(per * 2)}），或不写 per 由脚本选")
+
+
+_YEAR_KEYS = ("start", "revisions", "end")
+
+
+def _year(v, where):
+    if isinstance(v, bool) or not isinstance(v, int) or not 1000 <= v <= 2999:
+        raise SpecError(f"{where} 要是四位数的年份（整数，例如 2023），收到 {v!r:.40}")
+    return v
+
+
+def _validate_lineage(data):
+    """法条沿革：一行一部法律、司法解释或一份文件；何年通过、何年修改、何年废止。年份由人写，几何由年份算。"""
+    items = _rows_of(data, "items", ("id", "label", "start"), 2, BUDGET["lineage"][0], "法条沿革")
+    until = _year(data.get("until"), "data.until（截至哪一年：现行有效的线画到这一年）")
+    for k, it in enumerate(items):
+        extra = set(it) - {"id", "label", "start", "revisions", "end"}
+        if extra:
+            raise SpecError(f"data.items[{k}] 只写 id、label、start、revisions、end，多了 {'、'.join(sorted(extra))}")
+        a = _year(it["start"], f"data.items[{k}].start")
+        revs = it.get("revisions", [])
+        if not isinstance(revs, list):
+            raise SpecError(f"data.items[{k}].revisions 要是年份列表，例如 [2005, 2013]")
+        for j, r in enumerate(revs):
+            _year(r, f"data.items[{k}].revisions[{j}]")
+        if revs != sorted(set(revs)):
+            raise SpecError(f"「{it['label']}」的修改年份要从早到晚写、不重复；同一年改了两次请只写一次，"
+                            f"并在 scope 或来源里注明")
+        end = it.get("end")
+        if end is not None:
+            _year(end, f"data.items[{k}].end")
+        last = end if end is not None else until
+        if a > last:
+            raise SpecError(f"「{it['label']}」{a} 年通过，晚于 {'废止年份' if end is not None else '截至年份'} {last}")
+        if end is not None and end > until:
+            raise SpecError(f"「{it['label']}」{end} 年废止，晚于截至年份 {until}：请把 data.until 改到 {end} 年或以后")
+        for r in revs:
+            if not a < r <= until or (end is not None and r >= end):
+                raise SpecError(f"「{it['label']}」的修改年份 {r} 要在通过（{a}）之后、"
+                                f"{'废止（' + str(end) + '）之前' if end is not None else '截至年份（' + str(until) + '）之内'}")
+    mk = data.get("marks")
+    if mk is not None:
+        if not isinstance(mk, dict) or set(mk) - {"start", "revise", "end"}:
+            raise SpecError("data.marks 只写 start、revise、end 三项，例如 {\"start\": \"公布\", \"revise\": \"修正\", \"end\": \"废止\"}")
+        for key, v in mk.items():
+            if not isinstance(v, str) or not 1 <= len(v.strip()) <= 4:
+                raise SpecError(f"data.marks.{key} 要是 1 到 4 个字（例如「通过」「修改」「废止」）")
+
+
+def _validate_interval(data):
+    """区间胶囊：每一项一段从低到高的区间（判赔的最低到最高、刑期的下限到上限）；可选 mid 标中位数。"""
+    items = _rows_of(data, "items", ("id", "label", "from", "to"), 2, BUDGET["interval"][0], "区间胶囊")
+    for k, it in enumerate(items):
+        extra = set(it) - {"id", "label", "from", "to", "mid"}
+        if extra:
+            raise SpecError(f"data.items[{k}] 只写 id、label、from、to、mid，多了 {'、'.join(sorted(extra))}")
+        a = _num(it["from"], f"data.items[{k}].from")
+        b = _num(it["to"], f"data.items[{k}].to")
+        if a > b:
+            raise SpecError(f"「{it['label']}」的 from（{_fmt(a)}）比 to（{_fmt(b)}）大：from 写低的一端，to 写高的一端")
+        if "mid" in it:
+            c = _num(it["mid"], f"data.items[{k}].mid")
+            if not a <= c <= b:
+                raise SpecError(f"「{it['label']}」的 mid（{_fmt(c)}）不在 {_fmt(a)} 到 {_fmt(b)} 之间")
+    has = [("mid" in it) for it in items]
+    if any(has) and not all(has):
+        raise SpecError("区间胶囊的 mid（胶囊上的白点）要么每一项都写，要么都不写")
+    if all(has) and not (isinstance(data.get("mid_label"), str) and data["mid_label"].strip()):
+        raise SpecError("写了 mid，就要写 data.mid_label：白点代表什么（例如「中位数」「点估计」）")
+
+
+COUNT_UNITS = ("", "件", "个", "起", "份", "宗", "人", "家", "次", "项", "条")
+
+
+def _validate_radpie(data):
+    """双读饼：角度 = 占比，从内圈量起的长度 = 第二个量（平均审理天数、平均标的额）。"""
+    items = _items(data, "radpie", need=("id", "label", "value", "size"))
+    lim = BUDGET["radpie"][0]
+    if not 2 <= len(items) <= lim:
+        raise SpecError(f"双读饼要 2 到 {lim} 个扇区；更多请合并长尾为「其他」")
+    for k, it in enumerate(items):
+        if it["value"] <= 0:
+            raise SpecError(f"data.items[{k}].value 要大于 0（扇区的角度）；是 0 的一项请删掉")
+        _num(it["size"], f"data.items[{k}].size")
+        if it["size"] <= 0:
+            raise SpecError(f"data.items[{k}].size 要大于 0（扇区从内圈伸出的长度）")
+    tot, smax = xsum(i["value"] for i in items), max(i["size"] for i in items)
+    for it in items:
+        if it["value"] / tot < 0.015:
+            raise SpecError(f"「{it['label']}」只占 {_fmt(round(it['value'] / tot * 100, 2))}%，扇区窄到看不见。"
+                            f"请把占比不足 1.5% 的几项合并为「其他」")
+        if it["size"] < smax / 20:
+            raise SpecError(f"「{it['label']}」的 size（{_fmt(it['size'])}）不到最大值的二十分之一，扇区短到看不见。"
+                            f"两个量差得这么悬殊，请改用横条或哑铃分开画")
+    if not (isinstance(data.get("size_label"), str) and data["size_label"].strip()):
+        raise SpecError("双读饼要写 data.size_label：扇区的长短代表什么（例如「平均审理天数」）")
+    su = data.get("size_unit")
+    if su is not None and not isinstance(su, str):
+        raise SpecError("data.size_unit 要是文字（例如「天」「万元」）")
 
 
 def validate(m):
@@ -342,6 +640,23 @@ def validate(m):
             raise SpecError(f"桑基图最多 {BUDGET['sankey'][0]} 个节点，收到 {len(nodes)} 个。"
                             f"请拆成「总览一页 + 细节一页」，或把小去向合并为「其他」")
 
+    elif chart == "funnel":
+        _validate_funnel(data)
+    elif chart == "matrix":
+        _validate_matrix(data)
+    elif chart == "fan":
+        _validate_fan(data)
+    elif chart == "converge":
+        _validate_converge(data)
+    elif chart == "cascade":
+        _validate_cascade(data)
+    elif chart == "lineage":
+        _validate_lineage(data)
+    elif chart == "interval":
+        _validate_interval(data)
+    elif chart == "radpie":
+        _validate_radpie(data)
+
     d = derive(m)
     m["_derived"] = d
     if d.get("n_computed") is not None and d["n_computed"] != m["n"]:
@@ -349,6 +664,9 @@ def validate(m):
     emph = m.get("emphasis")
     if emph is not None and emph not in d["ids"]:
         raise SpecError(_id_miss("emphasis", emph, d["ids"]))
+    if emph is not None and chart == "converge" and emph not in d["group_ids"]:
+        raise SpecError(f"放射汇聚的重音指向一个主题（groups 里的 id），收到条目 {emph!r}；"
+                        f"可选：{'、'.join(map(str, d['group_ids']))}")
     errs, warns = check_numbers(m["title"], m, d, "标题")
     if errs:
         raise SpecError("；\n".join(errs))
@@ -374,6 +692,12 @@ def budget_used(m):
         n = len(data["nodes"])
     elif chart == "ribbon":
         n = len(data["sources"]) + len(data["targets"])
+    elif chart == "funnel":
+        n = len(data["stages"])
+    elif chart == "matrix":
+        n = len(data["rows"]) * len(data["cols"])
+    elif chart in ("fan", "converge", "cascade", "lineage", "interval", "radpie"):
+        n = len(data["items"])
     else:
         n = len(data["steps"])
     lim, unit = BUDGET[chart]
@@ -664,6 +988,184 @@ def derive(m):
             sib = [l for l in links if l["from"] == n["id"]]
             N.pairs([l["value"] for l in sib], [l["to"] for l in sib], pct_data=pdata)
         labels(*(n["label"] for n in nodes))
+    elif chart == "funnel":
+        stages = data["stages"]
+        vals = [s["value"] for s in stages]
+        ids = [s["id"] for s in stages]
+        first = vals[0]
+        for s in stages:
+            raw(s["value"], ids=[s["id"]])
+            N.addp(s["value"] / first * 100, (first - s["value"]) / first * 100, ids=[s["id"], ids[0]])
+        for a_, b_ in zip(stages, stages[1:]):
+            w = [a_["id"], b_["id"]]
+            raw(a_["value"] - b_["value"], ids=w)
+            N.addp(b_["value"] / a_["value"] * 100, (a_["value"] - b_["value"]) / a_["value"] * 100, ids=w)
+        N.pairs(vals, ids, pct_data=pdata)
+        N.add(len(stages))
+        out["n_computed"] = int(first) if float(first).is_integer() else None
+        out["n_how"] = "第一级的件数"
+        labels(*(s["label"] for s in stages))
+    elif chart == "matrix":
+        rows, cols, cells = data["rows"], data["cols"], data["cells"]
+        ids = [r["id"] for r in rows] + [c["id"] for c in cols]
+        val = {(c["row"], c["col"]): c["value"] for c in cells}
+        tot = xsum(val.values())
+        rt = {r["id"]: xsum(v for (a, _), v in val.items() if a == r["id"]) for r in rows}
+        ct = {c["id"]: xsum(v for (_, b), v in val.items() if b == c["id"]) for c in cols}
+        out["row_total"], out["col_total"], out["cell"] = rt, ct, val
+        raw(tot)
+        N.add(len(rows), len(cols), len(cells))
+        for (a, b), v in val.items():
+            raw(v, ids=[a, b])
+            if rt[a]:
+                N.addp(v / rt[a] * 100, ids=[a, b])
+            if ct[b]:
+                N.addp(v / ct[b] * 100, ids=[a, b])
+        for k_, v in list(rt.items()) + list(ct.items()):
+            raw(v, ids=[k_])
+            if tot:
+                N.addp(v / tot * 100, ids=[k_])
+        N.pairs([rt[r["id"]] for r in rows], [r["id"] for r in rows], pct_data=pdata)
+        N.pairs([ct[c["id"]] for c in cols], [c["id"] for c in cols], pct_data=pdata)
+        # 同一列（或同一行）里的比较只认三种说法：相邻（「比上年减少」）、与第一个比（「较 2019 年增长」）、
+        # 与最后一个比（「2026 年为 2019 年的几倍」）。全部两两相比会让可出现的数多到几乎什么都对得上，
+        # 编的数就混进来了。
+        for line, other, is_row in (([r["id"] for r in rows], [c["id"] for c in cols], True),
+                                    ([c["id"] for c in cols], [r["id"] for r in rows], False)):
+            for o in other:
+                seq = [(x, val.get((x, o) if is_row else (o, x))) for x in line]
+                seq = [(x, v) for x, v in seq if v]
+                pairs = list(zip(seq, seq[1:]))
+                pairs += [(seq[0], e) for e in seq[2:]] + [(e, seq[-1]) for e in seq[1:-2]]
+                for (xa, va), (xb, vb) in pairs:
+                    w = [xa, xb, o]
+                    (N.addpp if pdata else N.add)(vb - va, va - vb, abs(vb - va), ids=w)
+                    N.addp((vb - va) / va * 100, vb / va * 100, (va - vb) / va * 100, ids=w)
+                    N.add(vb / va, ids=w)
+        labels(*(x["label"] for x in rows + cols))
+    elif chart == "fan":
+        items = data["items"]
+        ids = [i["id"] for i in items]
+        vals = [i["value"] for i in items]
+        for it in items:
+            raw(it["value"], ids=[it["id"]])
+        N.add(len(items))
+        N.pairs(vals, ids, pct_data=pdata)
+        if all("size" in i for i in items):
+            sizes = [i["size"] for i in items]
+            stot = xsum(sizes)
+            for it in items:
+                N.add(it["size"], ids=[it["id"]])
+                N.addp(it["size"] / stot * 100, ids=[it["id"]])
+            N.add(stot)
+            N.pairs(sizes, ids)
+        if all("start" in i for i in items):
+            for it in items:
+                raw(it["start"], it["start"] + it["value"], ids=[it["id"]])   # 起点与终点（第几周开庭、第几周结案）
+        labels(*(i["label"] for i in items))
+    elif chart == "converge":
+        groups, items = data["groups"], data["items"]
+        gids = [g["id"] for g in groups]
+        ids = gids + [i["id"] for i in items]
+        cnt = {g: sum(1 for i in items if i["group"] == g) for g in gids}
+        out["group_count"] = cnt
+        out["group_ids"] = gids
+        total = len(items)
+        for g, c in cnt.items():
+            N.add(c, ids=[g])
+            N.addp(c / total * 100, ids=[g])
+        N.add(total, len(groups))
+        N.pairs([cnt[g] for g in gids], gids)
+        out["n_computed"], out["n_how"] = total, "条目数（一个点一条）"
+        labels(*(g["label"] for g in groups))
+        labels(*(i["label"] for i in items if "label" in i))
+    elif chart == "cascade":
+        items = data["items"]
+        ids = [i["id"] for i in items]
+        vals = [i["value"] for i in items]
+        per = cascade_per(data)
+        out["per"] = per
+        out["cells"] = {i["id"]: cascade_cells(i["value"], per) for i in items}
+        out["rounded"] = any(abs(i["value"] / per - round(i["value"] / per)) > 1e-9 for i in items)
+        for it in items:
+            raw(it["value"], ids=[it["id"]])
+            if not pdata:
+                N.addp(it["value"] / m["n"] * 100, ids=[it["id"]])     # 「出现在 16% 的判决里」：占 n 的比例
+        N.add(len(items))
+        for v in set(vals):
+            N.add(sum(1 for x in vals if x == v))
+        if not pdata:
+            N.add(xsum(vals))
+        N.pairs(vals, ids, pct_data=pdata)
+        labels(*(i["label"] for i in items))
+    elif chart == "lineage":
+        items = data["items"]
+        ids = [i["id"] for i in items]
+        until = data["until"]
+        out["n_computed"], out["n_how"] = len(items), "行数（一行一部法律或一份文件）"
+        nrev = []
+        for it in items:
+            w = [it["id"]]
+            revs = it.get("revisions", [])
+            nrev.append(len(revs))
+            N.add(len(revs), ids=w)                                   # 修改几次
+            N.add((it.get("end") or until) - it["start"], ids=w)      # 施行多少年（到废止或截至）
+            if revs:
+                N.add(revs[-1] - it["start"], ids=w)                  # 「30 年间修改 6 次」：通过到最后一次修改
+            labels(it["label"], it["start"], *revs, *([it["end"]] if "end" in it else []))
+        labels(until)
+        N.add(len(items), xsum(nrev))
+        N.add(sum(1 for i in items if "end" in i), sum(1 for i in items if "end" not in i))
+        # 修改次数不做两两相减：「民法典修改 6 次」会借「公司法比民法典多 6 次」混过去
+    elif chart == "interval":
+        items = data["items"]
+        ids = [i["id"] for i in items]
+        for it in items:
+            w = [it["id"]]
+            a, b = it["from"], it["to"]
+            raw(a, b, ids=w)
+            if "mid" in it:
+                raw(it["mid"], ids=w)
+            (N.addpp if pdata else N.add)(b - a, ids=w)               # 区间宽度
+            if a > 0:
+                N.add(b / a, ids=w)
+                N.addp((b - a) / a * 100, ids=w)
+        N.add(len(items))
+        N.pairs([i["to"] - i["from"] for i in items], ids, pct_data=pdata)
+        N.pairs([i["to"] for i in items], ids, pct_data=pdata)
+        N.pairs([i["from"] for i in items], ids, pct_data=pdata)
+        if all("mid" in i for i in items):
+            N.pairs([i["mid"] for i in items], ids, pct_data=pdata)
+        labels(*(i["label"] for i in items))
+    elif chart == "radpie":
+        items = data["items"]
+        ids = [i["id"] for i in items]
+        vals = [i["value"] for i in items]
+        sizes = [i["size"] for i in items]
+        tot = xsum(vals)
+        spct = str(data.get("size_unit", "")).strip() in ("%", "％")
+        shares = {}
+        for it in items:
+            w = [it["id"]]
+            raw(it["value"], ids=w)
+            shares[it["id"]] = it["value"] / tot * 100
+            N.addp(shares[it["id"]], ids=w)
+            (N.addp if spct else N.add)(it["size"], ids=w)
+        sl = list(shares.values())
+        for a_, ia in zip(sl, ids):
+            for b_, ib in zip(sl, ids):
+                if ia != ib:
+                    N.addpp(a_ - b_, abs(a_ - b_), ids=[ia, ib])
+        N.add(len(items))
+        if not pdata:
+            N.add(tot)
+        N.pairs(vals, ids, pct_data=pdata)
+        N.pairs(sizes, ids, pct_data=spct)
+        out["shares"] = shares
+        unit = str(m.get("unit", "")).strip()
+        if all(float(v).is_integer() for v in vals) and unit in COUNT_UNITS:
+            out["n_computed"], out["n_how"] = int(tot), "各扇区件数之和"
+        labels(*(i["label"] for i in items))
     out["num"], out["pct"], out["pp"], out["bind"] = N.num, N.pct, N.pp, N.bind
     out["label_nums"] = set(label_nums)
     out["nums"] = N.num | N.pct | N.pp          # 旧接口：所有可出现的数（只用于展示，不用于核对）
@@ -698,7 +1200,7 @@ def _match(x, pool, bound=False):
 def _labels(m):
     """数据 id → 类目名（图上读者看到的那几个字）。"""
     d, out = m["data"] or {}, {}
-    for key in ("items", "groups", "nodes", "sources", "targets", "steps"):
+    for key in ("items", "groups", "nodes", "sources", "targets", "steps", "stages", "rows", "cols"):
         for x in d.get(key) or []:
             if isinstance(x, dict) and "id" in x and "label" in x:
                 out[x["id"]] = str(x["label"])

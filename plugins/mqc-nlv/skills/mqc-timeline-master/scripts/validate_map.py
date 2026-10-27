@@ -60,15 +60,22 @@ def check(path):
 
     sc = m.get("scope")
 
-    # ---- 卡片结构：一个标题行 + 一个正文块，二者不得并存 ----
+    # ---- 卡片结构：摘要图，卡片只放一行标题 ----
+    # 主路由的三个渲染器（编号型横向 / 纵向多列 / 日期型）只画 head。原来这里在没有
+    # body 时报「无正文块」告警，等于要求模型写一段**根本不会上图**的正文 —— 外部复核
+    # 指出的「正文静默遗漏」就是从这条旧规矩来的。现在反过来：写了 body / items 的
+    # 要告警，说清它们不上图（出图时 omission.py 会逐条披露）。
     for e in events:
         i = e.get("id", "?")
         if not e.get("head"):
             E.append(f"事件 {i}: v2 要求 head（唯一的标题行）")
         if e.get("body") and e.get("items"):
             E.append(f"事件 {i}: body 与 items 不得并存")
-        if not e.get("body") and not e.get("items"):
-            W.append(f"事件 {i}: 无正文块，卡片只有标题行")
+        # 纵向单列（render_vertical）是唯一画正文的一档，那里的 body 会上图，不告警
+        if (e.get("body") or e.get("items")) and layout != "vertical_single_column":
+            W.append(f"事件 {i}: 写了{'body' if e.get('body') else 'items'}，"
+                     f"但本图是摘要图、卡片只画 head —— 这段正文不会上图，"
+                     f"出图时会作为「未上图」逐条披露")
 
     # ---- 禁用标点：破折号与引号 ----
     for e in events:

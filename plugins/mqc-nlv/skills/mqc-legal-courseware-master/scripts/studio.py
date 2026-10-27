@@ -4,13 +4,20 @@
 
     python3 scripts/studio.py <课件目录>            打开编辑器（浏览器自动打开）
     python3 scripts/studio.py <课件目录> --port 8765 --no-open
+    python3 scripts/studio.py <课件目录> --detach     由 AI 助手（Agent）代开时用这个：编辑器独立运行，命令马上返回
+    python3 scripts/studio.py <课件目录> --stop       关掉独立运行的编辑器
+
+为什么要 --detach（0.9.0）：Agent 的命令有时限（常见 2–10 分钟），到点或一轮结束会把它启动的进程一并清掉。
+前台跑、普通后台跑（&），编辑器都会在几分钟后断掉——浏览器里页面还在，点什么都没反应。
+--detach 让编辑器脱离 Agent 独立运行，先确认浏览器真能连上，再打印网址；连不上（多半是 Agent 的沙箱关了网络）
+就明说，退出码 3，并给出两条路。
 
 只用 Python 标准库：不装 Node、不装数据库、不联网。只监听本机 127.0.0.1，材料不出这台电脑。
 课件目录的样子：
 
     我的课件/
       deck.json        课件说明（编辑器自动保存；模型也可以直接写它）
-      assets/            V6 图表说明（*.json）与 V1–V5 的图（*.svg），出现在编辑器「选图 → 已有的图」里
+      assets/            V6 图表说明（*.json）与 V1–V5 的图（*.svg），出现在编辑器「诉讼图 → 已有的图」里
       exports/            导出的 PPTX
 
 预览与导出走同一个拼页函数（deck.compose），编辑器里看到的就是 PPTX 里的样子。
@@ -21,9 +28,12 @@ import tempfile
 import os
 import re
 import socket
+import subprocess
 import sys
+import time
 import threading
 import urllib.parse
+import urllib.request
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -100,6 +110,98 @@ class Project:
                     builtin.append({"name": fn[:-5], "title": spec.get("title", ""), "chart": spec.get("chart", ""),
                                     "spec": spec, "origin": "V6 示例"})
         return {"charts": charts, "builtin": builtin, "figures": figures}
+
+
+V6_LIBRARY = os.path.join(paths.V6, "..", "library")
+
+
+def form_examples():
+    """每种画法一份 V6 自带的示例说明（图表库的缩略图与「放进这一页」用它）。文件名以画法开头的优先。"""
+    out = {}
+    if not os.path.isdir(V6_EXAMPLES):
+        return out
+    for fn in sorted(os.listdir(V6_EXAMPLES)):
+        if not fn.endswith(".json"):
+            continue
+        try:
+            spec = json.load(open(os.path.join(V6_EXAMPLES, fn), encoding="utf-8-sig"))
+        except (ValueError, OSError):
+            continue
+        c = spec.get("chart") if isinstance(spec, dict) else None
+        if not isinstance(c, str):
+            continue
+        if c not in out or (fn.startswith(c + "-") and not out[c][0].startswith(c + "-")):
+            spec.pop("annotations", None)
+            out[c] = (fn[:-5], spec)
+    return out
+
+
+def chart_library():
+    """图表库：V6 场景库里现在就能画的场景（画法已就绪、有示例），按画法交错排，漏斗排最后（作者定的：备用画法，不主推）。"""
+    from spec import CHARTS, CHART_ZH
+    ex = form_examples()
+    try:
+        ix = json.load(open(os.path.join(V6_LIBRARY, "index.json"), encoding="utf-8-sig"))
+        tx = json.load(open(os.path.join(V6_LIBRARY, "taxonomy.json"), encoding="utf-8-sig"))
+    except (ValueError, OSError):
+        return {"forms": [], "recipes": [], "scenes": [], "intents": []}
+    scenes = {x["code"]: x["name"] for x in tx.get("scenes", [])}
+    areas = {x["code"]: x["name"] for x in tx.get("areas", [])}
+    intents = {x["code"]: x["name"] for x in tx.get("intents", [])}
+    ok = [r for r in ix.get("recipes", []) if r.get("status") == "ready" and r.get("form") in ex and r["form"] in CHARTS]
+    order = [c for c in CHARTS if c != "funnel"]
+    buckets = {c: [r for r in ok if r["form"] == c] for c in order}
+    ranked = []
+    while any(buckets.values()):
+        for c in order:
+            if buckets[c]:
+                ranked.append(buckets[c].pop(0))
+    ranked += [r for r in ok if r["form"] == "funnel"]
+    recipes = [{"id": r["id"], "name": r.get("name", ""), "question": r.get("question", ""), "example": r.get("example", ""),
+                "guard": r.get("guard", ""), "form": r["form"], "form_zh": CHART_ZH.get(r["form"], r["form"]),
+                "scenes": [scenes.get(c, c) for c in r.get("scenes", [])], "area": areas.get(r.get("area"), ""),
+                "intent": intents.get(r.get("intent"), "")}
+               for r in ranked]
+    cnt = {}
+    for r in recipes:
+        for z in r["scenes"]:
+            cnt[z] = cnt.get(z, 0) + 1
+    forms = [{"code": c, "zh": CHART_ZH.get(c, c), "example": ex[c][0], "n": sum(1 for r in recipes if r["form"] == c)}
+             for c in order + ["funnel"] if c in ex]
+    icnt = {}
+    for r in recipes:
+        if r["intent"]:
+            icnt[r["intent"]] = icnt.get(r["intent"], 0) + 1
+    return {"forms": forms, "recipes": recipes, "scenes": sorted(cnt, key=lambda z: (-cnt[z], z)),
+            "intents": [{"name": z, "n": icnt[z]} for z in sorted(icnt, key=lambda z: (-icnt[z], z))]}
+
+
+def chart_thumb(deck, base_dir, form, cache=None):
+    """图表库缩略图：这种画法的 V6 示例，按课件的风格（含律所风格）画。"""
+    import make
+    ex = form_examples().get(form)
+    if not ex:
+        return None
+    firm = D.firm_of(deck, base_dir)
+    th = D._theme(deck["style"], firm)
+    fk = ({"name": firm["name"], "base": th["base"], "accent": firm["colors"]["accent"],
+           "title_font": (firm.get("fonts") or {}).get("title", "sans")} if firm else None)
+    key = ("thumb", form, deck["style"], fk and fk["accent"])
+    if cache is not None and key in cache:
+        return cache[key]
+    from spec import SpecError
+    svg = None
+    for w, h in ((1280, 720), (1600, 900)):   # 按整页幻灯片的比例画（缩略图框也是 16:9）：字与图的比例和放进课件时一样
+        try:
+            svg, _ = make.build(json.loads(json.dumps(ex[1])), th["base"], None, {"w": w, "h": h}, None, fk)
+            break
+        except (SpecError, ValueError):
+            continue
+    if svg is None:
+        return None
+    if cache is not None:
+        cache[key] = svg
+    return svg
 
 
 def mtime(p):
@@ -183,6 +285,10 @@ def make_handler(proj):
             try:
                 if u.path in ("/", "/index.html"):
                     return self._send(200, open(WEB, encoding="utf-8-sig").read(), "text/html; charset=utf-8")
+                m = re.fullmatch(r"/brand/(qichuan-(?:avatar|favicon)\.png)", u.path)
+                if m:                                   # 作者的头像：侧栏左上角与浏览器标签页的小图标
+                    with open(os.path.join(ROOT, "web", "brand", m.group(1)), "rb") as f:
+                        return self._send(200, f.read(), "image/png")
                 if u.path == "/grid.js":
                     return self._send(200, open(GRID_JS, encoding="utf-8-sig").read(), "text/javascript; charset=utf-8")
                 if u.path == "/api/state":
@@ -191,13 +297,26 @@ def make_handler(proj):
                                             "project": os.path.basename(proj.dir), "dir": proj.dir})
                 if u.path == "/api/library":
                     return self._send(200, proj.library())
+                if u.path == "/api/ping":            # --detach / --stop 认人：这个端口上开的是不是这套课件
+                    return self._send(200, {"dir": proj.dir, "pid": os.getpid()})
                 if u.path == "/api/version":
                     bd = B.brand_dir(proj.dir)
                     # 课件的版本用字符串：纳秒数超过 JS 能精确表示的整数，回传时会被四舍五入，保存时就对不上号
                     return self._send(200, {"deck": str(mtime(proj.path)), "ai": mtime(A.qpath(proj.dir)),
+                                            "listen": A.listening(proj.dir),
                                             "brand": max(mtime(os.path.join(bd, "brand.json")), mtime(bd))})
                 if u.path == "/api/ai":
-                    return self._send(200, {"requests": A.load_q(proj.dir)[-50:], "kinds": A.KINDS, "tools": A.TOOLS})
+                    return self._send(200, {"requests": A.load_q(proj.dir)[-50:], "kinds": A.KINDS, "tools": A.TOOLS,
+                                            "listening": A.listening(proj.dir)})
+                if u.path == "/api/chartlib":
+                    return self._send(200, chart_library())
+                m = re.fullmatch(r"/api/chartthumb/([a-z]+)\.svg", u.path)
+                if m:
+                    with proj.lock:
+                        svg = chart_thumb(proj.load(), proj.dir, m.group(1), proj.cache)
+                    if not svg:
+                        return self._send(404, {"error": "没有这种画法的示例"})
+                    return self._send(200, svg, "image/svg+xml; charset=utf-8")
                 if u.path == "/api/brand":
                     b = B.load(proj.dir)
                     firm, ferr = B.firm_style(proj.dir)
@@ -482,7 +601,8 @@ def make_handler(proj):
                         with proj.lock:
                             p, rep = E.build(deck, proj.dir, out, cache=proj.cache, pages=pages,
                                              animate=(q.get("animate") or ["1"])[0] != "0",
-                                             notes=(q.get("notes") or ["0"])[0] == "1")
+                                             notes=(q.get("notes") or ["0"])[0] == "1",
+                                             title_face="方正小标宋简体" if (q.get("tf") or ["0"])[0] == "1" else None)
                     except (E.ExportError, D.DeckError) as e:
                         return self._send(200, {"ok": False, "error": str(e)})
                     return self._send(200, {"ok": True, "file": os.path.basename(p), "path": p, **rep})
@@ -526,18 +646,175 @@ def free_port(start):
     raise SystemExit("找不到空闲端口")
 
 
-def serve(folder, port=8765, open_browser=True):
+STATE = ".nlv-studio.json"     # 独立运行的编辑器：网址与进程号（--stop 用它）
+LOG = ".nlv-studio.log"
+
+
+def serve(folder, port=8765, open_browser=True, state=None):
     proj = Project(folder)
     port = free_port(port)
     srv = ThreadingHTTPServer(("127.0.0.1", port), make_handler(proj))
     url = f"http://127.0.0.1:{port}/"
-    print(f"法律课件大师 · 编辑器已打开：{url}\n课件：{proj.path}\n关掉这个窗口（或 Ctrl+C）就退出。")
+    if state:                  # 独立运行：端口真的绑上之后才写网址，等它的那一头据此确认
+        W.write_text(os.path.join(proj.dir, STATE), json.dumps({"url": url, "pid": os.getpid(), "token": state}))
+    print(f"法律课件大师 · 编辑器已打开：{url}\n课件：{proj.path}\n"
+          + ("用 --stop 关掉。" if state else "关掉这个窗口（或 Ctrl+C）就退出。"), flush=True)
     if open_browser:
         threading.Timer(0.6, lambda: webbrowser.open(url)).start()
     try:
         srv.serve_forever()
     except KeyboardInterrupt:
         pass
+    return 0
+
+
+def _ping(url, folder, timeout=2.0):
+    """像浏览器那样连一下编辑器，并认清开的是不是这套课件（端口可能已被别的课件的编辑器占了）。
+    连上且是这套课件 → 返回编辑器进程号；否则 None。
+    不走代理：有的电脑设了 HTTP_PROXY，127.0.0.1 也会被送去代理。"""
+    try:
+        op = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        with op.open(url + "api/ping", timeout=timeout) as r:
+            got = json.loads(r.read().decode("utf-8"))
+        same = os.path.normcase(os.path.abspath(got.get("dir") or "")) == os.path.normcase(os.path.abspath(folder))
+        return got.get("pid") if same and isinstance(got.get("pid"), int) else None
+    except Exception:
+        return None
+
+
+def _reachable(url, folder, timeout=2.0):
+    return _ping(url, folder, timeout) is not None
+
+
+def _read_state(folder):
+    try:
+        with open(os.path.join(folder, STATE), encoding="utf-8") as f:
+            st = json.load(f)
+        return st if isinstance(st, dict) and isinstance(st.get("url"), str) else None
+    except (OSError, ValueError):
+        return None
+
+
+def _spawn_detached(cmd, log):
+    """起一个脱离 Agent 的进程：不在 Agent 的进程组 / 作业对象里，Agent 清理时不会被连带掐掉。"""
+    kw = {"stdin": subprocess.DEVNULL, "stdout": log, "stderr": subprocess.STDOUT, "close_fds": True}
+    if os.name == "nt":
+        base = 0x00000008 | 0x00000200          # DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
+        try:                                    # 再跳出 Agent 的作业对象；作业不许跳出时退一步
+            return subprocess.Popen(cmd, creationflags=base | 0x01000000, **kw)   # CREATE_BREAKAWAY_FROM_JOB
+        except OSError:
+            return subprocess.Popen(cmd, creationflags=base, **kw)
+    return subprocess.Popen(cmd, start_new_session=True, **kw)
+
+
+def _net_isolated(dev="/proc/net/dev"):
+    """Linux 上 Agent 关网的常见做法是把命令放进独立的网络命名空间：里面只剩回环口 lo。
+    这时编辑器在沙箱里连得上，沙箱外的浏览器却连不上——光靠「连一下」看不出来，要单独认。"""
+    if not sys.platform.startswith("linux"):
+        return False
+    try:                                   # 读 /proc/net/dev（随网络命名空间变）；/sys/class/net 不随它变，认不出来
+        with open(dev, encoding="ascii", errors="replace") as f:
+            names = [ln.split(":", 1)[0].strip() for ln in f.readlines()[2:] if ":" in ln]
+        return names == ["lo"]
+    except OSError:
+        return False
+
+
+def _open_browser(url):
+    """替用户打开浏览器，但绝不拖住 Agent 的命令：
+    - 浏览器由一个脱离的小进程去开，输入输出都不接 Agent 的管道（Linux 上 xdg-open 拉起的浏览器会继承管道，
+      Agent 要等管道关上才算命令结束，就一直等下去）；
+    - 没有图形界面的 Linux（多是远程或沙箱）上不开：webbrowser 会退到 lynx 这类终端浏览器，开了也没人看，只给网址。"""
+    if sys.platform.startswith("linux") and not (os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")):
+        return
+    try:
+        _spawn_detached([sys.executable, "-c", "import sys, webbrowser; webbrowser.open(sys.argv[1])", url],
+                        subprocess.DEVNULL)
+    except OSError:
+        pass
+
+
+def detach(folder, port=8765, open_browser=True, wait=15.0):
+    folder = os.path.abspath(folder)
+    Project(folder)                                   # 先在这里验课件目录：错了当场报，不留一个死进程
+    old = _read_state(folder)
+    if old and _reachable(old["url"], folder):
+        # 不再替用户开浏览器：AI 常会重复执行「打开编辑器」，每次都弹一个新标签页，用户那边就乱了（缪律师实测）
+        print(f"这套课件的编辑器已经开着：{old['url']}\n用户已经打开的那个页面照常用；关掉了的话，请在浏览器里打开这个网址。")
+        return 0
+    try:
+        os.remove(os.path.join(folder, STATE))
+    except OSError:
+        pass
+    # 用一次性记号认「是不是刚起的那个」，不比进程号：Windows 的虚拟环境里 python.exe 是个转发器，
+    # 真正跑服务的是它再起的子进程，进程号对不上
+    token = "%d-%d" % (os.getpid(), time.time_ns())
+    with open(os.path.join(folder, LOG), "ab") as log:
+        proc = _spawn_detached([sys.executable, os.path.abspath(__file__), folder, "--port", str(port),
+                                "--no-open", "--_serve", token], log)
+    t0, url = time.time(), None
+    while time.time() - t0 < wait:
+        st = _read_state(folder)
+        if st and st.get("token") == token:
+            url = st["url"]
+            if _reachable(url, folder):
+                break
+        if proc.poll() is not None:
+            break
+        time.sleep(0.3)
+    if url and _reachable(url, folder) and _net_isolated():
+        print(f"编辑器在 {url} 起来了，但这条命令跑在关了网络的沙箱里：您的浏览器多半连不上。\n"
+              "若浏览器能打开这个网址，照常用即可；打不开有两条路：\n"
+              "  1. 在 Agent 里允许这条命令在沙箱外运行（或打开网络权限），再开一次；\n"
+              "  2. 不开编辑器：直接说要做什么，AI 写 deck.json，用 build.py 检查并导出 PPTX。", file=sys.stderr)
+        return 3
+    if url and _reachable(url, folder):
+        print(f"法律课件大师 · 编辑器已打开：{url}\n课件：{folder}\n"
+              f"编辑器独立运行，关掉对话也还在；不用时：python3 {os.path.abspath(__file__)} \"{folder}\" --stop")
+        if open_browser:
+            _open_browser(url)
+        return 0
+    if proc.poll() is None:
+        proc.terminate()
+    tail = ""
+    try:
+        with open(os.path.join(folder, LOG), encoding="utf-8", errors="replace") as f:
+            tail = "".join(f.readlines()[-5:]).strip()
+    except OSError:
+        pass
+    print("编辑器没能打开：" + (f"服务在 {url} 起来了，但连不上。" if url else "服务没有起来。") + "\n"
+          "多半是 AI 助手（Agent）的沙箱关了网络或不许开本机网页。两条路：\n"
+          "  1. 在 Agent 里允许这条命令在沙箱外运行（或打开网络权限），再开一次；\n"
+          "  2. 不开编辑器：直接说要做什么，AI 写 deck.json，用 build.py 检查并导出 PPTX。"
+          + (f"\n日志：\n{tail}" if tail else ""), file=sys.stderr)
+    return 3
+
+
+def stop(folder):
+    folder = os.path.abspath(folder)
+    st = _read_state(folder)
+    if not st:
+        print("这套课件没有独立运行的编辑器。")
+        return 0
+    pid = _ping(st["url"], folder)            # 只结束「这个网址上、开着这套课件」的那个进程，不信文件里的旧进程号
+    if pid and pid > 0 and pid != os.getpid():
+        try:
+            if os.name == "nt":
+                subprocess.run(["taskkill", "/PID", str(pid), "/F"], capture_output=True)
+            else:
+                import signal
+                os.kill(pid, signal.SIGTERM)
+        except OSError:
+            pass
+        for _ in range(20):
+            if not _reachable(st["url"], folder, 0.5):
+                break
+            time.sleep(0.2)
+    try:
+        os.remove(os.path.join(folder, STATE))
+    except OSError:
+        pass
+    print("编辑器已关掉。" if not _reachable(st["url"], folder, 0.5) else f"没关掉：{st['url']} 还开着，请结束进程 {pid}。")
     return 0
 
 
@@ -551,8 +828,15 @@ def main(argv=None):
     ap.add_argument("folder")
     ap.add_argument("--port", type=int, default=8765)
     ap.add_argument("--no-open", action="store_true")
+    ap.add_argument("--detach", action="store_true", help="独立运行（AI 助手代开时用）：命令马上返回，编辑器不随 Agent 结束")
+    ap.add_argument("--stop", action="store_true", help="关掉独立运行的编辑器")
+    ap.add_argument("--_serve", metavar="TOKEN", help=argparse.SUPPRESS)
     a = ap.parse_args(argv)
-    return serve(a.folder, a.port, not a.no_open)
+    if a.stop:
+        return stop(a.folder)
+    if a.detach:
+        return detach(a.folder, a.port, not a.no_open)
+    return serve(a.folder, a.port, not a.no_open, state=a._serve)
 
 
 if __name__ == "__main__":

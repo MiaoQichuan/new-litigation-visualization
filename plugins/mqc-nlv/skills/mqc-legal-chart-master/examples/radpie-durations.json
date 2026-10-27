@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "chart": "radpie",
+  "title": "建设工程只占 18%，审得最久：平均 210 天",
+  "scope": "示例：某中级法院 2024 年审结的民商事一审案件",
+  "unit": "件",
+  "n": 1330,
+  "source": "示例数据，非真实统计",
+  "emphasis": "build",
+  "data": {
+    "size_label": "平均审理天数",
+    "size_unit": "天",
+    "items": [
+      {
+        "id": "build",
+        "label": "建设工程",
+        "value": 240,
+        "size": 210
+      },
+      {
+        "id": "sale",
+        "label": "买卖合同",
+        "value": 452,
+        "size": 95
+      },
+      {
+        "id": "loan",
+        "label": "民间借贷",
+        "value": 293,
+        "size": 70
+      },
+      {
+        "id": "labor",
+        "label": "劳动争议",
+        "value": 186,
+        "size": 120
+      },
+      {
+        "id": "other",
+        "label": "其他",
+        "value": 159,
+        "size": 60
+      }
+    ]
+  }
+}

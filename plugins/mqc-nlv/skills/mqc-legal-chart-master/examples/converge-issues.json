@@ -1,0 +1,226 @@
+{
+  "schema_version": 1,
+  "chart": "converge",
+  "title": "违约金调整占争议焦点的 32%",
+  "scope": "示例：40 份民间借贷二审判决归纳的争议焦点",
+  "unit": "个",
+  "n": 38,
+  "source": "示例数据，非真实判决",
+  "emphasis": "penalty",
+  "data": {
+    "groups": [
+      {
+        "id": "principal",
+        "label": "本金认定"
+      },
+      {
+        "id": "interest",
+        "label": "利息与LPR"
+      },
+      {
+        "id": "penalty",
+        "label": "违约金调整"
+      },
+      {
+        "id": "cost",
+        "label": "律师费等费用"
+      },
+      {
+        "id": "guar",
+        "label": "保证责任"
+      }
+    ],
+    "items": [
+      {
+        "id": "f01",
+        "group": "principal",
+        "label": "01"
+      },
+      {
+        "id": "f02",
+        "group": "principal",
+        "label": "02"
+      },
+      {
+        "id": "f03",
+        "group": "principal",
+        "label": "03"
+      },
+      {
+        "id": "f04",
+        "group": "principal",
+        "label": "04"
+      },
+      {
+        "id": "f05",
+        "group": "principal",
+        "label": "05"
+      },
+      {
+        "id": "f06",
+        "group": "principal",
+        "label": "06"
+      },
+      {
+        "id": "f07",
+        "group": "principal",
+        "label": "07"
+      },
+      {
+        "id": "f08",
+        "group": "principal",
+        "label": "08"
+      },
+      {
+        "id": "f09",
+        "group": "principal",
+        "label": "09"
+      },
+      {
+        "id": "f10",
+        "group": "interest",
+        "label": "10"
+      },
+      {
+        "id": "f11",
+        "group": "interest",
+        "label": "11"
+      },
+      {
+        "id": "f12",
+        "group": "interest",
+        "label": "12"
+      },
+      {
+        "id": "f13",
+        "group": "interest",
+        "label": "13"
+      },
+      {
+        "id": "f14",
+        "group": "interest",
+        "label": "14"
+      },
+      {
+        "id": "f15",
+        "group": "interest",
+        "label": "15"
+      },
+      {
+        "id": "f16",
+        "group": "interest",
+        "label": "16"
+      },
+      {
+        "id": "f17",
+        "group": "interest",
+        "label": "17"
+      },
+      {
+        "id": "f18",
+        "group": "penalty",
+        "label": "18"
+      },
+      {
+        "id": "f19",
+        "group": "penalty",
+        "label": "19"
+      },
+      {
+        "id": "f20",
+        "group": "penalty",
+        "label": "20"
+      },
+      {
+        "id": "f21",
+        "group": "penalty",
+        "label": "21"
+      },
+      {
+        "id": "f22",
+        "group": "penalty",
+        "label": "22"
+      },
+      {
+        "id": "f23",
+        "group": "penalty",
+        "label": "23"
+      },
+      {
+        "id": "f24",
+        "group": "penalty",
+        "label": "24"
+      },
+      {
+        "id": "f25",
+        "group": "penalty",
+        "label": "25"
+      },
+      {
+        "id": "f26",
+        "group": "penalty",
+        "label": "26"
+      },
+      {
+        "id": "f27",
+        "group": "penalty",
+        "label": "27"
+      },
+      {
+        "id": "f28",
+        "group": "penalty",
+        "label": "28"
+      },
+      {
+        "id": "f29",
+        "group": "penalty",
+        "label": "29"
+      },
+      {
+        "id": "f30",
+        "group": "cost",
+        "label": "30"
+      },
+      {
+        "id": "f31",
+        "group": "cost",
+        "label": "31"
+      },
+      {
+        "id": "f32",
+        "group": "cost",
+        "label": "32"
+      },
+      {
+        "id": "f33",
+        "group": "cost",
+        "label": "33"
+      },
+      {
+        "id": "f34",
+        "group": "guar",
+        "label": "34"
+      },
+      {
+        "id": "f35",
+        "group": "guar",
+        "label": "35"
+      },
+      {
+        "id": "f36",
+        "group": "guar",
+        "label": "36"
+      },
+      {
+        "id": "f37",
+        "group": "guar",
+        "label": "37"
+      },
+      {
+        "id": "f38",
+        "group": "guar",
+        "label": "38"
+      }
+    ]
+  }
+}

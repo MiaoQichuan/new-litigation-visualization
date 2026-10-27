@@ -84,7 +84,7 @@ FIN|stack|compute|case|逾期利息分段|逾期利息按什么利率、分几�
 FIN|ribbon|flow|case,trial|借款资金流向|出借款项最终流到哪里？|出借人账户 → 借款人 → 关联方 → 实际用款人。|
 FIN|sankey|flow|case,client|金融批量案件结果|几百件批量诉讼最后都去了哪？|起诉 → 调解 / 判决 → 执行到位 / 终本。|
 FIN|stack|progress|client|批量案件月度进度|批量案件每月各在哪个阶段？|480 件信用卡纠纷按月的立案、审理、结案、执行构成。|每月合计守恒
-FIN|interval|risk|client,deal|担保覆盖率|担保物够不够覆盖债权？|债权 5 亿，抵押 3.2 亿、质押 0.8 亿，覆盖率 80%。|覆盖率由脚本算
+FIN|hbar|risk|client,deal|担保覆盖率|担保物够不够覆盖债权？|债权 5 亿，抵押 3.2 亿、质押 0.8 亿，覆盖率 80%。|覆盖率由脚本算
 FIN|relation|structure|case,deal|增信结构|谁为谁提供了什么担保？|保证、抵押、质押、差额补足的多方结构。|
 FIN|waffle|compose|research|差额补足性质认定|法院把差额补足认定成什么？|保证 / 债务加入 / 独立合同的件数。|
 FIN|bar|count|research,firm|金融借款收案趋势|这类案子这些年多了还是少了？|年度收案量。|
@@ -132,7 +132,7 @@ MNA|cardwall|compare|pitch,firm|代表交易卡片墙|团队做过哪些代表�
 
 ## BKR 破产重整与不良资产
 BKR|waterfall|compute|deal,case,client|清偿顺位分配|可分配财产按顺位分下去，普通债权还剩多少？|财产按法定顺位逐级分配，算出普通债权清偿率。|顺位按法律规定；逐级平衡
-BKR|interval|compare|deal,client|重整与清算清偿率|重整比清算多拿回多少？|按债权类别，模拟清算与重整清偿率并排。|数值来自评估与偿债能力分析报告
+BKR|dumbbell|compare|deal,client|重整与清算清偿率|重整比清算多拿回多少？|按债权类别，模拟清算与重整清偿率并排。|数值来自评估与偿债能力分析报告
 BKR|stack|compose|deal,client|债权申报与确认|申报多少、确认多少、暂缓多少？|按债权类别的申报、确认、暂缓确认。|
 BKR|board|progress|client,deal|重整程序进度|重整走到哪一步？|受理、债权申报、债权人会议、计划表决、批准、执行。|
 BKR|waffle|compose|deal|表决结果|各表决组通过了没有？|各组人数与金额两项是否过半、过三分之二。|通过标准按法律规定计算
@@ -321,7 +321,7 @@ LAI|waffle|compose|ai,paper|引证核验结果|AI 给的引用有多少是真的
 LAI|waffle|compose|ai|错误类型构成|错在哪？|100 条错误的类型构成。|
 LAI|matrix|compare|ai,skill|工具能力矩阵|几款工具各能做什么？|工具 × 功能，有、无、部分。|
 LAI|flow|structure|ai,skill|AI 处理管线|这套系统怎么运转？|读材料 → 抽要素 → 检索 → 生成 → 人工复核。|
-LAI|interval|compare|ai|效率前后对比|用了之后快了多少？|每类任务耗时的前后区间。|
+LAI|dumbbell|compare|ai|效率前后对比|用了之后快了多少？|每类任务耗时的前后区间。|
 LAI|spectrum|risk|ai|人机分工边界|哪些环节交给 AI、哪些必须人来？|环节在全自动到人工主导轴上的位置。|位置须注明依据
 LAI|lines|trend|ai,paper|模型能力演进|几代模型在法律任务上的表现。|多个基准的得分随时间。|基准来源必填
 LAI|number|count|ai,public|一页一个关键数|这次分享只想让人记住哪个数？|「审查时间缩短 70%」配口径。|数字须能由数据推得
@@ -350,7 +350,7 @@ FIRM|bubbles|compare|firm,pitch|客户规模气泡|大客户有哪些？|每个�
 EXE|waterfall|compute|case,client|执行回款拆解|判决金额最后实际收回多少，差在哪？|判决金额 − 无财产可供执行 − 和解让步 − 执行费 = 实际到账。|逐级平衡
 EXE|lines|progress|client,case|执行回款累计曲线|钱是按什么节奏回来的？|按月累计回款，标出查封、拍卖、和解节点。|
 EXE|board|progress|client,firm|执行案件看板|几十个执行案件各卡在哪个环节？|查控、评估、拍卖、终本、恢复执行。|
-EXE|interval|risk|client,case|查封资产覆盖率|查封的资产够不够还债？|房产、股权、存款评估值与债权额对照。|覆盖率由脚本算
+EXE|hbar|risk|client,case|查封资产覆盖率|查封的资产够不够还债？|房产、股权、存款评估值与债权额对照。|覆盖率由脚本算
 EXE|waterfall|count|research,client|执行到位漏斗|立案执行的案子，最后有多少全额到位？|立案 → 查到财产 → 处置 → 部分到位 → 全额到位。|
 EXE|timeline|narrate|case|拍卖流拍降价过程|一拍、二拍、变卖各降了多少？|起拍价、流拍、降价、成交的时间轴。|降价比例由脚本算
 EXE|relation|structure|case,trial|追加被执行人|还能追加谁来承担责任？|未出资股东、一人公司股东、抽逃出资人。|
@@ -484,3 +484,27 @@ DAT|layers|risk|training|数据安全纵深防护|边界、身份、加密、审
 GEN|paired|contest|case,research,moot|一审二审推理对照|同一组事实，一审与二审推理在哪一步分岔？|两列推理链并排，分岔点用重音。|推理原句照录判决书
 GEN|paired|contest|paper,teach|多数意见与少数意见|合议庭多数与少数意见的推理差在哪？|两列并排。|照录原文
 GEN|paired|contest|paper,teach|两种学说对照|同一问题两种学说的推理路径。|形式说与实质说并排。|观点须注明出处
+
+## 0.10.0 · 发射扇与放射汇聚（新画法）
+GEN|fan|spread|research,report,firm|各类案件审理周期|哪类案件审得最久、量又有多大？|各案由一根辐条，平均审理周数为辐条上的点数，圆面积为收案件数。|辐条长与圆面积各自由数值算出，不凭感觉排
+CST|fan|progress|case,client,trial|工程各项工期延误|哪几项工作拖得最久？|各分项工程一根辐条，实际工期（周）为点数，圆面积为延误损失金额。|工期以合同与签证为准，逐项注明来源
+EXE|fan|spread|research,gov|执行各环节耗时|执行案件卡在哪个环节最久？|查控、评估、拍卖、分配各环节平均天数。|天数由立案、结案日期算出
+GEN|converge|structure|research,case,trial|争议焦点归类|几十个争议焦点，集中在哪几类问题上？|类案判决归纳的争议焦点，按主题汇聚，枢纽面积为焦点数。|归类标准事先写明，焦点逐条可查
+GEN|converge|structure|case,client,trial|诉讼请求归类|这一串诉请其实是哪几类主张？|本金、利息、违约金、费用、担保责任五类诉请逐条汇聚。|诉请原文照录，归类不改原意
+CON|converge|contest|trial,case|证据归入待证事实|每份证据证明的是哪一项待证事实？|证据目录逐份汇入待证事实，枢纽面积为证据份数。|证明目的照录证据目录
+DAT|converge|risk|training,client|合规问题归类|几十个合规发现集中在哪几类风险？|个人信息、数据出境、内部制度、第三方管理四类。|按条数计，不打主观分
+GEN|matrix|trend|research,report,firm|历年收案年鉴|这几年哪类案件涨得最快？|年份 × 案由的收案件数，气泡面积为件数，当年数据不全的一年画虚线圈。|行列合计由脚本算；虚线圈须写明含义
+
+## 0.11.0 · 点阵阶梯、法条沿革、区间胶囊、双读饼（新画法）
+GEN|cascade|count|research,case,paper|争点出现频次|类案判决里，哪些争点出现得最多？|168 份判决中各争点出现的件数，一格一件，由少到多排成阶梯。|一份判决可涉及几项争点：件数之和不等于 n，口径写明
+CON|cascade|count|research,client|违约事由频次|买卖合同纠纷里，违约多因为什么？|逾期付款、质量异议、逾期交货等事由各出现几件。|事由按判决认定归类，归类标准事先写明
+LAB|cascade|count|research,training|劳动争议请求类型|劳动仲裁里，员工最常主张什么？|加班费、经济补偿、未签合同二倍工资等请求各几件。|一案多请求，件数之和不等于 n
+CRM|cascade|count|research|量刑情节出现频次|判决里最常被认定的量刑情节是什么？|自首、坦白、退赃、认罪认罚各出现几件。|情节照录判决认定
+GEN|lineage|narrate|newlaw,research,teach|法律与司法解释沿革|这几部法律何时通过、改过几次、哪些已废止？|公司法、民事诉讼法的历次修改，民法典施行后废止的担保法、合同法、物权法。|年份照录公布文本，修改次数由脚本数
+COR|lineage|narrate|newlaw,training,board|公司法修订脉络|公司法改了几次，这次改在什么背景下？|1993 年通过以来的历次修改，与配套司法解释并排。|年份以全国人大公布为准
+CON|lineage|narrate|case,trial|合同与补充协议沿革|主合同签了之后，补充协议、变更、解除依次发生在哪年？|主合同、三份补充协议、解除通知并排，用 marks 改成「签订 / 变更 / 终止」。|年份照录合同落款
+DAT|lineage|narrate|newlaw,training|数据合规规则沿革|个人信息与数据安全规则这些年怎么一层层加上来？|网络安全法、数据安全法、个人信息保护法与配套规定的施行与修改。|年份照录公布文本
+PIN|interval|compare|research,client|各地判赔区间|同类伤情，各地一般判多少？|各地精神损害抚慰金的最低到最高判赔额，白点为中位数。|区间来自类案，不得画成对结果的承诺
+GEN|radpie|compose|research,report,firm|案件构成与审理时长|哪类案件占比不大、却审得最久？|各案由收案占比为角度，平均审理天数为扇区长度。|占比由脚本算；天数口径写明（立案到结案）
+FIRM|radpie|compose|firm,pitch|业务构成与平均标的|律所各业务线的案件占比与平均标的额。|诉讼、仲裁、非诉、顾问的件数占比与平均标的。|件数与标的额口径分别写明
+EXE|radpie|compose|research,gov|执行案件构成与执行到位率|哪类执行案件多，又最难执行到位？|各类执行案件占比为角度，平均执行到位率为长度。|到位率由脚本算，size_unit 写 %

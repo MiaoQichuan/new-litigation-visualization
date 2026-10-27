@@ -173,6 +173,8 @@ def validate(d, base_dir=None):
             if "crop" in m and (m.get("type") != "figure" or not isinstance(m["crop"], list) or not m["crop"]
                                 or not all(isinstance(k, str) for k in m["crop"])):
                 errs.append(f"{where}：「{m.get('id')}」的切片（crop）要是图卡上的元素键列表")
+            if ("sample" in m or "recipe" in m) and (m.get("type") != "chart" or not isinstance(m.get("recipe", ""), str)):
+                errs.append(f"{where}：「{m.get('id')}」的图表库记号（sample / recipe）只给图表卡")
             if "pins" in m and m.get("type") not in ("chart", "figure"):
                 errs.append(f"{where}：读图编号只放在图上（图表卡、图卡）")
         if not isinstance(s.get("parked", []), list):
@@ -186,7 +188,7 @@ def resolve(mod, base_dir):
     m = dict(mod)
     if m.get("type") == "chart" and "spec" not in m:
         if not m.get("file"):
-            raise DeckError("图表卡还是空的：从左边「选图 → 已有的图」点一张 V6 图表")
+            raise DeckError("图表卡还是空的：从左边「图表库」挑一张，或在「诉讼图 → 已有的图」点一张 V6 图表")
         p = paths.inside(base_dir, m["file"])
         if p is None:
             raise DeckError(f"图表说明 {m['file']!r} 不在这个课件的文件夹里：素材请放进 assets/（外面的文件不读）")
@@ -205,7 +207,7 @@ def resolve(mod, base_dir):
             raise DeckError(f"图 {m['file']!r} 不在这个课件的文件夹里：素材请放进 assets/（外面的文件不读）")
         if not m.get("file") or not os.path.exists(p):
             raise DeckError(f"找不到图片文件 {m.get('file')!r}" if m.get("file")
-                            else "图卡还是空的：从左边「选图 → 已有的图」点一张 V1–V5 的图")
+                            else "图卡还是空的：从左边「诉讼图 → 已有的图」点一张 V1–V5 的图")
         try:
             with open(p, encoding="utf-8-sig") as f:
                 m["svg"] = f.read()
@@ -299,16 +301,51 @@ def _fit_text(s, fs, w, h, lh=1.35, min_fs=MIN_BODY):
                   "请删短、把卡片拉大，或拆成两页")
 
 
+# 宋体标题（0.9.0，缪律师定的）：用方正小标宋本来的字重，不再加粗、不再描边。
+# 原来标题是 font-weight 700 + 0.3 同色描边：方正小标宋本身就是重的标题字、没有粗体字面，浏览器和 PowerPoint
+# 都会「伪加粗」，再叠一道描边，比小标宋原样粗一大坨。没装小标宋的电脑，按顺序落到本身就偏重的华文中宋、
+# 思源宋体 SemiBold，不至于发细。标题打 data-title="1"：导出 PPT 时据此选标题字（见 export.py）。
+TITLE_STACK = ("'方正小标宋简体','FZXiaoBiaoSong-B05S','华文中宋','STZhongsong','思源宋体 SemiBold',"
+               "'Source Han Serif SC SemiBold','Noto Serif CJK SC SemiBold','思源宋体','Source Han Serif SC',"
+               "'Noto Serif CJK SC',serif")
+_TEXT_TAG = re.compile(r"<text\b[^>]*>")
+_HEAVY = ("600", "700", "800", "900", "bold", "bolder")
+
+
+def _is_song(family):
+    low = family.lower()
+    return "sans" not in low and ("serif" in low or "宋" in family)
+
+
+def unbold_titles(svg):
+    """别的模块（V1–V6）的图里，宋体加粗（+ 描边）的字一律改成标题字的本来字重。只动宋体，黑体的粗字不动。"""
+    def fix(m):
+        tag = m.group(0)
+        fam = re.search(r'font-family="([^"]*)"', tag)
+        w = re.search(r'font-weight="([^"]*)"', tag)
+        if not fam or not w or w.group(1) not in _HEAVY or not _is_song(fam.group(1)):
+            return tag
+        tag = re.sub(r'\s+font-weight="[^"]*"', "", tag)
+        tag = re.sub(r'\s+stroke="[^"]*"', "", tag)
+        tag = re.sub(r'\s+stroke-width="[^"]*"', "", tag)
+        tag = re.sub(r'font-family="[^"]*"', f'font-family="{TITLE_STACK}"', tag, count=1)
+        return tag if "data-title=" in tag else tag[:-1] + ' data-title="1">'
+    return _TEXT_TAG.sub(fix, svg)
+
+
 def _text_svg(x, y, lines, fs, fill, family, weight=400, lh=1.35, mod="", anchor="start"):
     out = []
     yy = y + fs * 0.88
-    st = f' stroke="{fill}" stroke-width="0.3"' if family == TITLE_FONT and weight >= 700 else ""
+    title = family == TITLE_FONT and weight >= 600       # 只改原来加粗的宋体标题；本来就是常规字重的（金句、要旨正文）原样
+    if title:
+        family, weight = TITLE_STACK, 400
     for ln in lines:
         if ln:
             out.append(f'<text x="{x:.2f}" y="{yy:.2f}" font-size="{fs:.2f}" fill="{fill}" font-family="{family}"'
                        + (f' font-weight="{weight}"' if weight != 400 else "")
                        + (f' text-anchor="{anchor}"' if anchor != "start" else "")
-                       + f'{st} data-mod="{mod}">{_esc(ln)}</text>')
+                       + (' data-title="1"' if title else "")
+                       + f' data-mod="{mod}">{_esc(ln)}</text>')
         yy += fs * lh
     return out
 
@@ -963,6 +1000,8 @@ def compose(deck, idx, base_dir=".", cache=None, paste=False):
             if crep["problems"]:
                 info["problems"].append("V6 守卫没过：" + "；".join(crep["problems"][:2]) + "。试试把卡片拉大")
                 continue
+            if mod.get("sample"):                              # 图表库放进来的示例：照常画出来看样子，但不许当成律师的数据导出
+                info["problems"].append("这张图还是图表库里的示例数据：交给 AI 换成您的数据，或在右边改「V6 图表说明」")
             for wn in crep["warnings"]:
                 info["warnings"].append(wn)
                 rep["warnings"].append(f"第 {idx + 1} 页图表：{wn}")
@@ -972,6 +1011,7 @@ def compose(deck, idx, base_dir=".", cache=None, paste=False):
             body = re.sub(r'<rect [^>]*data-role="(paper|texture)"[^>]*/>', "", body)
             if mod.get("focus"):                               # 聚焦：只点亮这几个数据项，其余调浅
                 body = svgimport.fade_ids(body, set(mod["focus"]))
+            body = unbold_titles(body)                          # V6 图里的宋体标题：同样不加粗、不描边
             for el in ("path", "text", "circle", "line", "polygon", "polyline"):
                 body = body.replace(f"<{el} ", f'<{el} data-mod="{tag}" ')
             parts.append(f'<g transform="translate({ix:.2f},{iy:.2f})">{body}</g>')
@@ -1021,7 +1061,7 @@ def compose(deck, idx, base_dir=".", cache=None, paste=False):
                                               + (f"，最小字 {frep['min_font']:.1f}px" if frep["min_font"] else "")]
             if frep["problems"] and (not el or not all("最小的字" in p_ for p_ in frep["problems"])):
                 continue                                     # 风格不一致等：不画
-            parts.append(el)                                 # 字太小也照样画出来：律师要看着图去切片；导出仍被拦下
+            parts.append(unbold_titles(el))                  # 字太小也照样画出来：律师要看着图去切片；导出仍被拦下
             parts += _pins(mod, info, (ix, iy, iw, ih), th, tag)   # 字太小也画编号：律师看得到放在哪；导出仍被拦
     footer = deck.get("footer_logo")
     if footer is None:
@@ -1033,7 +1073,7 @@ def compose(deck, idx, base_dir=".", cache=None, paste=False):
         parts.append(f'<text x="{W - g["MX"]}" y="{H - 22}" font-size="14" fill="{p["note"]}" font-family="{BODY_FONT}" '
                      f'text-anchor="end" data-mod="page">{idx + 1:02d}</text>')
     if not mods:                                            # 空页：导出前要放东西（编辑器里会请律师先选场景）
-        rep["problems"].append(f"第 {idx + 1} 页还是空的：在左边「选图」里点一个场景")
+        rep["problems"].append(f"第 {idx + 1} 页还是空的：从左边「图表库」挑一张图，或在「诉讼图」里点一个场景")
     n_pins = sum(len(i.get("pins") or []) for i in rep["modules"].values())
     for m in mods:                                          # 要点卡「按编号排」：条数与图上的编号对得上
         if m["type"] == "bullets" and m.get("numbered") and m["id"] in rep["modules"]:

@@ -5086,6 +5086,14 @@ def main():
         print(f"  已拒绝（设计如此，不是失败）{name}: {why}")
     print()
 
+    print("=== 未上图披露（摘要图 + 强制披露，v2.2.0）===")
+    # 外部复核（原点平台）：主路由只画 head，body 写了也不上图，图照样生成、自检照样过。
+    # 守卫单独成文件，便于单跑；这里汇进总结论，CI 只跑这一个入口。
+    sys.path.insert(0, HERE)
+    import omission_checks as _omc
+    omit_msgs = _omc.main()
+    print()
+
     print("=== 每条守卫故意改坏，必须报错 ===")
     print(f"{'守卫':<34}{'结果':>6}")
     print("-" * 58)
@@ -5106,7 +5114,7 @@ def main():
     print(f"{'未改动的好地图仍然通过':<34}{'是' if clean else '否':>6}")
     print(f"\n{len(CASES) - fail}/{len(CASES)} 条守卫确认可失败" + ("" if clean else "；但好地图被误伤"))
     return 1 if (fail or not clean or v1bad or ownbad or rmsgs or leaks
-                 or read_msgs or plant_fail or envmsgs) else 0
+                 or read_msgs or plant_fail or envmsgs or omit_msgs) else 0
 
 
 if __name__ == "__main__":

@@ -52,7 +52,48 @@ def _f(a, k, d=0.0):
         return d
 
 
+_ROT = re.compile(r"rotate\(\s*(-?[\d.]+)")
+
+
+def _rot(t):
+    m_ = _ROT.search(t.get("transform", ""))
+    return float(m_.group(1)) if m_ else 0.0
+
+
+def _tpoly(t):
+    """文字外框的四个角。转过的字（发射扇顺着辐条写的标签）绕 (x, y) 转，与 SVG 一致。"""
+    x0, y0, x1, y1 = _bbox0(t)
+    pts = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+    a = _rot(t)
+    if not a:
+        return pts
+    px, py = _f(t, "x"), _f(t, "y")
+    c, s_ = math.cos(math.radians(a)), math.sin(math.radians(a))
+    return [(px + (x - px) * c - (y - py) * s_, py + (x - px) * s_ + (y - py) * c) for x, y in pts]
+
+
 def _bbox(t):
+    pts = _tpoly(t)
+    return (min(p[0] for p in pts), min(p[1] for p in pts), max(p[0] for p in pts), max(p[1] for p in pts))
+
+
+def _sat(pa, pb, pad=0.5):
+    """两个凸多边形是否真的压在一起（分离轴）。pad：各收进去这么多再判，与轴对齐时的 0.5px 余量一致。"""
+    for poly in (pa, pb):
+        n = len(poly)
+        for i in range(n):
+            (x1, y1), (x2, y2) = poly[i], poly[(i + 1) % n]
+            ax, ay = y1 - y2, x2 - x1
+            L = math.hypot(ax, ay) or 1.0
+            ax, ay = ax / L, ay / L
+            A = [px * ax + py * ay for px, py in pa]
+            B = [px * ax + py * ay for px, py in pb]
+            if max(A) - pad <= min(B) + pad or max(B) - pad <= min(A) + pad:
+                return False
+    return True
+
+
+def _bbox0(t):
     fs = _f(t, "font-size")
     mono = "Mono" in t.get("font-family", "") or "Consolas" in t.get("font-family", "")
     w = text_w(t["_t"], fs, mono=mono, track=_f(t, "letter-spacing"))
@@ -66,7 +107,8 @@ def _bbox(t):
     return (x, y - fs * 0.88, x + w, y + fs * 0.17)
 
 
-MARK_ROLES = ("bar", "hbar", "step", "total", "from", "to", "span", "sector", "dot", "point", "node", "flow")
+MARK_ROLES = ("bar", "hbar", "step", "total", "from", "to", "span", "sector", "dot", "point", "node", "flow",
+              "stage", "bubble", "spoke", "hub", "range", "wedge")
 
 
 def _shape_box(a):
@@ -195,6 +237,8 @@ def check(svg, m, chart, pal, whitelist):
         for j in range(i + 1, len(boxes)):
             (a, ta), (b, tb) = boxes[i], boxes[j]
             if a[0] < b[2] - 0.5 and b[0] < a[2] - 0.5 and a[1] < b[3] - 0.5 and b[1] < a[3] - 0.5:
+                if (_rot(ta) or _rot(tb)) and not _sat(_tpoly(ta), _tpoly(tb)):
+                    continue                     # 转过的字：外接矩形碰了，真正的字框没碰
                 bad.append(f"G4 互压：「{ta['_t'][:10]}」与「{tb['_t'][:10]}」重叠")
 
     # G5 数值与几何成正比 / G6 基线
@@ -287,6 +331,139 @@ def check(svg, m, chart, pal, whitelist):
         for k_, v in want.items():
             if got.get(str(k_), 0) != v:
                 bad.append(f"G5 比例：「{k_}」应有 {v} 格，图上 {got.get(str(k_), 0)} 个")
+    elif chart == "funnel":
+        # 条宽 ∝ 件数，且各级共用一条中线（漏斗的「基线」）
+        centers = []
+        for a in els:
+            if a.get("data-role") != "stage" or a.get("data-value") is None:
+                continue
+            v = _f(a, "data-value")
+            x0, y0, x1, y1 = box(a)
+            centers.append((x0 + x1) / 2)
+            if v > 0:
+                ratios.append((x1 - x0) / v)
+        if centers and max(centers) - min(centers) > 0.25:
+            bad.append("G6 基线：漏斗的各级不在同一条中线上")
+    elif chart in ("matrix", "fan", "converge"):
+        # 面积编码：气泡、端点圆、枢纽的面积 ∝ 数值（半径取平方根）。圆按 πr² 量，
+        # 奇川风的卵石形气泡按回读出来的轮廓面积量——形状可以「手作」，面积不能差。
+        areas = []                          # (面积, 数值, 等效半径)
+        for a in els:
+            if a.get("data-role") not in ("bubble", "hub") or a.get("data-value") is None:
+                continue
+            v = _f(a, "data-value")
+            if v <= 0:
+                continue
+            if a["_k"] == "circle":
+                ar = math.pi * _f(a, "r") ** 2
+            else:
+                ar = area(flatten(a.get("d", "")))
+            areas.append((ar, v, math.sqrt(ar / math.pi)))
+        if areas:
+            # 比例尺取最大的那一个（坐标写到两位小数，越大越准）；每一个都要落在它的 1.2% 之内，
+            # 外加坐标舍入能造成的那一点点（周长 × 0.006px）——很小的气泡不因舍入被误拦
+            ar0, v0, _ = max(areas, key=lambda t: t[0])
+            ref = ar0 / v0
+            for ar, v, rr in areas:
+                if abs(ar - ref * v) > 0.012 * ref * v + 2 * math.pi * rr * 0.006 + 0.02:
+                    bad.append(f"G5 比例：面积与数值不成正比（数值 {v:g} 的面积 {ar:.1f}，按比例尺应为 {ref * v:.1f}）")
+                    break
+        if chart == "fan":
+            # 辐条长 ∝ 数值；每根辐条都在从同一个根射出的那条射线上，起点离根 data-r0（0.11.0 起点可以在圆外）
+            for a in els:
+                if a.get("data-role") == "spoke" and a.get("data-value") is not None and _f(a, "data-value") > 0:
+                    x1, y1, x2, y2 = _f(a, "x1"), _f(a, "y1"), _f(a, "x2"), _f(a, "y2")
+                    L = math.hypot(x2 - x1, y2 - y1)
+                    ratios.append(L / _f(a, "data-value"))
+                    ox_, oy_ = _f(a, "data-ox"), _f(a, "data-oy")
+                    cross = (x1 - ox_) * (y2 - oy_) - (y1 - oy_) * (x2 - ox_)
+                    far = math.hypot(x2 - ox_, y2 - oy_) or 1.0
+                    if abs(math.hypot(x1 - ox_, y1 - oy_) - _f(a, "data-r0")) > 0.06 or abs(cross) / far > 0.06:
+                        bad.append("G6 基线：发射扇的辐条不是从同一个根射出的")
+                        break
+    elif chart == "cascade":
+        # 一格 = per：每一列的格数等于 数值 ÷ per 四舍五入；全图的格一样大、同一列等距叠放
+        want = m["_derived"]["cells"]
+        cols, sides = {}, []
+        for a in els:
+            if a.get("data-role") == "dot":
+                cols.setdefault(a.get("data-id"), []).append(a)
+                sides.append(_f(a, "data-w"))
+        for k_, v in want.items():
+            got = len(cols.get(str(k_), []))
+            if got != v:
+                bad.append(f"G5 比例：「{k_}」应有 {v} 格，图上 {got} 格")
+        if sides and max(sides) - min(sides) > 0.02:
+            bad.append("G5 比例：点阵阶梯的格大小不一")
+        for k_, arr in cols.items():
+            ys_ = sorted(_f(a, "data-y") for a in arr)
+            gaps = [b - a for a, b in zip(ys_, ys_[1:])]
+            xs_ = {round(_f(a, "data-x"), 2) for a in arr}
+            if (gaps and max(gaps) - min(gaps) > 0.05) or len(xs_) > 1:
+                bad.append(f"G5 比例：「{k_}」这一列的格没有等距叠放")
+                break
+    elif chart == "lineage":
+        # 横向位置 ∝ 年份：通过、修改、废止的标记与年份同一把尺；生命线两端也在这把尺上
+        for a in els:
+            role = a.get("data-role")
+            if role in ("start", "revise", "end"):
+                x = _f(a, "cx") if a["_k"] == "circle" else _f(a, "x1")
+                pairs_ = [(x, _f(a, "data-value"))]
+            elif role == "life":
+                pairs_ = [(_f(a, "x1"), _f(a, "data-start")), (_f(a, "x2"), _f(a, "data-last"))]
+            else:
+                continue
+            for x, yr in pairs_:
+                t0, x0 = _f(a, "data-t0"), _f(a, "data-x0")
+                if abs(yr - t0) < 1e-9:
+                    if abs(x - x0) > 0.05:
+                        bad.append(f"G5 比例：「{a.get('data-id')}」{yr:g} 年的位置不在年份尺上")
+                else:
+                    ratios.append((x - x0) / (yr - t0))
+    elif chart == "interval":
+        # 胶囊的上沿 = to、下沿 = from，与 0 线同一把尺；太窄画成一粒的，只核中心。
+        # 按像素核（0.6px），不按比值：0.3 这种贴着 0 的数，坐标舍入 0.005px 就能让比值差出 2%
+        axis0 = [a for a in els if a.get("data-role") == "axis" and _f(a, "data-value", -1) == 0]
+        if not axis0:
+            bad.append("G6 基线：区间胶囊没有画 0 线")
+        else:
+            y0 = _f(axis0[0], "y1")
+            pts_ = []                                  # (量到的 y, 数值, id)
+            for a in els:
+                if a.get("data-role") == "range":
+                    _, top, _, bot = box(a)
+                    if a.get("data-short") == "1":
+                        pts_.append(((top + bot) / 2, (_f(a, "data-from") + _f(a, "data-to")) / 2, a.get("data-id")))
+                    else:
+                        pts_ += [(top, _f(a, "data-to"), a.get("data-id")), (bot, _f(a, "data-from"), a.get("data-id"))]
+                elif a.get("data-role") == "mid":
+                    pts_.append((_f(a, "cy"), _f(a, "data-value"), a.get("data-id")))
+            far = max(pts_, key=lambda t: abs(t[1]), default=None)
+            ref = (y0 - far[0]) / far[1] if far and abs(far[1]) > 1e-12 else 0.0
+            for yy, v, id_ in pts_:
+                if abs((y0 - yy) - v * ref) > 0.6 + 0.002 * abs(v * ref):
+                    bad.append(f"G5 比例：「{id_}」的 {v:g} 不在纵轴的比例尺上（差 {abs((y0 - yy) - v * ref):.1f}px）")
+                    break
+    elif chart == "radpie":
+        # 角度 ∝ 占比（按回读的面积反算角度）；从内圈量起的长度 ∝ size；各扇区同心、同一个内圈
+        wedges = [a for a in els if a.get("data-role") == "wedge"]
+        cen = {(round(_f(a, "data-cx"), 2), round(_f(a, "data-cy"), 2), round(_f(a, "data-r0"), 2)) for a in wedges}
+        if len(cen) > 1:
+            bad.append("G6 基线：双读饼的扇区不同心或内圈不一")
+        for a in wedges:
+            pts = flatten(a.get("d", ""))
+            cx, cy, r0 = _f(a, "data-cx"), _f(a, "data-cy"), _f(a, "data-r0")
+            ds = [math.hypot(x - cx, y - cy) for x, y in pts]
+            R, rin = max(ds), min(ds)
+            if abs(rin - r0) > 0.6:
+                bad.append(f"G6 基线：「{a.get('data-id')}」不是从内圈量起的")
+                break
+            ratios.append((R - r0) / _f(a, "data-size"))
+            th = 2 * area(pts) / (R * R - r0 * r0)
+            want = _f(a, "data-value") / _f(a, "data-total") * 2 * math.pi
+            if abs(th - want) > 0.015 * want + 0.01:
+                bad.append(f"G5 比例：「{a.get('data-id')}」的角度与占比不符（{math.degrees(th):.1f}°，应为 {math.degrees(want):.1f}°）")
+                break
     if ratios:
         lo, hi = min(ratios), max(ratios)
         if hi - lo > max(0.02, 0.003 * hi):
@@ -318,9 +495,9 @@ def check(svg, m, chart, pal, whitelist):
             bad.append(f"G9 尖角：{role or '一条线'} 的线头是方的")
     want_r = pal.get("module", 0.0)
     for a in els:
-        if a.get("data-role") in ("dot", "key", "empty") and chart == "waffle":
+        if a.get("data-role") in ("dot", "key", "empty") and chart in ("waffle", "cascade"):
             if a["_k"] != "path" or a.get("data-module") != "1":
-                bad.append(f"G9 方块：百点方阵的{a.get('data-role')}应是方块模块，图上是 {a['_k']}")
+                bad.append(f"G9 方块：{'百点方阵' if chart == 'waffle' else '点阵阶梯'}的{a.get('data-role')}应是方块模块，图上是 {a['_k']}")
                 break
             w_, h_, r_ = _f(a, "data-w"), _f(a, "data-h"), _f(a, "data-r")
             if abs(w_ - h_) > 0.01:

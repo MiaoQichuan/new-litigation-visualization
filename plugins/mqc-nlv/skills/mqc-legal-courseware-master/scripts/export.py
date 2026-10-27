@@ -29,8 +29,12 @@ CT_SLIDE = "application/vnd.openxmlformats-officedocument.presentationml.slide+x
 class ExportError(RuntimeError):
     pass
 
+# 标题字（0.9.0）：只认这几种名字。编辑器确认本机装了方正小标宋，才让 PPT 里的标题用它（不加粗）；
+# 没装就照旧用安全字体里的宋体加粗——在别人电脑上也不变样。
+TITLE_FACES = ("方正小标宋简体",)
 
-def _one_slide(svg, workdir, k, fonts):
+
+def _one_slide(svg, workdir, k, fonts, title_face=None):
     import make                                          # V6
     import export_pptx                                   # V1
     ready, alpha = make.pptx_ready(svg)
@@ -38,7 +42,7 @@ def _one_slide(svg, workdir, k, fonts):
     pp = os.path.join(workdir, f"s{k}.pptx")
     with open(sp, "w", encoding="utf-8", newline="\n") as f:
         f.write(ready)
-    export_pptx.export(sp, pp, fonts=fonts)
+    export_pptx.export(sp, pp, fonts=fonts, title_face=title_face if title_face in TITLE_FACES else None)
     make.apply_alpha(pp, alpha)
     with zipfile.ZipFile(pp) as z:
         return {n: z.read(n) for n in z.namelist()}
@@ -447,7 +451,8 @@ def pick_pages(deck, pages):
     return dict(deck, slides=[deck["slides"][i] for i in pages])
 
 
-def build(deck, base_dir, out_path, fonts="safe", cache=None, pages=None, paste=True, animate=True, notes=False):
+def build(deck, base_dir, out_path, fonts="safe", cache=None, pages=None, paste=True, animate=True, notes=False,
+          title_face=None):
     """返回 (输出路径, 报告)。有问题抛 ExportError，不写半成品。pages：只导出这几页（从 0 数）。
     paste=False 只给测试用：照旧画页码、页脚 Logo、整页底色块（测试拿它冒充一份律所模板）。"""
     D.validate(deck, base_dir)
@@ -471,7 +476,7 @@ def build(deck, base_dir, out_path, fonts="safe", cache=None, pages=None, paste=
     with tempfile.TemporaryDirectory(prefix="nlv7-") as td:
         parts = []
         for k, (svg, logos) in enumerate(lifted):
-            part = put_logos(_one_slide(svg, td, k + 1, fonts), logos, k + 1)
+            part = put_logos(_one_slide(svg, td, k + 1, fonts, title_face), logos, k + 1)
             m = _PAPER.search(composed[k][0])
             if not paste:
                 parts.append(part)

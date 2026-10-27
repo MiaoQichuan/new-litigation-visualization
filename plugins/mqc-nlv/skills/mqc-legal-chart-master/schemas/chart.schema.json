@@ -24,7 +24,15 @@
         "strip",
         "sankey",
         "ribbon",
-        "waterfall"
+        "waterfall",
+        "funnel",
+        "matrix",
+        "fan",
+        "converge",
+        "cascade",
+        "lineage",
+        "interval",
+        "radpie"
       ]
     },
     "title": {
@@ -108,7 +116,7 @@
         "desc",
         "given"
       ],
-      "description": "横条的排序"
+      "description": "排序。横条、发射扇默认由大到小（desc），写 given 保持原序；点阵阶梯默认由少到多，given 保持原序"
     },
     "note": {
       "type": "string",
@@ -122,8 +130,7 @@
           "items": {
             "type": "object",
             "required": [
-              "id",
-              "label"
+              "id"
             ],
             "properties": {
               "id": {
@@ -142,16 +149,52 @@
               },
               "from": {
                 "type": "number",
-                "minimum": 0,
-                "description": "哑铃：左端的值"
+                "description": "哑铃：左端的值（不小于 0）；区间胶囊：区间低的一端（可为负）"
               },
               "to": {
                 "type": "number",
-                "minimum": 0,
-                "description": "哑铃：右端的值"
+                "description": "哑铃：右端的值（不小于 0）；区间胶囊：区间高的一端（可为负）"
+              },
+              "size": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "description": "发射扇：圆的面积所代表的数（可选，要写就每根都写）；双读饼：扇区从内圈伸出的长度所代表的数（必填）"
+              },
+              "group": {
+                "type": [
+                  "string",
+                  "integer"
+                ],
+                "description": "放射汇聚：这一条归入哪个主题（groups 里的 id）"
+              },
+              "mid": {
+                "type": "number",
+                "description": "区间胶囊：胶囊上的白点（中位数、点估计），要写就每项都写，并写 data.mid_label"
+              },
+              "start": {
+                "type": [
+                  "integer",
+                  "number"
+                ],
+                "description": "法条沿革：通过（公布、签订）的年份（四位整数）；发射扇：圆在径向上的位置（例如立案后第几周开庭），要写就都写，并写 data.start_label"
+              },
+              "revisions": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 2999
+                },
+                "description": "法条沿革：修改年份，从早到晚、不重复"
+              },
+              "end": {
+                "type": "integer",
+                "minimum": 1000,
+                "maximum": 2999,
+                "description": "法条沿革：废止（终止）年份；现行有效的不写"
               }
             },
-            "description": "竖柱 / 横条 / 百点方阵 / 玫瑰写 value；哑铃写 from 与 to"
+            "description": "竖柱 / 横条 / 百点方阵 / 玫瑰 / 发射扇写 id、label、value；哑铃写 from 与 to；放射汇聚写 id、group，label 可选；点阵阶梯写 id、label、value；法条沿革写 id、label、start，revisions、end 可选；区间胶囊写 id、label、from、to，mid 可选；双读饼写 id、label、value、size"
           }
         },
         "measure": {
@@ -173,8 +216,7 @@
             "type": "object",
             "required": [
               "id",
-              "label",
-              "values"
+              "label"
             ],
             "properties": {
               "id": {},
@@ -186,10 +228,12 @@
                 "items": {
                   "type": "number",
                   "minimum": 0
-                }
+                },
+                "description": "逐件分布：一件一个值"
               }
             }
-          }
+          },
+          "description": "逐件分布的组（要写 values）；放射汇聚的主题（只写 id、label）"
         },
         "threshold": {
           "type": "object",
@@ -328,6 +372,142 @@
             }
           },
           "description": "逐级加减：终点，等于起点加减各级之和"
+        },
+        "stages": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 8,
+          "description": "漏斗：一级比一级少（或相等）",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label",
+              "value"
+            ],
+            "properties": {
+              "id": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "label": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            }
+          }
+        },
+        "rows": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 12,
+          "description": "气泡矩阵的行（例如年份）",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label"
+            ]
+          }
+        },
+        "cols": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 14,
+          "description": "气泡矩阵的列（例如案由）",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label"
+            ]
+          }
+        },
+        "cells": {
+          "type": "array",
+          "minItems": 1,
+          "description": "气泡矩阵的格：没写的格按 0 画",
+          "items": {
+            "type": "object",
+            "required": [
+              "row",
+              "col",
+              "value"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "row": {},
+              "col": {},
+              "value": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "status": {
+                "enum": [
+                  "dashed"
+                ],
+                "description": "虚线圈：这一格口径不完整（试行期、当年数据不全）"
+              }
+            }
+          }
+        },
+        "dashed_label": {
+          "type": "string",
+          "description": "气泡矩阵：虚线圈是什么意思，有虚线圈时必填"
+        },
+        "size_label": {
+          "type": "string",
+          "description": "发射扇：圆的面积代表什么，写了 size 时必填；双读饼必填：扇区长短代表什么"
+        },
+        "per": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "点阵阶梯：一格代表多少（不写由脚本选 1、2、5、10……里最小的一档，使最高一列不超过 24 格）"
+        },
+        "until": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 2999,
+          "description": "法条沿革：截至哪一年（现行有效的线画到这一年）"
+        },
+        "marks": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "start": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4
+            },
+            "revise": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4
+            },
+            "end": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4
+            }
+          },
+          "description": "法条沿革：三种标记的叫法，默认 通过 / 修改 / 废止"
+        },
+        "mid_label": {
+          "type": "string",
+          "description": "区间胶囊：白点代表什么（例如「中位数」）"
+        },
+        "size_unit": {
+          "type": "string",
+          "description": "双读饼：size 的单位（例如「天」）"
+        },
+        "start_label": {
+          "type": "string",
+          "description": "发射扇：写了 start 时必填，圆的位置代表什么（例如「首次开庭」）"
         }
       },
       "description": "给了 dataset + view 时，items / groups / nodes / links / sources / targets 由脚本算，不要手写"
@@ -670,6 +850,354 @@
               "targets",
               "links"
             ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chart": {
+            "enum": [
+              "bar",
+              "hbar",
+              "waffle",
+              "rose",
+              "dumbbell",
+              "fan"
+            ]
+          }
+        },
+        "required": [
+          "chart"
+        ],
+        "not": {
+          "required": [
+            "dataset"
+          ]
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "properties": {
+              "items": {
+                "items": {
+                  "required": [
+                    "label"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chart": {
+            "const": "strip"
+          }
+        },
+        "required": [
+          "chart"
+        ],
+        "not": {
+          "required": [
+            "dataset"
+          ]
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "properties": {
+              "groups": {
+                "items": {
+                  "required": [
+                    "values"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chart": {
+            "const": "funnel"
+          }
+        },
+        "required": [
+          "chart"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "required": [
+              "stages"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chart": {
+            "const": "matrix"
+          }
+        },
+        "required": [
+          "chart"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "required": [
+              "rows",
+              "cols",
+              "cells"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chart": {
+            "const": "fan"
+          }
+        },
+        "required": [
+          "chart"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "required": [
+              "items"
+            ],
+            "properties": {
+              "items": {
+                "items": {
+                  "required": [
+                    "value"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chart": {
+            "const": "converge"
+          }
+        },
+        "required": [
+          "chart"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "required": [
+              "groups",
+              "items"
+            ],
+            "properties": {
+              "items": {
+                "items": {
+                  "required": [
+                    "group"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chart": {
+            "const": "dumbbell"
+          }
+        },
+        "required": [
+          "chart"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "properties": {
+              "items": {
+                "items": {
+                  "properties": {
+                    "from": {
+                      "minimum": 0
+                    },
+                    "to": {
+                      "minimum": 0
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chart": {
+            "const": "cascade"
+          }
+        },
+        "required": [
+          "chart"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "required": [
+              "items"
+            ],
+            "properties": {
+              "items": {
+                "minItems": 3,
+                "maxItems": 16,
+                "items": {
+                  "required": [
+                    "id",
+                    "label",
+                    "value"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chart": {
+            "const": "lineage"
+          }
+        },
+        "required": [
+          "chart"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "required": [
+              "items",
+              "until"
+            ],
+            "properties": {
+              "items": {
+                "minItems": 2,
+                "maxItems": 10,
+                "items": {
+                  "required": [
+                    "id",
+                    "label",
+                    "start"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chart": {
+            "const": "interval"
+          }
+        },
+        "required": [
+          "chart"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "required": [
+              "items"
+            ],
+            "properties": {
+              "items": {
+                "minItems": 2,
+                "maxItems": 12,
+                "items": {
+                  "required": [
+                    "id",
+                    "label",
+                    "from",
+                    "to"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chart": {
+            "const": "radpie"
+          }
+        },
+        "required": [
+          "chart"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "required": [
+              "items",
+              "size_label"
+            ],
+            "properties": {
+              "items": {
+                "minItems": 2,
+                "maxItems": 8,
+                "items": {
+                  "required": [
+                    "id",
+                    "label",
+                    "value",
+                    "size"
+                  ]
+                }
+              }
+            }
           }
         }
       }
