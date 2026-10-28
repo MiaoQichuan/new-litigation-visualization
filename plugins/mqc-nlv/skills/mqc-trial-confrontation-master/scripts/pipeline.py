@@ -9,6 +9,11 @@
   6 光栅     rasterize.py      → PNG（换单一字族，避开静默的字体回退）
   7 自检     cross_check.py 图表一致 + check_figure.py 图几何
 一份输入同时喂表与图；缺顶层 title/subtitle 时渲染器回落到 case 段。
+
+用法：
+  python3 pipeline.py <case.json> [输出目录] [交付物]   交付物：1=Excel 2=SVG 3=PNG，可写 1,2,3 或 全部；默认 Excel+SVG
+  python3 pipeline.py --demo [输出目录]                 用随包示例跑一遍（默认写到 ./庭审对抗图-示例）
+  python3 pipeline.py --check                           只查本机环境：出表、出图、出 PNG 各缺什么
 """
 import json, os, subprocess, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
@@ -57,12 +62,107 @@ def parse_formats(ans):
     return out or DEFAULT_FORMATS
 
 
+# 出表、出图要读的字段。缺了原来跑到出表那一步才甩 KeyError 堆栈，前面的校验白跑；
+# 现在开跑前一次查完，逐条说「哪一条、少了什么、照哪份骨架补」。
+_ELEMENT_KEYS = ("id", "name", "layer", "kind", "burden", "standard", "dispute", "facts",
+                 "claim", "response", "response_class", "counter", "second", "second_class",
+                 "st_plaintiff", "st_defendant", "st_replik", "st_duplik", "gap", "self_defeat",
+                 "triage", "issue_kind", "evidence", "prospect", "decisive", "conf_law", "conf_evid",
+                 "source", "todo", "figure_ref", "court_standard")
+_GUIDE = "references/casefile-guide.md 第 4 节「可粘贴骨架」"
+
+
+def check_shape(D):
+    """输入的骨架对不对：返回问题清单（空表示可以往下跑）。只查有没有、是不是那种类型，不查内容。"""
+    if not isinstance(D, dict):
+        return [f"输入最外层应是一个对象（{{…}}），实为{type(D).__name__}。照 {_GUIDE} 起头"]
+    errs = []
+    case = D.get("case")
+    if not isinstance(case, dict):
+        errs.append("缺 case 段（案件名、初步研判、立场都写在这里）")
+    else:
+        for k, what in (("title", "案件名（图与表的大标题）"), ("triage", "初步研判（两三句收束）")):
+            if not str(case.get(k) or "").strip():
+                errs.append(f"case.{k} 没写：{what}")
+    parts = D.get("parts")
+    if not isinstance(parts, list) or not parts:
+        errs.append("缺 parts（对抗部分）或它是空的：至少要有一个争点板块")
+        return errs
+    for i, part in enumerate(parts, 1):
+        where = f"第 {i} 个对抗部分"
+        if not isinstance(part, dict):
+            errs.append(f"{where}应是一个对象"); continue
+        where = f"{where}（{part.get('label') or '未写 label'}）"
+        for k in ("label", "track", "summary"):
+            if k not in part:
+                errs.append(f"{where}缺 {k}")
+        cbs = part.get("claim_bases")
+        if not isinstance(cbs, list) or not cbs:
+            errs.append(f"{where}缺 claim_bases（请求权基础）或它是空的"); continue
+        for j, cb in enumerate(cbs, 1):
+            els = cb.get("elements") if isinstance(cb, dict) else None
+            if not isinstance(els, list) or not els:
+                errs.append(f"{where}第 {j} 条请求权基础缺 elements（构成要件）或它是空的"); continue
+            for k, e in enumerate(els, 1):
+                if not isinstance(e, dict):
+                    errs.append(f"{where}第 {k} 条要件应是一个对象"); continue
+                miss = [x for x in _ELEMENT_KEYS if x not in e]
+                if miss:
+                    errs.append(f"要件 {e.get('id') or where + '第%d条' % k} 缺字段：{'、'.join(miss)}"
+                                "（没有内容的段填「—」，不要删字段）")
+    return errs
+
+
+def _run(no, name, *cmd):
+    """跑一步子脚本；失败时一句话说清是哪一步，原因就在上面几行（不甩 CalledProcessError 堆栈）。"""
+    r = subprocess.run(list(cmd))
+    if r.returncode:
+        print(f"    第 {no} 步「{name}」没跑通：原因见上面几行。改好输入后重跑同一条命令即可。")
+    return r.returncode
+
+
+def env_check():
+    """只查环境，不出图：出表、出图、出 PNG 各自缺什么，缺了会怎样。"""
+    import importlib.util as u
+    has = lambda m: u.find_spec(m) is not None
+    print(f"Python {sys.version.split()[0]}")
+    print(f"  出图 SVG    可用（只用标准库）")
+    print(f"  分析表 Excel {'可用' if has('openpyxl') else '缺 openpyxl：pip install openpyxl（只要图可在命令末尾写 2）'}")
+    png_libs = [m for m in ("PIL", "numpy") if not has(m)]
+    sys.path.insert(0, HERE)
+    try:
+        import rasterize as _r
+        tools = ["cairosvg"] if getattr(_r, "cairosvg", None) else []
+        tools += [t for t in ("rsvg-convert", "inkscape") if _r._find_tool(t)]
+        if _r._find_tool("soffice") and _r._find_tool("pdftoppm"):
+            tools.append("LibreOffice")
+    except ImportError:
+        tools = []
+    if png_libs:
+        print(f"  对抗图 PNG  可选；缺 {'、'.join('Pillow' if m == 'PIL' else m for m in png_libs)}："
+              f"pip install pillow numpy。不影响 Excel 与 SVG")
+    elif tools:
+        print(f"  对抗图 PNG  可用（{'、'.join(tools)}）")
+    else:
+        print("  对抗图 PNG  可选；本机暂未找到转图工具（cairosvg / Inkscape / LibreOffice / resvg-js / Playwright 任一即可），"
+              "不影响 Excel 与 SVG")
+    return 0
+
+
 def main(case, outdir="out", formats=None):
     if "excel" in set(parse_formats(formats)) and not _preflight([("openpyxl", "分析表 Excel")]):
         return 2
-    os.makedirs(outdir, exist_ok=True)
     D=json.load(open(case,encoding="utf-8-sig"))
-    S=lambda *a: subprocess.run(list(a), check=True)
+    bad = check_shape(D)
+    if bad:
+        print(f"输入的骨架不全，先补上再跑（共 {len(bad)} 处）：")
+        for b in bad[:20]:
+            print(f"  · {b}")
+        if len(bad) > 20:
+            print(f"  ……另有 {len(bad) - 20} 处，补完前面的再跑一次就能看到")
+        print(f"照着补：{_GUIDE}；完整示例见 examples/matrix-input.json")
+        return 1
+    os.makedirs(outdir, exist_ok=True)
 
     step(1,"摄入")
     mats=D.get("materials")
@@ -95,19 +195,26 @@ def main(case, outdir="out", formats=None):
           + ("" if formats else "（默认；要别的就在命令行末尾加 1,2,3 或 全部）"))
     step(4,"出表")
     xls=os.path.join(outdir,"庭审对抗分析表.xlsx")
-    if "excel" in want:
-        S(sys.executable, os.path.join(HERE,"build_matrix.py"), case, xls)
+    if "excel" in want and _run(4, "出表", sys.executable, os.path.join(HERE,"build_matrix.py"), case, xls):
+        return 1
 
     step(5,"出图")
     fig=os.path.join(outdir,"图输入.json")     # 产出目录里不留英文名
-    S(sys.executable, os.path.join(HERE,"to_figure.py"), case, fig)   # 表→图，表是唯一的源
+    if _run(5, "表→图", sys.executable, os.path.join(HERE,"to_figure.py"), case, fig):   # 表→图，表是唯一的源
+        return 1
     svg=os.path.join(outdir,"庭审对抗图.svg")
-    S(sys.executable, os.path.join(HERE,"render_main.py"), fig, svg)
+    if _run(5, "出图", sys.executable, os.path.join(HERE,"render_main.py"), fig, svg):
+        return 1
 
     step(6,"光栅")
     png=os.path.join(outdir,"庭审对抗图.png")
+    png_skipped = False
     if "png" in want:
-        S(sys.executable, os.path.join(HERE,"rasterize.py"), svg, png)
+        # PNG 只是预览：转不出来时不连累 Excel 与 SVG，照常交付并说明 PNG 缺了什么
+        if subprocess.run([sys.executable, os.path.join(HERE,"rasterize.py"), svg, png]).returncode:
+            png_skipped = True
+            print("    PNG 没出成（原因见上一行）。Excel 与 SVG 照常交付；"
+                  "要 PNG 就按提示补上工具后重跑，或用 --check 看本机缺什么")
     else:
         print("    未选 PNG，跳过（要就在命令行末尾加 3 或 全部）")
 
@@ -121,6 +228,8 @@ def main(case, outdir="out", formats=None):
     _made = [p for k, p in (("excel", xls), ("svg", svg), ("png", png))
              if k in want and os.path.exists(p)]
     print("\n完成：" + "\n      ".join(_made))
+    if png_skipped:
+        print("      （PNG 未出，见上文）")
     # 与其余 skill 一致：把结论用文字给出，模型不必再去转图、看图核对
     # （时间轴大师的真实运行里，读图工具显示不了 PNG 时模型反复转格式，白花五分钟）。
     print("核对清单（核对以此为准，不必查看图片）：图几何与图表一致两项自检见上；"
@@ -143,5 +252,14 @@ if __name__=="__main__":
             _stream.reconfigure(encoding="utf-8")
         except Exception:
             pass
-    sys.exit(main(sys.argv[1], sys.argv[2] if len(sys.argv)>2 else "out",
-                  sys.argv[3] if len(sys.argv)>3 else None))
+    _a = sys.argv[1:]
+    if not _a:
+        print("用法：" + __doc__.split("用法：", 1)[1].rstrip())
+        sys.exit(2)
+    if _a[0] == "--check":
+        sys.exit(env_check())
+    if _a[0] == "--demo":
+        _out = _a[1] if len(_a) > 1 else "庭审对抗图-示例"
+        print(f"用随包示例跑一遍，产物写到 {os.path.abspath(_out)}")
+        sys.exit(main(os.path.join(ROOT, "examples", "matrix-input.json"), _out, _a[2] if len(_a) > 2 else None))
+    sys.exit(main(_a[0], _a[1] if len(_a)>1 else "out", _a[2] if len(_a)>2 else None))

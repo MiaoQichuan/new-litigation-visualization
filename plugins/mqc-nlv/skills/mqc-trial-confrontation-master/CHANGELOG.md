@@ -1,5 +1,20 @@
 # 更新记录
 
+## 1.1.0
+
+分析表与对抗图一个字节不变（同一份输入出的 SVG 与改前逐字节一致）。
+
+- 新：`pipeline.py --demo` 用随包示例一条命令跑通；`--check` 只查本机环境，逐项说出 Excel、SVG、PNG 各缺什么。
+- 修：不给参数时原来甩 IndexError 堆栈，现在打印用法。
+- 修：输入骨架不全（缺 case／parts／claim_bases／elements 或要件字段）原来跑到出表那一步才甩 KeyError 堆栈，
+  前面的校验白跑；现在开跑前一次说全「哪一条要件缺哪个字段」，并指到可粘贴骨架。
+- 修：出表、出图某一步失败时原来甩 CalledProcessError 堆栈，现在说是第几步、原因在上面几行。
+- 修：选了 PNG 而本机缺 Pillow 或转图工具时，原来整条流程中断、Excel 与 SVG 也算失败；现在照常交付 Excel 与 SVG，说明 PNG 缺什么。
+- 文档：SKILL.md 加「怎么用」「依赖」「安全与隐私」「文档地图」；新增 `references/faq.md`
+  （三步上手、常见误用、报错对照与各校验编号的改法、本诉与反诉同图、术语速查、已知限制）；README 重写。
+- SKILL.md 的依赖改准：必需只有 openpyxl（出 Excel），PNG 所需的 pillow、numpy、cairosvg 列为可选。
+- 回归加「命令行边界」一节（`tests/cli_checks.py`，9 项）。
+
 ## 随套件 v2.4.0
 
 分析表与对抗图一个字节不变。

@@ -5,7 +5,7 @@ tags: [legal, litigation, chronicle, docx, xlsx, 大事记, 庭前三大法宝]
 metadata:
   version: 1.0.0
   author: 缪奇川
-  license: MIT
+  license: AGPL-3.0-only
   deliverables: [docx, xlsx, pdf, svg, png, casefile.json]
   dependencies: [openpyxl]
   optional_dependencies: [cairosvg, pypdf, node+docx]

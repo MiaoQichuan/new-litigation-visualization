@@ -1,0 +1,75 @@
+{
+  "name": "mqc-nlv-dsh",
+  "version": "3.0.0",
+  "description": "新诉讼可视化 · New Litigation Visualization for DeepSeek Harness: seven litigation visualisation skills (timelines, relationship diagrams, chronicles, trial confrontation maps, legal charts, courseware) with native tools to run them.",
+  "icon": "./icon.svg",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./skill-provider": "./skill-provider.js",
+    "./skill-provider/locale/*.json": "./locale/skill-provider/*.json",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "skill-provider.js",
+    "lib",
+    "locale",
+    "docs",
+    "nlv-skills",
+    "python",
+    "nodejs",
+    "cordis.patch.yml",
+    "icon.svg",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.md"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "engines": {
+    "dsh": ">=0.2.0-rc.2",
+    "node": ">=18"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-tools": "*",
+    "@deepseek-ai/dsh-skill": "*"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-tools": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-skill": {
+      "optional": true
+    }
+  },
+  "license": "AGPL-3.0-only",
+  "author": "缪奇川 (Miao Qichuan)",
+  "homepage": "https://github.com/MiaoQichuan/new-litigation-visualization",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MiaoQichuan/new-litigation-visualization.git",
+    "directory": "plugins/mqc-nlv-dsh"
+  },
+  "bugs": {
+    "url": "https://github.com/MiaoQichuan/new-litigation-visualization/issues"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh-plugin",
+    "legal",
+    "litigation",
+    "visualization",
+    "诉讼可视化"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

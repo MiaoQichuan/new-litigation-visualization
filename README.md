@@ -3,12 +3,12 @@
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-3FB950" alt="License: MIT"/></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-3FB950" alt="License: AGPL-3.0"/></a>
   <img src="https://img.shields.io/badge/Python-3-3776AB?logo=python&logoColor=white" alt="Python 3"/>
   <a href="https://github.com/MiaoQichuan/new-litigation-visualization/actions/workflows/checks.yml"><img src="https://github.com/MiaoQichuan/new-litigation-visualization/actions/workflows/checks.yml/badge.svg" alt="checks"/></a>
   <img src="https://img.shields.io/badge/Built%20with-Claude-D97757?logo=anthropic&logoColor=white" alt="Built with Claude"/>
   <img src="https://img.shields.io/badge/Claude-Skills-D97757?logo=anthropic&logoColor=white" alt="Claude Skills"/>
-  <img src="https://img.shields.io/badge/DeepSeek%20Harness-supported-4D6BFE" alt="DeepSeek Harness supported"/>
+  <img src="https://img.shields.io/badge/DeepSeek%20Harness-plugin-4D6BFE" alt="DeepSeek Harness plugin"/>
   <img src="https://img.shields.io/badge/Skills-7%20modules-0F766E" alt="7 skills"/>
   <img src="https://img.shields.io/badge/A4%20%E6%89%93%E5%8D%B0-%E8%AE%BE%E8%AE%A1%E5%89%8D%E6%8F%90-0F766E" alt="A4 打印是设计前提"/>
   <img src="https://img.shields.io/badge/%E8%BE%93%E5%87%BA-%E6%A0%BC%E5%BC%8F%E5%8F%AF%E9%80%89%20%C2%B7%20%E4%BA%94%E7%A7%8D%E5%8F%AF%E7%BC%96%E8%BE%91-7C3AED" alt="格式可选 · 五种可编辑格式"/>
@@ -22,7 +22,7 @@
 files and legal data into court-ready figures, charts and tables. The model only reads meaning; every coordinate,
 size and character budget is computed by deterministic scripts from the physical size of an
 A4 sheet. Text on a figure is always a subsequence of the source sentence, and every element
-traces back to the document and sentence it came from. MIT licensed, no network calls, works
+traces back to the document and sentence it came from. AGPL-3.0 licensed, no network calls, works
 with any agent that reads `SKILL.md`.
 
 ## 为什么做这件事
@@ -58,9 +58,9 @@ with any agent that reads `SKILL.md`.
 | <img src="assets/icons/v2.png" width="44" alt="V2"/> | **V2** [时间轴大师](plugins/mqc-nlv/skills/mqc-timeline-master/) | v2.2.0 | 案件经过是怎样的 | 判决书 · 起诉状 · 答辩状 · 合同 · 证据目录 · 流水 · 聊天记录（PDF、老式 .doc、扫描件、照片、口述） | 同上 + 溯源索引 |
 | <img src="assets/icons/v3.png" width="44" alt="V3"/> | **V3** [法律关系图大师](plugins/mqc-nlv/skills/mqc-legal-relation-master/) | v1.0.0 | 谁与谁、就什么标的、成立何种关系 | 一批案件材料 | 同上 + 出处索引 |
 | <img src="assets/icons/v4.png" width="44" alt="V4"/> | **V4** [大事记表大师](plugins/mqc-nlv/skills/mqc-chronicle-master/) | v1.0.0 | 什么时候发生了什么 | 一批案件材料 | 案件大事记 Word · Excel 母表 · A4 简表（默认）；简表 PDF/PNG 可选 |
-| <img src="assets/icons/v5.png" width="44" alt="V5"/> | **V5** [庭审对抗图大师](plugins/mqc-nlv/skills/mqc-trial-confrontation-master/) | v1.0.0 | 谁主张什么、对方怎么抗辩、法院审查什么 | 起诉状 · 答辩状 · 证据目录 · 代理意见 | 分析表 Excel · 对抗图 SVG（默认）；PNG 可选 |
+| <img src="assets/icons/v5.png" width="44" alt="V5"/> | **V5** [庭审对抗图大师](plugins/mqc-nlv/skills/mqc-trial-confrontation-master/) | v1.1.0 | 谁主张什么、对方怎么抗辩、法院审查什么 | 起诉状 · 答辩状 · 证据目录 · 代理意见 | 分析表 Excel · 对抗图 SVG（默认）；PNG 可选 |
 | <img src="assets/icons/v6.png" width="44" alt="V6"/> | **V6** [法律图表大师](plugins/mqc-nlv/skills/mqc-legal-chart-master/) | v0.11.0 | 有多少、占几成、判了多少、钱流向哪里 | 一组法律数据（判决结果、案由、金额、天数、去向、资金流水） | SVG · PPTX（默认）；PNG 可选 |
-| <img src="assets/icons/v7.png" width="44" alt="V7"/> | **V7** [法律课件大师](plugins/mqc-nlv/skills/mqc-legal-courseware-master/) | v0.9.0 | 这些图怎么做成一页能上讲台的法律图表页，粘进自己的课件 | V1–V6 的图、法条与案例、一句想法、律所模板或截图（可选） | 可编辑 PPTX（整页或框选复制；图里每个元素各成一组，按读图编号自带讲课动画） |
+| <img src="assets/icons/v7.png" width="44" alt="V7"/> | **V7** [法律课件大师](plugins/mqc-nlv/skills/mqc-legal-courseware-master/) | v0.9.1 | 这些图怎么做成一页能上讲台的法律图表页，粘进自己的课件 | V1–V6 的图、法条与案例、一句想法、律所模板或截图（可选） | 可编辑 PPTX（整页或框选复制；图里每个元素各成一组，按读图编号自带讲课动画） |
 
 **三组用法，V3 是交叠处。**
 
@@ -154,19 +154,18 @@ python3 plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/scripts/doctor.py
 用时间轴大师，把这份判决书画成案件经过时间轴，交当事人看
 ```
 
-**DeepSeek Harness**：挂目录即可，不必构建（它的技能发现是扁平的，指到 `skills/`
-这一层，会扫到下面每一个 `<模块名>/SKILL.md`）：
+<img src="assets/icons/dsh.png" width="44" alt="DeepSeek Harness 插件" align="left"/> **DeepSeek Harness**（v3.0.0 起有专门的插件 `mqc-nlv-dsh`，七个模块一次装好）：<br clear="left"/>
 
-```yaml
-skills:
-  local:
-    customSkillDirs:
-      - "./new-litigation-visualization/plugins/mqc-nlv/skills"
-```
+1. 电脑上先装 Python 3.9 或更新的版本（Windows 安装时第一页勾选「Add python.exe to PATH」）；
+2. 从本仓库的 [Releases](https://github.com/MiaoQichuan/new-litigation-visualization/releases) 下载 `mqc-nlv-dsh-<版本>.tgz`；
+3. 在 DeepSeek Harness 左侧点 **插件 → 添加插件**，填这个文件的完整路径（例如 `C:\Users\您\Downloads\mqc-nlv-dsh-3.0.0.tgz`，**不要带引号**；安装源保持「中国大陆镜像源」），安装后「立即启用」；
+4. 完全退出再打开 DeepSeek Harness，新建会话，说「检查新诉讼可视化的环境」。
 
-dsh 的发现优先级（先命中先生效）：项目 `.dsh` → 项目 `.agents` → `customSkillDirs` →
-用户 `.dsh` → 用户 `.agents`。它把 `allowed-tools` / `disallowed-tools` 当未知字段处理，
-技能内的工具约束需要在 harness 层自行保证。
+插件比单纯挂技能目录多做了三件事：自带 `nlv_check`（找本机的 Python，缺什么说清怎么装）与 `nlv_run`
+（参数直传给 Python、不经 PowerShell，Windows 上中文路径与引号不出错）两个工具；出 Excel 的 openpyxl、写 Word 的 docx 都随包附带（Word 版另需本机有 Node.js）；
+成品通过 DeepSeek Harness 的交付卡片出现在对话里，点开就在右侧预览。详见
+[`plugins/mqc-nlv-dsh/README.md`](plugins/mqc-nlv-dsh/README.md)。以前手动把技能放进 `.dsh/skills` 或 `.agents/skills` 的，
+装插件前请先移走那些同名文件夹，它们会优先于插件里的版本。
 
 **桌面办公智能体**（WorkBuddy、千问、Codex、Claude 等）：在「技能」页选「上传技能」，
 把技能包拖进去。仓库 `plugins/mqc-nlv/skills/` 下的每个文件夹就是一个技能包，按需打包上传。
@@ -196,6 +195,7 @@ new-litigation-visualization/
 ├── assets/                                  仓库封面、模块图标与配合图
 ├── .claude-plugin/marketplace.json          插件市场清单
 ├── .github/workflows/checks.yml             每次 push 与 PR 跑七个模块的回归
+├── plugins/mqc-nlv-dsh/                  DeepSeek Harness 插件：两个原生工具 + 打包脚本（build.py）与模拟宿主回归
 └── plugins/mqc-nlv/
     ├── .claude-plugin/plugin.json           插件清单（插件版本只在这里声明）
     └── skills/
@@ -502,9 +502,16 @@ python3 plugins/mqc-nlv/skills/mqc-legal-courseware-master/tests/run_checks.py
 
 ## 许可
 
-MIT。作者 [缪奇川](https://github.com/MiaoQichuan)，公众号：奇川律师。
+自 v3.0.0 起以 **GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）** 发布，全文见 [LICENSE](LICENSE)。
+Copyright (C) 2026 缪奇川（Miao Qichuan）。作者 [缪奇川](https://github.com/MiaoQichuan)，公众号：奇川律师。
 
-文中与示意图里出现的 PowerPoint、Visio、Illustrator、ProcessOn、draw.io、WPS 等产品名称与图标，归各自的权利人所有，只用来说明能导出哪些格式；它们不在 MIT 许可的范围内，本项目与这些公司也没有关联。
+简单说：可以自由使用、学习、修改和再分发；但凡分发修改后的版本，或把它改造后通过网络向他人提供服务，
+都必须以同一许可公开相应的完整源代码，并保留原作者的版权与许可声明。
+
+v2.5.0 及以前的版本以 MIT 许可发布，已经按 MIT 取得那些版本的人，仍可按 MIT 使用那些版本；
+此后的新版本与新代码只适用 AGPL-3.0。需要在闭源产品或不公开源码的服务中使用的，请联系作者另行授权。
+
+文中与示意图里出现的 PowerPoint、Visio、Illustrator、ProcessOn、draw.io、WPS 等产品名称与图标，归各自的权利人所有，只用来说明能导出哪些格式；它们不在本项目许可的范围内，本项目与这些公司也没有关联。
 
 ---
 

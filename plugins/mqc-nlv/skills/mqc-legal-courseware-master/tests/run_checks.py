@@ -1836,10 +1836,38 @@ def t_studio(td):
         _bc2, _bb2 = get("/brand/qichuan-favicon.png")
         _bc3, _bb3 = get("/brand/../studio.py")
         _bc4, _bpage = get("/")
-        check("品牌：侧栏左上角是作者头像 + 「新诉讼可视化」，标签页小图标是头像；别的路径不放行",
+        check("品牌：侧栏左上角是作者头像 + 「法律课件大师」，下面一行小字「新诉讼可视化 · V7」；标签页小图标是头像；别的路径不放行",
               _bc == 200 and _bb.startswith(b"\x89PNG") and _bc2 == 200 and _bb2.startswith(b"\x89PNG") and _bc3 != 200
-              and "/brand/qichuan-avatar.png" in _bpage.decode("utf-8") and '<span class="bm-name">新诉讼可视化</span>' in _bpage.decode("utf-8")
+              and "/brand/qichuan-avatar.png" in _bpage.decode("utf-8") and '<span class="bm-name">法律课件大师</span>' in _bpage.decode("utf-8")
+              and '>新诉讼可视化 · V7</span>' in _bpage.decode("utf-8") and '<span class="bm-name">新诉讼可视化</span>' not in _bpage.decode("utf-8")
               and 'rel="icon"' in _bpage.decode("utf-8"))
+        _pg = _bpage.decode("utf-8")
+        _css = _pg.split("<style>", 1)[1].split("</style>", 1)[0] if "<style>" in _pg else _pg
+        _rules = {sel: body for sel, body in re.findall(r"(\.[\w .-]+?)\s*\{([^}]*)\}", _css)}
+        _bad = [sel.strip() for sel, body in _rules.items()
+                if sel.strip() in (".logo", ".emptypage b", ".lh1", ".lcard .lq", ".bm-sub")
+                and re.search(r"var\(--(song|title)\)|小标宋|serif\b(?!-)", body) and "--sans" not in body]
+        check("操作界面不用衬线字：空页提示、图表库大标题与问题标题、品牌下的小字都用无衬线（作者 10-28 定）", not _bad, _bad)
+        check("唯一的例外是左上角品牌名「法律课件大师」：用方正小标宋（没装时落到华文中宋 / 思源宋体）（作者 10-28 定）",
+              "var(--brand-song)" in _rules.get(".bm-name", "") and "方正小标宋" in _css.split("--brand-song:", 1)[-1][:120])
+        _heavy = [sel.strip() for sel, body in _rules.items()
+                  if sel.strip() in (".lh1", ".lcard .lq", ".emptypage b", ".rail .thumb.on .no", ".title-in")
+                  and re.search(r"font-weight:\s*(600|700|bold)", body)]
+        check("界面字重只用 400 / 500（微软雅黑没有 600，会被渲染成粗体，显得廉价；作者 10-28 指出）", not _heavy, _heavy)
+        check("步骤圆圈里的数字居中：行高等于圆的高度、数字用系统西文字", re.search(
+              r"\.lsteps b \{[^}]*height:18px[^}]*line-height|\.lsteps b \{[^}]*font:500 10\.5px/18px", _css) is not None)
+        _ac, _ab = get("/api/about")
+        _aj = json.loads(_ab) if _ac == 200 else {}
+        check("「关于」：给出模块版本（读 SKILL.md）、套件版本、作者与许可；页面上有版权行与知识产权声明",
+              _aj.get("module_version") and _aj.get("author") == "缪奇川" and _aj.get("license") == "AGPL-3.0-only"
+              and 'id="aboutBtn"' in _pg and "知识产权声明" in _pg and "著作权归缪奇川所有" in _pg, _aj)
+        _tc, _tsvg = get("/api/chartthumb/waffle.svg")
+        _tt = re.findall(r'<text\b[^>]*data-role="title"[^>]*>', _tsvg.decode("utf-8")) if _tc == 200 else []
+        check("图表库缩略图的宋体标题不加粗、不描边（原来缩小后糊成粗字，作者 10-28 指出）",
+              _tc == 200 and _tt and all('font-weight="700"' not in t and "stroke=" not in t for t in _tt), _tt[:1])
+        check("侧栏页面的选中态是整行浅灰底，不再用会被右边裁掉的外描边（作者 10-28 指出）",
+              re.search(r"\.rail \.thumb\.on \{[^}]*background:var\(--w-sel\)", _css) is not None
+              and re.search(r"\.rail \.thumb\.on \.pic \{[^}]*outline-offset:0", _css) is not None)
         check("预览与导出同一个拼页函数", b.decode("utf-8") == D.compose(P.load(), 0, proj, {})[0])
         c, _ = get("/api/slide/99.svg")
         check("没有这一页：404", c == 404)

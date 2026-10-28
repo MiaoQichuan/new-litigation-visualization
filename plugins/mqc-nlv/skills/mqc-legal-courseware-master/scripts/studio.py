@@ -136,6 +136,37 @@ def form_examples():
     return out
 
 
+def about_info():
+    """「关于」：本模块版本（SKILL.md）与套件版本（仓库的 plugin.json，或 DeepSeek Harness 插件包的 package.json）。"""
+    def skill_version():
+        try:
+            for ln in open(os.path.join(ROOT, "SKILL.md"), encoding="utf-8"):
+                if ln.strip().startswith("version:"):
+                    return ln.split(":", 1)[1].strip()
+        except OSError:
+            pass
+        return None
+
+    suite, d = None, ROOT
+    for _ in range(5):
+        d = os.path.dirname(d)
+        for cand, key in ((os.path.join(d, ".claude-plugin", "plugin.json"), "plugin"),
+                          (os.path.join(d, "package.json"), "dsh")):
+            try:
+                j = json.load(open(cand, encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+            if key == "plugin" or j.get("name") == "mqc-nlv-dsh":
+                suite = j.get("version")
+                break
+        if suite:
+            break
+    return {"module": "法律课件大师", "module_version": skill_version(), "suite": "新诉讼可视化",
+            "suite_en": "New Litigation Visualization", "suite_version": suite,
+            "author": "缪奇川", "license": "AGPL-3.0-only", "year": 2026,
+            "source": "https://github.com/MiaoQichuan/new-litigation-visualization"}
+
+
 def chart_library():
     """图表库：V6 场景库里现在就能画的场景（画法已就绪、有示例），按画法交错排，漏斗排最后（作者定的：备用画法，不主推）。"""
     from spec import CHARTS, CHART_ZH
@@ -199,6 +230,8 @@ def chart_thumb(deck, base_dir, form, cache=None):
             continue
     if svg is None:
         return None
+    # 缩略图里的宋体标题同样用标题字本来的字重：不加粗、不描边（原来缩小后标题糊成一坨粗字，作者 10-28 指出）
+    svg = D.unbold_titles(svg)
     if cache is not None:
         cache[key] = svg
     return svg
@@ -287,7 +320,10 @@ def make_handler(proj):
                     return self._send(200, open(WEB, encoding="utf-8-sig").read(), "text/html; charset=utf-8")
                 m = re.fullmatch(r"/brand/(qichuan-(?:avatar|favicon)\.png)", u.path)
                 if m:                                   # 作者的头像：侧栏左上角与浏览器标签页的小图标
-                    with open(os.path.join(ROOT, "web", "brand", m.group(1)), "rb") as f:
+                    fp = os.path.join(ROOT, "web", "brand", m.group(1))
+                    if not os.path.isfile(fp):            # 不带图片的分发包（例如 SkillHub 版）里没有头像
+                        return self._send(404, {"error": "没有这张图"})
+                    with open(fp, "rb") as f:
                         return self._send(200, f.read(), "image/png")
                 if u.path == "/grid.js":
                     return self._send(200, open(GRID_JS, encoding="utf-8-sig").read(), "text/javascript; charset=utf-8")
@@ -308,6 +344,8 @@ def make_handler(proj):
                 if u.path == "/api/ai":
                     return self._send(200, {"requests": A.load_q(proj.dir)[-50:], "kinds": A.KINDS, "tools": A.TOOLS,
                                             "listening": A.listening(proj.dir)})
+                if u.path == "/api/about":
+                    return self._send(200, about_info())
                 if u.path == "/api/chartlib":
                     return self._send(200, chart_library())
                 m = re.fullmatch(r"/api/chartthumb/([a-z]+)\.svg", u.path)

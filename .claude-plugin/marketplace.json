@@ -16,7 +16,7 @@
       },
       "homepage": "https://github.com/MiaoQichuan/new-litigation-visualization",
       "repository": "https://github.com/MiaoQichuan/new-litigation-visualization",
-      "license": "MIT",
+      "license": "AGPL-3.0-only",
       "category": "legal",
       "keywords": [
         "litigation",

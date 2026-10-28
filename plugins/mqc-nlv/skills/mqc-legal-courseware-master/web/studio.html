@@ -330,7 +330,7 @@ svg.i { width:16px; height:16px; stroke-width:1.4; }
 
 /* 导轨与左栏：一整条浅灰侧栏，细线分开 */
 .rail { background:var(--w-side); gap:2px; padding:14px 0 12px; }
-.logo { width:auto; height:auto; background:none; border-radius:0; color:var(--w-ink); font-family:var(--song); font-weight:700;
+.logo { width:auto; height:auto; background:none; border-radius:0; color:var(--w-ink); font-family:var(--sans); font-weight:600;
   font-size:15px; letter-spacing:.04em; margin:2px 0 16px; }
 .rbtn { width:56px; color:var(--w-mute); font-size:11.5px; gap:3px; padding:4px 0; }
 .rbtn .pill { width:40px; height:30px; border-radius:8px; }
@@ -383,7 +383,7 @@ svg.i { width:16px; height:16px; stroke-width:1.4; }
 .thumb .aib { background:var(--w-solid); color:var(--w-on); border-radius:4px; }
 .addpage { background:transparent; border:1px dashed var(--w-line2); border-radius:8px; color:var(--w-mute); }
 .addpage:hover { background:transparent; border-color:var(--w-mute); color:var(--w-ink); }
-.emptypage b { font-family:var(--song); font-weight:700; font-size:20px; letter-spacing:.04em; color:#1D1D1F; }
+.emptypage b { font-family:var(--sans); font-weight:600; font-size:19px; letter-spacing:.02em; color:#1D1D1F; }
 .emptypage span { color:#86868B; }
 .scn { padding:16px 8px; font-size:13px; }
 
@@ -461,7 +461,12 @@ body.noside .rail .rbtn.on:hover { background:var(--w-hover); }
   padding:2px 2px 8px; gap:10px; border-top:0; }
 .rail .thumb { width:100%; display:flex; align-items:flex-start; gap:8px; }
 .rail .thumb .no { position:static; background:none; padding:0; width:16px; flex:none; text-align:right; font-size:11px; color:var(--w-mute); margin-top:1px; }
-.rail .thumb.on .no { color:var(--w-ink); }
+.rail .thumb.on .no { color:var(--w-ink); font-weight:600; }
+/* 选中页：整行铺一层浅灰底、缩略图本身不加外框（外框会被滚动区的右边裁掉一截，作者 10-28 指出） */
+.rail .thumb { padding:5px 6px 5px 2px; border-radius:8px; transition:background .12s; }
+.rail .thumb:hover { background:var(--w-hover); }
+.rail .thumb.on { background:var(--w-sel); }
+.rail .thumb.on .pic { outline:1px solid var(--w-line2); outline-offset:0; }
 .rail .thumb .pic { width:auto; flex:1; height:auto; aspect-ratio:16/9; }
 .rail .thumb .aib { left:30px; }
 .rail .addpage { display:none; }
@@ -520,15 +525,12 @@ body.noside .rail .rbtn.on:hover { background:var(--w-hover); }
 
 /* 细节：少一根线、少一圈框 */
 .logo { display:block; }
-/* 品牌：作者头像 + 「新诉讼可视化」字标，下面一行小字是产品名（作者 10-27 定） */
-.logo.bmark { display:flex; align-items:center; gap:10px; padding:4px 8px 16px; font-weight:400; }
-.bm-av { width:32px; height:32px; border-radius:50%; flex:none; display:block;
-  background:#fff; }
-.bm-txt { display:flex; flex-direction:column; gap:3px; min-width:0; line-height:1; }
-.bm-name { font-family:"FZXiaoBiaoSong-B05S","方正小标宋简体","FZXiaoBiaoSong-B05",var(--song); font-size:17px;
-  letter-spacing:.08em; color:var(--w-ink2); font-weight:700; white-space:nowrap; }
-body.has-xbs .bm-name { font-weight:400; }      /* 方正小标宋本身就有分量：不再加粗（加粗会伪粗） */
-.bm-prod { font-family:var(--sans, inherit); font-size:11px; letter-spacing:.06em; color:var(--w-mute); }
+/* 品牌：作者头像 + 产品名「法律课件大师」，一行、无衬线（作者 10-28 定：操作界面不用宋体，侧栏不再放「新诉讼可视化」字标） */
+.logo.bmark { display:flex; align-items:center; gap:10px; padding:6px 10px 20px; font-weight:400; }
+.bm-av { width:28px; height:28px; border-radius:50%; flex:none; display:block; background:#fff;
+  box-shadow:0 0 0 1px var(--w-line); }
+.bm-txt { display:flex; align-items:center; min-width:0; line-height:1; }
+.bm-name { font-family:var(--sans); font-size:14.5px; font-weight:600; letter-spacing:.02em; color:var(--w-ink); white-space:nowrap; }
 .rail .thumb .no { order:-1; }
 .sec::after { display:none; }
 .sec { margin:18px 4px 6px; }
@@ -588,7 +590,7 @@ body.libon:not(.noside) .libsheet { display:block; }
 body.libon .side { display:none; }
 .libsheet .dclose { position:fixed; right:22px; top:16px; }
 .lbody { max-width:1320px; margin:0 auto; padding:34px 40px 60px; }
-.lh1 { font-family:var(--title); font-size:28px; line-height:1.2; color:var(--w-ink); letter-spacing:.01em; }
+.lh1 { font-family:var(--sans); font-size:26px; font-weight:600; line-height:1.25; color:var(--w-ink); letter-spacing:.01em; }
 .lsub { color:var(--w-mute); font-size:13px; margin-top:8px; max-width:860px; }
 .lsearch { margin-top:22px; height:42px; max-width:620px; border-radius:12px; background:var(--w-side); display:flex; align-items:center; gap:10px; padding:0 14px; color:var(--w-mute); border:1px solid transparent; }
 .lsearch:focus-within { border-color:var(--w-line2); background:var(--w-bg); }
@@ -622,7 +624,7 @@ body.libon .side { display:none; }
 .lcard:hover .lact, .lcard:focus-within .lact { opacity:1; transform:none; }
 .lact button { font-size:12px; padding:5px 10px; border-radius:7px; background:#1D1D1F; color:#fff; }
 .lact button + button { background:#fff; color:#1D1D1F; box-shadow:0 0 0 1px #DCDCE0; }
-.lcard .lq { margin-top:14px; font-family:var(--title); font-size:16px; line-height:1.4; color:var(--w-ink); }
+.lcard .lq { margin-top:14px; font-family:var(--sans); font-size:15px; font-weight:600; line-height:1.45; color:var(--w-ink); }
 .lcard .ln { margin-top:5px; font-size:12.5px; color:var(--w-ink2); }
 .lcard .ln span { color:var(--w-mute); margin-left:8px; }
 .lcard .lx { margin-top:7px; font-size:12px; line-height:1.55; color:var(--w-mute); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
@@ -637,14 +639,63 @@ body.libon .side { display:none; }
 .pop .golib.pg svg.i { color:var(--w-on); }
 .emptypage .scns { grid-template-columns:repeat(5, auto); gap:8px; margin-top:6px; }
 .emptypage .scn { flex-direction:row; padding:7px 12px; font-size:12.5px; gap:6px; }
+
+/* ===== 0.9.2 · 字与版权（作者 10-28：字太粗显得廉价；学大厂——系统字、靠字号与灰度分层，不靠加粗） =====
+   界面字：拉丁字母与数字先用系统的 Segoe UI / San Francisco，汉字落到苹方 / 微软雅黑 UI。
+   字重只用 400 与 500：微软雅黑没有 500，会按常规字重显示，不会像 600 那样被渲染成粗体。 */
+:root { --sans:-apple-system,BlinkMacSystemFont,"Segoe UI Variable Text","Segoe UI","Helvetica Neue","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei UI","Microsoft YaHei","Noto Sans CJK SC","Source Han Sans SC",sans-serif;
+  --brand-song:"方正小标宋简体","FZXiaoBiaoSong-B05S","FZXiaoBiaoSong-B05","STZhongsong","华文中宋","Source Han Serif SC","Noto Serif CJK SC","Songti SC","SimSun",serif; }
+html, body { font-family:var(--sans); font-weight:400; }
+.lh1 { font-size:26px; font-weight:500; letter-spacing:0; color:var(--w-ink); }
+.lsub { color:var(--w-mute); font-size:13px; line-height:1.7; }
+.lcard .lq { font-size:15px; font-weight:500; letter-spacing:0; color:var(--w-ink); }
+.lcard .ln { color:var(--w-ink2); }
+.emptypage b { font-weight:500; letter-spacing:0; }
+.rail .thumb.on .no { font-weight:500; }
+.title-in, .step span, .c.on, .ib.ai, .req b, .lawyer summary, .provtip b, .prov b, .ai-wait, .rbtn.on { font-weight:500; }
+/* 步骤圆圈里的数字居中：数字用系统字（微软雅黑的数字上下留白不对称，会偏），行高等于圆的高度 */
+.lsteps b { width:18px; height:18px; padding:0; display:inline-flex; align-items:center; justify-content:center;
+  font:500 10.5px/18px -apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+  font-variant-numeric:tabular-nums; text-align:center; }
+
+/* 品牌：上面一行是产品名（小标宋，网页能保证的标准标题字；没装小标宋就落到华文中宋 / 思源宋体），下面一行小字是项目名与模块号（作者 10-28 选 B：中文） */
+.logo.bmark { align-items:center; gap:11px; padding:8px 10px 20px; }
+.bm-av { width:34px; height:34px; }
+.bm-txt { flex-direction:column; align-items:flex-start; gap:5px; }
+.bm-name { font-family:var(--brand-song); font-size:17.5px; font-weight:700; letter-spacing:.06em; color:var(--w-ink); line-height:1.05; }
+body.has-xbs .bm-name { font-weight:400; }          /* 方正小标宋本身就重：不再伪加粗 */
+.bm-sub { font-family:var(--sans); font-size:8.6px; font-weight:400; letter-spacing:.07em; color:var(--w-mute); line-height:1; text-transform:uppercase; white-space:nowrap; }
+.bm-sub.zh { font-size:11px; letter-spacing:.08em; text-transform:none; }
+
+/* 侧栏底部：版本与版权一行小字，点开是「关于」 */
+.sbabout { display:block; width:100%; text-align:left; padding:8px 10px 2px; font-size:11px; line-height:1.5; color:var(--w-faint);
+  font-variant-numeric:tabular-nums; }
+.sbabout:hover { color:var(--w-ink2); }
+/* 「关于」面板 */
+.about-mask { position:fixed; inset:0; z-index:90; background:rgba(0,0,0,.18); display:grid; place-items:center; }
+.about { width:min(520px, calc(100vw - 32px)); max-height:calc(100vh - 64px); overflow:auto; background:var(--w-bg); color:var(--w-ink);
+  border-radius:14px; box-shadow:var(--w-pop); padding:28px 30px 24px; position:relative; }
+.about .ab-h { display:flex; align-items:center; gap:12px; }
+.about .ab-h img { width:40px; height:40px; border-radius:50%; box-shadow:0 0 0 1px var(--w-line); }
+.about .ab-name { font-family:var(--brand-song); font-size:20px; font-weight:700; letter-spacing:.05em; }
+body.has-xbs .about .ab-name { font-weight:400; }
+.about .ab-en { font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--w-mute); margin-top:5px; }
+.about dl { display:grid; grid-template-columns:72px 1fr; gap:9px 14px; margin:22px 0 0; font-size:13px; }
+.about dt { color:var(--w-mute); }
+.about dd { margin:0; color:var(--w-ink); font-variant-numeric:tabular-nums; }
+.about dd a { color:var(--w-ink); text-decoration:underline; text-decoration-color:var(--w-line2); text-underline-offset:3px; }
+.about .ab-ip { margin-top:20px; padding-top:16px; border-top:1px solid var(--w-line); font-size:12px; line-height:1.8; color:var(--w-ink2); }
+.about .ab-ip b { display:block; font-weight:500; color:var(--w-ink); margin-bottom:4px; font-size:12.5px; }
+.about .ab-ip p { margin:0 0 6px; }
+.about .ab-copy { margin-top:14px; font-size:11px; color:var(--w-mute); }
 </style>
 </head>
 <body data-style="奇川风" class="noside">
 <div class="app">
   <nav class="rail" aria-label="课件">
-    <div class="logo bmark" title="新诉讼可视化 · V7">
+    <div class="logo bmark" title="法律课件大师 · V7">
       <img class="bm-av" src="/brand/qichuan-avatar.png" alt="" width="32" height="32">
-      <span class="bm-txt"><span class="bm-name">新诉讼可视化</span><span class="bm-prod">法律课件大师</span></span>
+      <span class="bm-txt"><span class="bm-name">法律课件大师</span><span class="bm-sub zh" id="bmSub">新诉讼可视化 · V7</span></span>
     </div>
     <button class="rbtn newpage" id="newPageBtn" title="加一页"><span class="pill plus" data-ic="plus"></span>新建一页</button>
     <button class="rbtn" data-tab="lib"><span class="pill" data-ic="lib"></span>图表库<small class="rcount" id="libCountRail"></small></button>
@@ -656,6 +707,7 @@ body.libon .side { display:none; }
     <button class="rbtn" data-tab="more"><span class="pill" data-ic="more"></span>更多</button>
     <div class="sbsec">页面</div>
     <div class="film" id="film"></div>
+    <button class="sbabout" id="aboutBtn" title="关于 · 版本与版权">© 2026 缪奇川 · 新诉讼可视化</button>
     <div class="sbfoot">
       <button class="rbtn" id="helpBtn"><span class="pill" data-ic="help"></span>快捷键</button>
       <button class="ib" id="themeBtn" title="浅色 / 深色（默认跟随系统）" data-ic="moon"></button>
@@ -2214,7 +2266,8 @@ $("#moreBtn").onclick = (e) => {
     <div class="mlabel">课件风格</div>
     ${["奇川风", "歸藏风", CUSTOM].map((s_) => `<button data-st="${s_}" class="${s_ === S.deck.style ? "cur" : ""}"><span>${s_}</span>${s_ === S.deck.style ? icon("check") : ""}</button>`).join("")}
     <div class="msep"></div>
-    <button data-act="help">${icon("help")}<span>快捷键</span></button></div>`, 220);
+    <button data-act="help">${icon("help")}<span>快捷键</span></button>
+    <button data-act="about">${icon("help")}<span>关于 · 版本与版权</span></button></div>`, 220);
   p.style.left = Math.max(10, e.currentTarget.getBoundingClientRect().right - 220) + "px";
   p.querySelectorAll("[data-act]").forEach((b) => (b.onclick = () => {
     p.remove();
@@ -2223,6 +2276,7 @@ $("#moreBtn").onclick = (e) => {
     else if (a === "tidy") tidy();
     else if (a === "tpl") { document.body.classList.remove("noside"); S.tab = "tpl"; renderSide(); requestAnimationFrame(fit); }
     else if (a === "help") $("#helpBtn").click();
+    else if (a === "about") showAbout();
   }));
   p.querySelectorAll("[data-st]").forEach((b) => (b.onclick = () => { p.remove(); $(`#styleSeg [data-st="${b.dataset.st}"]`)?.click(); }));
 };
@@ -2571,6 +2625,45 @@ async function introPage(kind, lawyer) {
   status("就绪 · 自动保存"); poll();
   window.__ready = true;
 })();
+
+/* ---------- 关于：版本、作者、许可与知识产权声明（0.9.2，作者 10-28 要求） ---------- */
+let ABOUT = null;
+async function loadAbout() {
+  if (ABOUT) return ABOUT;
+  try { ABOUT = await (await fetch("/api/about")).json(); } catch (e) { ABOUT = {}; }
+  const b = $("#aboutBtn");
+  if (b && ABOUT.suite_version) b.textContent = `© ${ABOUT.year || 2026} ${ABOUT.author || "缪奇川"} · 新诉讼可视化 v${ABOUT.suite_version}`;
+  return ABOUT;
+}
+async function showAbout() {
+  const a = await loadAbout();
+  const m = document.createElement("div");
+  m.className = "about-mask";
+  const ver = [a.suite_version ? `新诉讼可视化 v${esc(a.suite_version)}` : "新诉讼可视化",
+               a.module_version ? `法律课件大师 ${esc(a.module_version)}` : ""].filter(Boolean).join(" · ");
+  m.innerHTML = `<div class="about" role="dialog" aria-label="关于">
+    <button class="dclose" data-close title="关闭">${icon("close")}</button>
+    <div class="ab-h"><img src="/brand/qichuan-avatar.png" alt="" onerror="this.remove()">
+      <div><div class="ab-name">法律课件大师</div><div class="ab-en">New Litigation Visualization · V7</div></div></div>
+    <dl>
+      <dt>项目</dt><dd>新诉讼可视化（New Litigation Visualization）· 给法律人的诉讼可视化工具集</dd>
+      <dt>版本</dt><dd>${ver}</dd>
+      <dt>作者</dt><dd>${esc(a.author || "缪奇川")} 律师</dd>
+      <dt>许可</dt><dd>GNU AGPL-3.0（${esc(a.license || "AGPL-3.0-only")}）</dd>
+      <dt>源代码</dt><dd><a href="${esc(a.source || "https://github.com/MiaoQichuan/new-litigation-visualization")}" target="_blank" rel="noopener">github.com/MiaoQichuan/new-litigation-visualization</a></dd>
+    </dl>
+    <div class="ab-ip"><b>知识产权声明</b>
+      <p>本软件的源代码、图表画法、版式与界面设计，著作权归缪奇川所有，依 GNU Affero 通用公共许可证第 3 版（AGPL-3.0）开源。</p>
+      <p>您可以自由使用、学习、修改与再分发；分发修改后的版本，或将其改造后以网络服务的形式提供给他人，须以同一许可公开完整源代码，并保留本版权与许可声明。闭源或商业使用，请联系作者另行授权。</p>
+      <p>「新诉讼可视化」名称、作者头像与各模块图标不随开源许可授权使用。您用本软件制作的课件内容，著作权归您所有。</p></div>
+    <div class="ab-copy">© ${esc(String(a.year || 2026))} 缪奇川（Miao Qichuan）. All rights reserved except as granted by AGPL-3.0.</div>
+  </div>`;
+  const close = () => m.remove();
+  m.addEventListener("click", (e) => { if (e.target === m || e.target.closest("[data-close]")) close(); });
+  document.body.appendChild(m);
+}
+$("#aboutBtn").onclick = showAbout;
+loadAbout();
 </script>
 </body>
 </html>

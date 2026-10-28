@@ -7,7 +7,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/version-1.1.0-6B7280" alt="version 1.1.0"/>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-6B7280" alt="License: MIT"/></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-6B7280" alt="License: AGPL-3.0"/></a>
   <img src="https://img.shields.io/badge/Python-3-6B7280" alt="Python 3"/>
   <img src="https://img.shields.io/badge/dependencies-none%20(stdlib)-6B7280" alt="zero third-party dependencies"/>
   <a href="https://github.com/MiaoQichuan/mqc-litigation-visual-redraw/actions/workflows/checks.yml"><img src="https://github.com/MiaoQichuan/mqc-litigation-visual-redraw/actions/workflows/checks.yml/badge.svg" alt="checks"/></a>

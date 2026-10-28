@@ -28,5 +28,6 @@ fails+= run("摄入分派与完备性对账", [sys.executable,"tests/ingest_chec
 fails+= run("诉请固定与抗辩归类", [sys.executable,"scripts/check_claims.py","examples/matrix-input.json"])
 fails+= run("图表一致性", [sys.executable,"tests/cross_check.py"])
 fails+= run("改坏验证", [sys.executable,"tests/break_tests.py"])
+fails+= run("命令行边界（用法、骨架不全、PNG 出不来）", [sys.executable,"tests/cli_checks.py"])
 print("\n"+("全部通过" if not fails else f"{fails} 节未通过"))
 sys.exit(1 if fails else 0)

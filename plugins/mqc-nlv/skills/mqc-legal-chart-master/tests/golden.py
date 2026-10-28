@@ -70,7 +70,10 @@ def verdict_of(row):
 
 def check_verdicts():
     bad = []
-    rows = [json.loads(l) for l in open(os.path.join(GOLD, "verdicts.jsonl"), encoding="utf-8") if l.strip()]
+    vf = os.path.join(GOLD, "verdicts.jsonl")
+    if not os.path.exists(vf):            # SkillHub 版不收 .jsonl 文件：同样内容改名为 verdicts.txt
+        vf = os.path.join(GOLD, "verdicts.txt")
+    rows = [json.loads(l) for l in open(vf, encoding="utf-8") if l.strip()]
     for r in rows:
         got, why = verdict_of(r)
         if got != r["expect"]:

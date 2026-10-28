@@ -8,8 +8,8 @@ authors:
     given-names: "Qichuan"
     alias: "缪奇川"
     email: "miaoqichuan@hotmail.com"
-version: "2.5.0"
-license: MIT
+version: "3.0.0"
+license: AGPL-3.0-only
 repository-code: "https://github.com/MiaoQichuan/new-litigation-visualization"
 url: "https://github.com/MiaoQichuan/new-litigation-visualization"
 keywords:

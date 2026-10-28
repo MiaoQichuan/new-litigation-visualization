@@ -170,6 +170,10 @@ jobs:
       - name: Run regression · mqc-legal-courseware-master
         run: python plugins/mqc-nlv/skills/mqc-legal-courseware-master/tests/run_checks.py
 
+      # DeepSeek Harness 插件：打包（build.py），用模拟宿主加载，七个技能各跑一次示例，核对越权路径被拒。
+      - name: DeepSeek Harness plugin · mqc-nlv-dsh
+        run: node plugins/mqc-nlv-dsh/tests/dsh_checks.mjs
+
       - name: Run regression · mqc-trial-confrontation-master
         run: |
           python plugins/mqc-nlv/skills/mqc-trial-confrontation-master/tests/shape_checks.py
@@ -177,6 +181,7 @@ jobs:
           python plugins/mqc-nlv/skills/mqc-trial-confrontation-master/tests/coverage_checks.py
           python plugins/mqc-nlv/skills/mqc-trial-confrontation-master/tests/palette_checks.py
           python plugins/mqc-nlv/skills/mqc-trial-confrontation-master/tests/ingest_checks.py
+          python plugins/mqc-nlv/skills/mqc-trial-confrontation-master/tests/cli_checks.py
 
       # 用户大多在中文 Windows 上：不写编码时，Python 按系统区域设置读写，那里是 GBK。
       # 积成（案图）在 Windows 上跑 CI；我们这里在 Linux 上造一个 GBK 区域设置，把同一套回归再跑一遍

@@ -102,7 +102,7 @@ python3 plugins/mqc-nlv/skills/mqc-timeline-master/tests/check_anonymised.py
 
 ## 社区与安全设置（开源当天做一次）
 
-仓库里已备好 GitHub「Community Standards」要的全部文件：`README.md`、`LICENSE`（MIT）、
+仓库里已备好 GitHub「Community Standards」要的全部文件：`README.md`、`LICENSE`（AGPL-3.0）、
 `CONTRIBUTING.md`、`CODE_OF_CONDUCT.md`、`SECURITY.md`、`CITATION.cff`、
 `.github/ISSUE_TEMPLATE/`（问题、建议两种表单）、`.github/PULL_REQUEST_TEMPLATE.md`。
 推上去之后，在网页上再点几处：
@@ -113,7 +113,7 @@ python3 plugins/mqc-nlv/skills/mqc-timeline-master/tests/check_anonymised.py
 3. **Settings → General → Features**：Issues 打开；Discussions 可选。
 4. **Insights → Community Standards**：应当全部打勾，有缺项就照提示补。
 5. **Settings → Branches**：给 `main` 加保护规则，要求 `checks` 通过才能合并。
-6. **Releases**：打一个 tag（`v2.5.0`，与 `plugin.json` 的版本一致；上一版公开的是 v2.4.0）并写发布说明。
+6. **Releases**：打一个 tag（`v3.0.0`，与 `plugin.json` 的版本一致；上一版公开的是 v2.5.0）并写发布说明；把 `python3 plugins/mqc-nlv-dsh/build.py` 打出的 `mqc-nlv-dsh-3.0.0.tgz` 作为附件上传，DeepSeek Harness 用户下载它安装。
 
 **仓库里不该出现的东西**（推送前 `git status` 看一眼）：`__pycache__/`、`.DS_Store`、`__MACOSX/`、
 真实案件材料、律所模板与 Logo、任何本机路径。`.gitignore` 已覆盖前两项。

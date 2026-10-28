@@ -96,10 +96,13 @@ else:
     ck("A1", False, "没出图，箭头几何无法验")
 _stripb = lambda t: "\n".join(l for l in t.splitlines()
                               if not l.startswith("# ⚠") and "各拷一份" not in l)
-ck("A2", _stripb(open(_osb.path.join(_HEREB, "arrow_geom_check.py"), encoding="utf-8").read())
-   == _stripb(open(_osb.path.join(_HEREB, "..", "..", "mqc-litigation-visual-redraw", "tests",
-                                  "arrow_geom_check.py"), encoding="utf-8").read()),
-   "箭头量具与 V1 的那份一致")
+_v1agc = _osb.path.join(_HEREB, "..", "..", "mqc-litigation-visual-redraw", "tests", "arrow_geom_check.py")
+if _osb.path.exists(_v1agc):
+    ck("A2", _stripb(open(_osb.path.join(_HEREB, "arrow_geom_check.py"), encoding="utf-8").read())
+       == _stripb(open(_v1agc, encoding="utf-8").read()),
+       "箭头量具与 V1 的那份一致")
+else:                     # 单独安装（SkillHub 等）时没有 V1：这一项只在完整仓库里比对，不计入通过与失败
+    print("  SKIP A2  箭头量具与 V1 的那份一致（单独安装，旁边没有 V1）")
 
 # ---- 决定性要件两处时，结论条两处都要列出（真实运行：只列了第一处）------------------
 _rm9 = open(__import__("os").path.join(__import__("os").path.dirname(__import__("os").path.abspath(__file__)), "..", "scripts",

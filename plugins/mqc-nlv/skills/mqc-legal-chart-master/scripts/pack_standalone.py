@@ -74,7 +74,7 @@ def build(out_dir):
                 entries.append((f, os.path.join(name, "vendor", tag, rel)))
         lic = os.path.join(SKILLS, "..", "..", "..", "LICENSE")
         manifest["vendor"][tag] = {"module": mod, "version": _version(os.path.join(SKILLS, mod)),
-                                   "license": "MIT（与本仓库同一许可）", "files": files}
+                                   "license": "AGPL-3.0-only（与本仓库同一许可）", "files": files}
         if os.path.exists(lic):
             entries.append((lic, os.path.join(name, "vendor", tag, "LICENSE")))
     with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as z:

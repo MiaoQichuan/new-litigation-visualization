@@ -1,0 +1,6 @@
+# 新诉讼可视化：两行插件。第一行注册原生工具（nlv_check / nlv_run），第二行注册随包的七个技能。
+- insert:
+    - id: mqc-nlv-tools
+      name: mqc-nlv-dsh
+    - id: mqc-nlv-skills
+      name: mqc-nlv-dsh/skill-provider

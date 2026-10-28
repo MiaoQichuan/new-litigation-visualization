@@ -61,4 +61,4 @@ python3 plugins/mqc-nlv/skills/mqc-legal-courseware-master/tests/run_checks.py
 
 ## 许可
 
-提交到本仓库的贡献，视为同意以本仓库的 [MIT 许可](LICENSE) 发布。
+提交到本仓库的贡献，视为同意以本仓库的 [AGPL-3.0 许可](LICENSE) 发布。
