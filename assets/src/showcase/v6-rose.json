@@ -1,0 +1,54 @@
+{
+ "schema_version": 1,
+ "chart": "rose",
+ "title": "专利侵权纠纷收案最多",
+ "scope": "示例：某知识产权法院 2025 年收案",
+ "unit": "件",
+ "n": 1005,
+ "source": "示例数据，非真实统计",
+ "emphasis": "patent",
+ "data": {
+  "items": [
+   {
+    "id": "patent",
+    "label": "专利侵权",
+    "value": 342
+   },
+   {
+    "id": "tm",
+    "label": "商标侵权",
+    "value": 214
+   },
+   {
+    "id": "copy",
+    "label": "著作权",
+    "value": 168
+   },
+   {
+    "id": "tech",
+    "label": "技术合同",
+    "value": 97
+   },
+   {
+    "id": "unfair",
+    "label": "不正当竞争",
+    "value": 88
+   },
+   {
+    "id": "secret",
+    "label": "商业秘密",
+    "value": 61
+   },
+   {
+    "id": "plant",
+    "label": "植物新品种",
+    "value": 23
+   },
+   {
+    "id": "ic",
+    "label": "集成电路布图设计",
+    "value": 12
+   }
+  ]
+ }
+}

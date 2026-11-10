@@ -1,0 +1,14 @@
+# 真实卷宗产出的底稿、页面与运行记录一律不进仓库（含当事人信息、证据编号、金额）
+_案件看板/
+_事实时间线/
+*.base.json
+!examples/*.base.json
+*.案件看板.html
+*.事实时间线.html
+run-log.md
+web/out/
+web/.forbidden-terms
+
+__pycache__/
+*.pyc
+.DS_Store

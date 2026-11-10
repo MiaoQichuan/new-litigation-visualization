@@ -1,10 +1,10 @@
 # New Litigation Visualization · Make the Law Visible
 
-Seven litigation visualisation skills for lawyers. Once installed, just describe what you need in the chat, for example "turn these judgments and exhibits into a case timeline" or "draw the legal relationships in this case".
+Eight litigation visualisation skills for lawyers. Once installed, just describe what you need in the chat, for example "turn these judgments and exhibits into a case timeline" or "draw the legal relationships in this case".
 
 Results are written to your current workspace; the chat shows a file card you can click to preview in the right sidebar.
 
-## The seven skills
+## The eight skills
 
 | Skill | What it does | Delivers |
 | --- | --- | --- |
@@ -15,6 +15,7 @@ Results are written to your current workspace; the chat shows a file card you ca
 | Trial confrontation master | Pre-trial confrontation map and analysis table (nine-step method) | SVG, Excel |
 | Legal chart master | Statistical charts of legal data; every number in a title must follow from the data | SVG, editable PPTX |
 | Legal courseware master | Puts the figures into lecture slides with conclusions, notes and statutes | PPTX |
+| Case board master | Turns every party's materials into an interactive case board: a timeline above, the list of facts below; where materials disagree the versions sit side by side for the lawyer to decide | Single offline HTML page, base JSON |
 
 ## First use
 

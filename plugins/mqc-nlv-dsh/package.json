@@ -1,7 +1,7 @@
 {
   "name": "mqc-nlv-dsh",
-  "version": "3.0.0",
-  "description": "新诉讼可视化 · New Litigation Visualization for DeepSeek Harness: seven litigation visualisation skills (timelines, relationship diagrams, chronicles, trial confrontation maps, legal charts, courseware) with native tools to run them.",
+  "version": "3.1.0",
+  "description": "新诉讼可视化 · New Litigation Visualization for DeepSeek Harness: eight litigation visualisation skills (timelines, relationship diagrams, chronicles, trial confrontation maps, legal charts, courseware, interactive case board) with native tools to run them.",
   "icon": "./icon.svg",
   "type": "module",
   "main": "index.js",

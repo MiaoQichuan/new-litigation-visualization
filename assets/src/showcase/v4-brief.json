@@ -1,0 +1,175 @@
+{
+ "case": {
+  "title": "案件大事记",
+  "subtitle": "远帆资本与海德控股股权购买协议价款调整争议（虚构示例）"
+ },
+ "rows": [
+  {
+   "date": "2023.02.10",
+   "item": "签署《股权购买协议》",
+   "content": "载明：买方以人民币18亿元收购海德精工100%股权，最终价款按交割日经审计的净营运资本调整",
+   "note_parts": [
+    "申证1（申请人）"
+   ],
+   "issue": "交易签署",
+   "parties": "远帆资本、海德控股",
+   "relation": "",
+   "explain": "",
+   "new_evidence": false,
+   "evidence_status": "有书证",
+   "source": "申证1（申请人）"
+  },
+  {
+   "date": "2023.02.10",
+   "item": "签署《陈述与保证函》",
+   "content": "海德控股保证目标公司2022年度财务报表真实、准确，不存在未披露的重大负债",
+   "note_parts": [
+    "申证2（申请人）"
+   ],
+   "issue": "交易签署",
+   "parties": "海德控股",
+   "relation": "",
+   "explain": "",
+   "new_evidence": false,
+   "evidence_status": "有书证",
+   "source": "申证2（申请人）"
+  },
+  {
+   "date": "2023.03.28",
+   "item": "支付首期价款",
+   "content": "买方向卖方共管账户支付首期价款15亿元",
+   "note_parts": [
+    "申证3（申请人）"
+   ],
+   "issue": "交易签署",
+   "parties": "远帆资本",
+   "relation": "",
+   "explain": "",
+   "new_evidence": false,
+   "evidence_status": "有书证",
+   "source": "申证3（申请人）"
+  },
+  {
+   "date": "2023.06.30",
+   "item": "完成交割",
+   "content": "目标公司股权变更登记至买方名下，双方签署交割确认书",
+   "note_parts": [
+    "申证4（申请人）"
+   ],
+   "issue": "交割与审计",
+   "parties": "远帆资本、海德控股",
+   "relation": "",
+   "explain": "",
+   "new_evidence": false,
+   "evidence_status": "有书证",
+   "source": "申证4（申请人）"
+  },
+  {
+   "date": "2023.09.15",
+   "item": "出具交割审计报告",
+   "content": "审计报告载明交割日净营运资本较基准值减少1.26亿元",
+   "note_parts": [
+    "申证5（申请人）"
+   ],
+   "issue": "交割与审计",
+   "parties": "审计机构",
+   "relation": "",
+   "explain": "",
+   "new_evidence": false,
+   "evidence_status": "有书证",
+   "source": "申证5（申请人）"
+  },
+  {
+   "date": "2023.09.29",
+   "item": "卖方书面异议",
+   "content": "海德控股认为审计口径将应收账款坏账准备计提过高，不同意调整结果",
+   "note_parts": [
+    "被申证1（被申请人）"
+   ],
+   "issue": "交割与审计",
+   "parties": "海德控股",
+   "relation": "",
+   "explain": "",
+   "new_evidence": false,
+   "evidence_status": "有书证",
+   "source": "被申证1（被申请人）"
+  },
+  {
+   "date": "2023.10.20",
+   "item": "发出价款调整通知",
+   "content": "买方要求从尾款中扣减1.26亿元，并主张卖方违反财务报表保证",
+   "note_parts": [
+    "申证6（申请人）"
+   ],
+   "issue": "价款调整争议",
+   "parties": "远帆资本",
+   "relation": "",
+   "explain": "",
+   "new_evidence": false,
+   "evidence_status": "有书证",
+   "source": "申证6（申请人）"
+  },
+  {
+   "date": "2023.12",
+   "item": "专家决定程序未启动",
+   "content": "双方未能就独立会计师人选达成一致",
+   "note_parts": [
+    "双方陈述"
+   ],
+   "issue": "价款调整争议",
+   "parties": "远帆资本、海德控股",
+   "relation": "",
+   "explain": "",
+   "new_evidence": false,
+   "evidence_status": "仅当事人陈述",
+   "source": "双方陈述"
+  },
+  {
+   "date": "2024.02.05",
+   "item": "提起仲裁",
+   "content": "买方请求裁决扣减价款1.26亿元并赔偿违反保证造成的损失",
+   "note_parts": [
+    "仲裁申请书"
+   ],
+   "issue": "仲裁程序",
+   "parties": "远帆资本",
+   "relation": "",
+   "explain": "",
+   "new_evidence": false,
+   "evidence_status": "有书证",
+   "source": "仲裁申请书"
+  },
+  {
+   "date": "2024.04.18",
+   "item": "提交答辩及反请求",
+   "content": "卖方请求裁决买方支付剩余价款3亿元及逾期付款利息",
+   "note_parts": [
+    "答辩书"
+   ],
+   "issue": "仲裁程序",
+   "parties": "海德控股",
+   "relation": "",
+   "explain": "",
+   "new_evidence": false,
+   "evidence_status": "仅当事人陈述",
+   "source": "答辩书"
+  },
+  {
+   "date": "2024.07.09",
+   "item": "首次开庭",
+   "content": "双方围绕审计口径、陈述与保证条款的适用发表意见",
+   "note_parts": [
+    "庭审笔录"
+   ],
+   "issue": "仲裁程序",
+   "parties": "远帆资本、海德控股",
+   "relation": "",
+   "explain": "",
+   "new_evidence": false,
+   "evidence_status": "有书证",
+   "source": "庭审笔录"
+  }
+ ],
+ "endnotes": [],
+ "arithmetic_notes": []
+}

@@ -7,13 +7,13 @@
 **Description**（一行，会出现在搜索结果里）：
 
 ```
-把法律画出来 · 给法律人的诉讼可视化工具集：把凌乱的诉讼图重画成能进材料的图，直接读案件材料画准一张时间轴，并提供庭前三大法宝（大事记表、庭审对抗图、法律关系图）。Claude Skill / DeepSeek Harness 通用。
+把法律画出来 · 给法律人的诉讼可视化工具集，八个模块：诉讼图重画、时间轴、法律关系图、大事记表、庭审对抗图、法律图表、法律课件、案件看板。照录原文、每项可追溯、脚本算图、不联网。Claude Code / DeepSeek Harness 通用。
 ```
 
 英文版（若要双语）：
 
 ```
-Make the Law Visible — litigation visualisation skills for lawyers: redraw a messy case diagram into a court-ready one, turn raw case materials into a faithful timeline, and prepare for trial with a case chronicle, a trial confrontation map and a legal relationship diagram. Works in Claude Code, Codex, DeepSeek Harness and any agent that reads SKILL.md.
+Make the Law Visible — eight litigation visualization skills for lawyers: visual redraw, timeline, legal relationship map, case chronicle, trial confrontation map, legal charts, courseware and an interactive case board. Verbatim, traceable, computed by scripts, offline. For Claude Code, DeepSeek Harness and any agent that reads SKILL.md.
 ```
 
 **Website**：公众号或个人站（若有）
@@ -58,15 +58,13 @@ gh repo edit MiaoQichuan/new-litigation-visualization \
 
 ## Social preview（分享时显示的大图）
 
-Settings → General → Social preview → 上传
-`plugins/mqc-nlv/skills/mqc-timeline-master/assets/screenshots/timeline-example.png`
-
-那张是真实输出，比任何宣传图都有说服力。
+Settings → General → Social preview → 上传 `assets/banner.png`（与首页顶部同一张横幅，3:1）。
+需要竖版海报时（公众号、朋友圈），用 `assets/cover.png`。
 
 ## 发布前自查
 
 ```bash
-# 七个模块的回归都要绿
+# 八个模块的回归都要绿
 python3 plugins/mqc-nlv/skills/mqc-litigation-visual-redraw/tests/run_checks.py
 python3 plugins/mqc-nlv/skills/mqc-timeline-master/tests/run_checks.py
 python3 plugins/mqc-nlv/skills/mqc-chronicle-master/tests/run_checks.py
@@ -74,31 +72,32 @@ python3 plugins/mqc-nlv/skills/mqc-trial-confrontation-master/tests/run_checks.p
 python3 plugins/mqc-nlv/skills/mqc-legal-relation-master/tests/make_checks.py
 python3 plugins/mqc-nlv/skills/mqc-legal-chart-master/tests/release_gate.py
 python3 plugins/mqc-nlv/skills/mqc-legal-courseware-master/tests/run_checks.py
+python3 plugins/mqc-nlv/skills/mqc-fact-chronology-master/tests/run_checks.py
+node plugins/mqc-nlv-dsh/tests/dsh_checks.mjs
 
 # 脱敏：仓库里不许有真实案件的当事人、案号、账号
 python3 plugins/mqc-nlv/skills/mqc-timeline-master/tests/check_anonymised.py
 ```
 
-**路径必须全部是 ASCII。** 重画与时间轴大师各有一条守卫盯这件事，理由是 Windows 的
+**路径必须全部是 ASCII。** 重画、时间轴大师各有一条守卫盯本模块，案件看板大师那条查整个仓库，理由是 Windows 的
 `Expand-Archive` 按系统代码页读 ZIP 条目名，中文文件名会让解压直接失败 ——
 而下载 ZIP 是大多数人拿到仓库的方式。内容用中文没问题，文件名不行。
 
 ## README 里的图
 
-八张，都在仓库里，不引外链：
+都在仓库里，不引外链；中英两版首页共用，带 `-en` 的是英文版：
 
 | 图 | 位置 |
 | --- | --- |
-| logo | `mqc-litigation-visual-redraw/assets/brand/nlv-logo-red.png` |
-| 时间轴成品示例 | `mqc-timeline-master/assets/screenshots/timeline-example.png` |
-| 三类七种图形 | `mqc-litigation-visual-redraw/assets/longform/seven-layouts.png` |
-| 三种视觉模式 | `mqc-litigation-visual-redraw/assets/modes/timeline-dated-3modes.png` |
-| Skill 运行全过程 | `mqc-litigation-visual-redraw/assets/longform/how-it-works.png` |
-| 01 数学 | `mqc-timeline-master/assets/longform/01-mathematics.png` |
-| 02 画准 | `mqc-timeline-master/assets/longform/02-exact.png` |
-| 03 时间轴 | `mqc-timeline-master/assets/longform/03-the-figure.png` |
-
-三张长图（01 / 02 / 03）同时提供 SVG，需要放大细看或二次编辑时用那一份。
+| 横幅 | `assets/banner.png` |
+| 亮点 | `assets/highlights.png` · `assets/highlights-en.png` |
+| 八个模块成品墙 | `assets/modules.png` · `assets/modules-en.png`（虚构示例与出图脚本在 `assets/src/showcase/`） |
+| 三步上手 | `assets/quickstart.png` |
+| 怎么配合 | `assets/flow.png` · `assets/flow-en.png`（由 `assets/src/flow.py` 生成） |
+| 案件看板截图 | `assets/v8-board.png` |
+| 模块图标 | `assets/icons/v1.png` … `v8.png`、`dsh.png` |
+| 作者名片 | `assets/author-card.jpg` |
+| 竖版封面（首页不用，对外分享用） | `assets/cover.png` |
 
 ## 社区与安全设置（开源当天做一次）
 
@@ -113,7 +112,7 @@ python3 plugins/mqc-nlv/skills/mqc-timeline-master/tests/check_anonymised.py
 3. **Settings → General → Features**：Issues 打开；Discussions 可选。
 4. **Insights → Community Standards**：应当全部打勾，有缺项就照提示补。
 5. **Settings → Branches**：给 `main` 加保护规则，要求 `checks` 通过才能合并。
-6. **Releases**：打一个 tag（`v3.0.0`，与 `plugin.json` 的版本一致；上一版公开的是 v2.5.0）并写发布说明；把 `python3 plugins/mqc-nlv-dsh/build.py` 打出的 `mqc-nlv-dsh-3.0.0.tgz` 作为附件上传，DeepSeek Harness 用户下载它安装。
+6. **Releases**：打一个 tag（`v3.1.0`，与 `plugin.json` 的版本一致；上一版是 v3.0.0）并写发布说明；把 `python3 plugins/mqc-nlv-dsh/build.py` 打出的 `mqc-nlv-dsh-3.1.0.tgz` 作为附件上传，DeepSeek Harness 用户下载它安装。
 
 **仓库里不该出现的东西**（推送前 `git status` 看一眼）：`__pycache__/`、`.DS_Store`、`__MACOSX/`、
 真实案件材料、律所模板与 Logo、任何本机路径。`.gitignore` 已覆盖前两项。

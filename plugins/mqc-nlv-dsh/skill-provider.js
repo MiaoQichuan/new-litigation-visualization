@@ -1,4 +1,4 @@
-// 新诉讼可视化 · DeepSeek Harness 插件：把随包的七个技能注册给 DeepSeek Harness。
+// 新诉讼可视化 · DeepSeek Harness 插件：把随包的八个技能注册给 DeepSeek Harness。
 //
 // 每个技能的正文 = 一段「在 DeepSeek Harness 里怎么跑」的前言 + 原样的 SKILL.md 正文（去掉开头的 YAML）。
 // 技能目录（scripts/、references/、examples/……）作为 resourceBase 交给模型，相对路径照常可读。

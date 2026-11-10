@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "diagram_type": "flowchart",
+  "layout": "graphviz_flow",
+  "title_text": "证券虚假陈述责任纠纷审理流程（虚构示例）",
+  "direction": "TB",
+  "nodes": [
+    {
+      "id": "n1",
+      "kind": "terminal",
+      "title": "【起点】上市公司年报被认定存在虚假陈述"
+    },
+    {
+      "id": "n2",
+      "kind": "step",
+      "title": "投资者以虚假陈述致损为由提起诉讼"
+    },
+    {
+      "id": "n3",
+      "kind": "decision",
+      "title": "【判断】是否适用代表人诉讼？"
+    },
+    {
+      "id": "n4",
+      "kind": "step",
+      "title": "投资者保护机构作为代表人参加诉讼"
+    },
+    {
+      "id": "n5",
+      "kind": "step",
+      "title": "投资者以普通共同诉讼方式起诉"
+    },
+    {
+      "id": "n6",
+      "kind": "step",
+      "title": "【法院审理】查明事实",
+      "lines": [
+        "虚假陈述具有重大性；",
+        "交易因果关系推定成立；",
+        "扣除系统风险后核定投资差额损失。"
+      ],
+      "emphasis": true
+    },
+    {
+      "id": "n7",
+      "kind": "step",
+      "title": "【判决】",
+      "lines": [
+        "a. 上市公司赔偿投资者损失；",
+        "b. 不能证明自己没有过错的董事、高管承担连带责任"
+      ],
+      "emphasis": true
+    },
+    {
+      "id": "n8",
+      "kind": "terminal",
+      "title": "【终点】执行完毕，赔偿款分配至投资者"
+    }
+  ],
+  "edges": [
+    {
+      "from": "n1",
+      "to": "n2"
+    },
+    {
+      "from": "n2",
+      "to": "n3"
+    },
+    {
+      "from": "n3",
+      "to": "n4",
+      "label": "是"
+    },
+    {
+      "from": "n3",
+      "to": "n5",
+      "label": "否"
+    },
+    {
+      "from": "n4",
+      "to": "n6"
+    },
+    {
+      "from": "n5",
+      "to": "n6"
+    },
+    {
+      "from": "n6",
+      "to": "n7"
+    },
+    {
+      "from": "n7",
+      "to": "n8"
+    }
+  ],
+  "provenance": {
+    "text_policy": "verbatim",
+    "tidy_note": "首页展示用虚构示例",
+    "emphasis_note": "使用者指定【法院审理】与【判决】两处为深红",
+    "uncertainties": []
+  },
+  "checkpoint": {
+    "emphasis_source": "user",
+    "confirmed": true
+  }
+}

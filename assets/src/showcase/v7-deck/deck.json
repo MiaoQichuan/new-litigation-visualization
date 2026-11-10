@@ -1,0 +1,56 @@
+{
+ "schema": "mqc-nlv/deck@2",
+ "title": "涉外商事仲裁实务",
+ "style": "奇川风",
+ "slides": [
+  {
+   "id": "s3",
+   "modules": [
+    {
+     "id": "m1",
+     "type": "title",
+     "x": 0,
+     "y": 0,
+     "w": 12,
+     "h": 1,
+     "text": "涉外商事仲裁受案逐年增长"
+    },
+    {
+     "id": "m2",
+     "type": "chart",
+     "x": 0,
+     "y": 1,
+     "w": 8,
+     "h": 5,
+     "file": "assets/bar-filings.json"
+    },
+    {
+     "id": "m3",
+     "type": "stat",
+     "tone": "accent",
+     "x": 8,
+     "y": 1,
+     "w": 4,
+     "h": 2,
+     "value": "+98%",
+     "label": "2025 年较 2019 年",
+     "note": "412 → 815 件"
+    },
+    {
+     "id": "m4",
+     "type": "bullets",
+     "x": 8,
+     "y": 3,
+     "w": 4,
+     "h": 3,
+     "heading": "看点",
+     "items": [
+      "七年来逐年上升",
+      "近两年每年多八十余件"
+     ]
+    }
+   ]
+  }
+ ],
+ "footer_logo": true
+}
