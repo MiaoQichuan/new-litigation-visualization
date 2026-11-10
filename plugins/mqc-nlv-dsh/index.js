@@ -3,7 +3,7 @@
 //   nlv_check  查本机环境：Python 在不在、版本够不够、可选工具有哪些，缺了怎么装
 //   nlv_run    在用户的工作区里运行某个技能的 Python 脚本（参数直传，不经 shell）
 //
-// 七个技能本身由同包的 ./skill-provider.js 注册。出图、核验、守卫都在各技能的 Python 脚本里，
+// 八个技能本身由同包的 ./skill-provider.js 注册。出图、核验、守卫都在各技能的 Python 脚本里，
 // 这里只负责找到 Python、把脚本安全地跑起来、把新写出的文件列给模型，好让它用 present 交付。
 //
 // Copyright (C) 2026 缪奇川（Miao Qichuan）. AGPL-3.0-only.
@@ -63,7 +63,7 @@ export function apply(ctx) {
   ctx.tools.register(defineTool({
     name: 'nlv_check',
     description:
-      '新诉讼可视化：检查本机能不能运行七个诉讼可视化技能（Python 是否可用、版本、Excel / PNG / Word 等可选能力）。'
+      '新诉讼可视化：检查本机能不能运行八个诉讼可视化技能（Python 是否可用、版本、Excel / PNG / Word 等可选能力）。'
       + '第一次使用新诉讼可视化、或 nlv_run 报告找不到 Python 时调用；把返回的安装说明原样转告用户。',
     parameters: {
       refresh: { type: 'boolean', description: '重新查找 Python（用户刚装好 Python 时传 true）。' },

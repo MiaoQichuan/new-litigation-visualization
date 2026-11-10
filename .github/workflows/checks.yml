@@ -170,7 +170,11 @@ jobs:
       - name: Run regression · mqc-legal-courseware-master
         run: python plugins/mqc-nlv/skills/mqc-legal-courseware-master/tests/run_checks.py
 
-      # DeepSeek Harness 插件：打包（build.py），用模拟宿主加载，七个技能各跑一次示例，核对越权路径被拒。
+      # V8 只用标准库；页面冒烟需要 Playwright，CI 上没装时那一项自己跳过（页面全量回归用 --page 在本机跑）。
+      - name: Run regression · mqc-fact-chronology-master
+        run: python plugins/mqc-nlv/skills/mqc-fact-chronology-master/tests/run_checks.py
+
+      # DeepSeek Harness 插件：打包（build.py），用模拟宿主加载，八个技能各跑一次示例，核对越权路径被拒。
       - name: DeepSeek Harness plugin · mqc-nlv-dsh
         run: node plugins/mqc-nlv-dsh/tests/dsh_checks.mjs
 
@@ -206,6 +210,7 @@ jobs:
           python $S/mqc-chronicle-master/tests/run_checks.py
           python $S/mqc-legal-chart-master/tests/run_checks.py
           python $S/mqc-legal-courseware-master/tests/run_checks.py
+          python $S/mqc-fact-chronology-master/tests/run_checks.py
           for t in shape_checks break_tests coverage_checks palette_checks ingest_checks; do
             python $S/mqc-trial-confrontation-master/tests/$t.py
           done

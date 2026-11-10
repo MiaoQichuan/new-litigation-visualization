@@ -5,7 +5,7 @@
     python3 plugins/mqc-nlv-dsh/build.py            # 输出到 plugins/mqc-nlv-dsh/dist/
     python3 plugins/mqc-nlv-dsh/build.py -o 某目录
 
-包里有：插件入口（index.js、skill-provider.js、lib/）、七个技能原样（含各自的自检脚本，去掉缓存与只给 README 看的展示图）、
+包里有：插件入口（index.js、skill-provider.js、lib/）、八个技能原样（含各自的自检脚本，去掉缓存与只给 README 看的展示图）、
 随包的 openpyxl 与 et_xmlfile（纯 Python，MIT，出 Excel 用）、许可与第三方声明。
 同一份源码打出的包逐字节一致（文件按名排序、时间戳固定）。
 """
@@ -31,7 +31,8 @@ SKIP_FILES = re.compile(r"(\.pyc$|^\.|\.DS_Store$)")
 FIXED_MTIME = 499162500          # npm pack 用的固定时间（1985-10-26），保证逐字节可复现
 VENDORED_PY = ["openpyxl", "et_xmlfile"]
 # 只给 README 看的展示图，运行时不用：不进插件包（包小一大半）。运行时要读的 assets（字体说明、样式令牌、索引表）照带。
-DOC_ONLY = re.compile(r"^assets/(longform|modes|screenshots|brand)(/|$)|^assets/gallery[^/]*\.png$")
+# 案件看板大师的 web/ 是页面源码与字体，只给改页面的人重新生成模板用；运行时用的是 assets/template.html。
+DOC_ONLY = re.compile(r"^assets/(longform|modes|screenshots|brand)(/|$)|^assets/gallery[^/]*\.png$|^web/(src|fonts)(/|$)|^web/(build|palette)\.py$")
 
 
 def frontmatter(path):
@@ -160,8 +161,8 @@ def build(out_dir, with_docx=True):
             raise SystemExit(f"{sk}：技能名要是小写连字符、description 不能为空")
         copy_skill(os.path.join(SKILLS_SRC, name), os.path.join(stage, "nlv-skills", name), doc_filter=True)
         skills.append({"name": name, "description": fm["description"]})
-    if len(skills) != 7:
-        raise SystemExit(f"应有七个技能，找到 {len(skills)} 个")
+    if len(skills) != 8:
+        raise SystemExit(f"应有八个技能，找到 {len(skills)} 个")
     # 插件包本身是 ES 模块（package.json 写了 "type": "module"），技能目录里的 Node 脚本（build_docx.js、trace_index.js）
     # 却是 CommonJS（用 require）。不隔开的话 Node 按最近的 package.json 把它们当 ES 模块读，一运行就报 require 未定义。
     with open(os.path.join(stage, "nlv-skills", "package.json"), "w", encoding="utf-8") as f:
@@ -206,7 +207,7 @@ def build(out_dir, with_docx=True):
     n = len(entries)
     shutil.rmtree(stage_root)
     print(f"已打包：{tgz}")
-    print(f"  {n} 个文件，{os.path.getsize(tgz) / 1048576:.1f} MB；七个技能：{'、'.join(s['name'] for s in skills)}")
+    print(f"  {n} 个文件，{os.path.getsize(tgz) / 1048576:.1f} MB；八个技能：{'、'.join(s['name'] for s in skills)}")
     print(f"  随包 Python 组件：{'、'.join(f'{m} {v}' for m, v in notices)}；Word 用的 docx：{docx_ver or '未带'}")
     return tgz
 

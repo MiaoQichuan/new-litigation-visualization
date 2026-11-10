@@ -1,0 +1,302 @@
+{
+ "_note": "虚构示例（首页展示用）：芯擎科技诉韩某、启微半导体侵害技术秘密纠纷。人物、公司均为虚构。",
+ "schema_version": 2,
+ "diagram_type": "timeline",
+ "title_text": "芯片技术秘密侵权纠纷 · 双方主张对读时间轴",
+ "layout": "numbered_point_timeline",
+ "medium": "a4_portrait",
+ "axis": {
+  "mode": "equidistant",
+  "unit": "month"
+ },
+ "frame": {
+  "stage": "auto",
+  "audience": "internal",
+  "stage_inferred_from": "有起诉状与答辩状，无裁判文书"
+ },
+ "lanes": [
+  {
+   "id": "P",
+   "label_text": "原告主张"
+  },
+  {
+   "id": "D",
+   "label_text": "被告主张"
+  }
+ ],
+ "documents": [
+  {
+   "file": "起诉状.pdf",
+   "kind": "起诉状",
+   "unit_kind": "page",
+   "units": 5,
+   "events_found": 7
+  },
+  {
+   "file": "答辩状.pdf",
+   "kind": "答辩状",
+   "unit_kind": "page",
+   "units": 3,
+   "events_found": 3
+  }
+ ],
+ "scope": {
+  "mode": "full",
+  "selection_source": "default",
+  "events_from_image": 0,
+  "documents_unreadable": []
+ },
+ "events": [
+  {
+   "id": "1",
+   "lane": "P",
+   "unit_type": "event",
+   "quote_depth": 0,
+   "time": {
+    "certainty": "exact",
+    "origin": "extracted",
+    "kind": "sign",
+    "raw": "2019年7月1日",
+    "date": "2019/7/1",
+    "date_text": "2019.07.01"
+   },
+   "head": "韩某入职并签订《保密及竞业限制协议》",
+   "source": {
+    "file": "起诉状.pdf",
+    "at": "page:2",
+    "medium": "text_layer",
+    "quote": "2019年7月1日，韩某入职原告并签订《保密及竞业限制协议》"
+   },
+   "head_short": "签订保密协议"
+  },
+  {
+   "id": "2",
+   "lane": "P",
+   "unit_type": "event",
+   "quote_depth": 0,
+   "time": {
+    "certainty": "range",
+    "origin": "extracted",
+    "kind": "occur",
+    "raw": "2021年3月",
+    "from": "2021/3/1",
+    "to": "2021/3/31",
+    "date_text": "2021年3月"
+   },
+   "head": "韩某参与第三代电源管理芯片研发",
+   "source": {
+    "file": "起诉状.pdf",
+    "at": "page:2",
+    "medium": "text_layer",
+    "quote": "2021年3月起，韩某参与第三代电源管理芯片研发"
+   },
+   "head_short": "参与核心研发"
+  },
+  {
+   "id": "3",
+   "lane": "P",
+   "unit_type": "event",
+   "quote_depth": 0,
+   "time": {
+    "certainty": "exact",
+    "origin": "extracted",
+    "kind": "occur",
+    "raw": "2022年8月31日",
+    "date": "2022/8/31",
+    "date_text": "2022.08.31"
+   },
+   "head": "韩某离职",
+   "source": {
+    "file": "起诉状.pdf",
+    "at": "page:2",
+    "medium": "text_layer",
+    "quote": "2022年8月31日，韩某离职"
+   },
+   "head_short": "韩某离职"
+  },
+  {
+   "id": "4",
+   "lane": "D",
+   "unit_type": "event",
+   "quote_depth": 0,
+   "time": {
+    "certainty": "exact",
+    "origin": "extracted",
+    "kind": "record",
+    "raw": "2022年10月12日",
+    "date": "2022/10/12",
+    "date_text": "2022.10.12"
+   },
+   "head": "启微半导体成立",
+   "source": {
+    "file": "答辩状.pdf",
+    "at": "page:2",
+    "medium": "text_layer",
+    "quote": "2022年10月12日，启微半导体成立"
+   },
+   "head_short": "启微公司成立"
+  },
+  {
+   "id": "5",
+   "lane": "D",
+   "unit_type": "event",
+   "quote_depth": 0,
+   "time": {
+    "certainty": "range",
+    "origin": "extracted",
+    "kind": "occur",
+    "raw": "2023年5月",
+    "from": "2023/5/1",
+    "to": "2023/5/31",
+    "date_text": "2023年5月"
+   },
+   "head": "启微半导体完成独立研发流片",
+   "source": {
+    "file": "答辩状.pdf",
+    "at": "page:2",
+    "medium": "text_layer",
+    "quote": "2023年5月，启微半导体完成独立研发流片"
+   },
+   "head_short": "称独立流片"
+  },
+  {
+   "id": "6",
+   "lane": "P",
+   "unit_type": "event",
+   "quote_depth": 0,
+   "time": {
+    "certainty": "exact",
+    "origin": "extracted",
+    "kind": "send",
+    "raw": "2023年6月15日",
+    "date": "2023/6/15",
+    "date_text": "2023.06.15"
+   },
+   "head": "启微半导体发布同类芯片",
+   "source": {
+    "file": "起诉状.pdf",
+    "at": "page:2",
+    "medium": "text_layer",
+    "quote": "2023年6月15日，启微半导体发布同类芯片"
+   },
+   "head_short": "发布同类芯片"
+  },
+  {
+   "id": "7",
+   "lane": "P",
+   "unit_type": "event",
+   "quote_depth": 0,
+   "time": {
+    "certainty": "exact",
+    "origin": "extracted",
+    "kind": "record",
+    "raw": "2023年9月20日",
+    "date": "2023/9/20",
+    "date_text": "2023.09.20"
+   },
+   "head": "原告申请证据保全公证",
+   "source": {
+    "file": "起诉状.pdf",
+    "at": "page:2",
+    "medium": "text_layer",
+    "quote": "2023年9月20日，原告申请证据保全公证"
+   },
+   "head_short": "证据保全公证"
+  },
+  {
+   "id": "8",
+   "lane": "P",
+   "unit_type": "event",
+   "quote_depth": 0,
+   "time": {
+    "certainty": "exact",
+    "origin": "extracted",
+    "kind": "record",
+    "raw": "2024年3月8日",
+    "date": "2024/3/8",
+    "date_text": "2024.03.08"
+   },
+   "head": "司法鉴定认定技术信息实质相同",
+   "emphasis": true,
+   "source": {
+    "file": "起诉状.pdf",
+    "at": "page:2",
+    "medium": "text_layer",
+    "quote": "2024年3月8日，司法鉴定认定技术信息实质相同"
+   },
+   "head_short": "鉴定实质相同"
+  },
+  {
+   "id": "9",
+   "lane": "P",
+   "unit_type": "event",
+   "quote_depth": 0,
+   "time": {
+    "certainty": "exact",
+    "origin": "extracted",
+    "kind": "send",
+    "raw": "2024年4月10日",
+    "date": "2024/4/10",
+    "date_text": "2024.04.10"
+   },
+   "head": "原告向法院提起诉讼",
+   "source": {
+    "file": "起诉状.pdf",
+    "at": "page:2",
+    "medium": "text_layer",
+    "quote": "2024年4月10日，原告向法院提起诉讼"
+   },
+   "head_short": "提起诉讼"
+  },
+  {
+   "id": "10",
+   "lane": "D",
+   "unit_type": "event",
+   "quote_depth": 0,
+   "time": {
+    "certainty": "exact",
+    "origin": "extracted",
+    "kind": "send",
+    "raw": "2024年6月5日",
+    "date": "2024/6/5",
+    "date_text": "2024.06.05"
+   },
+   "head": "被告提交答辩状主张独立研发",
+   "source": {
+    "file": "答辩状.pdf",
+    "at": "page:2",
+    "medium": "text_layer",
+    "quote": "2024年6月5日，被告提交答辩状，主张涉案芯片系独立研发"
+   },
+   "head_short": "答辩独立研发"
+  }
+ ],
+ "conflicts": [
+  {
+   "id": "c1",
+   "kind": "characterization",
+   "fact_text": "涉案芯片是否系独立研发",
+   "members": [
+    "5",
+    "8",
+    "10"
+   ]
+  }
+ ],
+ "residuals": [],
+ "stipulated": [
+  {
+   "raw": "离职后二年内",
+   "text": "竞业限制期限（保密及竞业限制协议第五条）"
+  }
+ ],
+ "provenance": {
+  "text_policy": "verbatim-condensed",
+  "note": "虚构示例，两份材料合并。"
+ },
+ "checkpoint": {
+  "confirmed": true,
+  "extraction_confirmed": true,
+  "emphasis_source": "user"
+ }
+}

@@ -3,7 +3,7 @@
 //   node plugins/mqc-nlv-dsh/tests/dsh_checks.mjs
 //
 // 做的事：打包（build.py）→ 解压成 node_modules/mqc-nlv-dsh → 按 cordis.patch.yml 的两行加载插件 →
-// 核对注册的工具与技能 → 用 nlv_run 真跑七个技能的示例 → 核对越权路径被拒、取消与超时、没有 Python 时的说法。
+// 核对注册的工具与技能 → 用 nlv_run 真跑八个技能的示例 → 核对越权路径被拒、取消与超时、没有 Python 时的说法。
 //
 // defineTool：设了环境变量 DSH_SRC（DeepSeek Harness 源码目录）时用它的真实现（Node 自带的类型剥离直接读 .ts）；
 // 没设时用本文件里按官方文档写的严格替身。真实现那一遍是发版前在本地跑的。
@@ -102,13 +102,13 @@ try { toolsMod.apply(ctx) } catch (e) { ok('工具插件 apply 不抛错', false
 try { skillsMod.apply(ctx) } catch (e) { ok('技能插件 apply 不抛错', false, e.stack) }
 ok('注册 nlv_check 与 nlv_run 两个工具', tools.has('nlv_check') && tools.has('nlv_run'), [...tools.keys()])
 const runParams = tools.get('nlv_run')?.parameters
-ok('nlv_run 的参数表：skill 与 script 必填，skill 只能取七个技能名', runParams?.required?.includes('skill') && runParams?.required?.includes('script')
-  && runParams?.properties?.skill?.enum?.length === 7, JSON.stringify(runParams))
+ok('nlv_run 的参数表：skill 与 script 必填，skill 只能取八个技能名', runParams?.required?.includes('skill') && runParams?.required?.includes('script')
+  && runParams?.properties?.skill?.enum?.length === 8, JSON.stringify(runParams))
 
 // ---------------------------------------------------------------- 技能
-section('七个技能')
+section('八个技能')
 const list = await provider.list()
-ok('列出七个技能', list.length === 7, list.map((x) => x.name))
+ok('列出八个技能', list.length === 8, list.map((x) => x.name))
 const NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 ok('技能名都是小写连字符，描述不空，provider 与提供者同名', list.every((c) => NAME.test(c.name) && c.description.length > 0 && c.provider === provider.name))
 ok('每个技能的目录与 SKILL.md 都在包里', list.every((c) => c.resourceBase.kind === 'directory' && existsSync(join(c.resourceBase.path, 'SKILL.md')) && existsSync(c.path)))
@@ -133,10 +133,10 @@ ok('找到 Python', check.python?.ok, JSON.stringify(check))
 ok('Excel 可用（openpyxl 随插件附带）', String(check.optional?.excel).startsWith('可用'), check.optional?.excel)
 const checkText = tools.get('nlv_check').output.render({}, check).map((b) => b.text).join('')
 ok('Word：本机有 Node.js 时报可用（docx 随插件附带）', String(check.optional?.word).startsWith('可用'), check.optional?.word)
-ok('自检文字列出 Python 版本与七个技能', checkText.includes('Python：可用') && checkText.includes('mqc-legal-chart-master'))
+ok('自检文字列出 Python 版本与八个技能', checkText.includes('Python：可用') && checkText.includes('mqc-legal-chart-master'))
 
-// ---------------------------------------------------------------- 工具：真跑七个技能
-section('nlv_run · 七个技能各跑一次示例（在中文带空格的工作区里）')
+// ---------------------------------------------------------------- 工具：真跑八个技能
+section('nlv_run · 八个技能各跑一次示例（在中文带空格的工作区里）')
 // Word 版必须靠随插件附带的 docx 写出来：清掉本机的 NODE_PATH，免得用到全局装的那份
 delete process.env.NODE_PATH
 async function run(skill, script, args, opts = {}) {
@@ -151,6 +151,7 @@ const cases = [
   ['mqc-trial-confrontation-master', 'scripts/pipeline.py', ['--demo', 'v5'], ['.svg', '.xlsx']],
   ['mqc-legal-chart-master', 'scripts/make.py', ['examples/waffle-outcomes.json', '-o', 'v6/判决结果'], ['.svg', '.pptx']],
   ['mqc-legal-courseware-master', 'scripts/build.py', ['我的课件', '--new', '--title', '民间借贷类案研究'], ['deck.json']],
+  ['mqc-fact-chronology-master', 'scripts/build_page.py', ['examples/lending.base.json', '-o', 'v8 案件看板.html'], ['.html']],
 ]
 for (const [skill, script, args, want] of cases) {
   const v = await run(skill, script, args)
@@ -185,7 +186,7 @@ writeFileSync(outside, 'print(1)\n')
 await rejects('script 写成技能目录外的绝对路径', { skill: 'mqc-legal-chart-master', script: outside })
 let schemaRejected = false
 try { await tools.get('nlv_run').execute({ skill: 'not-a-skill', script: 'scripts/make.py' }, exec()) } catch { schemaRejected = true }
-ok('skill 不在七个之内：参数校验直接拒绝', schemaRejected)
+ok('skill 不在八个之内：参数校验直接拒绝', schemaRejected)
 
 // ---------------------------------------------------------------- 底层：取消、超时、Windows 候选
 section('取消、超时与找 Python')
