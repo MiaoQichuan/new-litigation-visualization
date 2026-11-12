@@ -7,3 +7,4 @@
 | [0003](0003-model-writes-facts-only.md) | 模型只写事实，原文、核对、算术交给脚本 |
 | [0004](0004-structure-follows-fact-chronology.md) | 页面结构照 Fact chronology，升级只加在外面 |
 | [0005](0005-no-jumping.md) | 交互位置不跳动 |
+| [0006](0006-review-facts-and-conflicts.md) | 首轮事实复核与待审 |

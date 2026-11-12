@@ -55,34 +55,97 @@ function viewTL(){
   const filtered = vis.length<totalAll;
   const seg=(cls,items,cur,act)=>`<div class="seg ${cls}">${items.map(([v,n])=>`<button class="${cur(v)?'on':''}" aria-pressed="${cur(v)}" onclick="${act(v)}">${n}</button>`).join('')}</div>`;
   return `<div class="card tlcard">
-    <div class="tltools">${S.play!==null?playTools():`
+    <div class="tltools${S.timelineMode==='vertical'&&S.play===null?' vertical-tools':''}">
+      ${S.play===null?seg('timeline-mode',[['horizontal','横向'],['vertical','纵向']],v=>S.timelineMode===v,v=>`S.timelineMode='${v}';render()`):''}
+      ${S.play!==null?playTools():`
       <span class="lab">截至</span>
       ${seg('stage',[[0,'接受咨询'],[1,'谈案'],[2,'庭前'],[5,'全部']],v=>v===5?S.stage>=3:S.stage===v,v=>`S.stage=${v};render()`)}
       <span class="hsp"></span>
-      <span class="rng num" id="rng">${esc(rangeLabel())}</span>
+      ${S.timelineMode==='vertical'?'<button class="btn sm" onclick="setTimelineMonths(true)">展开全部</button><button class="btn sm" onclick="setTimelineMonths(false)">收起全部</button>':`<span class="rng num" id="rng">${esc(rangeLabel())}</span>
       <span class="zgrp"><button class="ibt" id="zout" onclick="zoom(1/1.6)" title="缩小">${ICO.minus}</button><button class="ibt" onclick="zoom(1.6)" title="放大">${ICO.plus}</button></span>
       <button class="btn sm" id="bfit" onclick="fit()" title="显示全部时间">${ICO.fit}全时段</button>
       <button class="btn sm" onclick="viewPop(event)">${ICO.eye}显示</button>
-      <button class="btn sm" onclick="startPlay()">${ICO.play}回放</button>`}
+      <button class="btn sm" onclick="startPlay()">${ICO.play}回放</button>`}`}
     </div>
-    ${vis.some(e=>!e.undated)||S.play!==null?`<div class="minirow"><button class="lanebtn" onclick="lanePop(event)" title="泳道按什么分">${ICO.lanes}<span>${LANE_N[S.lanes]}</span>${ICO.chev}</button><div id="mini"></div></div><div class="tlscroll"><div id="tl"></div></div>`:`<div class="tlempty">本案材料中的事实都没有可定位的日期，暂不能上时间线；它们列在下方「无日期」与事实表里。</div>`}
-    ${legend(vis)}
+    ${S.timelineMode==='vertical'&&S.play===null?verticalTimeline(vis):vis.some(e=>!e.undated)||S.play!==null?horizontalTimeline():`<div class="tlempty">本案材料中的事实都没有可定位的日期，暂不能上时间线；它们列在下方「无日期」与事实表里。</div>`}
+    ${S.timelineMode!=='vertical'||S.play!==null?legend(vis):''}
     <div class="undated"><div class="lt">无日期 <span class="num">${undated.length}</span>${undated.length?`<button class="lnk udgo" onclick="S.tab='narr';render()" title="无日期的事实在「事实经过」里按线索排在相应位置">在事实经过里看 →</button>`:''}</div><div class="ud-list">
       ${undated.map(e=>`<button class="udchip" onclick="selectEv('${e.id}')"><span class="dot" style="background:${TYPES[e.t].c}"></span><span class="t">${esc(e.title)}</span></button>`).join('')}
       ${S.showClaims?cl.filter(c=>!c.s).map(c=>`<button class="udchip" onclick="openClaim('${c.id}')"><span class="sqo"></span><span class="t">${c.who}主张：${esc(c.title)}</span></button>`).join(''):''}
     </div></div>
+    ${S.timelineMode==='horizontal'&&S.play===null?timelineMaterials():''}
   </div>
   <div class="tbar">
     <div class="search">${ICO.search}<input id="q" placeholder="搜索事实、原文、材料名" value="${esc(S.q)}" oninput="S.q=this.value;drawTable()">${S.q?`<button class="qx" onclick="S.q='';render()" title="清空">${ICO.x}</button>`:''}</div>
     <button class="btn sm" onclick="filterPop(event)">${ICO.filter}筛选${activeFilters()?` · ${activeFilters()}`:''}</button>
     <span id="tstate" class="vstate inl"></span>
-    <span class="hsp"></span><span id="batch"></span>
+    <span class="hsp"></span><span id="tcount" class="sub" aria-live="polite"></span><span id="batch"></span>
   </div>
   <div class="card tablecard"><div class="tscroll" id="tablewrap"></div></div>`;
 }
+function horizontalTimeline(){
+  const controls=S.play===null?`<aside class="tl-density" aria-label="时间线纵向疏密">
+    <label for="tl-density">纵向疏密</label>
+    <input type="range" id="tl-density" min="0" max="2" step="1" value="${S.timelineDensity}" aria-orientation="vertical" aria-valuetext="${TIMELINE_DENSITY[S.timelineDensity]}" oninput="setTimelineDensity(this.valueAsNumber)">
+    <div class="density-stops">${TIMELINE_DENSITY.map((name,i)=>`<button type="button" data-density="${i}" aria-pressed="${i===S.timelineDensity}" onclick="setTimelineDensity(${i})">${name}</button>`).join('')}</div>
+    <button class="lnk" id="tl-open-materials" onclick="openTimelineMaterials()" hidden>材料目录</button>
+    <button class="lnk" id="tl-reset-clusters" onclick="resetTimelineClusters()" hidden>收起局部</button>
+  </aside>`:'';
+  return `<div class="tl-layout${controls?' has-density':''}">
+    <div class="tl-canvas">
+      <div class="minirow"><button class="lanebtn" onclick="lanePop(event)" title="泳道按什么分">${ICO.lanes}<span>${LANE_N[S.lanes]}</span>${ICO.chev}</button><div id="mini"></div></div>
+      <div class="tlscroll"><div id="tl"></div></div>
+    </div>${controls}
+  </div>`;
+}
+function openTimelineMaterials(){
+  const materials=$('#timeline-materials');
+  if(!materials) return;
+  materials.open=true;
+  materials.scrollIntoView({block:'start'});
+}
+function timelineMaterials(){
+  const docs=DOCS.filter(d=>docVisible(d.id));
+  if(!docs.length) return '';
+  return `<details class="timeline-materials" id="timeline-materials" ${S.timelineMaterialsOpen?'open':''} ontoggle="if(this.isConnected) S.timelineMaterialsOpen=this.open" hidden>
+    <summary>${S.stage>=5?'全部':'本阶段'} ${docs.length} 份材料</summary>
+    <ul>${docs.map(d=>`<li><button class="dref" onclick="openDoc(this.dataset.material)" data-material="${esc(d.id)}"><span class="sub">${esc(d.id)}</span> ${esc(d.name)}</button></li>`).join('')}</ul>
+  </details>`;
+}
+
+function setTimelineMonths(open){
+  document.querySelectorAll('.timeline-month').forEach(el=>{
+    S.monthOpen.set(el.dataset.month,open);
+    el.open=open;
+  });
+}
+function verticalTimeline(evs){
+  const months=new Map();
+  for(const e of evs){
+    if(!Number.isFinite(e.sortKey)) continue;
+    const month=isoOf(e.sortKey).slice(0,7);
+    if(!months.has(month)) months.set(month,[]);
+    months.get(month).push(e);
+  }
+  if(!months.size) return '<div class="tlempty">当前没有可按月排列的事实。</div>';
+  const pending=pendingFactIds(reviewItems());
+  const row=e=>{
+    const date=timelineDateLabel(e);
+    return `<li><button class="month-fact ${S.selected===e.id?'on':''}" data-fact="${esc(e.id)}" onclick="selectEv(this.dataset.fact)">
+      <span class="month-date num">${esc(date)}</span>
+      <span class="month-title"><span class="dot" style="background:${TYPES[e.t].c}"></span>${esc(e.title)}</span>
+      ${factReviewBadge(e,false,pending)}
+    </button></li>`;
+  };
+  return `<div class="vertical-timeline">${[...months].map(([month,rows])=>`
+    <details class="timeline-month" data-month="${month}" ${S.monthOpen.get(month)!==false?'open':''} ontoggle="if(this.isConnected) S.monthOpen.set(this.dataset.month,this.open)">
+      <summary><strong>${fmtM(dn(month))}</strong><span class="sub">${rows.length} 条事实</span></summary>
+      <ol>${rows.map(row).join('')}</ol>
+    </details>`).join('')}</div>`;
+}
+
 /* 事实表：保留官方四列（日期｜事实｜来源｜状态），每行压成两行字：标题+标记一行，对外措辞一行 */
-function drawTable(){
-  const host=$('#tablewrap'); if(!host) return;
+function tableFacts(){
   const q=S.q.trim();
   let evs=visibleFacts().filter(e=>{
     if(S.f.types.size && !S.f.types.has(e.t)) return false;
@@ -94,12 +157,18 @@ function drawTable(){
     if(q && !hay(e).includes(q)) return false;
     return true; });
   if(!S.sortAsc) evs=[...evs].reverse().sort((a,b)=>(a.undated?1:0)-(b.undated?1:0));
+  return evs;
+}
+function drawTable(){
+  const host=$('#tablewrap'); if(!host) return;
+  const evs=tableFacts();
+  const pending=pendingFactIds(reviewItems());
   const cl=S.showClaims?claimsVisible():[];
   TL.tableRows=evs;
   const src=e=>{ const seen=new Map(); e.recs.forEach(r=>{ if(!seen.has(r.d)) seen.set(r.d,r); });
     return [...seen.values()].map(r=>`<span class="sc ${e.adopted&&REC[e.adopted].d===r.d?'ad':''}">${kindTag(r.d)}<button class="dref" title="${esc(DOC[r.d].sub)}${e.conflict||e.wasConflict?'：'+esc(r.raw):''}" onclick="event.stopPropagation();openDoc('${r.d}','${r.rid}')">${r.d}</button></span>`).join(''); };
   const tc=$('#tcount'); if(tc) tc.textContent=`${evs.length} 条事实${cl.length?` · ${cl.length} 条主张`:''}`;
-  host.innerHTML=`<table class="ev"><thead><tr><th style="width:150px;cursor:pointer" onclick="S.sortAsc=!S.sortAsc;drawTable()">日期 ${S.sortAsc?'↑':'↓'}</th><th>事实</th><th style="width:190px">来源</th><th style="width:76px">状态</th></tr></thead><tbody>
+  host.innerHTML=`<table class="ev"><thead><tr><th style="width:150px;cursor:pointer" onclick="S.sortAsc=!S.sortAsc;drawTable()">日期 ${S.sortAsc?'↑':'↓'}</th><th>事实</th><th style="width:190px">来源</th><th style="width:116px">状态</th></tr></thead><tbody>
   ${evs.map(e=>{
     const tags=[];
     if(e.conflict) tags.push('<span class="tag conf">日期冲突</span>');
@@ -115,10 +184,12 @@ function drawTable(){
      <td class="dt"><div class="dwrap"><input type="checkbox" class="cb" ${S.checked.has(e.id)?'checked':''} onclick="event.stopPropagation();toggleCheck('${e.id}')"><div><div class="d num">${dateLabel(e)}</div>${dateNote(e)?`<div class="n">${dateNote(e)}</div>`:''}</div></div></td>
      <td class="ev"><div class="t"><span class="dot" style="background:${TYPES[e.t].c}"></span>${e.key?'<span class="star-s">★</span>':''}<span class="tt">${esc(e.title)}</span>${tags.join('')}</div><div class="s">${esc(phrase(e))}</div></td>
      <td class="src"><div class="srcs">${src(e)}</div></td>
-     <td class="st"><button class="stbtn" onclick="event.stopPropagation();toggleRev('${e.f.id}')" title="${e.rev==='done'?'改回待确认':'标为已确认'}">${e.rev==='done'?'<span class="st-ok">已确认</span>':'<span class="st-needs"></span>'}</button></td></tr>`;}).join('')}
+     <td class="st"><div class="fact-status-cell">${factReviewBadge(e,false,pending)}<button class="stbtn" onclick="event.stopPropagation();toggleRev('${e.f.id}')" title="${e.rev==='done'?'撤销人工确认':'标为已确认'}" aria-label="${e.rev==='done'?'撤销人工确认':'标为已确认'}">${e.rev==='done'?'<span class="review-tick" aria-hidden="true">✓</span>':'<span class="st-needs"></span>'}</button></div></td></tr>`;}).join('')}
   ${cl.map(c=>`<tr class="claimrow" onclick="openClaim('${c.id}')"><td class="dt"><div class="dwrap"><span class="cbsp"></span><div><div class="d num">${c.s?fmtD(c.s):'无日期'}</div><div class="n">主张</div></div></div></td><td class="ev"><div class="t"><span class="sqo"></span><span class="tt">${c.who}主张：${esc(c.title)}</span><span class="tag out">主张不是事实</span></div><div class="s">「${esc(c.q)}」</div></td><td class="src"><span class="sc">${kindTag(c.d)}<button class="dref" onclick="event.stopPropagation();openDoc('${c.d}')">${c.d}</button></span></td><td></td></tr>`).join('')}
   </tbody></table>`;
   batchBar();
+  const steps=$('#factSteps');
+  if(steps&&S.drawer?.kind==='fact') steps.innerHTML=factSteps(S.drawer.id);
   const ts=$('#tstate'); if(ts) ts.innerHTML=tableState();
 }
 

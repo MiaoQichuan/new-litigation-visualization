@@ -235,16 +235,56 @@ async def ui_clicks(pg):
     await pg.locator('#drawerIn .chip', has_text='日期冲突').click(); await pg.wait_for_timeout(80)
     kinds = await pg.evaluate("[...document.querySelectorAll('#drawerIn .rcard .rk')].map(x=>x.textContent)")
     ok('点「日期冲突」只剩冲突卡片', kinds and all('日期冲突' in k for k in kinds), kinds)
-    await pg.locator('#drawerIn .rcard').first.get_by_role('button', name='采信此记载').first.click(); await pg.wait_for_timeout(120)
+    await pg.locator('#drawerIn .rcard').first.get_by_role('button', name='采用 ').first.click(); await pg.wait_for_timeout(120)
     p1 = await pg.evaluate('pendingCount()')
-    both = await pg.evaluate("(()=>{ const f=Object.keys(S.adopt)[0]; return S.adopt && derive().some(e=>e.f.id===f && e.amtVals.length>1); })()")
-    ok('点「采信此记载」后待审相应减少（同时有金额冲突时减二）', p1 == p0 - (2 if both else 1), f'{p0}→{p1}')
+    ok('采用记载后同一事实的待审总数减一', p1 == p0 - 1, f'{p0}→{p1}')
     ok('顶部按钮数字同步', await pg.get_by_role('button', name=f'{p1} 项待审').count() == 1)
     await pg.locator('#drawerIn .chip', has_text='全部').click(); await pg.wait_for_timeout(60)
     await pg.locator('#drawerIn .resolved button', has_text='撤销').first.click(); await pg.wait_for_timeout(100)
     ok('点「撤销」后待审复原', await pg.evaluate('pendingCount()') == p0)
     await pg.locator('#drawerIn .x').first.click(); await pg.wait_for_timeout(80)
     ok('点 × 关闭抽屉', await pg.evaluate('S.drawer===null'))
+    await pg.get_by_role('button', name='纵向', exact=True).click()
+    month_rows = pg.locator('.timeline-month .month-fact')
+    ok('纵向按月逐条展示有日期的事实', await month_rows.count() == await pg.evaluate('visibleFacts().filter(e=>Number.isFinite(e.sortKey)).length'))
+    await pg.get_by_role('button', name='收起全部', exact=True).click()
+    ok('纵向可收起所有月份', await pg.locator('.timeline-month[open]').count() == 0)
+    await pg.locator('.timeline-month summary').first.click()
+    ok('纵向可单独展开一个月', await pg.locator('.timeline-month[open]').count() == 1)
+    await pg.get_by_role('button', name='横向', exact=True).click()
+    await pg.get_by_role('button', name=f'{p0} 项待审').click()
+    conflict = pg.locator('#drawerIn .rcard').filter(has=pg.get_by_text('日期冲突', exact=True)).first
+    await conflict.locator('.lawyer-note summary').click()
+    await conflict.get_by_role('textbox', name='律师复核意见').fill('对照签署页，核查日期。')
+    saved = await pg.evaluate('JSON.parse(baseJSON()).decisions.reviewNotes')
+    ok('复核意见随底稿保存', list(saved.values()) == [{'text': '对照签署页，核查日期。', 'status': 'pending'}])
+    await pg.locator('#drawerIn .dhead .x').click()
+    await pg.evaluate("switchCase(CASES.findIndex(c=>c.id==='lending'))")
+    # 同日的合并点即使横向放大也不会分开，使用虚构事实验证局部展开。
+    group = await pg.evaluate("""() => {
+      const c=JSON.parse(baseJSON()), seed=c.facts.find(f=>f.recs.some(r=>r.p==='day'));
+      const record=seed.recs.find(r=>r.p==='day');
+      const ids=['density-a','density-b','density-c'];
+      c.facts=ids.map((id,i)=>({id,t:'other',title:'虚构同日事实 '+i,recs:[{...record}]}));
+      c.claims=[]; c.relations=[]; c.threads=[]; c.inferences={};
+      loadCase(c); render();
+      return {ids,index:TL.clusters.findIndex(idsInGroup=>ids.every(id=>idsInGroup.includes(id))),range:[S.t0,S.t1]};
+    }""")
+    compact_height = int(await pg.locator('#tlsvg').get_attribute('height'))
+    cluster = pg.locator(f'#tlsvg [data-c="{group["index"]}"]')
+    await cluster.get_by_text('3 件', exact=True).click()
+    rows = pg.locator('#tlsvg .timeline-entry[data-e]')
+    ok('点击件数文字后，同日事实逐条展开', await rows.count() == 3)
+    ok('局部展开保留横轴时段', await pg.evaluate('[S.t0,S.t1]') == group['range'])
+    ok('局部展开增加时间线高度', int(await pg.locator('#tlsvg').get_attribute('height')) > compact_height)
+    await pg.get_by_role('button', name='收起局部').click()
+    ok('收起后还原合并点', await cluster.count() == 1 and await rows.count() == 0)
+    await pg.get_by_role('slider', name='纵向疏密').press('End')
+    ok('滑条切至逐条时逐件显示并保留横轴',
+       await rows.count() == 3 and await pg.evaluate('[S.t0,S.t1]') == group['range'])
+    await pg.get_by_role('button', name='材料目录', exact=True).click()
+    ok('逐条状态可在原图下展开材料目录', await pg.locator('#timeline-materials[open] li').count() > 0)
+    await pg.evaluate("switchCase(CASES.findIndex(c=>c.id==='lending'))")
     await pg.fill('#q', '回单'); await pg.wait_for_timeout(80)
     n = await pg.locator('#tablewrap tbody tr:not(.claimrow)').count()
     ok('在搜索框输入「回单」后表格过滤', 0 < n < await pg.evaluate('derive().length'), n)
@@ -307,7 +347,7 @@ async def ui_clicks(pg):
     ok('线索恢复原样', await pg.evaluate("!narrModified()"))
     await pg.locator('.tabs10 button', has_text='时间线').click(); await pg.wait_for_timeout(60)
     await pg.locator('#tablewrap tbody tr:not(.claimrow) .stbtn').first.click(); await pg.wait_for_timeout(60)
-    ok('点状态圈标为已确认', await pg.locator('#tablewrap tbody tr:not(.claimrow)').first.locator('.st-ok').count() == 1)
+    ok('点状态圈标为已确认', await pg.locator('#tablewrap tbody tr:not(.claimrow)').first.locator('.review-tick').count() == 1)
     await pg.locator('#tablewrap tbody tr:not(.claimrow) .cb').nth(0).check(); await pg.locator('#tablewrap tbody tr:not(.claimrow) .cb').nth(1).check()
     ok('勾选两行出现批量栏', await pg.locator('#batch .batch').count() == 1)
     await pg.locator('#batch button', has_text='标为关键').click(); await pg.wait_for_timeout(60)
