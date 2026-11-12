@@ -219,10 +219,10 @@ function dot4(e){
 }
 const fname=x=>`${CASE.title||'案件看板'}-${x}`;
 function exportPop(ev){
-  const hasTL=!!$('#tlsvg');
+  const tlName=S.timelineMode==='vertical'?'横向时间线图':'时间线图';
   pop(ev,`<h4>导出</h4>
-    <button class="mi" onclick="closePops();exportTL('png')">时间线图（PNG 图片）</button>
-    <button class="mi" onclick="closePops();exportTL('svg')">时间线图（SVG 矢量图）</button>
+    <button class="mi" onclick="closePops();exportTL('png')">${tlName}（PNG 图片）</button>
+    <button class="mi" onclick="closePops();exportTL('svg')">${tlName}（SVG 矢量图）</button>
     <button class="mi" onclick="closePops();exportFacts()">事实表（Excel 可打开）</button>
     <button class="mi" onclick="closePops();exportNarr('table')">大事记表（Word 可打开）</button>
     <button class="mi" onclick="closePops();exportNarr('prose')">事实经过叙述（Word 可打开）</button>
@@ -240,7 +240,7 @@ function tlSVG(){
   return {svg:new XMLSerializer().serializeToString(c),w,h};
 }
 function exportTL(kind){
-  if(!$('#tlsvg')){ S.tab='tl'; render(); }
+  if(!$('#tlsvg')){ S.tab='tl'; S.timelineMode='horizontal'; render(); }
   const t=tlSVG(); if(!t){ toast('先回到时间线'); return; }
   const tag=rangeLabel().replace(/^全部 · /,'').replace(/ /g,'');
   if(kind==='svg'){ saveFile(fname(`时间线（${tag}）.svg`),t.svg,'image/svg+xml'); return; }
@@ -254,7 +254,7 @@ function exportFacts(){
   const lines=[['日期','事实','类型','来源','证据种类','状态','原文'].map(cell).join(',')];
   rows.forEach(e=>{ const ds=[...new Set(e.recs.map(r=>r.d))];
     lines.push([e.undated?'时间未载明':dot4(e), e.title, TYPES[e.t]?TYPES[e.t].n:'', ds.map(d=>DOC[d].evno||d).join('、'), [...new Set(ds.map(d=>KIND[dKind(d)].n))].join('、'),
-      e.rev==='done'?'已确认':'待确认', e.recs.map(r=>`${DOC[r.d].evno||r.d}：${r.q}`).join('\n')].map(cell).join(',')); });
+      pendingReviewNote(e.f.id)?'复核意见待处理':e.rev==='done'?'已确认':'待确认', e.recs.map(r=>`${DOC[r.d].evno||r.d}：${r.q}`).join('\n')].map(cell).join(',')); });
   saveFile(fname('事实表.csv'),'﻿'+lines.join('\r\n'),'text/csv');
 }
 function exportNarr(view){

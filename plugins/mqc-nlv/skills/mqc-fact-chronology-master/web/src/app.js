@@ -26,7 +26,7 @@ function loadCase(c){
   REC=Object.fromEntries(FACTS.flatMap(f=>f.recs.map(r=>[r.rid,r]))); FACT=Object.fromEntries(FACTS.map(f=>[f.id,f]));
   const ds=FACTS.flatMap(f=>f.recs.flatMap(r=>[r.s,r.e].filter(Boolean))).concat(CLAIMS.map(x=>x.s).filter(Boolean)).map(dn);
   if(ds.length){ const a=Math.min(...ds), b=Math.max(...ds), pad=Math.max(20,(b-a)*.035); EXT=[a-pad,b+pad]; } else { const t=dn(new Date().toISOString().slice(0,10)); EXT=[t-365,t]; }
-  Object.assign(S,{view:'work',tab:'tl',phase:'ready',read:DOCS.length,reading:-1,lanes:'type',more:false,typeOff:new Set(),selected:null,checked:new Set(),q:'',drawer:null,rfilter:'all',docOv:{},stage:5,play:null,exp:null,t0:EXT[0],t1:EXT[1],f:{types:new Set(),kinds:new Set(),rev:new Set(),cf:new Set(),conf:false,key:false}});
+  Object.assign(S,{view:'work',tab:'tl',phase:'ready',read:DOCS.length,reading:-1,lanes:'type',timelineMode:'horizontal',timelineDensity:0,expandedTimelineFacts:new Set(),timelineMaterialsOpen:false,monthOpen:new Map(),more:false,typeOff:new Set(),selected:null,checked:new Set(),q:'',drawer:null,rfilter:'all',docOv:{},stage:5,play:null,exp:null,t0:EXT[0],t1:EXT[1],f:{types:new Set(),kinds:new Set(),rev:new Set(),cf:new Set(),conf:false,key:false}});
   resetDecisions();
   if(c.decisions){ DEC_KEYS.forEach(k=>{ if(c.decisions[k]!==undefined) S[k]=JSON.parse(JSON.stringify(c.decisions[k])); }); if(c.decisions.aside) S.aside=new Set(c.decisions.aside); }
   if(Array.isArray(c.changes)) S.log=c.changes.slice();
@@ -200,27 +200,92 @@ function phrase(e,level='plain'){
 /* =====================================================================
    待审：全部由代码从底稿与裁决里算出
    ===================================================================== */
+function factIssue(e){
+  if(e.conflict) return 'conflict';
+  if(e.amtConflict) return 'amount';
+  if(e.f.cnote || e.f.reviewConflict || e.disp==='有争议') return 'fact';
+  if(pendingReviewNote(e.f.id)) return 'fact';
+  return '';
+}
+function pendingFactIds(items){
+  const ids=new Set();
+  for(const item of items){
+    if(item.e) ids.add(item.e.f.id);
+    if(item.f) ids.add(item.f.id);
+    for(const e of item.fs||[]) ids.add(e.f.id);
+    for(const fid of item.g?.fids||[]) ids.add(fid);
+  }
+  return ids;
+}
+function isClearFact(e,pending){
+  return !factIssue(e)&&!e.stmtOnly&&!e.est&&!e.susOnly&&!pending.has(e.f.id);
+}
+function clearReviewCandidates(items){
+  const pending=pendingFactIds(items);
+  const rows=new Map();
+  for(const e of derive()){
+    if(e.rev!=='done'&&!e.adopted&&isClearFact(e,pending)&&!rows.has(e.f.id)) rows.set(e.f.id,e);
+  }
+  return [...rows.values()];
+}
+function confirmClearFacts(){
+  const rows=clearReviewCandidates(reviewItems());
+  if(!rows.length) return;
+  for(const e of rows){
+    S.rev[e.f.id]='done';
+    logIt(e.f.id,'一键确认未见冲突事实',e.title);
+  }
+  toast(`已确认 ${rows.length} 条事实`);
+  render();
+}
+function factReviewBadge(e, expanded=false, pending=pendingFactIds(reviewItems())){
+  const issue=factIssue(e);
+  let tone, label;
+  if(pendingReviewNote(e.f.id)){
+    tone='review';
+    label='复核意见待处理';
+  } else if(e.rev==='done'){
+    tone='checked';
+    label=e.adopted?'已选用记载':issue==='conflict'||issue==='amount'||e.f.reviewConflict?'已确认 · 保留差异':'已确认';
+  } else if(issue==='conflict'||issue==='amount'||e.f.reviewConflict||e.disp==='有争议'){
+    tone='conflict';
+    label=expanded?'有冲突或争议 · 需您确认':'冲突待确认';
+  } else if(!isClearFact(e,pending)){
+    tone='review';
+    label=expanded?'有待核事项 · 需您确认':'需要核对';
+  } else {
+    tone='clear';
+    label=expanded?'现有记载未见冲突':'未见冲突';
+  }
+  return `<span class="review-state ${tone}${expanded?' review-banner':''}">${label}</span>`;
+}
 function reviewItems(){
   if(S.phase!=='ready') return [];
   const evs=derive(); const items=[];
-  evs.filter(e=>e.conflict).forEach(e=>items.push({k:'conflict',id:'C:'+e.f.id,e}));
-  evs.filter(e=>e.amtConflict).forEach(e=>items.push({k:'amount',id:'M:'+e.f.id,e}));
+  const byFact=new Set();
+  for(const e of evs){
+    const k=factIssue(e);
+    if(!k) continue;
+    byFact.add(e.id);
+    if(e.rev!=='done'||pendingReviewNote(e.f.id)) items.push({k,id:'F:'+e.id,e});
+  }
   (PACK.rules||[]).forEach(rule=>{
     if(rule.kind==='needDocTag') evs.filter(e=>e.role===rule.role && !e.recs.some(r=>(DOC[r.d].tags||[]).includes(rule.tag))).forEach(e=>{ const id='P:'+rule.id+':'+e.id; if(!S.packRes[id]) items.push({k:'pack',id,rule,fs:[e]}); });
     if(rule.kind==='sum'){ const parts=evs.filter(e=>e.role===rule.parts&&e.amt!=null), tot=evs.filter(e=>e.role===rule.total&&e.amt!=null);
       if(parts.length&&tot.length){ const sum=parts.reduce((a,e)=>a+e.amt,0); tot.forEach(t=>{ const id='P:'+rule.id+':'+t.id; if(Math.abs(sum-t.amt)>0.005 && !S.packRes[id]) items.push({k:'pack',id,rule,fs:[...parts,t],sum,total:t.amt}); }); } }
   });
-  Object.keys(INFER).forEach(k=>{ const fs=evs.filter(e=>e.recs.some(r=>r.inf===k)); const gone=derive===null; if(fs.length && !S.inferOk[k]) items.push({k:'infer',id:'I:'+k,key:k,fs}); });
-  FACTS.forEach(f=>f.recs.filter(r=>r.sus && docVisible(r.d) && !S.susRes[r.rid]).forEach(r=>items.push({k:'suspect',id:'S:'+r.rid,r,f})));
-  const np=evs.filter(e=>e.stmtOnly && !S.aside.has(e.id)); if(np.length) items.push({k:'np',id:'N',fs:np});
-  ATTN.filter(a=>docVisible(a.d) && !S.attnRes[a.id]).forEach(a=>items.push({k:'att',id:'A:'+a.id,a}));
+  Object.keys(INFER).forEach(k=>{ const fs=evs.filter(e=>e.rev!=='done'&&!byFact.has(e.id)&&e.recs.some(r=>r.inf===k)); const gone=derive===null; if(fs.length && !S.inferOk[k]) items.push({k:'infer',id:'I:'+k,key:k,fs}); });
+  FACTS.filter(f=>S.rev[f.id]!=='done'&&!byFact.has(f.id)).forEach(f=>f.recs.filter(r=>r.sus && docVisible(r.d) && !S.susRes[r.rid]).forEach(r=>items.push({k:'suspect',id:'S:'+r.rid,r,f})));
+  const np=evs.filter(e=>e.stmtOnly && e.rev!=='done' && !byFact.has(e.id) && !S.aside.has(e.id)); if(np.length) items.push({k:'np',id:'N',fs:np});
+  const linked=new Set(evs.filter(e=>e.f.cnote).map(e=>e.f.id));
+  ATTN.filter(a=>docVisible(a.d) && !S.attnRes[a.id] && !linked.has(a.fact)).forEach(a=>items.push({k:'att',id:'A:'+a.id,a}));
   dupGroups().filter(g=>!S.dupRes[g.id]).forEach(g=>items.push({k:'dup',id:g.id,g}));
   arithItems().filter(a=>!S.arithRes[a.id]).forEach(a=>items.push({k:'arith',id:a.id,a}));
   return items;
 }
 const itemCount = it => it.k==='np'? it.fs.length : it.k==='infer'? 1 : 1;
 const pendingCount = () => reviewItems().reduce((a,it)=>a+itemCount(it),0);
-const RK = {conflict:'日期冲突',amount:'金额冲突',dup:'疑似重复',arith:'数字对不上',pack:'领域规则',infer:'推断日期',suspect:'可疑日期',np:'仅有当事人陈述',att:'需留意'};
+const RK = {conflict:'日期冲突',amount:'金额冲突',fact:'事实待核',dup:'疑似重复',arith:'数字对不上',pack:'领域规则',infer:'推断日期',suspect:'可疑日期',np:'仅有当事人陈述',att:'需留意'};
 
 /* =====================================================================
    渲染总入口
@@ -325,14 +390,23 @@ function bindTimeline(){
       html=`<div class="tt">${esc(e.title)}</div><div class="td">${r?`${r.d} 记为「${esc(r.raw)}」`:dateLabel(e)+(dateNote(e)?' · '+dateNote(e):'')}</div>`+
         (e.conflict&&!r?`<div class="td" style="color:#F6C35B">${e.strict.map(r=>`${r.d}「${esc(r.raw)}」`).join('　')}</div>`:`<div class="td">${[...new Set(e.recs.map(r=>r.d))].map(d=>d+' '+KIND[dKind(d)].short).join('　')}</div>`)+
         `<div class="td">${e.certain?'确定':'未确定'}${S.reviewLayer?' · '+(e.rev==='done'?'已确认':'待确认'):''}</div>`;
-    } else { const ids=TL.clusters[g.dataset.c], all=derive(); html=`<div class="tt">${ids.length} 个事实 · 点击放大</div>`+ids.slice(0,6).map(id=>{ const e=all.find(x=>x.id===id); return `<div class="td">${dateLabel(e)}　${esc(e.title)}</div>`; }).join(''); }
+    } else { const ids=TL.clusters[g.dataset.c], all=derive(); html=`<div class="tt">${ids.length} 个事实 · 点击展开</div>`+ids.slice(0,6).map(id=>{ const e=all.find(x=>x.id===id); return `<div class="td">${dateLabel(e)}　${esc(e.title)}</div>`; }).join(''); }
     if(g.dataset.e){ const e=derive().find(x=>x.id===g.dataset.e); if(e){ const ds=[...new Set(e.recs.map(r=>r.d))]; html+=`<div class="tsrc">材料 ${ds.map(esc).join('、')} · 下方表中已标亮</div>`; } }
     tip.innerHTML=html; tip.style.display='block'; tip.style.left=(ev.clientX+14)+'px'; tip.style.top=(ev.clientY+14)+'px';
   };
   svg.onmouseleave=()=>{ tip.style.display='none'; linkRows(null); };
+  const activate=g=>{
+    if(g.dataset.claim) openClaim(g.dataset.claim);
+    else if(g.dataset.e) selectEv(g.dataset.e);
+    else expandTimelineCluster(+g.dataset.c);
+  };
+  svg.onclick=ev=>{ const g=ev.target.closest('.mk'); if(g) activate(g); };
+  svg.onkeydown=ev=>{
+    const g=ev.target.closest('.mk[role="button"]');
+    if(g&&(ev.key==='Enter'||ev.key===' ')){ ev.preventDefault(); activate(g); }
+  };
   svg.onmousedown=ev=>{
-    const g=ev.target.closest('.mk');
-    if(g){ if(g.dataset.claim) openClaim(g.dataset.claim); else if(g.dataset.e) selectEv(g.dataset.e); else zoomCluster(+g.dataset.c); return; }
+    if(ev.button!==0 || ev.target.closest('.mk')) return;
     const x0=ev.clientX, t0=S.t0, t1=S.t1, k=(t1-t0)/TL.PW; document.body.classList.add('panning');
     let raf=0; const move=e2=>{ const dx=(e2.clientX-x0)*k; S.t0=t0-dx; S.t1=t1-dx; clampView(); if(!raf) raf=requestAnimationFrame(()=>{ raf=0; drawTimeline(); }); };
     const up=()=>{ document.body.classList.remove('panning'); removeEventListener('mousemove',move); removeEventListener('mouseup',up); };
@@ -347,7 +421,6 @@ function linkRows(g){
   ids.forEach(id=>{ const r=document.getElementById('row-'+id); if(r) r.classList.add('linkrow'); });
 }
 function linkMark(id,on){ const svg=$('#tlsvg'); if(!svg) return; svg.querySelectorAll('.mk.linkmk').forEach(m=>m.classList.remove('linkmk')); if(on){ const m=svg.querySelector(`.mk[data-e="${id}"]`); if(m) m.classList.add('linkmk'); else { const ci=(TL.clusters||[]).findIndex(c=>c.includes(id)); if(ci>=0){ const c=svg.querySelector(`.mk[data-c="${ci}"]`); if(c) c.classList.add('linkmk'); } } } }
-function zoomCluster(ci){ const ids=TL.clusters[ci], ds=derive().filter(e=>ids.includes(e.id)).map(e=>e.sortKey); const a=Math.min(...ds), b=Math.max(...ds), pad=Math.max(10,(b-a)*.8+6); S.t0=a-pad; S.t1=b+pad; clampView(); drawTimeline(); }
 function toggleType(t){ S.typeOff.has(t)?S.typeOff.delete(t):S.typeOff.add(t); render(); }
 
 /* ---------- 回放 ---------- */
@@ -403,25 +476,127 @@ function svgI(k){
 }
 
 /* ---------- 时间轴 ---------- */
+const TIMELINE_DENSITY = ['汇总','展开重叠','逐条'];
+function setTimelineDensity(level){
+  S.timelineDensity=level;
+  S.expandedTimelineFacts.clear();
+  drawTimeline();
+}
+function expandTimelineCluster(index){
+  for(const id of TL.clusters[index]||[]) S.expandedTimelineFacts.add(id);
+  linkRows(null);
+  drawTimeline();
+}
+function resetTimelineClusters(){
+  S.expandedTimelineFacts.clear();
+  drawTimeline();
+}
+function syncTimelineDensity(host,expanded){
+  host.closest('.tlcard').classList.toggle('timeline-expanded',expanded);
+  const slider=$('#tl-density');
+  if(slider){
+    slider.value=S.timelineDensity;
+    slider.setAttribute('aria-valuetext',TIMELINE_DENSITY[S.timelineDensity]);
+    document.querySelectorAll('.density-stops button').forEach(button=>{
+      button.setAttribute('aria-pressed',Number(button.dataset.density)===S.timelineDensity);
+    });
+    $('#tl-reset-clusters').hidden=S.expandedTimelineFacts.size===0;
+    const materials=$('#timeline-materials');
+    if(materials){
+      materials.hidden=S.timelineDensity!==2;
+      $('#tl-open-materials').hidden=materials.hidden;
+    }
+  }
+  $('#tip').style.display='none';
+  $('#gaptip').style.display='none';
+}
+function timelineDateLabel(e){
+  if(!e.conflict || e.kind==='range') return dateLabel(e);
+  return [...new Set([...e.strict].sort((a,b)=>dn(a.s)-dn(b.s)).map(r=>r.p==='day'?fmtD(r.s):r.raw))].join(' / ');
+}
+function wrapTimelineText(text,width,size){
+  const lines=[];
+  let line='', used=0;
+  for(const ch of text){
+    const w=textW(ch,size);
+    if(used+w>width && line){ lines.push(line); line=''; used=0; }
+    line+=ch;
+    used+=w;
+  }
+  if(line) lines.push(line);
+  return lines;
+}
+function timelineRow(g, PW){
+  const {e,c,r}=g.it;
+  const title=c?`${c.who}主张：${c.title}`:e.title;
+  const docs=r?[r.d]:c?[c.d]:[...new Set(e.recs.map(x=>x.d))];
+  const date=c?fmtD(c.s):r?r.raw:timelineDateLabel(e);
+  const detail=`${date}　·　来源 ${docs.join('、')}`;
+  const titleLines=wrapTimelineText(title,PW-24,13);
+  const detailLines=wrapTimelineText(detail,PW-24,11.5);
+  return {g,title,detail,titleLines,detailLines,h:28+16*titleLines.length+15*detailLines.length};
+}
+function drawTimelineRow(row,y,W,X,sel,lane){
+  const {g,title,detail,titleLines,detailLines,h}=row, {e,c}=g.it;
+  const cy=y+h-12, tx=LW+10;
+  const id=c?`data-claim="${esc(c.id)}"`:`data-e="${esc(e.id)}"`;
+  const text=(lines,by,step,size,color,weight)=>lines.map((line,i)=>`<text x="${tx}" y="${by+i*step}" font-size="${size}" fill="${color}" font-weight="${weight}">${esc(line)}</text>`).join('');
+  const label=esc(`${title}，${detail}`);
+  const marker=g.kind==='span'?drawSpan(g,cy,X,sel,false):drawItem(g,cy,sel,lane);
+  return `<g class="mk timeline-entry" ${id} tabindex="0" role="button" aria-label="${label}">
+    <rect class="timeline-entry-hit" x="${LW}" y="${y}" width="${W-LW}" height="${h}" fill="${e?.id===sel?'#F0F3F7':'transparent'}"/>
+    <line x1="${LW}" x2="${W}" y1="${y+h}" y2="${y+h}" stroke="#EEEEEB"/>
+    ${text(titleLines,y+16,16,13,e?.key?'#991B1B':'#1D1D1F',600)}
+    ${text(detailLines,y+16+16*titleLines.length,15,11.5,'#555452',400)}
+    ${marker}
+  </g>`;
+}
+
 let AXH=40, ROWH=34, SPANH=30;
 function drawTimeline(){
   const host=$('#tl'); if(!host) return;
   const evs=visibleFacts();
-  const W=Math.max(680,host.clientWidth||900), PW=W-LW-14, span=S.t1-S.t0;
+  const W=Math.max(300,host.clientWidth||900);
+  LW=Math.min(158,Math.floor(W*.33));
+  const PW=W-LW-14, span=S.t1-S.t0;
   const X=d=>LW+(d-S.t0)/span*PW;
   TL={W,PW,X,pos:{}};
+  const density=S.play===null?S.timelineDensity:0;
+  const expanded=S.play===null?S.expandedTimelineFacts:new Set();
   const lanes=lanesFor(evs), sel=S.selected, clusters=[], parts=[], RT=new Set(S.showRel?RELATED.map(r=>r[1]):[]);
   const L=lanes.map(l=>{
     const rowItems=[], spans=[];
     l.items.forEach(it=>{ const g=itemGeom(it,X); g.it=it; if(g.kind==='span') spans.push(g); else rowItems.push(g); });
     rowItems.sort((a,b)=>a.x0-b.x0);
-    const groups=[];
+    let groups=[];
     for(const g of rowItems){ const last=groups[groups.length-1], simple=g.kind==='pt'||g.kind==='rec';
       if(simple && last && last.simple && g.x-last.xl<18){ last.m.push(g); last.xl=g.x; last.x1=g.x1; } else groups.push({m:[g],simple,xl:g.x,x0:g.x0,x1:g.x1}); }
     groups.forEach(gr=>{ if(gr.m.length>1){ gr.x=(gr.m[0].x+gr.xl)/2; gr.x0=gr.x-12; gr.x1=gr.x+12; } });
+    // 展开的记号保留在横轴原来的日期位置。
+    const stacked=[];
+    const onScreen=g=>g.kind==='span'?g.b>=LW&&g.a<=LW+PW:g.x1>=LW&&g.x0<=LW+PW;
+    if(density===2){
+      stacked.push(...rowItems.filter(onScreen),...spans.filter(onScreen));
+      groups=[];
+      spans.length=0;
+    } else if(density===1 || expanded.size){
+      groups=groups.filter(gr=>{
+        const open=(density===1&&gr.m.length>1)||gr.m.some(g=>g.it.e&&expanded.has(g.it.e.id));
+        if(open) stacked.push(...gr.m.filter(onScreen));
+        return !open;
+      });
+      for(let i=spans.length-1;i>=0;i--){
+        if(expanded.has(spans[i].it.e.id)){
+          const g=spans.splice(i,1)[0];
+          if(onScreen(g)) stacked.push(g);
+        }
+      }
+    }
+    const detail=stacked.sort((a,b)=>(a.a??a.x)-(b.a??b.x)).map(g=>timelineRow(g,PW));
     spans.sort((a,b)=>a.a-b.a); const rows=[];
     spans.forEach(s=>{ const st=Math.max(s.a,LW)-8, lw=Math.max(s.b-Math.max(s.a,LW)+16, textW(spanLabel(s.it),11.5)*1.12+14); let r=rows.findIndex(end=>end<st); if(r<0){ rows.push(0); r=rows.length-1; } rows[r]=st+lw; s.r=r; });
-    return {...l,groups,spans,h:ROWH+rows.length*SPANH};
+    const compactH=ROWH+rows.length*SPANH;
+    return {...l,groups,spans,detail,compactH,h:compactH+detail.reduce((height,row)=>height+row.h,0)};
   });
   if(S.play!==null){ lanesFor(derive()).forEach(fl=>{ const sp=[]; fl.items.forEach(it=>{ const g=itemGeom(it,X); g.it=it; if(g.kind==='span') sp.push(g); }); sp.sort((a,b)=>a.a-b.a); const rows=[];
     sp.forEach(s=>{ const st=Math.max(s.a,LW)-8, lw=Math.max(s.b-Math.max(s.a,LW)+16, textW(spanLabel(s.it),11.5)*1.12+14); let r=rows.findIndex(end=>end<st); if(r<0){ rows.push(0); r=rows.length-1; } rows[r]=st+lw; });
@@ -453,12 +628,20 @@ function drawTimeline(){
       if(gr.m.length>1){
         const ci=clusters.length; clusters.push(gr.m.map(g=>g.it.e.id));
         const c=S.lanes==='type'?l.color:'#6D6C68', es=gr.m.map(g=>g.it.e), hasC=es.some(e=>e.anyConf), hasS=es.some(e=>e.id===sel);
-        parts.push(`<g class="mk" data-c="${ci}">${hasS?`<circle cx="${gr.x}" cy="${cy}" r="14" fill="none" stroke="#991B1B" stroke-width="1.5"/>`:''}<circle cx="${gr.x}" cy="${cy}" r="10.5" fill="#fff" stroke="${c}" stroke-width="2"/><text x="${gr.x}" y="${cy+4.2}" text-anchor="middle" font-size="12" font-weight="700" fill="${c}">${gr.m.length}</text>${hasC?`<circle cx="${gr.x+8.6}" cy="${cy-8.6}" r="3.5" fill="#F2A50C"/>`:''}</g>`);
-        es.forEach(e=>TL.pos[e.id]={x:gr.x,y:cy,r:11}); const prevEnd=lastEnd; lastEnd=gr.x1;
-        { const room=nextX-gr.x1-14, same=new Set(es.map(e=>dateLabel(e))).size===1, lab=`${es.length} 件${same?' · '+dateLabel(es[0]):''}`;
-          const lroom=gr.x0-prevEnd-14;
-          if(room>40){ const tx=trunc(lab,room,12); parts.push(`<text x="${gr.x1+7}" y="${cy+4.5}" font-size="12" fill="#8A8986" pointer-events="none">${esc(tx)}</text>`); lastEnd=gr.x1+7+textW(tx,12); }
-          else if(!isRT && lroom>60 && gr.x0-7<=LW+PW-2){ const tx=trunc(lab,lroom,12); parts.push(`<text x="${gr.x0-7}" y="${cy+4.5}" text-anchor="end" font-size="12" fill="#8A8986" pointer-events="none">${esc(tx)}</text>`); lastEnd=gr.x1; } }
+        const lab=`${es.length} 件`;
+        const circle=`${hasS?`<circle cx="${gr.x}" cy="${cy}" r="14" fill="none" stroke="#991B1B" stroke-width="1.5"/>`:''}<circle cx="${gr.x}" cy="${cy}" r="10.5" fill="#fff" stroke="${c}" stroke-width="2"/><text x="${gr.x}" y="${cy+4.2}" text-anchor="middle" font-size="12" font-weight="700" fill="${c}">${gr.m.length}</text>${hasC?`<circle cx="${gr.x+8.6}" cy="${cy-8.6}" r="3.5" fill="#F2A50C"/>`:''}`;
+        es.forEach(e=>TL.pos[e.id]={x:gr.x,y:cy,r:11});
+        const room=nextX-gr.x1-14, lroom=gr.x0-lastEnd-14;
+        lastEnd=gr.x1;
+        let label='';
+        if(room>40){
+          const tx=gr.x1+7;
+          label=`<text x="${tx}" y="${cy+4.5}" font-size="12" fill="#555452">${lab}</text>`;
+          lastEnd=tx+textW(lab,12);
+        } else if(!isRT&&lroom>40&&gr.x0-7<=LW+PW-2){
+          label=`<text x="${gr.x0-7}" y="${cy+4.5}" text-anchor="end" font-size="12" fill="#555452">${lab}</text>`;
+        }
+        parts.push(`<g class="mk timeline-cluster" data-c="${ci}" role="button" tabindex="0" aria-label="${lab}，点击展开">${circle}${label}</g>`);
       } else {
         const g=gr.m[0], it=g.it;
         parts.push(drawItem(g,cy,sel,l));
@@ -472,6 +655,13 @@ function drawTimeline(){
         if(it.e) TL.pos[it.e.id]=TL.pos[it.e.id]||{x:g.x0!=null&&g.kind!=='pt'?g.x0:g.x,y:cy,r:g.kind==='pt'?8:5};
       }
     });
+    let rowTop=top+l.compactH;
+    for(const row of l.detail){
+      parts.push(drawTimelineRow(row,rowTop,W,X,sel,l));
+      const {g,h}=row, e=g.it.e;
+      if(e) TL.pos[e.id]=TL.pos[e.id]||{x:Math.max(LW,Math.min(g.x??g.a,LW+PW)),y:rowTop+h-12,r:6};
+      rowTop+=h;
+    }
     parts.push(`</g>`);
     Object.values(TL.pos).forEach(p=>{ if(p.top===undefined && p.y>=top && p.y<=top+l.h){ p.top=top; p.bot=top+l.h; } });
     y+=l.h;
@@ -481,7 +671,7 @@ function drawTimeline(){
       arrows.push(`<path d="${d}" fill="none" stroke="#8E8C87" stroke-width="1.2" stroke-linejoin="round" marker-end="url(#arr)"><title>${t}（材料写明的指向）</title></path>`); });
     parts.push(`<g clip-path="url(#clip)" pointer-events="stroke">${arrows.join('')}</g>`); }
   host.innerHTML=`<svg width="${W}" height="${H}" id="tlsvg">${parts.join('')}</svg>`;
-  TL.clusters=clusters; bindTimeline(); drawMini(evs); bindGaps(); renderVState(); { const rg=$('#rng'); if(rg) rg.textContent=rangeLabel(); const full=S.t0<=EXT[0]+.5&&S.t1>=EXT[1]-.5; ['#zout','#bfit'].forEach(q=>{ const b=$(q); if(b) b.disabled=full; }); }
+  TL.clusters=clusters; syncTimelineDensity(host,density>0||expanded.size>0); bindTimeline(); drawMini(evs); bindGaps(); renderVState(); { const rg=$('#rng'); if(rg) rg.textContent=rangeLabel(); const full=S.t0<=EXT[0]+.5&&S.t1>=EXT[1]-.5; ['#zout','#bfit'].forEach(q=>{ const b=$(q); if(b) b.disabled=full; }); }
 }
 function bindGaps(){ const svg=$('#tlsvg'); svg.querySelectorAll('.gap').forEach(r=>{ r.addEventListener('mousemove',ev=>{ const tip=$('#gaptip'); tip.textContent=`${r.dataset.gap} 个月无事实`; tip.style.display='block'; tip.style.left=(ev.clientX+10)+'px'; tip.style.top=(ev.clientY-30)+'px'; }); r.addEventListener('mouseleave',()=>$('#gaptip').style.display='none'); }); }
 /* 关联连线：正交走线、小圆角；沿泳道分隔线走，最后一段水平进入目标，箭头前留足直段 */
@@ -544,7 +734,7 @@ function drawItem(g,cy,sel,lane){
   if(e.conflict){ const x=g.x; return `<g class="mk" data-e="${e.id}">${isSel?`<circle cx="${x}" cy="${cy}" r="${r+4.5}" fill="none" stroke="#991B1B" stroke-width="1.5"/>`:''}<circle cx="${x}" cy="${cy}" r="${r+6}" fill="transparent"/><circle cx="${x}" cy="${cy}" r="${r-.3}" fill="${tint(c,.42)}" stroke="${c}" stroke-width="1.6"/><circle cx="${x+r*.78}" cy="${cy-r*.78}" r="3.5" fill="#F2A50C"/>${badge(e,x-r*.8,cy-r*.8)}</g>`; }
   return `<g class="mk" data-e="${e.id}">${isSel?`<circle cx="${g.x}" cy="${cy}" r="${r+4.5}" fill="none" stroke="#991B1B" stroke-width="1.5"/>`:''}<circle cx="${g.x}" cy="${cy}" r="${r+6}" fill="transparent"/>${stateMark(e,g.x,cy,r,c)}${e.amtConflict?`<circle cx="${g.x+r*.78}" cy="${cy-r*.78}" r="3.5" fill="#F2A50C"/>`:''}${e.wasConflict&&e.adopted?`<circle cx="${g.x}" cy="${cy}" r="${r+2.6}" fill="none" stroke="#F2A50C" stroke-width="1" stroke-dasharray="1.5 2"/>`:''}${badge(e,g.x-r*.8,cy-r*.8)}</g>`;
 }
-function drawSpan(s,yy,X,sel){
+function drawSpan(s,yy,X,sel,showLabel=true){
   const it=s.it, e=it.e, c=TYPES[e.t].c, isSel=sel===e.id, lab=spanLabel(it);
   let body='';
   if(s.sub==='c'){
@@ -553,13 +743,13 @@ function drawSpan(s,yy,X,sel){
     body+=`<circle cx="${s.b+4}" cy="${yy-8}" r="3.5" fill="#F2A50C"/>`;
     const ring=isSel?`<rect x="${s.a-9}" y="${yy-12}" width="${w+18}" height="24" rx="12" fill="none" stroke="#991B1B" stroke-width="1.5"/>`:'';
     const room=LW+TL.PW-Math.max(s.a-6,LW)-4;
-    return `<g class="mk" data-e="${e.id}">${ring}${body}${badge(e,s.a-4,yy-8)}</g>${room>30?`<text x="${Math.max(s.a-6,LW+2)}" y="${yy+16}" font-size="11" fill="#1A1A1A" font-weight="${e.key?600:400}" pointer-events="none">${esc(trunc(lab,room,e.key?12.6:11.5))}</text>`:''}`;
+    return `<g class="mk" data-e="${e.id}">${ring}${body}${badge(e,s.a-4,yy-8)}</g>${showLabel&&room>30?`<text x="${Math.max(s.a-6,LW+2)}" y="${yy+16}" font-size="11" fill="#1A1A1A" font-weight="${e.key?600:400}" pointer-events="none">${esc(trunc(lab,room,e.key?12.6:11.5))}</text>`:''}`;
   }
   if(s.sub==='a'){
     const w=Math.max(12,s.b-s.a), inside=w>textW(e.title,11.5)+16;
     const ring=isSel?`<rect x="${s.a-4}" y="${yy-11}" width="${w+8}" height="22" rx="11" fill="none" stroke="#991B1B" stroke-width="1.5"/>`:'';
     return `<g class="mk" data-e="${e.id}">${ring}<rect x="${s.a}" y="${yy-8}" width="${w}" height="16" rx="8" fill="${tint(c,.3)}" stroke="${c}" stroke-width="1.3" stroke-dasharray="3 2"/>${badge(e,s.a+2,yy-8)}</g>`+
-      (()=>{ const t=`${e.title}${e.main.p==='month'?'（仅到月）':'（大致时间）'}`, room=LW+TL.PW-Math.max(s.a,LW)-6; if(inside) return `<text x="${s.a+8}" y="${yy+4}" font-size="11.5" fill="#1A1A1A" pointer-events="none">${esc(trunc(e.title,Math.min(w-16,room),11.5))}</text>`; return room>30?`<text x="${Math.max(s.a,LW+2)}" y="${yy+16}" font-size="11" fill="#1A1A1A" pointer-events="none">${esc(trunc(t,room,11.5))}</text>`:''; })();
+      (showLabel?(()=>{ const t=`${e.title}${e.main.p==='month'?'（仅到月）':'（大致时间）'}`, room=LW+TL.PW-Math.max(s.a,LW)-6; if(inside) return `<text x="${s.a+8}" y="${yy+4}" font-size="11.5" fill="#1A1A1A" pointer-events="none">${esc(trunc(e.title,Math.min(w-16,room),11.5))}</text>`; return room>30?`<text x="${Math.max(s.a,LW+2)}" y="${yy+16}" font-size="11" fill="#1A1A1A" pointer-events="none">${esc(trunc(t,room,11.5))}</text>`:''; })():'');
   }
   if(it.r){ const r=it.r; body = r.p==='range' ? `<rect x="${s.a}" y="${yy-2.5}" width="${Math.max(6,s.b-s.a)}" height="5" rx="2.5" fill="${r.inf?'#fff':c}" stroke="${c}" ${r.inf?'stroke-dasharray="2.5 1.8"':'stroke-width="0"'}/>` : `<rect x="${s.a}" y="${yy-7}" width="${Math.max(6,s.b-s.a)}" height="14" rx="7" fill="${tint(c,.3)}" stroke="${c}" stroke-width="1.3" stroke-dasharray="3 2"/>`; }
   else if(e.main && e.main.p==='arange') body=`<rect x="${s.a}" y="${yy-7}" width="${Math.max(6,s.b-s.a)}" height="14" rx="7" fill="${tint(c,.3)}" stroke="${c}" stroke-width="1.3" stroke-dasharray="3 2"/>`;
@@ -569,7 +759,7 @@ function drawSpan(s,yy,X,sel){
       tk.forEach(t=>{ body+=`<line x1="${t.x}" x2="${t.x}" y1="${yy-4.5}" y2="${yy+4.5}" stroke="#8A5A06" stroke-width="1.5" stroke-linecap="round" ${t.inf?'stroke-dasharray="1.6 1.6"':''}/>`; }); body+=`<circle cx="${tb}" cy="${yy-7}" r="3.3" fill="#F2A50C"/>`; } }
   const ring=isSel?`<rect x="${s.a-4}" y="${yy-9}" width="${s.b-s.a+8}" height="18" rx="9" fill="none" stroke="#991B1B" stroke-width="1.5"/>`:'';
   const room=LW+TL.PW-Math.max(s.a,LW)-4;
-  return `<g class="mk" data-e="${e.id}">${ring}${body}${!it.r?badge(e,s.a,yy-4):''}</g>${room>30?`<text x="${Math.max(s.a,LW+2)}" y="${yy+15}" font-size="11" fill="#1A1A1A" pointer-events="none">${esc(trunc(lab,room,11.5))}</text>`:''}`;
+  return `<g class="mk" data-e="${e.id}">${ring}${body}${!it.r?badge(e,s.a,yy-4):''}</g>${showLabel&&room>30?`<text x="${Math.max(s.a,LW+2)}" y="${yy+15}" font-size="11" fill="#1A1A1A" pointer-events="none">${esc(trunc(lab,room,11.5))}</text>`:''}`;
 }
 /* ---------- 事实表 ---------- */
 const hay = e => e.title+e.recs.map(r=>r.q+r.raw+r.d+DOC[r.d].sub+DOC[r.d].name+(r.amt!=null?fmtAmt(r.amt):'')).join('');
@@ -610,8 +800,9 @@ function selectEv(id,fromTable){
   S.selected=id; pushD({kind:'fact',id}); if(S.tab!=='tl'){ S.tab='tl'; } render();
   const e=derive().find(x=>x.id===id); if(e && !e.undated && (e.sortKey<S.t0||e.sortKey>S.t1)){ const sp=S.t1-S.t0; S.t0=e.sortKey-sp/2; S.t1=e.sortKey+sp/2; clampView(); drawTimeline(); }
   /* 不自动滚页面：图上点了什么，下面表格对应的行已标亮，页面位置保持不动 */
+  if(fromTable) document.getElementById('row-'+id)?.scrollIntoView({block:'nearest'});
 }
-function openDoc(d,rid){ pushD({kind:'doc',d,rid}); render(); setTimeout(()=>{ const m=document.querySelector('#drawerIn .hit'), b=document.querySelector('#drawerIn .dbody'); if(m&&b) b.scrollTop=m.offsetTop-b.offsetTop-b.clientHeight/3; },30); }
+function openDoc(d,rid){ pushD({kind:'doc',d,rid}); render(); setTimeout(()=>{ const m=document.querySelector('#drawerIn .hit'), b=document.querySelector('#drawerIn .dbody'); if(m&&b&&!b.querySelector('.source-scan')) b.scrollTop=m.offsetTop-b.offsetTop-b.clientHeight/3; },30); }
 function renderDrawer(){
   const sh=$('#shell'), inn=$('#drawerIn');
   if(!S.drawer){ sh.classList.remove('drawer-open'); inn.innerHTML=''; return; }
@@ -623,14 +814,29 @@ function q(s,showDoc=true,loc){
   return `${showDoc?`<div class="srchead">${kindTag(s.d)}<button class="dref" onclick="openDoc('${s.d}','${s.rid||''}')">${s.d}</button><span class="nm">${esc(loc||s.loc)}</span></div>`:''}<div class="q">${esc(s.q)}</div>${(s.qx||[]).map(x=>`<div class="q qx">${esc(x)}</div>`).join('')}`;
 }
 function drawerReview(){
-  const items=reviewItems(), cnt={}; let total=0; items.forEach(it=>{ const n=itemCount(it); cnt[it.k]=(cnt[it.k]||0)+n; total+=n; });
-  const chips=[['all','全部',total],['conflict','日期冲突',cnt.conflict||0],['amount','金额冲突',cnt.amount||0],['dup','疑似重复',cnt.dup||0],['arith','数字对不上',cnt.arith||0],['pack',PACK.n+'规则',cnt.pack||0],['infer','推断日期',cnt.infer||0],['suspect','可疑日期',cnt.suspect||0],['np','仅有陈述',cnt.np||0],['att','需留意',cnt.att||0]];
-  const list=items.filter(it=>S.rfilter==='all'||it.k===S.rfilter);
+  const items=reviewItems(), cnt={}; let total=0;
+  const clear=clearReviewCandidates(items);
+  const alsoAmount=it=>it.k==='conflict'&&it.e.amtConflict;
+  items.forEach(it=>{
+    const n=itemCount(it);
+    cnt[it.k]=(cnt[it.k]||0)+n;
+    if(alsoAmount(it)) cnt.amount=(cnt.amount||0)+n;
+    total+=n;
+  });
+  const chips=[['all','全部',total],['conflict','日期冲突',cnt.conflict||0],['amount','金额冲突',cnt.amount||0],['fact','事实待核',cnt.fact||0],['dup','疑似重复',cnt.dup||0],['arith','数字对不上',cnt.arith||0],['pack',PACK.n+'规则',cnt.pack||0],['infer','推断日期',cnt.infer||0],['suspect','可疑日期',cnt.suspect||0],['np','仅有陈述',cnt.np||0],['att','需留意',cnt.att||0]];
+  const list=items.filter(it=>S.rfilter==='all'||it.k===S.rfilter||(S.rfilter==='amount'&&alsoAmount(it)));
   const done=resolvedList().filter(x=>S.rfilter==='all'||x.k===S.rfilter);
   const evs=derive(), E=Object.fromEntries(evs.map(e=>[e.id,e]));
   const rel=`<details class="rel"><summary>${RELATED.length} 组材料写明了指向的事实</summary>${RELATED.map(([a,b,t])=>E[a]&&E[b]?`<div class="relrow"><button class="dref" onclick="selectEv('${a}')">${esc(E[a].title)}</button><span>→</span><button class="dref" onclick="selectEv('${b}')">${esc(E[b].title)}</button><span class="sub">${t}</span></div>`:'').join('')}</details>`;
   return `<div class="dhead"><span>待审</span><button class="x" onclick="closeDrawer()">×</button></div>
-  <div class="dbody"><div class="chips">${chips.filter(([k,n,c])=>k==='all'||c>0||S.rfilter===k).map(([k,n,c])=>`<button class="chip ${S.rfilter===k?'on':''}" onclick="S.rfilter='${k}';renderDrawer()">${n}<span class="c">${c}</span></button>`).join('')}</div>
+  <div class="dbody"><div class="review-bulk">
+    <button class="btn" onclick="exportBase()">导出复核底稿</button>
+    <button class="btn" onclick="confirmClearFacts()" ${clear.length?'':'disabled'}>${clear.length?`一键确认 ${clear.length} 条未见冲突事实`:'没有可一键确认的事实'}</button>
+    ${clear.length?`<details class="linked-checks"><summary>查看本次确认范围</summary>
+      <ol>${clear.map(e=>`<li><button class="dref" onclick="selectEv('${e.id}')">${esc(dateLabel(e))} · ${esc(e.title)}</button>
+      ${e.f.narr?`<div class="sub">${esc(e.f.narr)}</div>`:''}</li>`).join('')}</ol>
+    </details>`:''}
+  </div><div class="chips">${chips.filter(([k,n,c])=>k==='all'||c>0||S.rfilter===k).map(([k,n,c])=>`<button class="chip ${S.rfilter===k?'on':''}" onclick="S.rfilter='${k}';renderDrawer()">${n}<span class="c">${c}</span></button>`).join('')}</div>
   ${S.phase!=='ready'?'<div class="empty">比对完成后出现待审项</div>':list.map(it=>`<div class="rcard">${card(it)}</div>`).join('')||'<div class="empty">这一类没有待审项</div>'}
   ${done.length?`<div class="sec">已处理 ${done.length}</div>${done.map(x=>`<div class="resolved"><span>${RK[x.k]} · ${esc(x.t)}：<b>${esc(x.label)}</b></span><button class="lnk" onclick="${x.undo}">撤销</button></div>`).join('')}`:''}
   ${S.phase==='ready'?rel:''}</div>`;
@@ -639,6 +845,13 @@ function resolvedList(){
   const out=[];
   Object.entries(S.dupRes).forEach(([id,v])=>{ const g=dupGroups(true).find(x=>x.id===id); out.push({k:'dup',t:g?g.fids.map(f=>FACT[f].title).join(' / '):id,label:v==='merge'?'已合并为一个事实':'确认是不同的事，分开',undo:`delete S.dupRes['${id}'];logIt(null,'撤销疑似重复处理','');render()`}); });
   Object.keys(S.arithRes).forEach(id=>out.push({k:'arith',t:id.split(':')[1],label:'已知悉',undo:`delete S.arithRes['${id}'];render()`}));
+  const manuallyReviewed=new Map();
+  for(const e of derive()){
+    if(e.rev==='done'&&!e.adopted&&!pendingReviewNote(e.f.id)&&(factIssue(e)||e.stmtOnly||e.est||e.susOnly)){
+      manuallyReviewed.set(e.f.id,e);
+    }
+  }
+  manuallyReviewed.forEach((e,fid)=>out.push({k:factIssue(e)||'fact',t:e.title,label:e.anyConf||e.f.reviewConflict?'已确认，保留不同记载':'已确认',undo:`toggleRev('${fid}')`}));
   Object.entries(S.adopt).forEach(([fid,rid])=>out.push({k:'conflict',t:FACT[fid].title,label:`采信 ${REC[rid].d}「${REC[rid].raw}」`,undo:`unAdopt('${fid}')`}));
   Object.entries(S.cres).forEach(([fid,v])=>out.push({k:'conflict',t:FACT[fid].title,label:v==='split'?'不是同一件事，已拆开':'其中一条只是约定，保留全部',undo:`delete S.cres['${fid}'];render()`}));
   Object.entries(S.inferOk).forEach(([k,v])=>out.push({k:'infer',t:INFER[k].n,label:v==='ok'?'确认推断':'改为无日期',undo:`delete S.inferOk['${k}'];render()`}));
@@ -648,24 +861,99 @@ function resolvedList(){
   Object.keys(S.packRes).forEach(id=>out.push({k:'pack',t:id.split(':')[1],label:'已知悉',undo:`delete S.packRes['${id}'];render()`}));
   return out;
 }
-function card(it){
-  if(it.k==='conflict'){
-    const e=it.e, c={ctx:e.f.ctx,note:e.f.cnote};
-    const recs=e.strict.concat(e.recs.filter(r=>r.p==='none'||r.loose));
-    const days = e.kind==='range' ? e.strict.map(r=>`${r.d} ${dn(r.e)-dn(r.s)+1} 天`).join('；') : null;
-    return `<div class="rk">日期冲突</div><div class="rt">${esc(e.title)}${e.key?' <span style="color:#C98A16">★</span>':''}</div>
-     ${(()=>{ const G={}; let gi=0; e.strict.forEach(r=>{ const k=recIv(r).join(); if(!(k in G)) G[k]='一二三四五六七八九'[gi++]||'?'; }); e._G=G; return ''; })()}
-     ${recs.map(r=>`<div class="cand"><div class="d">${r.p!=='none'&&!r.loose&&e._G[recIv(r).join()]?`<span class="grp">说法${e._G[recIv(r).join()]}</span> `:''}${esc(r.raw)}</div>${q(r)}${r.inf?`<div class="sub">推断：${esc(INFER[r.inf].basis)}</div>`:''}${r.p!=='none'&&!r.loose?`<button class="btn" style="margin-top:6px" onclick="adopt('${e.f.id}','${r.rid}')">采信此记载</button>`:'<div class="sub">无确切日期，不参与比对</div>'}</div>`).join('')}
-     ${e.amtConflict?'<div class="warn">该事实金额也记载不一。采信一条记载会同时采用它的日期和金额。</div>':''}
-     <div class="calc">各记载最多相差 ${e.spread} 天${days?`；按各记载计停工天数：${days}`:''}。${c.note||''}</div>
-     ${(c.ctx||[]).length?`<div class="sub" style="margin-top:6px">材料中的相关记载（仅供对照，不作判断）</div>${c.ctx.map(s=>`<div class="ctx"><b>${s.d}</b> ${esc(s.loc)}：${esc(s.q)}</div>`).join('')}`:''}
-     <div class="ra"><button class="lnk" onclick="cres('${e.f.id}','planned')">其中一条只是约定</button><button class="lnk" onclick="cres('${e.f.id}','split')">不是同一件事，拆开</button><button class="lnk" onclick="S.tab='matrix';S.matrixConf=true;render()">去对照矩阵 →</button></div>`;
+function factDifference(e){
+  if(e.f.cnote) return e.f.cnote;
+  const differences=[];
+  if(e.conflict||e.wasConflict){
+    const dates=[...new Set(e.strict.map(r=>r.p==='day'?fmtD(r.s):r.raw))];
+    differences.push(`同一事项的日期记载分别为 ${dates.join('、')}`);
   }
-  if(it.k==='amount'){ const e=it.e;
-    return `<div class="rk">金额冲突</div><div class="rt">${esc(e.title)}</div>
-     ${e.recs.filter(r=>r.amt!=null).map(r=>`<div class="cand"><div class="d"><span class="grp">说法${'一二三四五六七八九'[e.amtVals.indexOf(+r.amt)]}</span> ${fmtAmt(r.amt)}</div>${q(r)}<button class="btn" style="margin-top:6px" onclick="adopt('${e.f.id}','${r.rid}')">采信此记载</button></div>`).join('')}
-     <div class="calc">各记载金额最多相差 ${fmtAmt(Math.max(...e.amtVals)-Math.min(...e.amtVals))}。</div>
-     <div class="ra"><button class="lnk" onclick="cres('${e.f.id}','split')">不是同一笔，拆开</button></div>`; }
+  if(e.amtVals.length>1){
+    differences.push(`同一事项的金额记载分别为 ${e.amtVals.map(fmtAmt).join('、')}`);
+  }
+  if(!differences.length && pendingReviewNote(e.f.id)) return '已填写律师复核意见，等待 AI 结合材料处理。';
+  return differences.length?`${differences.join('。')}。`:'该事项的材料或争议状态需要复核。';
+}
+function pendingReviewNote(fid){
+  const note=S.reviewNotes[fid];
+  return note?.status==='pending' && !!note.text?.trim();
+}
+function updateReviewNote(input){
+  const fid=input.dataset.fact;
+  const text=input.value.trim();
+  if(S.reviewNotes[fid]?.text===text) return;
+  if(text) S.reviewNotes[fid]={text,status:'pending'};
+  else delete S.reviewNotes[fid];
+  const box=input.closest('.lawyer-note');
+  box.querySelector('.note-state').textContent=text?' · 待 AI 复核':'';
+  box.querySelector('.note-response')?.remove();
+  const count=$('.rv .num');
+  if(count) count.textContent=pendingCount();
+  const status=document.getElementById('row-'+fid)?.querySelector('.review-state');
+  const fact=derive().find(e=>e.id===fid);
+  if(status&&fact) status.outerHTML=factReviewBadge(fact);
+  const badge=box.closest('.dbody')?.querySelector('.review-banner');
+  if(badge&&fact) badge.outerHTML=factReviewBadge(fact,true);
+}
+function reviewNoteEditor(fid){
+  const note=S.reviewNotes[fid];
+  const state=pendingReviewNote(fid)?' · 待 AI 复核':note?.status==='handled'?' · 已复核':'';
+  return `<details class="lawyer-note" ${note?.text?'open':''}>
+    <summary>填写其他复核意见<span class="note-state">${state}</span></summary>
+    <textarea aria-label="律师复核意见" data-fact="${esc(fid)}" rows="4" placeholder="填写您对这条事实的理解，或指出需要再核对的位置。" oninput="updateReviewNote(this)">${esc(note?.text||'')}</textarea>
+    ${note?.status==='handled'&&note.response?`<p class="note-response">${esc(note.response)}</p>`:''}
+    <div class="note-save"><span>输入后记在当前页面。关闭或刷新前请导出底稿，发给 AI 后可继续复核。</span>
+      <button class="btn sm" onclick="exportBase()">导出复核底稿</button></div>
+  </details>`;
+}
+
+function reviewFactCard(e){
+  const linked=ATTN.filter(a=>a.fact===e.f.id&&docVisible(a.d));
+  const suspects=e.f.recs.filter(r=>r.sus&&docVisible(r.d)&&!e.recs.some(x=>x.rid===r.rid));
+  const related=suspects.concat(e.f.ctx||[],linked.flatMap(a=>[a,...a.ctx]));
+  const sources=new Map();
+  const seen=new Set(e.recs.map(r=>`${r.d}:${r.q}`));
+  const scanPages=new Set();
+  const reviewScan=r=>{
+    const key=`${r.d}:${sourcePage(r)}`;
+    if(scanPages.has(key)) return '';
+    scanPages.add(key);
+    return sourceScan(r.d,r,true);
+  };
+  const extra=related.filter(r=>{
+    const key=`${r.d}:${r.q}`;
+    if(!r.q||seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  for(const r of e.recs.concat(extra)){
+    if(!sources.has(r.d)) sources.set(r.d,r);
+  }
+  const hasConflict=e.anyConf||e.f.reviewConflict||e.disp==='有争议';
+  const choice=r=>[e.conflict&&r.p!=='none'?(r.p==='day'?fmtD(r.s):r.raw):'',e.amtConflict&&r.amt!=null?fmtAmt(r.amt):''].filter(Boolean).join(' · ');
+  const type=e.conflict?(e.amtConflict?'日期冲突、金额冲突':'日期冲突'):e.amtConflict?'金额冲突':hasConflict?'记载不一致':'事实待核';
+  return `<div class="review-evidence"><strong>涉及的证据</strong>
+    <ul>${[...sources.values()].map(r=>`<li><button class="dref" onclick="openDoc('${r.d}','${r.rid||''}')">${esc(DOC[r.d].name)}</button>
+      ${r.loc?`<div class="sub">${esc(r.loc)}</div>`:''}</li>`).join('')}</ul></div>
+    <div class="rk">${type}</div><div class="rt">${esc(e.title)}</div>
+    <div class="review-difference"><strong>${hasConflict?'发现的差异':'发现的待核事项'}</strong><p>${esc(factDifference(e))}</p></div>
+    <div class="sec">原始记载</div>
+    ${e.recs.map(r=>`<div class="cand"><strong class="record-title">${esc(DOC[r.d].name)}</strong>
+      ${q({...r,qx:[]})}
+      ${reviewScan(r)}
+      ${r.qx?.length?`<details class="linked-checks"><summary>同份材料的其他摘录</summary>${r.qx.map(x=>`<div class="q">${esc(x)}</div>`).join('')}</details>`:''}
+      ${choice(r)&&!r.loose?`<button class="btn" onclick="adopt('${e.f.id}','${r.rid}')">采用 ${esc(choice(r))}</button>`:''}</div>`).join('')}
+    ${extra.map(r=>`<div class="cand"><strong class="record-title">${esc(DOC[r.d].name)}</strong>${q(r)}${reviewScan(r)}</div>`).join('')}
+    ${linked.length?`<details class="linked-checks"><summary>相关复核记录</summary>${linked.map(a=>`<p>${esc(a.why)}</p>`).join('')}</details>`:''}
+    ${reviewNoteEditor(e.f.id)}
+    <p class="review-action-note">确认事项：${esc(e.title)}。${hasConflict?'确认后保留材料中的不同记载。':''}</p>
+    <div class="ra"><button class="btn" onclick="toggleRev('${e.f.id}')">${hasConflict?'已确认，保留不同记载':'已确认'}</button>
+      ${e.conflict?`<button class="lnk" onclick="cres('${e.f.id}','planned')">其中一条只是约定</button>`:''}
+      ${e.anyConf?`<button class="lnk" onclick="cres('${e.f.id}','split')">拆为不同事实</button>`:''}
+      <button class="lnk" onclick="selectEv('${e.id}')">查看事实</button></div>`;
+}
+function card(it){
+  if(it.k==='conflict'||it.k==='amount'||it.k==='fact') return reviewFactCard(it.e);
   if(it.k==='dup'){ const g=it.g, es=g.fids.map(fid=>derive().find(e=>e.f.id===fid)||null).filter(Boolean);
     const ds=new Set(es.map(e=>dateLabel(e)));
     return `<div class="rk">疑似重复</div><div class="rt">${es.length} 个事实可能是同一件事</div>
@@ -689,7 +977,7 @@ function card(it){
      <div class="ra"><button class="lnk" onclick="S.inferOk['${it.key}']='undated';logIt(null,'推断改为无日期','${INFER[it.key].n}');render()">改为无日期</button><button class="btn" onclick="S.inferOk['${it.key}']='ok';logIt(null,'确认推断','${INFER[it.key].n}');render()">确认推断</button></div>`;
   }
   if(it.k==='suspect'){
-    return `<div class="rk">可疑日期</div><div class="rt">${esc(it.f.title)}：「${esc(it.r.raw)}」</div>${q(it.r)}
+    return `<div class="rk">可疑日期</div><div class="rt">${esc(it.f.title)}：「${esc(it.r.raw)}」</div>${q(it.r)}${sourceScan(it.r.d,it.r,true)}
      <div class="warn">${esc(it.r.susWhy||'该日期与同一材料的其他记载明显不合。')} 默认不按这个日期上时间线。</div>
      <div class="ra"><button class="lnk" onclick="S.susRes['${it.r.rid}']='event';logIt('${it.f.id}','可疑日期按原文上时间线','${esc(it.r.raw)}');render()">按原文上时间线</button><button class="btn" onclick="S.susRes['${it.r.rid}']='typo';logIt('${it.f.id}','可疑日期按笔误处理','${esc(it.r.raw)}');render()">按笔误处理</button></div>`;
   }
@@ -707,6 +995,48 @@ function adopt(fid,rid){ if(!(fid in S.adopt)) S.revPrev[fid]=S.rev[fid]; S.adop
 function unAdopt(fid){ delete S.adopt[fid]; if(fid in S.revPrev){ if(S.revPrev[fid]===undefined) delete S.rev[fid]; else S.rev[fid]=S.revPrev[fid]; delete S.revPrev[fid]; } logIt(fid,'撤销采信',FACT[fid].title); render(); }
 function cres(fid,v){ S.cres[fid]=v; logIt(fid,v==='split'?'拆为不同事实':'其中一条只是约定',FACT[fid].title); render(); }
 
+function factReview(e){
+  const dateDiff=e.wasConflict||e.conflict;
+  const amountDiff=e.amtVals.length>1;
+  const note=e.f.cnote;
+  if(!dateDiff&&!amountDiff&&!note&&e.disp!=='有争议') return '';
+  const groups=new Map();
+  for(const r of e.recs){
+    const iv=dateDiff&&e.strict.includes(r)?recIv(r):null;
+    const date=iv?(r.p==='day'?fmtD(r.s):r.raw):'';
+    const amount=amountDiff&&r.amt!=null?fmtAmt(r.amt):'';
+    const label=[date,amount].filter(Boolean).join(' · ');
+    if(!label) continue;
+    if(!groups.has(label)) groups.set(label,[]);
+    groups.get(label).push(r);
+  }
+  const related=ATTN.filter(a=>a.fact===e.f.id&&docVisible(a.d));
+  return `<section class="fact-focus" aria-label="复核要点">
+    <strong>材料记载与差异</strong>
+    <p>${esc(factDifference(e))}</p>
+    ${groups.size?`<ul class="fact-compare">${[...groups].map(([label,recs])=>`<li><b>${esc(label)}</b>
+      ${recs.map(r=>`<button class="dref" onclick="openDoc('${r.d}','${r.rid}')">${esc(DOC[r.d].name)}${r.loc?` · ${esc(r.loc)}`:''}</button>`).join('')}</li>`).join('')}</ul>`:''}
+    ${related.length?`<details class="linked-checks"><summary>核对依据</summary>${related.map(a=>`<p>${esc(a.why)}</p><button class="dref" onclick="openDoc('${a.d}')">${esc(DOC[a.d].name)}${a.loc?` · ${esc(a.loc)}`:''}</button>`).join('')}</details>`:''}
+  </section>`;
+}
+function factSteps(id){
+  const rows=tableFacts();
+  const i=rows.findIndex(row=>row.id===id);
+  if(i<0) return '';
+  return `<nav class="fact-step" aria-label="按表格顺序审阅">
+    <button class="btn sm" onclick="stepFact(-1)" ${i===0?'disabled':''}>上一条</button>
+    <span class="sub">表格第 ${i+1} / ${rows.length} 条</span>
+    <button class="btn sm" onclick="stepFact(1)" ${i===rows.length-1?'disabled':''}>下一条</button>
+  </nav>`;
+}
+function stepFact(direction){
+  const rows=tableFacts();
+  const i=rows.findIndex(row=>row.id===S.drawer?.id);
+  const next=i>=0?rows[i+direction]:null;
+  if(!next) return;
+  S.drawer={kind:'fact',id:next.id};
+  selectEv(next.id,true);
+}
 function drawerFact(id){
   const e=derive().find(x=>x.id===id);
   if(!e) return `<div class="dhead"><span></span><button class="x" onclick="closeDrawer()">×</button></div><div class="dbody empty">该事实已拆分或不在当前时点</div>`;
@@ -715,25 +1045,29 @@ function drawerFact(id){
   const hist=S.log.filter(l=>l.fid===fid);
   return `<div class="dhead"><span class="ed-type"><span class="dot" style="background:${TYPES[e.t].c}"></span>${TYPES[e.t].n} · ${fid}</span><button class="x" onclick="closeDrawer()">×</button></div>
   <div class="dbody">
+   <div id="factSteps">${factSteps(id)}</div>
    <div class="ed-title">${esc(e.title)}</div>
+   ${factReviewBadge(e,true)}
    <div class="ed-date">${dateLabel(e)} ${dateNote(e)?`<span class="sub" style="font-weight:400">· ${dateNote(e)}</span>`:''}</div>
-   <div class="tags">${e.state==='agr'?'<span class="tag out">约定·应当发生（空心）</span>':''}${e.est?'<span class="tag out">推定（虚线）</span>':''}<span class="tag ${e.certain?'grey':'out'}">${e.certain?'确定':'未确定'}</span>${e.conflict?'<span class="tag conf">日期冲突</span>':''}${e.amtConflict?'<span class="tag conf">金额冲突</span>':''}${e.role?`<span class="tag grey">角色：${esc(e.role)}</span>`:''}${e.stmtOnly?'<span class="tag amber">仅有当事人陈述</span>':''}</div>
+   <div class="tags">${e.state==='agr'?'<span class="tag out">约定·应当发生（空心）</span>':''}${e.est?'<span class="tag out">推定（虚线）</span>':''}<span class="tag ${e.certain?'grey':'out'}">${e.certain?'日期有材料支持':'日期待核'}</span>${e.conflict?'<span class="tag conf">日期冲突</span>':''}${e.amtConflict?'<span class="tag conf">金额冲突</span>':''}${e.role?`<span class="tag grey">角色：${esc(e.role)}</span>`:''}${e.stmtOnly?'<span class="tag amber">仅有当事人陈述</span>':''}</div>
+   ${factReview(e) || (e.f.narr ? `<p class="fact-brief">${esc(e.f.narr)}</p>` : '')}
    <div class="ctrls">
-    ${S.reviewLayer?`<span class="seg">${[['todo','待确认'],['done','已确认']].map(([v,n])=>`<button class="${e.rev===v?'on':''}" onclick="S.rev['${fid}']='${v}';logIt('${fid}','${n}','');render()">${n}</button>`).join('')}</span>`:''}
+    ${S.reviewLayer?`<span class="seg" aria-label="人工复核">${[['todo','待确认'],['done','已确认']].map(([v,n])=>`<button class="${e.rev===v?'on':''}" onclick="S.rev['${fid}']='${v}';logIt('${fid}','${n}','');render()">${n}</button>`).join('')}</span>`:''}
     <button class="star ${e.key?'on':''}" onclick="S.key['${fid}']=${e.key?0:1};logIt('${fid}','${e.key?'取消关键':'标为关键'}','');render()">${e.key?'★':'☆'} 关键事实</button>
    </div>
    <div class="kv"><span>争议</span><select class="sel" onchange="S.disp['${fid}']=this.value;logIt('${fid}','争议改为',this.value);render()">${['待定','无争议','有争议'].map(v=>`<option ${e.disp===v?'selected':''}>${v}</option>`).join('')}</select>
     <span>不利事实</span><label class="tg"><input type="checkbox" ${e.adverse?'checked':''} onchange="S.adverse['${fid}']=this.checked?'1':'';logIt('${fid}',this.checked?'标为不利（仅内部）':'取消不利标记','');render()"> 标为不利，仅内部可见</label></div>
    
-   <div class="sec">对外措辞（按可靠度自动套固定措辞）</div>
-   <div class="phr"><span class="tag grey">给客户</span> ${esc(phrase(e,'full'))}</div>
-   <div class="phr"><span class="tag grey">给法官</span> ${esc(phrase(e,'doubt'))}</div>
+   ${reviewNoteEditor(fid)}
    <div class="sec">记载 · ${e.recs.length} 条（一事多源）</div>
-   ${e.recs.map(r=>`<div class="srcbox ${e.adopted===r.rid?'ad':''}">${q(r)}
+   ${e.recs.map(r=>`<div class="srcbox ${e.adopted===r.rid?'ad':''}">${q(r)}${sourceScan(r.d,r,true)}
      <div class="rmeta"><span>日期原文：<b>${esc(r.raw)}</b>（${{day:'确切日',month:'仅到月',approx:'大致时间',range:'区间',arange:'大致时段',none:'无日期'}[r.p]}）</span>
      ${r.amt!=null?`<span>金额：<b>${fmtAmt(r.amt)}</b></span>`:''}<span>来源：${KIND[dKind(r.d)].n}</span><span>程序确认：${dConf(r.d)}</span><span>出现时点：${STAGES[dStage(r.d)]}</span></div>
      ${r.inf?`<div class="sub">推断：${esc(INFER[r.inf].basis)}</div>`:''}
      <div class="ra" style="justify-content:flex-start">${(e.anyConf||e.adopted)&&(r.p!=='none'||r.amt!=null)&&!r.loose?(e.adopted===r.rid?`<span class="tag blue">已采信</span><button class="lnk" onclick="unAdopt('${fid}')">撤销</button>`:`<button class="btn" onclick="adopt('${fid}','${r.rid}')">采信此记载</button>`):''}<button class="lnk" onclick="openDoc('${r.d}','${r.rid}')">在原文中查看 →</button></div></div>`).join('')}
+   <details class="fact-options"><summary>对外措辞参考</summary>
+   <div class="phr"><span class="tag grey">给客户</span> ${esc(phrase(e,'full'))}</div>
+   <div class="phr"><span class="tag grey">给法官</span> ${esc(phrase(e,'doubt'))}</div></details>
    ${e.act.length?`<div class="sec">涉及主体</div><div class="tags">${e.act.map(a=>`<span class="tag grey">${ACTORS[a]}</span>`).join('')}</div>`:''}
    ${rel?`<div class="sec">材料写明的指向</div>${rel}`:''}
    <div class="sec">变更记录</div>${hist.length?hist.map(l=>`<div class="relrow"><span class="sub" style="width:40px">${l.t}</span><span>${esc(l.what)} ${esc(l.detail)}</span></div>`).join(''):'<div class="sub">尚无</div>'}
@@ -746,6 +1080,34 @@ function drawerClaim(id){
   <div class="sec">原文</div><div class="srcbox">${q(c)}</div>
   <div class="sub" style="margin-top:10px">主张在时间轴上画方框，不与事实混排；进入结果计算模块时只作为对照，不作为计算依据。</div></div>`;
 }
+const sourcePage = r => Number(r?.imagePage || r?.loc?.match(/第\s*(\d+)\s*页/)?.[1]);
+function sourceScan(did,r,inline=false){
+  const page=sourcePage(r);
+  const pages=DOC[did]?.pageImages;
+  if(!Array.isArray(pages)) return '';
+  const images=pages.filter(x=>x && Number.isSafeInteger(x.page) && x.page>0 &&
+    (!inline || x.page===page) && /^data:image\/(?:jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(x.data));
+  if(!images.length) return '';
+  const current=images.find(x=>x.page===page) || (!r?images[0]:null);
+  return images.map(x=>{
+    const label=x.label||`原件第 ${x.page} 页`;
+    return `<details class="source-scan" ${x===current?'open':''}>
+      <summary>${esc(label)} · 原页影像</summary>
+      ${x.why?`<p class="scan-why">${esc(x.why)}</p>`:''}
+      <button class="scan-preview" type="button" aria-label="放大查看${esc(label)}" onclick="this.nextElementSibling.showModal()">
+        <img src="${x.data}" alt="${esc(label)}" loading="lazy">
+        <span>放大查看原页</span>
+      </button>
+      <dialog aria-label="${esc(label)}">
+        <div class="scan-head"><strong>${esc(label)}</strong><div class="scan-actions">
+          <button class="btn sm" aria-pressed="false" onclick="this.setAttribute('aria-pressed',this.closest('dialog').classList.toggle('scan-native'))">原像素</button>
+          <button class="btn sm" onclick="this.closest('dialog').close()">关闭影像</button></div></div>
+        <img src="${x.data}" alt="${esc(label)}" loading="lazy">
+      </dialog>
+    </details>`;
+  }).join('');
+}
+
 function drawerDoc(did,rid){
   const d=DOC[did]; const r=rid?REC[rid]:null; const qs=r?[r.q,...(r.qx||[])]:[];
   const evs=derive().filter(e=>e.recs.some(x=>x.d===did));
@@ -753,6 +1115,7 @@ function drawerDoc(did,rid){
   const back = 'closeDrawer()';
   return `<div class="dhead"><span>${d.id}　${esc(d.sub)}</span><button class="x" onclick="${back}" title="关闭">×</button></div>
   <div class="dbody"><div class="tags" style="margin-top:0">${kindTag(did)}<span class="tag out">${KIND[dKind(did)].n}</span>${d.date?`<span class="tag out wrap">文书日期 ${esc(d.date)}${d.dsrc?`（${esc(d.dsrc)}）`:''}</span>`:''}<span class="tag out">${dConf(did)}</span><span class="tag out">出现时点：${STAGES[dStage(did)]}</span><span class="tag out">${evs.length} 个事实</span></div>
+   ${sourceScan(did,r)}
    ${r?`<div class="sub" style="margin:10px 0 4px">高亮为「${esc(FACT[r.fid].title)}」所引原文</div>`:''}
    <div style="margin-top:8px">${lines}</div>
    <div class="sec">本份材料记载的事实</div><div class="tags">${evs.map(e=>`<button class="tchip" onclick="selectEv('${e.id}')"><span class="dot" style="background:${TYPES[e.t].c}"></span>${esc(trunc(e.title,170,12))}</button>`).join('')}</div></div>`;
@@ -802,7 +1165,7 @@ function validateCase(c){
   (c.claims||[]).forEach(x=>{ const d=docs[x.d]; if(d && x.q && !d.lines.some(l=>l.includes(x.q))) errs.push(`主张 ${x.id} 的引语在原文里找不到`); });
   return errs;
 }
-function resetDecisions(){ Object.assign(S,{dupRes:{},arithRes:{},nEdit:{},nTitle:{},nOrder:null,nMerge:{},adopt:{},revPrev:{},cres:{},rev:{},disp:{},key:{},adverse:{},inferOk:{},susRes:{},attnRes:{},packRes:{},log:[]}); S.aside=new Set(); S.checked=new Set(); }
+function resetDecisions(){ Object.assign(S,{dupRes:{},arithRes:{},nEdit:{},nTitle:{},nOrder:null,nMerge:{},reviewNotes:{},adopt:{},revPrev:{},cres:{},rev:{},disp:{},key:{},adverse:{},inferOk:{},susRes:{},attnRes:{},packRes:{},log:[]}); S.aside=new Set(); S.checked=new Set(); }
 let timer=null;
 function startBuild(){
   clearTimeout(timer); S.read=0; S.phase='build'; resetDecisions(); S.drawer=null; S.selected=null; S.view='work'; S.tab='tl'; S.t0=EXT[0]; S.t1=EXT[1]; S.play=null;
@@ -838,7 +1201,7 @@ function morePop(ev){
    <button class="menuitem" onclick="closePops();exportBase()">导出底稿 JSON</button>
    <button class="menuitem" onclick="closePops();resetDecisions();render();toast('已清空所有裁决')">清空所有裁决</button>`,200);
 }
-const DEC_KEYS=['adopt','rev','disp','key','adverse','cres','dupRes','arithRes','susRes','attnRes','packRes','inferOk','nEdit','nTitle','nOrder','nMerge','docOv'];
+const DEC_KEYS=['adopt','rev','disp','key','adverse','cres','dupRes','arithRes','susRes','attnRes','packRes','inferOk','nEdit','nTitle','nOrder','nMerge','docOv','reviewNotes'];
 /* 底稿：与读入的格式完全一样（可再次打开），另附律师在页面上的裁决、改动记录与待读材料 */
 function baseJSON(){
   const c=JSON.parse(JSON.stringify(CASE,(k,v)=>(k==='rid'||k==='fid')?undefined:(v instanceof Set?[...v]:v)));
@@ -853,6 +1216,7 @@ function exportBase(){ saveFile(`${CASE.title||CASE.id}.base.json`,baseJSON(),'a
 function toast(msg){ const t=$('#toast'); t.innerHTML=`<span class="ok">✓</span>${esc(msg)}`; t.style.display='flex'; clearTimeout(toast.t); toast.t=setTimeout(()=>t.style.display='none',3400); }
 addEventListener('resize',()=>{ if(S.view==='work'&&S.tab==='tl') drawTimeline(); });
 addEventListener('keydown',e=>{
+  if($('.source-scan dialog[open]')) return;
   if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
   if(e.key==='Escape'){ closePops(); if(S.play!==null){ S.play=null; render(); } else if(S.drawer){ if((S.dStack||[]).length) backDrawer(); else closeDrawer(); } }
   if(S.play!==null && e.key==='ArrowRight') playStep(1);
